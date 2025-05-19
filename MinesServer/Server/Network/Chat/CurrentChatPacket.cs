@@ -1,0 +1,23 @@
+﻿using MinesServer.Network.Constraints;
+using System.Text;
+
+namespace MinesServer.Network.Chat
+{
+    public readonly record struct CurrentChatPacket(string Tag, string Name) : ITopLevelPacket, IDataPart<CurrentChatPacket>
+    {
+        public const string packetName = "mO";
+
+        public string PacketName => packetName;
+
+        public int Length => 1 + Encoding.UTF8.GetByteCount(Tag) + Encoding.UTF8.GetByteCount(Name);
+
+        public static CurrentChatPacket Decode(ReadOnlySpan<byte> decodeFrom)
+        {
+            var parts = Encoding.UTF8.GetString(decodeFrom).Split(':');
+            if (parts.Length != 2) throw new InvalidPayloadException($"Expected {2} parts but got {parts.Length}");
+            return new(parts[0], parts[1]);
+        }
+
+        public int Encode(Span<byte> output) => Encoding.UTF8.GetBytes($"{Tag}:{Name}", output);
+    }
+}
