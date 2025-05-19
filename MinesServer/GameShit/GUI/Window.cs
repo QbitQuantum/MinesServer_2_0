@@ -38,7 +38,7 @@ namespace MinesServer.GameShit.GUI
         public bool ProcessButton(string action)
         {
 
-#warning Invalid payload. Remove in production!
+
             if (string.IsNullOrEmpty(action)) return false;
 
             if (action is "exit" or "exit:0")

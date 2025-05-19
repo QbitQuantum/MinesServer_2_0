@@ -37,7 +37,7 @@ namespace MinesServer.Server
         {
             sid = Auth.GenerateSessionId();
             Console.WriteLine($"Connected__\npoint:{Socket.RemoteEndPoint}");
-            SendU(new StatusPacket("черный хуй в твоей жопе"));
+            SendU(new StatusPacket("твоей жопе"));
             SendU(new AUPacket(sid));
             SendU(new PingPacket(0, 0, ""));
         }
