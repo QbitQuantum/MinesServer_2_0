@@ -148,7 +148,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped]
         private float cb;
         public DateTime Delay = ServerTime.Now;
-        public bool CanAct { get => !(Delay.AddMilliseconds(ServerTime.offset) > ServerTime.Now); }
         public bool OnRoad { get => World.isRoad(World.GetCell(x, y)); }
         public override double ServerPause
         {
