@@ -115,9 +115,7 @@ namespace MinesServer
         public static Regex def = new Regex("^[а-яА-ЯёЁa-zA-Z 0-9]+$");
         public static void WriteError(string ex)
         {
-            var trace = new System.Diagnostics.StackTrace();
-            var method = trace.GetFrame(1).GetMethod().Name;
-            Console.WriteLine($"{method} caused error {ex}");
+            Console.WriteLine("WriteError caused error " + $"{ex}");
         }
         public static int size = 1;
         public static MServer server { get; set; }

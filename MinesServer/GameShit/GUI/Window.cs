@@ -249,7 +249,7 @@ namespace MinesServer.GameShit.GUI
                 obj["si"] = up.SkillIcon?.GetCode() ?? "";
                 return "up:" + obj.ToString();
             }
-            return "horb:{\"title\":\"!!! UNKNOWN PAGE TYPE !!!\",\"text\":\"Report this to the developer, please.\n" + page.GetType() + "\"}";
+            return "horb:{\"title\":\"!!! UNKNOWN PAGE TYPE !!!\",\"text\":\"Report this to the developer, please.\n\"}";
         }
     }
 }
