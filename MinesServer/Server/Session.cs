@@ -50,6 +50,9 @@ namespace MinesServer.Server
                     switch (result.data)
                     {
                         case AUPacket au: AU(au); break;
+                        case TYPacket ty when ty.Data is XmovPacket:
+                            TY(ty);
+                            break;
                         case TYPacket ty: father.time.AddAction(() => TY(ty), player); break;
                         case PongPacket ping: Ping(ping); break;
                         default:
