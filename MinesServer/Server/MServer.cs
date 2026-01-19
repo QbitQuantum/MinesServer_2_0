@@ -28,7 +28,7 @@ namespace MinesServer.Server
         {
             new World(Default.cfg.WorldName);
             time = new ServerTime();
-            SessionsCheck();
+            // SessionsCheck(); ← УДАЛЕНО!
             return base.Start();
         }
         public override bool Stop()

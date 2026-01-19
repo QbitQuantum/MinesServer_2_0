@@ -1,181 +1,133 @@
 ﻿using MinesServer.GameShit.Entities.PlayerStaff;
-using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.WorldSystem;
-using System.ComponentModel.Design;
-using System.Diagnostics;
+using System;
+using System.Threading;
 
 namespace MinesServer.Server
 {
     public class ServerTime : IDisposable
     {
-        public delegate void GameAction();
-        public Queue<(GameAction action,Player initiator)> gameActions;
-        CancellationTokenSource s = new();
+        private readonly Thread _updateThread;
+        private volatile bool _running = true;
+
+        // Таймеры (последнее время выполнения)
+        private DateTime _lastChunksUpdate = DateTime.UtcNow;
+        private DateTime _lastPlayersUpdate = DateTime.UtcNow;
+        private DateTime _lastProgUpdate = DateTime.UtcNow;
+        private DateTime _lastOrdersUpdate = DateTime.UtcNow;
+        private DateTime _lastActionsUpdate = DateTime.UtcNow;
+
+        // Очередь действий
+        public readonly Queue<(Action action, Player initiator)> gameActions = new();
+
+        private DateTime _directActionDelay = DateTime.MinValue;
+
         public ServerTime()
         {
-            Now = DateTime.Now;
-            gameActions = new Queue<(GameAction,Player)>();
-            StartTimeUpdate();
-            StupidUpdate(() =>
+            _updateThread = new Thread(RunUpdateLoop)
             {
-                for (int i = 0; i < gameActions.Count; i++)
-                {
-                    var item = gameActions.Dequeue();
-                    /*try
-                    {*/
-                    if (item.action is not null)
-                    {
-                        item.action();
-                    }
-                    /*}
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"{item.initiator.name}[{item.initiator.id}] caused {ex}");
-                    }*/
-                }
-            },10);
-            StupidUpdate(() =>
-            {
-                var players = DataBase.activeplayers;
-                for (int i = 0; i < players.Count; i++)
-                {
-                    players[i]?.Update();
-                }
-            },10);
-            StupidUpdate(() =>
-            {
-                using var db = new DataBase();
-                foreach (var order in db.orders)
-                {
-                    order.CheckReady();
-                }
-                db.SaveChanges();
-            },1000);
-            ChunksUpdateSlised();
-            programmatorUpdate();
+                IsBackground = true,
+                Name = "Server Update Loop"
+            };
+            _updateThread.Start();
         }
-        private void StupidUpdate(Action a,double delay)
-        {
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    a();
-                    Thread.Sleep(TimeSpan.FromMilliseconds(delay));
-                }
-            },s.Token);
-        }
-        public void AddAction(GameAction action,Player p)
-        {
-            if (ServerTime.Now < directactiondelay) return;
-            gameActions.Enqueue((action,p));
-            directactiondelay = Now + TimeSpan.FromMicroseconds(5);
-        }
-        private DateTime directactiondelay = ServerTime.Now;
-        public static int offset;
-        public static DateTime Now { get; private set; }
-        public void StartTimeUpdate()
-        {
 
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    var d = DateTime.Now;
-                    offset = (int)(Now-d).TotalMicroseconds;
-                    Now = d;
-                    Thread.Sleep(TimeSpan.FromMicroseconds(50));
-                }
-            }, s.Token);
-        }
-        public void programmatorUpdate()
+        private void RunUpdateLoop()
         {
-            Task.Run(() =>
+            while (_running)
             {
-                while(true)
-                { 
-                    var players = DataBase.activeplayers.Where(i => i.programsData.ProgRunning);
-                    for (int i = 0; i < players.Count(); i++)
-                    {
-                        players.ElementAt(i)?.ProgrammatorUpdate();
-                    }
-                    Thread.Sleep(1);
-                }
-            }, s.Token);
-        }
-        public void ChunksUpdateSlised()
-        {
-            Task.Run(() =>
-            {
-                while (true)
+                var now = DateTime.UtcNow;
+
+                // === Обновление мира (чанков) — раз в секунду ===
+                if ((now - _lastChunksUpdate).TotalSeconds >= 1)
                 {
-                    var first = Task.Run(() =>
+                    for (int x = 0; x < World.ChunksW; x++)
                     {
                         for (int y = 0; y < World.ChunksH; y++)
                         {
-                            for (int x = 0; x < World.ChunksW; x++)
-                            {
-                               if (x % 2 == 0) World.W.chunks[x, y].Update();
-                                World.CommitWorld();
-                            }
+                            World.W?.chunks[x, y]?.Update();
                         }
-                    });
-                    var second = Task.Run(() =>
-                    {
-                        for (int y = 0; y < World.ChunksH; y++)
-                        {
-                            for (int x = 0; x < World.ChunksW; x++)
-                            {
-                                if (x % 2 == 1) World.W.chunks[x, y].Update();
-                                World.CommitWorld();
-                            }
-                        }
-                    });
-
-                    Task.WaitAll(first, second);
+                    }
                     World.Update();
                     World.CommitWorld();
-                    Thread.Sleep(1);
+                    _lastChunksUpdate = now;
                 }
-            },s.Token);
+
+                // === Обновление игроков — 10 раз в секунду ===
+                if ((now - _lastPlayersUpdate).TotalMilliseconds >= 100)
+                {
+                    foreach (var player in DataBase.activeplayers)
+                    {
+                        player?.Update();
+                    }
+                    _lastPlayersUpdate = now;
+                }
+
+                // === Программаторы — 10 раз в секунду ===
+                if ((now - _lastProgUpdate).TotalMilliseconds >= 100)
+                {
+                    var players = DataBase.activeplayers;
+                    for (int i = 0; i < players.Count; i++)
+                    {
+                        if (players[i]?.programsData.ProgRunning == true)
+                        {
+                            players[i].ProgrammatorUpdate();
+                        }
+                    }
+                    _lastProgUpdate = now;
+                }
+
+                // === Заказы — раз в 5 секунд ===
+                if ((now - _lastOrdersUpdate).TotalSeconds >= 5)
+                {
+                    using var db = new DataBase();
+                    foreach (var order in db.orders)
+                    {
+                        order.CheckReady();
+                    }
+                    db.SaveChanges();
+                    _lastOrdersUpdate = now;
+                }
+
+                // === Очередь действий — 10 раз в секунду ===
+                if ((now - _lastActionsUpdate).TotalMilliseconds >= 100)
+                {
+                    while (gameActions.Count > 0)
+                    {
+                        var (action, initiator) = gameActions.Dequeue();
+                        if (action != null)
+                        {
+                            try
+                            {
+                                action();
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"{initiator?.name}[{initiator?.id}] caused {ex}");
+                            }
+                        }
+                    }
+                    _lastActionsUpdate = now;
+                }
+
+                // Небольшая пауза, чтобы не грузить CPU на 100%
+                Thread.Sleep(1);
+            }
         }
-        public void Update()
+
+        public void AddAction(Action action, Player p)
         {
-            if (!MServer.started)
-                return;
-            for (int i = 0; i < gameActions.Count; i++)
-            {
-                var item = gameActions.Dequeue();
-                /*try
-                {*/
-                if (item.action != null)
-                {
-                    item.action();
-                }
-                /*}
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"{item.initiator.name}[{item.initiator.id}] caused {ex}");
-                }*/
-            }
-            var players = DataBase.activeplayers;
-            for (int i = 0; i < players.Count; i++)
-            {
-                players[i]?.Update();
-            }
-            using var db = new DataBase();
-            foreach (var order in db.orders)
-            {
-                order.CheckReady();
-            }
-            db.SaveChanges();
-            Thread.Sleep(1);
+            if (DateTime.UtcNow < _directActionDelay) return;
+            gameActions.Enqueue((action, p));
+            _directActionDelay = DateTime.UtcNow.AddMicroseconds(5);
         }
+
+        public static DateTime Now => DateTime.UtcNow;
 
         public void Dispose()
         {
-            s.CancelAsync().Wait();
-            s.Dispose();
+            _running = false;
+            _updateThread?.Join(2000); // ждём до 2 сек
         }
     }
 }
