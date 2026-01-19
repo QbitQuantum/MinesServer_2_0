@@ -94,9 +94,9 @@ namespace MinesServer.GameShit.SysMarket
                         new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3)}$</color>", 0, 0, p.crys[CrystalType.Violet], 0),
                         new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4)}$</color>", 0, 0, p.crys[CrystalType.White], 0),
                         new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)]),
-                    Text = $"Продажа кри\nПродано кристалов на <color=#aaeeaa>{money}$</color>",
-                    Buttons = [new MButton("sellall", $"sellall", (args) => Sell(p.crys.cry, p, m)),
-                        new MButton("sell", $"sell:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p, m))]
+                    Text = $"Продажа кристаллов\nПродано кристалов на <color=#aaeeaa>{money}$</color>",
+                    Buttons = [new MButton("Продать всё", $"Продать всё", (args) => Sell(p.crys.cry, p, m)),
+                        new MButton("Продать", $"Продать:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p, m))]
                 };
                 p.win?.CurrentTab.SetInitialPage(page);
                 p.SendWindow();
