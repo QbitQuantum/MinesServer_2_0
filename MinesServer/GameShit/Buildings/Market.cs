@@ -9,6 +9,7 @@ using MinesServer.Network.World;
 using MinesServer.Server;
 using MinesServer.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace MinesServer.GameShit.Buildings
 {
     public class Market : Pack, IDamagable
@@ -108,6 +109,29 @@ namespace MinesServer.GameShit.Buildings
                 p.SendWindow();
             }
         };
+
+        private Page SellPage(Player p, long money = -1)
+        {
+            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+
+            var InitialPage = new Page()
+            {
+                OnAdmin = adminaction,
+                CrystalConfig = new CrystalConfig(" ", "цена", [
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0)}$</color>", 0, 0, p.crys[CrystalType.Green], 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1)}$</color>", 0, 0, p.crys[CrystalType.Blue], 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2)}$</color>", 0, 0, p.crys[CrystalType.Red], 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3)}$</color>", 0, 0, p.crys[CrystalType.Violet], 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4)}$</color>", 0, 0, p.crys[CrystalType.White], 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
+                ]),
+                Text = "Продажа кристаллов" + (money == -1 ? "": $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
+                Buttons = [new MButton("Продать всё", $"Продать всё", (args) => Sell(p.crys.cry, p)),
+                        new MButton("Продать", $"Продать:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))]
+            };
+            return InitialPage;
+        }
+        
         private Tab BuildSelltab(Player p)
         {
             Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
@@ -115,22 +139,52 @@ namespace MinesServer.GameShit.Buildings
             {
                 Label = "ПРОДАЖА",
                 Action = "sellcrys",
-                InitialPage = new Page()
-                {
-                    OnAdmin = adminaction,
-                    CrystalConfig = new CrystalConfig(" ", "цена",
-                            [new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0)}$</color>", 0, 0, p.crys[CrystalType.Green], 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1)}$</color>", 0, 0, p.crys[CrystalType.Blue], 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2)}$</color>", 0, 0, p.crys[CrystalType.Red], 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3)}$</color>", 0, 0, p.crys[CrystalType.Violet], 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4)}$</color>", 0, 0, p.crys[CrystalType.White], 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)]
-                                ),
-                    Text = "Продажа кри",
-                    Buttons = [new MButton("sellall", $"sellall", (args) => MarketSystem.Sell(p.crys.cry, p, this)),
-                            new MButton("sell", $"sell:{ActionMacros.CrystalSliders}", (args) => MarketSystem.Sell(args.CrystalSliders, p, this))]
-                }
+                InitialPage = SellPage(p)
             };
+        }
+
+        public void Sell(long[] sliders, Player p)
+        {
+            long money = 0;
+            if (sliders != null)
+            {
+                using var db = new DataBase();
+                db.players.Attach(p);
+                for (int i = 0; i < 6; i++)
+                {
+                    var value = sliders[i];
+                    if (p.crys.RemoveCrys(i, sliders[i]))
+                        money += value * World.GetCrysCost(i);
+                }
+                moneyinside += (long)(money * 0.1);
+                p.money += money;
+                db.SaveChanges();
+                p.SendMoney();
+                var page = SellPage(p, money);
+                p.win?.CurrentTab.SetInitialPage(page);
+                p.SendWindow();
+            }
+
+        }
+        private Page BuyPage(Player p, long money = -1)
+        {
+            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+
+            var InitialPage = new Page()
+            {
+                OnAdmin = adminaction,
+                CrystalConfig = new CrystalConfig(" ", "цена", [
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(0) * 10)), 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(1) * 10)), 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(2) * 10)), 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(3) * 10)), 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(4) * 10)), 0),
+                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(5) * 10)), 0)
+                ]),
+                Text = "Покупка кристаллов" + (money == -1 ?  "": $"\nКуплено кристалов на <color=#aaeeaa>{money}$</color>"),
+                Buttons = [new MButton("Покупка", $"Покупка:{ActionMacros.CrystalSliders}", (args) => Buy(args.CrystalSliders, p))]
+            };
+            return InitialPage;
         }
         private Tab BuildBuytab(Player p)
         {
@@ -139,23 +193,31 @@ namespace MinesServer.GameShit.Buildings
             {
                 Label = "Покупка",
                 Action = "buycrys",
-                InitialPage = new Page()
-                {
-                    OnAdmin = adminaction,
-                    CrystalConfig = new CrystalConfig(" ", "цена", [
-                            new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(0) * 10)), 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(1) * 10)), 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(2) * 10)), 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(3) * 10)), 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(4) * 10)), 0),
-                                new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(5) * 10)), 0)
-
-                            ], true),
-                    Text = "Покупка",
-                    Buttons = [new MButton("buy", $"buy:{ActionMacros.CrystalSliders}", (args) => MarketSystem.Buy(args.CrystalSliders, p, this))
-                        ]
-                }
+                InitialPage = BuyPage(p)
             };
+        }
+        public void Buy(long[] sliders, Player p)
+        {
+            if (sliders == null)
+            {
+                return;
+            }
+            long money = 0;
+            using var db = new DataBase();
+            db.players.Attach(p);
+            for (int i = 0; i < 6; i++)
+            {
+                if (sliders[i] <= 0 || p.money - (sliders[i] * World.GetCrysCost(i) * 10) < 0)
+                    continue;
+                money -= sliders[i] * (World.GetCrysCost(i) * 10);
+                p.crys.AddCrys(i, sliders[i]);
+            }
+            p.money += money;
+            db.SaveChanges();
+            p.SendMoney();
+            var page = BuyPage(p, -money);
+            p.win?.CurrentTab.SetInitialPage(page);
+            p.SendWindow();
         }
         private Tab AucTab(Player p)
         {
