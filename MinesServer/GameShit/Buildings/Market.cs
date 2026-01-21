@@ -9,6 +9,7 @@ using MinesServer.Network.World;
 using MinesServer.Server;
 using MinesServer.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace MinesServer.GameShit.Buildings
 {
@@ -126,8 +127,8 @@ namespace MinesServer.GameShit.Buildings
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
                 ]),
                 Text = "Продажа кристаллов" + (money == -1 ? "": $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
-                Buttons = [new MButton("Продать всё", $"Продать всё", (args) => Sell(p.crys.cry, p)),
-                        new MButton("Продать", $"Продать:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))]
+                Buttons = [new MButton("Продать всё", $"sellcrys", (args) => Sell(p.crys.cry, p)),
+                        new MButton("Продать", $"sellcrys:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))]
             };
             return InitialPage;
         }
@@ -145,27 +146,45 @@ namespace MinesServer.GameShit.Buildings
 
         public void Sell(long[] sliders, Player p)
         {
+            if (sliders == null) return;
+
             long money = 0;
-            if (sliders != null)
+
+            // 1. Изменяем данные в памяти
+            for (int i = 0; i < 6; i++)
             {
-                using var db = new DataBase();
-                db.players.Attach(p);
-                for (int i = 0; i < 6; i++)
-                {
-                    var value = sliders[i];
-                    if (p.crys.RemoveCrys(i, sliders[i]))
-                        money += value * World.GetCrysCost(i);
-                }
-                moneyinside += (long)(money * 0.1);
-                p.money += money;
-                db.SaveChanges();
-                p.SendMoney();
-                var page = SellPage(p, money);
-                p.win?.CurrentTab.SetInitialPage(page);
-                p.SendWindow();
+                var value = sliders[i];
+                if (value > 0 && p.crys.RemoveCrys(i, value))
+                    money += value * World.GetCrysCost(i);
             }
 
+            moneyinside += (long)(money * 0.1);
+            p.money += money;
+
+            // 2. Сохраняем ВСЁ за один раз
+            using var db = new DataBase();
+
+            // Обновляем деньги игрока
+            var playerEntry = db.players.Find(p.id);
+            if (playerEntry != null)
+                playerEntry.money = p.money;
+
+            // Обновляем кристаллы — СЕРИАЛИЗУЕМ АКТУАЛЬНЫЙ МАССИВ!
+            var basketEntry = db.baskets.Find(p.crys.Id);
+            if (basketEntry != null)
+            {
+                basketEntry.serialazed = JsonConvert.SerializeObject(p.crys.cry); // ← ПРАВИЛЬНО!
+            }
+
+            db.SaveChanges();
+
+            // 3. Отправляем клиенту
+            p.SendMoney();
+            var page = SellPage(p, money);
+            p.win?.CurrentTab.SetInitialPage(page);
+            p.SendWindow();
         }
+
         private Page BuyPage(Player p, long money = -1)
         {
             Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
@@ -182,7 +201,7 @@ namespace MinesServer.GameShit.Buildings
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(5) * 10)), 0)
                 ]),
                 Text = "Покупка кристаллов" + (money == -1 ?  "": $"\nКуплено кристалов на <color=#aaeeaa>{money}$</color>"),
-                Buttons = [new MButton("Покупка", $"Покупка:{ActionMacros.CrystalSliders}", (args) => Buy(args.CrystalSliders, p))]
+                Buttons = [new MButton("Покупка", $"buycrys:{ActionMacros.CrystalSliders}", (args) => Buy(args.CrystalSliders, p))]
             };
             return InitialPage;
         }

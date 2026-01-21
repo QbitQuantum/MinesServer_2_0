@@ -23,14 +23,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
         public event Action Changed;
         public bool shouldsubscribe => Changed is null;
-        private Basket()
-        {
-        }
+
+        private Basket() { }
+
         public long this[CrystalType type]
         {
-            set => cry[(int)type] = value;
-
             get => cry[(int)type];
+            set => cry[(int)type] = value;
         }
         private long[] _cry = null;
         [NotMapped]
@@ -38,12 +37,20 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             get
             {
-                _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed);
-                using var db = new DataBase();
-                db.baskets.Attach(this);
-                serialazed = JsonConvert.SerializeObject(_cry);
-                db.SaveChanges();
+                _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed ?? "[]");
                 return _cry;
+            }
+        }
+
+        // НОВЫЙ МЕТОД: явно сохранить изменения
+        public void SaveToDatabase()
+        {
+            if (_cry != null)
+            {
+                serialazed = JsonConvert.SerializeObject(_cry);
+                using var db = new DataBase();
+                db.baskets.Update(this);
+                db.SaveChanges();
             }
         }
         public void AddCrys(int index, long val)
@@ -51,7 +58,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             cry[index] += val;
             if (cry[index] < 0)
                 cry[index] = long.MaxValue;
-            if (Changed is not null)Changed();
+            Changed?.Invoke();
         }
         public void Boxcrys(long[] crys)
         {
@@ -60,20 +67,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (Changed is not null) Changed();
 
         }
-        public void ClearCrys()
-        {
-            for (var i = 0; i < cry.Length; i++)
-                cry[i] = 0;
-            Changed();
-        }
         public bool RemoveCrys(int index, long val)
         {
-            if (val < 0)return false;
-            
-            if (cry[index] - val >= 0)
+            if (val < 0) return false;
+            if (cry[index] >= val)
             {
                 cry[index] -= val;
-                if (Changed is not null) Changed();
+                Changed?.Invoke();
                 return true;
             }
             return false;
