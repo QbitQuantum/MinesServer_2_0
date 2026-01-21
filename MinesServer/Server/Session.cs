@@ -50,9 +50,6 @@ namespace MinesServer.Server
                     switch (result.data)
                     {
                         case AUPacket au: AU(au); break;
-                        case TYPacket ty when ty.Data is XmovPacket:
-                            TY(ty);
-                            break;
                         case TYPacket ty: father.time.AddAction(() => TY(ty), player); break;
                         case PongPacket ping: Ping(ping); break;
                         default:
@@ -227,11 +224,11 @@ namespace MinesServer.Server
                 }
             }
         }
-        private void DigHandler(TYPacket parent, XdigPacket packet) => player?.TryAct(() =>{
-                    player.Move(player.x, player.y, packet.Direction);
-                    player.Bz();
-            }, 200);
-        
+        private void DigHandler(TYPacket parent, XdigPacket packet) => player?.TryAct(() => {
+            player.Bz();
+            player.Move(player.x, player.y, packet.Direction);
+        }, 200);
+
         private void GeoHandler(TYPacket parent, XgeoPacket packet) => player?.TryAct(player.Geo , 200);
         private void BuildHandler(TYPacket parent, XbldPacket packet) => player?.TryAct(() => player.Build(packet.BlockType), 200);
         
