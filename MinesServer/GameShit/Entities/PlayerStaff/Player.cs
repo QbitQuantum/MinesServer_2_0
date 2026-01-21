@@ -410,6 +410,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     if (World.GetProp(afterCell).isEmpty && World.W.ValidCoord(x, y))
                     {
                         // Программное движение — без триггеров autoDig
+                        tp(this.x, this.y);
                         _ = Move(x, y, dir, prog: true);
                     }
                 }
