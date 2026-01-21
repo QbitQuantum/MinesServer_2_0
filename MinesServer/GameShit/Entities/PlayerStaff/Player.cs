@@ -866,45 +866,46 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
             this.SendHealth();
         }
-        private async Task<(int x, int y)> FindEmptyForBox(int x, int y)
+        private (int x, int y) FindEmptyForBox(int x, int y)
         {
-            return await Task.Run(() =>
-            {
-                var dirs = new (int, int)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
-                var q = new Queue<(int, int)>();
-                var valid = bool (int x, int y) => World.GetProp(x, y).isEmpty && !World.PackPart(x, y) && World.W.ValidCoord(x, y);
-                var a = World.PackPart(x, y);
-                if (!valid(x, y))
-                {
-                    q.Enqueue((x, y));
-                }
-                while (q.Count > 0)
-                {
-                    var b = q.Dequeue();
-                    foreach (var dir in dirs)
-                    {
-                        if (!valid(b.Item1 + dir.Item1, b.Item2 + dir.Item2))
-                        {
-                            q.Enqueue((b.Item1 + dir.Item1, b.Item2 + dir.Item2));
-                            continue;
-                        }
-                        return (b.Item1 + dir.Item1, b.Item2 + dir.Item2);
-                    }
-                }
+            var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
+            var q = new Queue<(int x, int y)>();
+
+            bool IsValid(int tx, int ty) =>
+                World.W.ValidCoord(tx, ty) &&
+                World.GetProp(tx, ty).isEmpty &&
+                !World.PackPart(tx, ty);
+
+            if (IsValid(x, y))
                 return (x, y);
-            });
+
+            q.Enqueue((x, y));
+            var visited = new HashSet<(int, int)> { (x, y) };
+
+            while (q.Count > 0)
+            {
+                var (cx, cy) = q.Dequeue();
+                foreach (var (dx, dy) in dirs)
+                {
+                    int nx = cx + dx, ny = cy + dy;
+                    if (visited.Contains((nx, ny))) continue;
+
+                    if (IsValid(nx, ny))
+                        return (nx, ny);
+
+                    visited.Add((nx, ny));
+                    q.Enqueue((nx, ny));
+                }
+            }
+            return (x, y);
         }
 
         public override void Death()
         {
             if (crys.AllCry > 0)
             {
-                var c = FindEmptyForBox(x, y);
-                c.ContinueWith((f) =>
-                {
-                    Box.BuildBox(f.Result.x, f.Result.y, crys.cry, this, true);
-                    crys.ClearCrys();
-                });
+                var (bx, by) = FindEmptyForBox(x, y);
+                Box.BuildBox(bx, by, crys.cry, this, true);
             }
             win = null;
             SendWindow();
