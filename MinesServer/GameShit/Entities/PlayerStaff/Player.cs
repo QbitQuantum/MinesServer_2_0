@@ -518,15 +518,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         {
                             if (crys.RemoveCrys(5, (long)c.Effect) && World.TrueEmpty(x, y))
                             {
+                                // Даём опыт СРАЗУ при начале постройки
                                 c.AddExp(this);
                                 World.SetCell(x, y, CellType.MilitaryBlockFrame);
-                                World.W.StupidAction(10, x, y, () =>
+                                // Сохраняем только необходимые данные для завершения
+                                var finalDurability = c.AdditionalEffect;
+                                World.ScheduleAction(TimeSpan.FromSeconds(10), () =>
                                 {
+                                    // Проверяем: всё ещё ли там рамка?
                                     if (World.GetCell(x, y) == (byte)CellType.MilitaryBlockFrame)
                                     {
-                                        c.AddExp(this);
+                                        // Завершаем постройку
                                         World.SetCell(x, y, CellType.MilitaryBlock);
-                                        World.SetDurability(x, y, c.AdditionalEffect);
+                                        World.SetDurability(x, y, finalDurability);
                                     }
                                 });
                             }

@@ -330,19 +330,6 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return cell;
         }
-        public async void StupidAction(double delay, int x, int y, Action a)
-        {
-            CancellationTokenSource s = new();
-            shit[(x, y)] = s;
-            await Task.Run(() =>
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(delay));
-                if (!s.Token.IsCancellationRequested)
-                    a();
-                shit.Remove((x, y));
-                s.Dispose();
-            }, s.Token);
-        }
         public Stack<Player> GetPlayersFromPos(int x, int y)
         {
             var st = new Stack<Player>();
