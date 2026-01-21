@@ -94,6 +94,12 @@ namespace MinesServer.GameShit.WorldSystem
             road.Delete();
             durability.Delete();
         }
+        private static readonly List<(DateTime TriggerTime, Action Action)> _delayedActions = new();
+
+        public static void ScheduleAction(TimeSpan delay, Action action)
+        {
+            _delayedActions.Add((ServerTime.Now + delay, action));
+        }
         public void CreateSpawns()
         {
             var r = new Random();
@@ -324,14 +330,6 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return cell;
         }
-        public async void AsyncAction(int secdelay, Action act)
-        {
-            await Task.Run(delegate ()
-            {
-                Thread.Sleep(secdelay * 1000);
-                act();
-            });
-        }
         public async void StupidAction(double delay, int x, int y, Action a)
         {
             CancellationTokenSource s = new();
@@ -538,6 +536,23 @@ namespace MinesServer.GameShit.WorldSystem
                 }
                 W.summary = new long[6];
                 lastcryupdate = ServerTime.Now;
+            }
+
+            for (int i = _delayedActions.Count - 1; i >= 0; i--)
+            {
+                var (triggerTime, action) = _delayedActions[i];
+                if (ServerTime.Now >= triggerTime)
+                {
+                    _delayedActions.RemoveAt(i);
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Delayed action failed: {ex}");
+                    }
+                }
             }
         }
         public static DateTime lastcryupdate = DateTime.MinValue;

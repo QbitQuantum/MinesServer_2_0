@@ -121,32 +121,41 @@ namespace MinesServer.GameShit.Consumables
             if (!World.AccessGun(x, y, player.cid).access) return false;
             var ch = World.W.GetChunk(x, y);
             ch.SendPack('B', x, y, 0, 0);
-            World.W.AsyncAction(1, () =>
+
+            // Запланировать взрыв через 1 секунду
+            World.ScheduleAction(TimeSpan.FromSeconds(1), () =>
             {
-                for (int _x = -4; _x <= 4; _x++)
+                // Всё выполняется в основном игровом потоке!
+                for (int dx = -4; dx <= 4; dx++)
                 {
-                    for (int _y = -4; _y <= 4; _y++)
+                    for (int dy = -4; dy <= 4; dy++)
                     {
-                        if (World.W.ValidCoord(x + _x, y + _y) && System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2(x + _x, y + _y)) <= 3.5f)
+                        int tx = x + dx, ty = y + dy;
+                        if (!World.W.ValidCoord(tx, ty)) continue;
+
+                        if (Vector2.Distance(new Vector2(x, y), new Vector2(tx, ty)) <= 3.5f)
                         {
-                            foreach (var p in World.W.GetPlayersFromPos(x + _x, y + _y))
+                            // Наносим урон игрокам
+                            foreach (var p in World.W.GetPlayersFromPos(tx, ty))
                             {
                                 p.Hurt(40);
                             }
-                            var c = World.GetCell(x + _x, y + _y);
-                            if (World.GetProp(c).is_destructible && !World.PackPart(x + _x, y + _y))
+
+                            // Разрушаем блоки
+                            var c = World.GetCell(tx, ty);
+                            if (World.GetProp(c).is_destructible && !World.PackPart(tx, ty))
                             {
                                 if (c == 117 && Physics.r.Next(1, 101) > 98)
                                 {
-                                    World.SetCell(x + _x, y + _y, 118);
+                                    World.SetCell(tx, ty, 118);
                                 }
                                 else if (c == 118)
                                 {
-                                    World.SetCell(x + _x, y + _y, 103);
+                                    World.SetCell(tx, ty, 103);
                                 }
                                 else if (c != 117 && c != 118)
                                 {
-                                    World.Destroy(x + _x, y + _y, World.destroytype.CellAndRoad);
+                                    World.Destroy(tx, ty, World.destroytype.CellAndRoad);
                                 }
                             }
                         }
@@ -164,23 +173,34 @@ namespace MinesServer.GameShit.Consumables
             if (!World.AccessGun(x, y, player.cid).access) return false;
             var ch = World.W.GetChunk(x, y);
             ch.SendPack('B', x, y, 0, 1);
-            World.W.AsyncAction(2, () =>
+
+            World.ScheduleAction(TimeSpan.FromSeconds(2), () =>
             {
-                for (int _x = -1; _x <= 1; _x++)
+                for (int dx = -1; dx <= 1; dx++)
                 {
-                    for (int _y = -1; _y <= 1; _y++)
+                    for (int dy = -1; dy <= 1; dy++)
                     {
-                        if (World.W.ValidCoord(x + _x, y + _y) && System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2(x + _x, y + _y)) <= 3.5f)
+                        int tx = x + dx, ty = y + dy;
+                        if (!World.W.ValidCoord(tx, ty)) continue;
+
+                        if (Vector2.Distance(new Vector2(x, y), new Vector2(tx, ty)) <= 3.5f)
                         {
-                            foreach (var p in World.W.GetPlayersFromPos(x + _x, y + _y))
+                            foreach (var p in World.W.GetPlayersFromPos(tx, ty))
                             {
                                 p.Hurt(50);
                             }
-                            if (World.ContainsPack(x + _x, y + _y, out var pack) && pack is Gate) (pack as Gate).Destroy();
-                            var c = World.GetCell(x + _x, y + _y);
-                            if (World.GetProp(c).is_destructible && !World.PackPart(x + _x, y + _y))
+
+                            // Уничтожаем гейты
+                            if (World.ContainsPack(tx, ty, out var pack) && pack is Gate gate)
                             {
-                                World.Destroy(x + _x, y + _y, World.destroytype.CellAndRoad);
+                                gate.Destroy();
+                            }
+
+                            // Разрушаем блоки
+                            var c = World.GetCell(tx, ty);
+                            if (World.GetProp(c).is_destructible && !World.PackPart(tx, ty))
+                            {
+                                World.Destroy(tx, ty, World.destroytype.CellAndRoad);
                             }
                         }
                     }
@@ -188,6 +208,58 @@ namespace MinesServer.GameShit.Consumables
                 ch.SendDirectedFx(1, x, y, 1, 0, 1);
                 ch.ClearPack(x, y);
             });
+            return true;
+        }
+        public static bool Raz(Player player)
+        {
+            var d = player.GetDirCord();
+            int x = d.x, y = d.y;
+            var ch = World.W.GetChunk(x, y);
+            ch.SendPack('B', x, y, 0, 2);
+
+            World.ScheduleAction(TimeSpan.FromSeconds(5), () =>
+            {
+                // Создаём новый контекст БД — только внутри действия!
+                using var db = new DataBase();
+
+                for (int dx = -10; dx <= 10; dx++)
+                {
+                    for (int dy = -10; dy <= 10; dy++)
+                    {
+                        int tx = x + dx, ty = y + dy;
+                        if (!World.W.ValidCoord(tx, ty)) continue;
+
+                        if (Vector2.Distance(new Vector2(x, y), new Vector2(tx, ty)) <= 9.5f)
+                        {
+                            // Урон игрокам
+                            foreach (var p in World.W.GetPlayersFromPos(tx, ty))
+                            {
+                                p.Hurt(500);
+                            }
+
+                            // Работа с повреждаемыми объектами
+                            if (World.ContainsPack(tx, ty, out var pack) && pack is IDamagable damagable)
+                            {
+                                db.Attach(pack); // привязываем к контексту
+
+                                if (damagable.CanDestroy())
+                                    damagable.Destroy(player);
+                                else
+                                    damagable.Damage(10);
+
+                                if (pack.charge == 0)
+                                    World.W.GetChunk(pack.x, pack.y).ResendPack(pack);
+                            }
+                        }
+                    }
+                }
+
+                db.SaveChanges(); // сохраняем изменения
+
+                ch.SendDirectedFx(1, x, y, 9, 0, 2);
+                ch.ClearPack(x, y);
+            });
+
             return true;
         }
         public static bool Geopack(int type,Player p)
@@ -232,42 +304,6 @@ namespace MinesServer.GameShit.Consumables
                 return true;
             }
             return false;
-        }
-        public static bool Raz(Player p)
-        {
-            var d = p.GetDirCord();
-            int x = d.x, y = d.y;
-            var ch = World.W.GetChunk(x, y);
-            ch.SendPack('B', x, y, 0, 2);
-            World.W.AsyncAction(5, () =>
-            {
-                using var db = new DataBase();
-                for (int _x = -10; _x <= 10; _x++)
-                {
-                    for (int _y = -10; _y <= 10; _y++)
-                    {
-                        if (World.W.ValidCoord(x + _x, y + _y) && System.Numerics.Vector2.Distance(new System.Numerics.Vector2(x, y), new System.Numerics.Vector2(x + _x, y + _y)) <= 9.5f)
-                        {
-                            if (World.ContainsPack(x + _x, y + _y, out var pack) && pack is IDamagable)
-                            {
-                                var damagable = pack as IDamagable;
-                                db.Attach(pack);
-
-                                if (damagable.CanDestroy()) damagable.Destroy(p);
-                                else damagable.Damage(10);
-                                if (pack.charge == 0)
-                                    World.W.GetChunk(pack.x, pack.y).ResendPack(pack);
-                            }
-                            foreach (var player in World.W.GetPlayersFromPos(x + _x, y + _y))
-                                player.Hurt(500);
-                        }
-                    }
-                }
-                db.SaveChanges();
-                ch.SendDirectedFx(1, x, y, 9, 0, 2);
-                ch.ClearPack(x, y);
-            });
-            return true;
         }
     }
 }
