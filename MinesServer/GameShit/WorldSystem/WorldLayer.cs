@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using Microsoft.Win32.SafeHandles;
+﻿using Microsoft.Win32.SafeHandles;
 using MinesServer.Utils;
 using Newtonsoft.Json.Linq;
 using Syroot.BinaryData;

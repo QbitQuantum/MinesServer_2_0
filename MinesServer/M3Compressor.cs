@@ -1,5 +1,4 @@
-﻿using Azure;
-using Microsoft.EntityFrameworkCore.Query.Internal;
+﻿using Microsoft.EntityFrameworkCore.Query.Internal;
 using MinesServer.GameShit.WorldSystem;
 using System;
 using System.Collections.Generic;

@@ -47,7 +47,7 @@ namespace MinesServer.Server
         public void Delete() => Database.EnsureDeleted();
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSqlLocalDB;MultipleActiveResultSets=true;Database=M;Trusted_Connection=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlite("Data Source=M.db;");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

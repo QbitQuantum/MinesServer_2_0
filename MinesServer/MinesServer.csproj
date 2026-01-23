@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -15,13 +15,13 @@
   </ItemGroup>
  <ItemGroup>
     <PackageReference Include="AccidentalNoise" Version="1.0.0" />
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
     <PackageReference Include="morelinq" Version="4.2.0" />
     <PackageReference Include="NetCoreServer" Version="8.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Syroot.BinaryData" Version="5.2.2" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.2" />
     <PackageReference Include="System.Memory.Data" Version="8.0.0" />
   </ItemGroup>
 </Project>

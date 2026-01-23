@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using MinesServer.Enums;
+﻿using MinesServer.Enums;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.GameShit.Skills;
 using MinesServer.Server;

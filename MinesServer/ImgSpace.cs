@@ -11,7 +11,6 @@ using MinesServer.Server;
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Drawing;
-using Azure;
 using System.Net.Mime;
 using System.Drawing.Imaging;
 using System.Net.Http.Headers;

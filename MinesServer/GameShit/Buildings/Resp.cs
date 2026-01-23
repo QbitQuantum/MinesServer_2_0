@@ -8,7 +8,7 @@ using MinesServer.Network.World;
 using MinesServer.Server;
 using MinesServer.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 namespace MinesServer.GameShit.Buildings
 {
     public class Resp : Pack, IDamagable

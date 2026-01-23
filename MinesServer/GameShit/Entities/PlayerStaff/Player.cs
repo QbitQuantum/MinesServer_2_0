@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
 using Microsoft.EntityFrameworkCore.Update.Internal;
-using Microsoft.Identity.Client;
 using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.ClanSystem;
@@ -29,7 +28,7 @@ using MinesServer.Server;
 using MinesServer.Server.Network;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Net.WebSockets;
 using System.Numerics;
 using System.Runtime.CompilerServices;
