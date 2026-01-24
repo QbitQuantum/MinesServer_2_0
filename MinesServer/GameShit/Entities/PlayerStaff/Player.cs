@@ -637,8 +637,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
 
             MConsole.AddConsoleLine(this, "Если вы не понимаете, что происходит,");
-            MConsole.AddConsoleLine(this, "или вас попросили выполнить команду,");
-            MConsole.AddConsoleLine(this, "сосите хуй глотайте сперму");
+            MConsole.AddConsoleLine(this, "Или вас попросили выполнить команду,");
+            MConsole.AddConsoleLine(this, "Ничего не вводите");
             for (var i = 0; i < 8; i++)
             {
                 MConsole.AddConsoleLine(this);
