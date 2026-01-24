@@ -701,6 +701,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private IHubPacket[] GetBotsInChunk(int chunky,int chunkx)
         {
             List<IHubPacket> bots = new();
+
+            var valid = bool (int x, int y) => x >= 0 && y >= 0 && x < World.ChunksW && y < World.ChunksH;
+            if (!valid(chunkx, chunky)) return bots.ToArray();
+
             var ch = World.W.chunks[chunkx, chunky];
             foreach (var id in ch.bots)
             {
