@@ -28,7 +28,6 @@ namespace MinesServer.Server
         {
             new World(Default.cfg.WorldName);
             time = new ServerTime();
-            // SessionsCheck(); ← УДАЛЕНО!
             return base.Start();
         }
         public override bool Stop()
@@ -40,22 +39,6 @@ namespace MinesServer.Server
         {
             var s = new Session(this);
             return s;
-        }
-        private void SessionsCheck()
-        {
-            var lastcheck = ServerTime.Now;
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    if (ServerTime.Now - lastcheck > TimeSpan.FromSeconds(30))
-                    {
-                        foreach (Session i in Instance.Sessions.Values) i.CheckDisconnected();
-
-                    }
-                    Thread.Sleep(5);
-                }
-            },s.Token);
         }
         protected override void OnError(SocketError error)
         {
