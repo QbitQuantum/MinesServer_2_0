@@ -225,8 +225,8 @@ namespace MinesServer.Server
             }
         }
         private void DigHandler(TYPacket parent, XdigPacket packet) => player?.TryAct(() => {
-            player.Bz();
             player.Move(player.x, player.y, packet.Direction);
+            player.Bz();
         }, 200);
 
         private void GeoHandler(TYPacket parent, XgeoPacket packet) => player?.TryAct(player.Geo , 200);

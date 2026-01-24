@@ -193,7 +193,7 @@ namespace MinesServer.GameShit.WorldSystem
                 case destroytype.Cell:
                     if (W.cells[x, y] != 0)
                     {
-                        W.cells[x, y] = 0;
+                        W.cells[x, y] = 32;
                         W.road[x, y] = W.road[x, y] == 0 ? 32 : W.road[x, y];
                     }
                     break;
@@ -204,7 +204,7 @@ namespace MinesServer.GameShit.WorldSystem
                     }
                     break;
                 case destroytype.CellAndRoad:
-                    W.cells[x, y] = 0;
+                    W.cells[x, y] = 32;
                     if (W.road[x, y] is not (32 or 37 or 36))
                     {
                         W.road[x, y] = 32;

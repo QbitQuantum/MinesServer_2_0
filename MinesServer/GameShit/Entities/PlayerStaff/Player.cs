@@ -401,19 +401,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 }
             }
-            if (autoDig)
-            {
-                if (this.x != x || this.y != y)
-                {
-                    byte afterCell = World.GetCell(x, y);
-                    if (World.GetProp(afterCell).isEmpty && World.W.ValidCoord(x, y))
-                    {
-                        // Программное движение — без триггеров autoDig
-                        tp(this.x, this.y);
-                        _ = Move(x, y, dir, prog: true);
-                    }
-                }
-            }
         }
         public override bool Move(int x, int y, int dir = -1, bool prog = false)
         {
