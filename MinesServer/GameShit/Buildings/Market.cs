@@ -127,7 +127,7 @@ namespace MinesServer.GameShit.Buildings
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
                 ]),
                 Text = "Продажа кристаллов" + (money == -1 ? "": $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
-                Buttons = [new MButton("Продать всё", $"sellcrys", (args) => Sell(p.crys.cry, p)),
+                Buttons = [new MButton("Продать всё", $"sellallcrys", (args) => Sell(p.crys.cry, p)),
                         new MButton("Продать", $"sellcrys:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))]
             };
             return InitialPage;
