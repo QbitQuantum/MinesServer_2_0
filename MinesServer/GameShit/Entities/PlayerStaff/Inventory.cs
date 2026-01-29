@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Consumables;
+using MinesServer.GameShit.SysMarket;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
@@ -231,7 +232,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void Choose(int id, Player p)
         {
             AddChoose(id);
-            ITopLevelPacket packet = InventoryPacket.Choose("ты хуесос", new bool[0, 0], 123, 123, 12);
+            ITopLevelPacket packet = InventoryPacket.Choose("Выбран предмет - " + MarketSystem.PackName(id), new bool[0, 0], 123, 123, 12);
             selected = id;
             if (id == -1)
                 packet = InventoryPacket.Close();
