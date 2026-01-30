@@ -21,7 +21,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             typeditems = new Dictionary<int, ItemUsage>
             {
                 {
-                    0,(p) => {
+                    (int)Item.Teleport,
+                    (p) => {
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))
                         {
@@ -32,7 +33,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                      }
                 },
                 {
-                    1,
+                    (int)Item.Respawn,
                     (p) =>
                     {
                         var coord = p.GetDirCord(true);
@@ -45,7 +46,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    2,
+                    (int)Item.Up,
                     (p) =>
                     {
                         var coord = p.GetDirCord(true);
@@ -58,7 +59,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    3,
+                    (int)Item.Market,
                     (p) =>
                     {
                         var coord = p.GetDirCord(true);
@@ -71,40 +72,47 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    4,(p) => true
+                    (int)Item.PlasmaBomb,
+                    ShitClass.Boom
                 },
                 {
-                    5,ShitClass.Boom
+                    (int)Item.ProtonBomb,
+                    ShitClass.Prot
                 },
                 {
-                    6,ShitClass.Prot
+                    (int)Item.DischargeBomb,
+                    (p) => ShitClass.Raz(p)
                 },
                 {
-                    7,(p) => ShitClass.Raz(p)
+                    (int)Item.Geopack,
+                    (p) => ShitClass.Geopack(10,p)
                 },
                 {
-                    10,(p) => ShitClass.Geopack(10,p)
+                    (int)Item.GeopackBlue,
+                    (p) => ShitClass.Geopack(11,p)
                 },
                 {
-                    11,(p) => ShitClass.Geopack(11,p)
+                    (int)Item.GeopackRed,
+                    (p) => ShitClass.Geopack(12,p)
                 },
                 {
-                    12,(p) => ShitClass.Geopack(12,p)
+                    (int)Item.GeopackPurple,
+                    (p) => ShitClass.Geopack(13,p)
                 },
                 {
-                    13,(p) => ShitClass.Geopack(13,p)
+                    (int)Item.GeopackBlack,
+                    (p) => ShitClass.Geopack(14,p)
                 },
                 {
-                    14,(p) => ShitClass.Geopack(14,p)
+                    (int)Item.GeopackWhite,
+                    (p) => ShitClass.Geopack(15,p)
                 },
                 {
-                    15,(p) => ShitClass.Geopack(15,p)
+                    (int)Item.GeopackCyan,
+                    (p) => ShitClass.Geopack(16,p)
                 },
                 {
-                    16,(p) => ShitClass.Geopack(16,p)
-                },
-                {
-                    24,
+                    (int)Item.Crafter,
                     (p) =>
                     {
                         var coord = p.GetDirCord(true);
@@ -118,7 +126,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    26,
+                    (int)Item.Gun,
                     (p) =>
                     {
                         var coord = p.GetDirCord(true);
@@ -131,7 +139,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    27,
+                    (int)Item.ClanGate,
                     (p) =>
                     {
                         var coord = p.GetDirCord();
@@ -145,7 +153,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    29, (p) => {
+                    (int)Item.Storage, (p) => {
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))
                         {
@@ -156,22 +164,28 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    34,(p) => ShitClass.Geopack(34,p)
+                    (int)Item.Hypnoskal,
+                    (p) => ShitClass.Geopack(34,p)
                 },
                 {
-                    35,ShitClass.Poli
+                    (int)Item.Polymer,
+                    ShitClass.Poli
                 },
                 {
-                    40,ShitClass.C190Shot
+                    (int)Item.C190,
+                    ShitClass.C190Shot
                 },
                 {
-                    42,(p) => ShitClass.Geopack(42,p)
+                    (int)Item.GeopackBlackSkal,
+                    (p) => ShitClass.Geopack(42,p)
                 },
                 {
-                    43,(p) => ShitClass.Geopack(42,p)
+                    (int)Item.GeopackRedSkal,
+                    (p) => ShitClass.Geopack(43,p)
                 },
                 {
-                    46,(p) => ShitClass.Geopack(46,p)
+                    (int)Item.GeopackRainbow,
+                    (p) => ShitClass.Geopack(46,p)
                 },
             };
         }

@@ -14,69 +14,129 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MinesServer.GameShit.SysMarket
 {
+    public enum Item
+    {
+        Teleport = 0,
+        Respawn = 1,
+        Up = 2,
+        Market = 3,
+        ClanBuilding = 4,
+        PlasmaBomb = 5,
+        ProtonBomb = 6,
+        DischargeBomb = 7,
+        Credits = 8,
+        RepairBot = 9,
+        Geopack = 10,
+        GeopackBlue = 11,
+        GeopackRed = 12,
+        GeopackPurple = 13,
+        GeopackBlack = 14,
+        GeopackWhite = 15,
+        GeopackCyan = 16,
+        VolcanoRadar = 17,
+        GeodeRadar = 18,
+        BotRadar = 19,
+        Teleporter = 20,
+        ConstructorBot = 21,
+        CombatGenerator = 22,
+        DefenseCharge = 23,
+        Crafter = 24,
+        BombShop = 25,
+        Gun = 26,
+        ClanGate = 27,
+        Disassembler = 28,
+        Storage = 29,
+        ScanRadar = 30,
+        LevelUpgradeX3 = 31,
+        FreeUpgrade = 32,
+        DiggingSpeedX4 = 33,
+        Hypnoskal = 34,
+        Polymer = 35,
+        NanoBot = 36,
+        Accumulator = 37,
+        Translator = 38,
+        Compressor = 39,
+        C190 = 40,
+        FederalBuilding = 41,
+        GeopackBlackSkal = 42,
+        GeopackRedSkal = 43,
+        Automator = 44,
+        EMIBomb = 45,
+        GeopackRainbow = 46,
+        SpotBot = 47,
+        ScienceCenter = 48,
+        Money = 49,
+        RespecPoints = 50
+    }
     public static class MarketSystem
     {
+        private static readonly Dictionary<Item, string> _names = new()
+        {
+            [Item.Teleport] = "Телепортер",
+            [Item.Respawn] = "Респаун",
+            [Item.Up] = "UP",
+            [Item.Market] = "Маркет",
+            [Item.ClanBuilding] = "Здание кланов",
+            [Item.PlasmaBomb] = "Плазменная бомба",
+            [Item.ProtonBomb] = "Протонная бомба",
+            [Item.DischargeBomb] = "Разрядная бомба",
+            [Item.Credits] = "Кредиты",
+            [Item.RepairBot] = "Ремонтный бот",
+            [Item.Geopack] = "Геопак",
+            [Item.GeopackBlue] = "Геопак с голубой живкой",
+            [Item.GeopackRed] = "Геопак с красной живкой",
+            [Item.GeopackPurple] = "Геопак с фиолетовой живкой",
+            [Item.GeopackBlack] = "Геопак с чёрной живкой",
+            [Item.GeopackWhite] = "Геопак с белой живкой",
+            [Item.GeopackCyan] = "Геопак с синей живкой",
+            [Item.VolcanoRadar] = "Радар вулканов",
+            [Item.GeodeRadar] = "Радар живок",
+            [Item.BotRadar] = "Радар ботов",
+            [Item.Teleporter] = "Портативный телепортер",
+            [Item.ConstructorBot] = "Конструкционный бот",
+            [Item.CombatGenerator] = "Боевой генератор",
+            [Item.DefenseCharge] = "Заряд защиты",
+            [Item.Crafter] = "Крафтер",
+            [Item.BombShop] = "Магазин бомб",
+            [Item.Gun] = "Пушка",
+            [Item.ClanGate] = "Клановые ворота",
+            [Item.Disassembler] = "Дизассемблер",
+            [Item.Storage] = "Склад",
+            [Item.ScanRadar] = "Сканер зданий",
+            [Item.LevelUpgradeX3] = "Прокачка уровня x3",
+            [Item.FreeUpgrade] = "Бесплатная прокачка",
+            [Item.DiggingSpeedX4] = "Ускорение копания x4",
+            [Item.Hypnoskal] = "Гипноскал",
+            [Item.Polymer] = "Полимер",
+            [Item.NanoBot] = "Нано-бот",
+            [Item.Accumulator] = "Аккумулятор",
+            [Item.Translator] = "Транслятор",
+            [Item.Compressor] = "Компрессор",
+            [Item.C190] = "C-190",
+            [Item.FederalBuilding] = "База федерации",
+            [Item.GeopackBlackSkal] = "Геопак с черноскалом",
+            [Item.GeopackRedSkal] = "Геопак с красноскалом",
+            [Item.Automator] = "Автоматизатор",
+            [Item.EMIBomb] = "EMI-бомба",
+            [Item.GeopackRainbow] = "Геопак с радужной живкой",
+            [Item.SpotBot] = "Спот-бот",
+            [Item.ScienceCenter] = "Здание научного центра (НЦ)",
+            [Item.Money] = "Деньги",
+            [Item.RespecPoints] = "Очки перепрошивки"
+        };
+        public static string GetName(Item type) => _names[type];
+
+        public static Item GetItemById(int id)
+        {
+            if (!Enum.IsDefined(typeof(Item), id))
+            {
+                throw new ArgumentException($"Item with ID {id} not found");
+            }
+            return (Item)id;
+        }
         public static string PackName(int i)
         {
-            string[] names =
-            {
-                "Телепорт", // 0
-                "Респаун", // 1
-                "UP", // 2
-                "Маркет", // 3
-                "Здание кланов", // 4
-                "Плазменная бомба", // 5
-                "Протонная бомба", // 6
-                "Разрядная бомба", // 7
-                "Кредиты", // 8
-                "Ремонтный бот", // 9
-                "Геопак", // 10
-                "Геопак с голубой живкой", // 11
-                "Геопак с красной живкой", // 12
-                "Геопак с фиолетовой живкой", // 13
-                "Геопак с чёрной живкой", // 14
-                "Геопак с белой живкой", // 15
-                "Геопак с синей живкой", // 16
-                "Радар вулканов", // 17
-                "Радар живок", // 18
-                "Радар ботов", // 19
-                "Телепортер", // 20
-                "Конструкторный бот", // 21
-                "Боевой генератор", // 22
-                "Заряд защиты", // 23
-                "Крафтер", // 24
-                "Магазин бомб", // 25
-                "Пушка", // 26
-                "Клановые ворота", // 27
-                "Дизассемблер", // 28
-                "Склад", // 29
-                "Магазин радаров", // 30
-                "Прокачка уровня x3", // 31
-                "Бесплатная прокачка", // 32
-                "Ускорение копание x4", // 33
-                "Гипноскал", // 34
-                "Полимер", // 35
-                "Нано-бот", // 36
-                "Аккумулятор", // 37
-                "Транслятор", // 38
-                "Компрессор", // 39
-                "C-190", // 40
-                "Федеральное здание", // 41
-                "Геопак с черноскалом", // 42
-                "Геопак с красноскалом", // 43
-                "Автоматизатор", // 44
-                "EMI-бомба", // 45
-                "Радужная живка", // 46
-                "Спот-бот", // 47
-                "Здание научного центра (НЦ)", // 48
-                "Деньги", // 49
-                "Очки перепрошивки" // 50
-            };
-            if (i >= 0 && names.Length > i)
-            {
-                return names[i];
-            }
-            return "";
+            return GetName(GetItemById(i));
         }
         public static void CreateOrder(Player p, int type, int num, int cost)
         {
