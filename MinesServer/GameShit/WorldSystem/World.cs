@@ -447,6 +447,37 @@ namespace MinesServer.GameShit.WorldSystem
         private static DateTime lastpackupd = ServerTime.Now;
         private static DateTime lastpackeffect = ServerTime.Now;
         private static DateTime lazyupd = ServerTime.Now;
+        private static void UpdatePacks(TimeSpan interval, ref DateTime lastUpdate, bool shouldDamage)
+        {
+            if (ServerTime.Now - lastUpdate < interval)
+                return;
+            using var db = new DataBase();
+            for (int chx = 0; chx < ChunksW; chx++)
+            {
+                for (int chy = 0; chy < ChunksH; chy++)
+                {
+                    foreach (var pack in W.chunks[chx, chy].packs)
+                    {
+                        if (pack.Value != null && pack.Value is IDamagable damagable)
+                        {
+                            db.Attach(pack.Value);
+                            if (shouldDamage)
+                            {
+                                damagable?.Damage(2);
+                            }
+                            if (damagable != null && damagable.NeedEffect())
+                            {
+                                damagable.SendBrokenEffect();
+                            }
+                            pack.Value.Update();
+                        }
+                    }
+                }
+            }
+            db.SaveChanges();
+            lastUpdate = ServerTime.Now;
+        }
+
         public static void Update()
         {
             if (ServerTime.Now - lazyupd >= TimeSpan.FromMinutes(1))
@@ -458,65 +489,10 @@ namespace MinesServer.GameShit.WorldSystem
                 MarketSystem.GenerateRandomOrders();
                 lazyupd = ServerTime.Now;
             }
-            if (ServerTime.Now - lastpackupd >= TimeSpan.FromHours(1))
-            {
-                using var db = new DataBase();
-                for (int chx = 0; chx < ChunksW; chx++)
-                {
-                    for (int chy = 0; chy < ChunksH; chy++)
-                    {
-                        foreach (var pack in W.chunks[chx, chy].packs)
-                        {
-                            if (pack.Value != null && pack.Value is IDamagable)
-                            {
-                                db.Attach(pack.Value);
-                                var damagable = pack.Value as IDamagable;
-                                damagable?.Damage(2);
-                                if (damagable.NeedEffect())
-                                {
-                                    damagable.SendBrokenEffect();
-                                }
-                            }
-                        }
-                    }
-                }
-                db.SaveChanges();
-                lastpackupd = ServerTime.Now;
-            }
-
-            if (ServerTime.Now - lastpackeffect >= TimeSpan.FromSeconds(0.5))
-            {
-                using var db = new DataBase();
-                for (int chx = 0; chx < ChunksW; chx++)
-                {
-                    for (int chy = 0; chy < ChunksH; chy++)
-                    {
-                        foreach (var pack in W.chunks[chx, chy].packs)
-                        {
-                            if (pack.Value != null && pack.Value is IDamagable)
-                            {
-                                var damagable = pack.Value as IDamagable;
-                                if (damagable.NeedEffect())
-                                {
-                                    damagable.SendBrokenEffect();
-                                }
-                                if (pack.Value != null && pack.Value is Gun)
-                                {
-                                    var gun = pack.Value as Gun;
-                                    db.Attach(gun);
-                                    gun.Update();
-                                }
-                                if (pack.Value != null && pack.Value is Crafter)
-                                {
-                                    (pack.Value as Crafter).Update();
-                                }
-                            }
-                        }
-                    }
-                }
-                db.SaveChanges();
-                lastpackeffect = ServerTime.Now;
-            }
+            // Обновление паков с интервалом 1 час (с повреждением)
+            UpdatePacks(TimeSpan.FromHours(1), ref lastpackupd, shouldDamage: true);
+            // Обновление паков с интервалом 0.5 секунд (без повреждения, только эффекты)
+            UpdatePacks(TimeSpan.FromSeconds(0.5), ref lastpackeffect, shouldDamage: false);
             if (ServerTime.Now - lastcryupdate >= TimeSpan.FromHours(1))
             {
                 for (int i = 0; i < W.cryscostmod.Length; i++)
