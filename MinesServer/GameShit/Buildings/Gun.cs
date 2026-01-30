@@ -57,10 +57,10 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x - 1, y, 35, false);
             World.SetCell(x, y - 1, 35, false);
             World.SetCell(x, y + 1, 35, false);
-            World.SetCell(x + 1, y + 1, 106, false);
-            World.SetCell(x - 1, y + 1, 106, false);
-            World.SetCell(x + 1, y - 1, 106, false);
-            World.SetCell(x - 1, y - 1, 106, false);
+            World.SetCell(x + 1, y + 1, 35, false);
+            World.SetCell(x - 1, y + 1, 35, false);
+            World.SetCell(x + 1, y - 1, 35, false);
+            World.SetCell(x - 1, y - 1, 35, false);
         }
         public void Destroy(Player p)
         {
