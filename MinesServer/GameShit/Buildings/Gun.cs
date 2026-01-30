@@ -25,6 +25,8 @@ namespace MinesServer.GameShit.Buildings
         public override int off { get { return charge > 0 ? 1 : 0; } }
         public DateTime brokentimer { get; set; }
         #endregion
+        public static float radius = 20f;
+        public static float sqrRadius { get => radius * radius; }
         public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid)
         {
             this.cid = cid;
@@ -121,49 +123,78 @@ namespace MinesServer.GameShit.Buildings
         }
         public override void Update()
         {
-            if (charge == 0)
+            int chunkX = x / World.ChunkWidth;
+            int chunkY = y / World.ChunkHeight;
+            int chunkRadius = (int)Math.Ceiling(radius / World.ChunkWidth);
+
+            List<Player> playersInRange = new List<Player>();
+
+            for (int cx = -chunkRadius; cx <= chunkRadius; cx++)
             {
-                return;
-            }
-            for (int chx = -21; chx <= 21; chx++)
-            {
-                for (int chy = -21; chy <= 21; chy++)
+                for (int cy = -chunkRadius; cy <= chunkRadius; cy++)
                 {
-                    if (Vector2.Distance(new Vector2(x, y), new Vector2(x + chx, y + chy)) <= 20f)
+                    int tgChunkX = chunkX + cx;
+                    int tgChunkY = chunkY + cy;
+
+                    if (tgChunkX < 0 || tgChunkY < 0 ||
+                        tgChunkX >= World.ChunksW || tgChunkY >= World.ChunksH)
+                        continue;
+
+                    var chunk = World.W.chunks[tgChunkX, tgChunkY];
+                    if (chunk.bots.Count == 0) continue;
+
+                    foreach (var playerId in chunk.bots.Keys)
                     {
-                        if (World.W.ValidCoord(x + chx, y + chy))
-                        {
-                            foreach (var player in World.W.GetPlayersFromPos(x + chx, y + chy))
-                            {
-                                if (player.cid == cid)
-                                {
-                                    continue;
-                                }
-                                player.Hurt(60, DamageType.Gun);
-                                player.SendDFToBots(7, x, y, player.id, 1);
-                                var basecrys = 0.5f;
-                                foreach (var c in player.skillslist.skills.Values)
-                                {
-                                    if (c != null && c.UseSkill(SkillEffectType.OnHurt, player))
-                                    {
-                                        if (c.type == SkillType.Induction)
-                                        {
-                                            basecrys *= (c.Effect / 100);
-                                        }
-                                    }
-                                }
-                                if (charge - basecrys > 0)
-                                {
-                                    charge -= basecrys;
-                                    continue;
-                                }
-                                charge = 0;
-                                World.W.GetChunk(x, y).ResendPack(this);
-                            }
-                        }
+                        var player = DataBase.GetPlayer(playerId);
+                        if (player == null || player.cid == cid) continue;
+
+                        float dx = player.x - x;
+                        float dy = player.y - y;
+                        float sqrDistance = dx * dx + dy * dy;
+
+                        if (sqrDistance <= sqrRadius)
+                            playersInRange.Add(player);
                     }
                 }
             }
+            if (playersInRange.Count != 0)
+            {
+                foreach (var player in playersInRange)
+                {
+                    player.Hurt(60, DamageType.Gun);
+                    player.SendDFToBots(7, x, y, player.id, 1);
+
+                    float basecrys = 0.5f;
+
+                    if (player.skillslist?.skills != null && player.skillslist.skills.Count > 0)
+                    {
+                        float inductionMultiplier = 1f;
+                        foreach (var skill in player.skillslist.skills.Values)
+                        {
+                            if (skill == null || skill.type != SkillType.Induction)
+                                continue;
+
+                            if (skill.UseSkill(SkillEffectType.OnHurt, player))
+                                inductionMultiplier *= (skill.Effect / 100f);
+                        }
+
+                        if (inductionMultiplier != 1f)
+                        {
+                            basecrys *= inductionMultiplier;
+                        }
+                    }
+
+                    if (charge - basecrys > 0)
+                    {
+                        charge -= basecrys;
+                    }
+                    else
+                    {
+                        charge = 0;
+                    }
+                }
+            }
+            World.W.GetChunk(x, y).ResendPack(this);
         }
     }
 }

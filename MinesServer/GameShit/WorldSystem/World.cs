@@ -409,21 +409,34 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static (bool access,bool anygun) AccessGun(int x, int y, int cid)
         {
-            var ret = true;
-            var anygun = false;
-            for (int chx = -21; chx <= 21; chx++)
+            bool ret = true;
+            bool anygun = false;
+
+            int minX = Math.Max(0, x - 21);
+            int maxX = Math.Min(World.ChunksW - 1, x + 21);
+            int minY = Math.Max(0, y - 21);
+            int maxY = Math.Min(World.ChunksH - 1, y + 21);
+
+            // Перебираем координаты в найденных пределах
+            for (int checkX = minX; checkX <= maxX; checkX++)
             {
-                for (int chy = -21; chy <= 21; chy++)
+                int dx = checkX - x;
+                int dxSqr = dx * dx;
+
+                for (int checkY = minY; checkY <= maxY; checkY++)
                 {
-                    if (Vector2.Distance(new Vector2(x, y), new Vector2(x + chx, y + chy)) <= 20f)
+                    int dy = checkY - y;
+
+                    // Проверяем квадрат расстояния
+                    if (dxSqr + dy * dy <= Gun.sqrRadius)
                     {
-                        if (W.ValidCoord(x + chx, y + chy) && ContainsPack(x + chx, y + chy, out var p) && p is Gun)
+                        if (W.ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var p) && p is Gun)
                         {
                             anygun = true;
-                            var gun = p as Gun;
-                            if (gun.charge > 0)
+                            var gun = (Gun)p;
+                            if (gun.charge > 0 && gun.cid != cid)
                             {
-                                ret = ret && gun.cid == cid;
+                                return (false, true);
                             }
                         }
                     }
