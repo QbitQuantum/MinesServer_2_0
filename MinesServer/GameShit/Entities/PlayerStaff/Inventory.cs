@@ -246,10 +246,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void Choose(int id, Player p)
         {
             AddChoose(id);
-            ITopLevelPacket packet = InventoryPacket.Choose("Выбран предмет - " + MarketSystem.PackName(id), new bool[0, 0], 123, 123, 12);
             selected = id;
+            ITopLevelPacket packet;
             if (id == -1)
                 packet = InventoryPacket.Close();
+            else
+                packet = InventoryPacket.Choose("Выбран предмет - " + MarketSystem.PackName(id), new bool[0, 0], 123, 123, 12);
             p.connection?.SendU(InvToSend());
             p.connection?.SendU(packet);
         }
