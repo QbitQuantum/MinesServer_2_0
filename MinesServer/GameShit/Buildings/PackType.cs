@@ -14,7 +14,12 @@
         Spot = 'O',
         Levi = 'W',
         Jobs = 'J',
-        Zalupa = 'Y',
-        FLAGBLYAT = 'D'
+        Yards = 'Y', // Крестик с буквой N
+        Flag = 'D',
+        NC = 'N',
+        BoomShop = 'b',
+        BlackCircle = 'I',
+        Mayak = 'Z',
+        Clans = 'c',
     }
 }
