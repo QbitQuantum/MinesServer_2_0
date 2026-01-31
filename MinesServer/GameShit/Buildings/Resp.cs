@@ -22,6 +22,7 @@ namespace MinesServer.GameShit.Buildings
         public int hp { get; set; }
         public int maxhp { get; set; }
         public DateTime brokentimer { get; set; }
+        public override int PackId => 1;
         #endregion
         private Resp(){ }
         public Resp(int x, int y, int ownerid) : base(x, y, ownerid)

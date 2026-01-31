@@ -13,6 +13,7 @@ namespace MinesServer.GameShit.Buildings
     public class Gate : Pack
     {
         public override PackType type => PackType.None;
+        public override int PackId => 27;
         private Gate() { }
 
         public Gate(int x, int y, int cid) : base(x, y, 0)

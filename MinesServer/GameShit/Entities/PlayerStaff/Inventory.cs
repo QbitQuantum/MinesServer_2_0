@@ -153,6 +153,21 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
+                    (int)Item.Disassembler,
+                    (p) =>
+                    {
+                        var coord = p.GetDirCord(true);
+                        if (World.ContainsPack(coord.x,coord.y, out var pack)) {
+                            if (pack != null) {
+                                pack.Dizz();
+                                p.inventory[pack.PackId]++;
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                },
+                {
                     (int)Item.Storage, (p) => {
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))

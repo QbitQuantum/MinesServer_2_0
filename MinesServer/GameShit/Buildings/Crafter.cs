@@ -23,6 +23,7 @@ namespace MinesServer.GameShit.Buildings
         }
         [NotMapped]
         public override float charge { get; set; }
+        public override int PackId => 24;
         public bool ready = false;
         public CraftEntry? currentcraft { get; set; }
         public DateTime brokentimer { get; set; }

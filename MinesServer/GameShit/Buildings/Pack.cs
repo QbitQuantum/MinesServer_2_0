@@ -21,6 +21,8 @@ namespace MinesServer.GameShit.Buildings
         public virtual int cid { get; set; }
         [NotMapped]
         public virtual int off { get; set; }
+        [NotMapped]
+        public virtual int PackId { get; set; } = -1;
         public abstract PackType type { get; }
         public virtual int ownerid { get; set; }
         public virtual float charge { get; set; }

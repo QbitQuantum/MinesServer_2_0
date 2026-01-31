@@ -21,6 +21,7 @@ namespace MinesServer.GameShit.Buildings
         public override float charge { get; set; }
         [NotMapped]
         public override int cid { get; set; }
+        public override int PackId => 47;
         #endregion
         public DateTime brokentimer { get; set; }
         public int hp { get; set; }

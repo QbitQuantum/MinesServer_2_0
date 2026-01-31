@@ -23,6 +23,7 @@ namespace MinesServer.GameShit.Buildings
         public int hp { get; set; }
         public long moneyinside { get; set; }
         public DateTime brokentimer { get; set; }
+        public override int PackId => 3;
         #endregion;
         private Market() {}
         public Market(int ownerid, int x, int y) : base(ownerid, x, y)

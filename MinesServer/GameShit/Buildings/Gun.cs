@@ -27,6 +27,7 @@ namespace MinesServer.GameShit.Buildings
         #endregion
         public static float radius = 20f;
         public static float sqrRadius { get => radius * radius; }
+        public override int PackId => 26;
         public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid)
         {
             this.cid = cid;

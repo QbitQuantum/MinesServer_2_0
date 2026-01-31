@@ -17,6 +17,7 @@ namespace MinesServer.GameShit.Buildings
         #region fields
         [NotMapped]
         public override float charge { get; set; }
+        public override int PackId => 2;
         public override PackType type => PackType.Up;
         public int hp { get; set; }
         public int maxhp { get; set; }

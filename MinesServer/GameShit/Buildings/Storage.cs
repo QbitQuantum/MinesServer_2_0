@@ -18,6 +18,7 @@ namespace MinesServer.GameShit.Buildings
         }
         [NotMapped]
         public override float charge { get; set; }
+        public override int PackId => 29;
         public override PackType type => PackType.Storage;
         public DateTime brokentimer { get; set; }
         public int hp { get; set; }
