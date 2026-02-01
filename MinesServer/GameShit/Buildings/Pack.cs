@@ -12,7 +12,7 @@ namespace MinesServer.GameShit.Buildings
         public Pack(int x, int y, int ownerid)
         {
             if (x == 0 && y == 0)
-                throw new Exception("ЕБАТЬ ЧЕ ЭТО НАХУЙ");
+                throw new Exception("Админ, не занимайся фигнёй");
             this.x = x; this.y = y; this.ownerid = ownerid;
         }
         public virtual int id { get; set; }
