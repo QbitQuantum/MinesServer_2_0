@@ -90,10 +90,8 @@ namespace MinesServer.GameShit.Buildings
         public override void Update()
         {
             if (currentcraft?.progress >= 100 && !ready)
-            {
-                base.Update();
                 ready = true;
-            }
+            base.Update();
         }
         public override Window? GUIWin(Player p)
         {
