@@ -89,7 +89,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 Title = "Создание бокса",
                 Tabs = [new Tab()
                 {
-                    Label = "хуй",
+                    Label = "Box",
                     Action = "dropbox",
                     InitialPage = new Page()
                     {
@@ -99,8 +99,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                             new CrysLine("", 0, 0, cry[3], 0),
                             new CrysLine("", 0, 0, cry[4], 0),
                             new CrysLine("", 0, 0, cry[5], 0)]),
-                        Text = "\nИспользуйте полосы прокрутки, чтобы выбрать сколько положить в бокс\",\r\n                    \"ВНИМАНИЕ! При создании бокса теряется нихуя кристаллов\n",
-                        Buttons = [new MButton("<color=green>В БОКС</color>", $"dropbox:{ActionMacros.CrystalSliders}", (args) => { p.BBox(args.CrystalSliders); })]
+                        Text = "\nИспользуйте полосы прокрутки, чтобы выбрать сколько положить в бокс\",\r\n" +
+                        "                    \"ВНИМАНИЕ! При создании бокса, количество кристаллов не уменьшается\n",
+                        Buttons = [new MButton("<color=green>Добавить в бокс</color>", $"dropbox:{ActionMacros.CrystalSliders}", (args) => { p.BBox(args.CrystalSliders); })]
                     }
                 }]
             };
