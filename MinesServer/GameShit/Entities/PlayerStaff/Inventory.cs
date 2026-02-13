@@ -158,9 +158,21 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         var coord = p.GetDirCord(true);
                         if (World.ContainsPack(coord.x,coord.y, out var pack)) {
-                            if (pack != null) {
+                            if (pack == null)
+                                return false;
+                            if (p.id == pack.ownerid || p.cid == pack.cid)
+                            {
                                 pack.Dizz();
-                                p.inventory[pack.PackId]++;
+                                if (p.id == pack.ownerid)
+                                {
+                                    p.inventory[pack.PackId]++;
+                                }
+                                else
+                                {
+                                    var player = DataBase.GetPlayer(pack.ownerid);
+                                    if (player != null)
+                                        player.inventory[pack.PackId]++;
+                                }
                                 return true;
                             }
                         }
