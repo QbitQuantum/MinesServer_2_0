@@ -32,14 +32,7 @@ namespace MinesServer.GameShit.Buildings
             World.AddPack(x, y, this);
         }
         protected abstract void ClearBuilding();
-        public void Dizz()
-        {
-            ClearBuilding();
-            using var db = new DataBase();
-            World.RemovePack(x, y);
-            db.Remove(this);
-            db.SaveChanges();
-        }
+        public abstract void Destroy(Player p);
         public virtual void Update()
         {
             World.W.GetChunk(x, y).ResendPack(this);

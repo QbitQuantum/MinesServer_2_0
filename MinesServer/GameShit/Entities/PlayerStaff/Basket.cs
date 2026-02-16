@@ -39,12 +39,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed ?? "[]");
                 return _cry;
             }
-            set
-            {
-                _cry = value;
-                serialazed = JsonConvert.SerializeObject(value);
-                Changed?.Invoke();
-            }
         }
 
         // НОВЫЙ МЕТОД: явно сохранить изменения

@@ -45,7 +45,7 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x, y, 32, true);
             base.Build();
         }
-        public void Destroy(Player p)
+        public override void Destroy(Player p)
         {
             World.SetCell(x, y, 32, false);
             //idk

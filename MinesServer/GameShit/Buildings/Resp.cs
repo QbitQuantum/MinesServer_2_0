@@ -135,7 +135,7 @@ namespace MinesServer.GameShit.Buildings
                 }
             }
         }
-        public void Destroy(Player p)
+        public override void Destroy(Player p)
         {
             ClearBuilding();
             World.RemovePack(x, y);

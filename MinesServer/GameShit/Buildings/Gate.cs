@@ -27,7 +27,7 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x, y, 30);
             base.Build();
         }
-        public void Destroy()
+        public override void Destroy(Player p)
         {
             World.SetCell(x, y, 32);
             using var db = new DataBase();

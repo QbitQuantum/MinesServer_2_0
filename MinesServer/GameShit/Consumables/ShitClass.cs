@@ -188,14 +188,12 @@ namespace MinesServer.GameShit.Consumables
                             foreach (var p in World.W.GetPlayersFromPos(tx, ty))
                             {
                                 p.Hurt(50);
+                                // Уничтожаем гейты
+                                if (World.ContainsPack(tx, ty, out var pack) && pack is Gate gate)
+                                {
+                                    gate.Destroy(p);
+                                }
                             }
-
-                            // Уничтожаем гейты
-                            if (World.ContainsPack(tx, ty, out var pack) && pack is Gate gate)
-                            {
-                                gate.Destroy();
-                            }
-
                             // Разрушаем блоки
                             var c = World.GetCell(tx, ty);
                             if (World.GetProp(c).is_destructible && !World.PackPart(tx, ty))

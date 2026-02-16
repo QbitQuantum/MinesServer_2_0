@@ -162,17 +162,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                                 return false;
                             if (p.id == pack.ownerid || p.cid == pack.cid)
                             {
-                                pack.Dizz();
-                                if (p.id == pack.ownerid)
-                                {
-                                    p.inventory[pack.PackId]++;
-                                }
-                                else
-                                {
-                                    var player = DataBase.GetPlayer(pack.ownerid);
-                                    if (player != null)
-                                        player.inventory[pack.PackId]++;
-                                }
+                                Player? player = p.id == pack.ownerid ?
+                                    p : DataBase.GetPlayer(pack.ownerid);
+                                if (player != null)
+                                    pack.Destroy(player);
                                 return true;
                             }
                         }

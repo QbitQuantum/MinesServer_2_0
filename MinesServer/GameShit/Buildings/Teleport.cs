@@ -65,7 +65,7 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x - 1, y, 106, true);
             base.Build();
         }
-        public void Destroy(Player p)
+        public override void Destroy(Player p)
         {
             ClearBuilding();
             World.RemovePack(x, y);
