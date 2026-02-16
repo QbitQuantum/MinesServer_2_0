@@ -167,11 +167,7 @@ namespace MinesServer.GameShit.Buildings
             var playerEntry = db.players.Find(p.id);
             if (playerEntry != null)
                 playerEntry.money = p.money;
-
-            var basketEntry = db.baskets.Find(p.crys.Id);
-            if (basketEntry != null)
-                basketEntry.serialazed = JsonConvert.SerializeObject(p.crys.cry);
-
+            p.crys.SaveToDatabase();
             db.SaveChanges();
 
             p.SendMoney();
