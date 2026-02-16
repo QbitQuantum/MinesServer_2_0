@@ -223,6 +223,7 @@ namespace MinesServer.GameShit.Buildings
                 p.crys.AddCrys(i, sliders[i]);
             }
             p.money += money;
+            p.crys.SaveToDatabase();
             db.SaveChanges();
             p.SendMoney();
             var page = BuyPage(p, -money);
