@@ -23,6 +23,50 @@ namespace MinesServer.GameShit.Buildings
         public int maxhp { get; set; }
         public DateTime brokentimer { get; set; }
         public long moneyinside { get; set; }
+
+        public static Dictionary<int, long> PriceSlotsMoney =
+            new Dictionary<int, long>()
+            {
+        { 1, 2_500_000 },
+        { 2, 5_000_000 },
+        { 3, 7_500_000 },
+        { 4, 10_000_000 },
+        { 5, 12_500_000 },
+        { 6, 15_000_000 },
+        { 7, 17_500_000 },
+        { 8, 20_000_000 },
+        { 9, 22_500_000 },
+        { 10, 25_000_000 },
+            };
+
+        public static Dictionary<int, int> PriceSlotsCreds =
+            new Dictionary<int, int>()
+            {
+        { 11, 5 },
+        { 12, 10 },
+        { 13, 25 },
+        { 14, 50 },
+        { 15, 75 },
+        { 16, 100 },
+        { 17, 250 },
+        { 18, 500 },
+        { 19, 750 },
+        { 20, 1000 },
+        { 21, 1500 },
+        { 22, 2000 },
+        { 23, 2500 },
+        { 24, 3000 },
+        { 25, 3500 },
+        { 26, 4000 },
+        { 27, 4500 },
+        { 28, 5000 },
+        { 29, 5100 },
+        { 30, 5200 },
+        { 31, 5300 },
+        { 32, 5400 },
+        { 33, 5500 },
+        { 34, 5600 },
+            };
         #endregion
         public Up(int x, int y, int ownerid) : base(x, y, ownerid)
         {
@@ -71,12 +115,58 @@ namespace MinesServer.GameShit.Buildings
                 OnSkill = onskill,
                 Title = "xxx",
                 Text = "Выберите скилл или пустой слот",
-                Button = p.skillslist.slots < 34 ? new MButton("buyslotcost", "buyslot", (args) => { if (p.creds > 1000 && p.skillslist.slots < 34) { 
-                        using var db = new DataBase();
-                        db.Attach(p.skillslist);
-                        p.skillslist.slots++;
-                        db.SaveChanges();
-                    } p.win = GUIWin(p); p.SendWindow(); }) : null,
+                Button = p.skillslist.slots < 34 ? new MButton(
+        (p.skillslist.slots + 1 <= 10)
+            ? $"Купить слот за {PriceSlotsMoney[p.skillslist.slots + 1]:N0} $"
+            : $"Купить слот за {PriceSlotsCreds[p.skillslist.slots + 1]} C",
+        "buyslot",
+        (args) =>
+        {
+            if (p.skillslist.slots < 34)
+            {
+                int nextSlot = p.skillslist.slots + 1;
+
+                if (nextSlot <= 10)
+                {
+                    // Покупка за монеты (слоты 1-10)
+                    if (PriceSlotsMoney.TryGetValue(nextSlot, out long requiredMoney))
+                    {
+                        if (p.money >= requiredMoney)
+                        {
+                            using var db = new DataBase();
+                            db.Attach(p.skillslist);
+                            db.Attach(p);
+
+                            p.money -= requiredMoney;
+                            p.skillslist.slots++;
+
+                            db.SaveChanges();
+                        }
+                    }
+                }
+                else if (nextSlot <= 34)
+                {
+                    // Покупка за кредиты (слоты 11-34)
+                    if (PriceSlotsCreds.TryGetValue(nextSlot, out int requiredCreds))
+                    {
+                        if (p.creds >= requiredCreds)
+                        {
+                            using var db = new DataBase();
+                            db.Attach(p.skillslist);
+                            db.Attach(p);
+
+                            p.creds -= requiredCreds;
+                            p.skillslist.slots++;
+
+                            db.SaveChanges();
+                        }
+                    }
+                }
+
+                p.win = GUIWin(p);
+                p.SendWindow();
+            }
+        }) : null,
                 SkillIcon = SkillType.Unknown
             } : new UpPage()
             {
