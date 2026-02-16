@@ -162,24 +162,18 @@ namespace MinesServer.GameShit.Buildings
             moneyinside += (long)(money * 0.1);
             p.money += money;
 
-            // 2. Сохраняем ВСЁ за один раз
             using var db = new DataBase();
 
-            // Обновляем деньги игрока
             var playerEntry = db.players.Find(p.id);
             if (playerEntry != null)
                 playerEntry.money = p.money;
 
-            // Обновляем кристаллы — СЕРИАЛИЗУЕМ АКТУАЛЬНЫЙ МАССИВ!
             var basketEntry = db.baskets.Find(p.crys.Id);
             if (basketEntry != null)
-            {
-                basketEntry.serialazed = JsonConvert.SerializeObject(p.crys.cry); // ← ПРАВИЛЬНО!
-            }
+                basketEntry.serialazed = JsonConvert.SerializeObject(p.crys.cry);
 
             db.SaveChanges();
 
-            // 3. Отправляем клиенту
             p.SendMoney();
             var page = SellPage(p, money);
             p.win?.CurrentTab.SetInitialPage(page);
