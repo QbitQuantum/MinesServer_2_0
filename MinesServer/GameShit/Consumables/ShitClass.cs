@@ -99,12 +99,6 @@ namespace MinesServer.GameShit.Consumables
             }
             return false;
         }
-        public static void Gate(int x,int y,Player p)
-        {
-            using var db = new DataBase();
-            db.gates.Add(new Gate(x, y, p.cid));
-            db.SaveChanges();
-        }
         public static bool Poli(Player p)
         {
             var d = p.GetDirCord();

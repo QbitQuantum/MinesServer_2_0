@@ -146,7 +146,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var c = World.AccessGun(coord.x,coord.y,p.cid);
                         if (p.clan != null && c.access && c.anygun)
                         {
-                            ShitClass.Gate(coord.x,coord.y,p);
+                            var Gate = new Gate(coord.x,coord.y, p.cid);
+                            Gate.Build();
+                            using var db = new DataBase();
+                            db.gates.Add(Gate);
+                            db.SaveChanges();
                             return true;
                         }
                         return false;

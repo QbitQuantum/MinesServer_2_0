@@ -19,8 +19,6 @@ namespace MinesServer.GameShit.Buildings
         public Gate(int x, int y, int cid) : base(x, y, 0)
         {
             this.x = x; this.y = y; this.cid = cid;
-            World.SetCell(x, y, 30);
-            base.Build();
         }
         public override void Build()
         {
