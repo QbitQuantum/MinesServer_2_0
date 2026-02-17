@@ -158,7 +158,7 @@ namespace MinesServer.GameShit.Buildings
                     }
                 }
             }
-            if (playersInRange.Count != 0)
+            if (playersInRange.Count != 0 && charge != 0)
             {
                 foreach (var player in playersInRange)
                 {
