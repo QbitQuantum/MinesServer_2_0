@@ -87,33 +87,45 @@ namespace MinesServer.GameShit.Buildings
         };
         public override Window? GUIWin(Player p)
         {
-            Action? admn = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); }
-            : null;
+            Action? admn = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null;
             var onskill = (int arg) => { p.skillslist.selectedslot = arg; p.win = GUIWin(p); p.SendWindow(); };
+
+            // Базовые общие свойства
+            var basePageProps = new
+            {
+                OnAdmin = admn,
+                Skills = p.skillslist.GetSkills(),
+                SlotAmount = p.skillslist.slots,
+                OnSkill = onskill,
+                Title = "Здание прокачки умений"
+            };
+
             var oninstall = (int slot, SkillType skilltype) =>
             {
                 p.win?.CurrentTab.Replace(new UpPage()
                 {
-                    OnAdmin = admn,
-                    Skills = p.skillslist.GetSkills(),
-                    OnSkill = onskill,
-                    SlotAmount = p.skillslist.slots,
-                    Title = "Здание прокачки умений",
+                    OnAdmin = basePageProps.OnAdmin,
+                    Skills = basePageProps.Skills,
+                    OnSkill = basePageProps.OnSkill,
+                    SlotAmount = basePageProps.SlotAmount,
+                    Title = basePageProps.Title,
                     SkillIcon = skilltype,
                     Text = "описание и цена установки",
                     Button = new MButton("Установить", "confirm", (args) => { p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot, p); p.win = GUIWin(p); p.SendWindow(); })
                 });
                 p.SendWindow();
             };
+
             var skillfromslot = p.skillslist.selectedslot > -1 ? (p.skillslist.skills.ContainsKey(p.skillslist.selectedslot) ? p.skillslist.skills[p.skillslist.selectedslot] : null) : null;
+
             var uppage = p.skillslist.selectedslot == -1 ? new UpPage()
             {
-                OnAdmin = admn,
-                Skills = p.skillslist.GetSkills(),
+                OnAdmin = basePageProps.OnAdmin,
+                Skills = basePageProps.Skills,
                 SkillsToInstall = null,
-                SlotAmount = p.skillslist.slots,
-                OnSkill = onskill,
-                Title = "Здание прокачки умений",
+                SlotAmount = basePageProps.SlotAmount,
+                OnSkill = basePageProps.OnSkill,
+                Title = basePageProps.Title,
                 Text = "Выберите скилл или пустой слот",
                 Button = p.skillslist.slots < 34 ? new MButton(
         (p.skillslist.slots + 1 <= 10)
@@ -170,14 +182,14 @@ namespace MinesServer.GameShit.Buildings
                 SkillIcon = SkillType.Unknown
             } : new UpPage()
             {
-                OnAdmin = admn,
+                OnAdmin = basePageProps.OnAdmin,
                 SelectedSlot = p.skillslist.selectedslot,
-                Skills = p.skillslist.GetSkills(),
+                Skills = basePageProps.Skills,
                 SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall(p) : null,
-                SlotAmount = p.skillslist.slots,
+                SlotAmount = basePageProps.SlotAmount,
                 OnInstall = skillfromslot == null ? oninstall : null,
-                OnSkill = onskill,
-                Title = "Здание прокачки умений",
+                OnSkill = basePageProps.OnSkill,
+                Title = basePageProps.Title,
                 Text = skillfromslot?.Description,
                 Button = skillfromslot != null && skillfromslot.isUpReady() ? new MButton("Прокачать", "upgrade", (args) => { skillfromslot.Up(p); p.win = GUIWin(p); p.SendWindow(); }) : null,
                 OnDelete = skillfromslot != null ? (slot) => { p.skillslist.DeleteSkill(p); p.win = GUIWin(p); p.SendWindow(); } : null,
