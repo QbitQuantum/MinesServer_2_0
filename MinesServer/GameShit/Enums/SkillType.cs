@@ -122,4 +122,92 @@
         /// <summary>*g | gluo | Глюонная упаковка</summary>
         GluonPacking
     }
+    public static class SkillTypeExtensions
+    {
+        public static string GetDescription(this SkillType skill)
+        {
+            return skill switch
+            {
+                SkillType.MineBlue => "Увеличивет добычу синих кристаллов",
+                SkillType.MineGreen => "Увеличивет добычу зеленых кристаллов",
+                SkillType.MineRed => "Увеличивет добычу красных кристаллов",
+                SkillType.MineViolet => "Увеличивет добычу фиолетовых кристаллов",
+                SkillType.MineWhite => "Увеличивет добычу белых кристаллов",
+                SkillType.MineCyan => "Увеличивет добычу голубых кристаллов",
+
+                SkillType.PackingGreen => "Зеленые кристаллы занимают меньше места",
+                SkillType.PackingBlue => "Синие кристаллы занимают меньше места",
+                SkillType.PackingRed => "Красные кристаллы занимают меньше места",
+                SkillType.PackingWhite => "Белые кристаллы занимают меньше места",
+                SkillType.PackingViolet => "Фиолетовые кристаллы занимают меньше места",
+                SkillType.PackingCyan => "Голубые кристаллы занимают меньше места",
+
+                SkillType.Sort => "Позволяет добывать дополнительные кристаллы",
+
+                SkillType.BuildGreen => "Позволяет строить зеленые постройки",
+                SkillType.BuildYellow => "Позволяет строить желтые постройки",
+                SkillType.BuildRed => "Позволяет строить красные постройки",
+                SkillType.BuildQuadro => "Позволяет строить квадро-блоки",
+
+                SkillType.Movement => "Увеличивает передвижение робота",
+                SkillType.RoadMovement => "По дорогам робот бегает быстрее",
+
+                SkillType.Packing => "В хранилище влезает больше ресурсов",
+                SkillType.Compression => "Уплотняет руду для экономии места",
+                SkillType.HyperPacking => "Ещё сильнее плотняет руду для экономии места",
+                SkillType.NanoPacking => "Очень плотная упаковка ресурсов",
+
+                SkillType.BuildStructure => "Строит опоры и перекрытия",
+                SkillType.BuildRoad => "Строит дороги",
+                SkillType.BuildWar => "Строит Военный блок",
+
+               
+                SkillType.AdjacentExtraction => "Позволяет добывать зеленые кристаллы из синих и наоборот",
+                SkillType.Extraction => "Увеличивает добычу зеленых и синих кристаллов",
+                SkillType.Geology => "Позволяет таскать с собой кристаллы",
+
+                SkillType.Destruction => "Увеличивает скорость разрушение скал",
+                SkillType.Annihilation => "Увеличивает скорость разрушение песка",
+                SkillType.Crystallography => "Ускоряет разрушение кристаллов",
+
+                SkillType.Deconstruction => "Ускоряет разрушение блоков",
+
+                SkillType.AntiSlime => "Уменьшает урон слизи при поедание",
+                SkillType.AntiBlock => "Позволяет быстрее разрушать квадро-блоков",
+                SkillType.AntiGun => "Защита от пушек",
+
+                SkillType.Digging => "Позволяет быстрее разрушать кристаллы и разную породу",
+                SkillType.Health => "Увеличивает прочность робота",
+                SkillType.MineGeneral => "Увеличивает добычу синих и зеленых кристаллов",
+                SkillType.Detection => "Позволяет находить кристаллы из скал",
+
+                SkillType.Fridge => "Охлаждает робота при погружение на глубину",
+                SkillType.Turbo => "Охлаждение робота при погружение на глубину на полную мощность",
+
+                SkillType.Deactivation => "Увеличивает скорость поедание слизи",
+                SkillType.DeMagnetizing => "Ускоряет разрушение металического песка",
+                SkillType.Repair => "Позволяет чинить робота",
+                SkillType.Washing => "Извлекает чистые кристаллы из песка",
+                SkillType.Fracturing => "Ускоряет дробление валунов",
+
+                // =============== Скиллы за очки перепрошивки ===============
+                SkillType.Architecture => "Строит зеленые/красные/желтые блоки",
+                SkillType.BuildUniversal => "Строит опоры и дороги",
+                SkillType.Upgrade => "Ускоряет получение опыта",
+                SkillType.Discount => "Позволяет тратить меньше денег на прокачку скилов",
+                SkillType.ExpertMining => "Позволяет добывать огромное количество кристаллов",
+                SkillType.TotalDestruction => "Ломает более прочную и тяжелую породу скал",
+                SkillType.Induction => "Увеличивает расход пушек",
+                SkillType.Jewlery => "Аккуратная добыча фиолетовых без сколов",
+                SkillType.UltraWhite => "Добывает белые кристаллы за один удар",
+                SkillType.MineSlime => "Добыча кристаллов из слизи",
+                SkillType.MineDeep => "Копает глбинные породы",
+                SkillType.GluonPacking => "Увеличивает вместимость до огромнейшего размера",
+                // ==========================================================
+
+                SkillType.Unknown => "Неизвестный навык",
+                _ => "Описание отсутствует"
+            };
+        }
+    }
 }

@@ -102,6 +102,7 @@ namespace MinesServer.GameShit.Buildings
 
             var oninstall = (int slot, SkillType skilltype) =>
             {
+                var playerSkill = p.skillslist.skills.Values.FirstOrDefault(s => s?.type.GetCode() == skilltype.GetCode());
                 p.win?.CurrentTab.Replace(new UpPage()
                 {
                     OnAdmin = basePageProps.OnAdmin,
@@ -110,7 +111,7 @@ namespace MinesServer.GameShit.Buildings
                     SlotAmount = basePageProps.SlotAmount,
                     Title = basePageProps.Title,
                     SkillIcon = skilltype,
-                    Text = "описание и цена установки",
+                    Text = playerSkill != null ? playerSkill.Description : SkillTypeExtensions.GetDescription(skilltype),
                     Button = new MButton("Установить", "confirm", (args) => { p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot, p); p.win = GUIWin(p); p.SendWindow(); })
                 });
                 p.SendWindow();

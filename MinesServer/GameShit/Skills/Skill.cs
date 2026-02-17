@@ -99,14 +99,14 @@ namespace MinesServer.GameShit.Skills
                 expfunc ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type).expfunc;
                 return expfunc(lvl); 
             } }
-        public string Description { get {
-                description ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type)?.description!;
+        public string Description { 
+            get {
+                description = PlayerSkills.skillz.FirstOrDefault(i => i.type == type)?.description;
                 if (description != null)
-                {
                     return description(lvl, Effect, AdditionalEffect, Cost, exp, Expiriense);
-                }
-                return $"lvl:{lvl} effect:{Math.Round(Effect,2)} cost:{Cost} exp:{exp}/{Expiriense}";
-                    } }
+                return "";
+            }
+        }
         public float Effect { get
             {
                 effectfunc ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type).effectfunc;
