@@ -42,15 +42,15 @@ namespace MinesServer.GameShit.Buildings
         #region affectworld
         protected override void ClearBuilding()
         {
-            World.SetCell(x, y, 37, true);
-            World.SetCell(x, y + 1, 37, true);
-            World.SetCell(x + 1, y, 106, true);
-            World.SetCell(x + 1, y - 1, 106, true);
-            World.SetCell(x + 1, y + 1, 106, true);
-            World.SetCell(x - 1, y - 1, 106, true);
-            World.SetCell(x - 1, y + 1, 106, true);
-            World.SetCell(x, y - 1, 106, true);
-            World.SetCell(x - 1, y, 106, true);
+            World.SetCell(x, y, 32, false);
+            World.SetCell(x, y + 1, 32, false);
+            World.SetCell(x + 1, y, 32, false);
+            World.SetCell(x + 1, y - 1, 32, false);
+            World.SetCell(x + 1, y + 1, 32, false);
+            World.SetCell(x - 1, y - 1, 32, false);
+            World.SetCell(x - 1, y + 1, 32, false);
+            World.SetCell(x, y - 1, 32, false);
+            World.SetCell(x - 1, y, 32, false);
         }
         public override void Build()
         {
@@ -71,7 +71,7 @@ namespace MinesServer.GameShit.Buildings
             World.RemovePack(x, y);
             if (charge > 0)
             {
-                var temp =new long[] { 0, 0, 0, 0, (long)charge, 0};
+                var temp = new long[] { 0, 0, 0, (long)charge, 0, 0 };
                 Box.BuildBox(x, y, temp,null);
             }
             using var db = new DataBase();
