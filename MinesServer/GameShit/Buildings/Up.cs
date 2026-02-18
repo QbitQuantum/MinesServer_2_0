@@ -232,11 +232,11 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x, y - 1, 32, false);
             World.SetCell(x + 1, y - 1, 32, false);
             World.SetCell(x + 1, y, 32, false);
-            World.SetCell(x, y, 32, false);
+            World.SetCell(x, y, 32, false); /* -> */ World.W.cells[x, y] = 32;
             World.SetCell(x - 1, y, 32, false);
             World.SetCell(x + 1, y + 1, 32, false);
             World.SetCell(x - 1, y + 1, 32, false);
-            World.SetCell(x, y + 1, 32, false);
+            World.SetCell(x, y + 1, 32, false); /* -> */ World.W.cells[x, y + 1] = 32;
         }
         public override void Destroy(Player p)
         {
