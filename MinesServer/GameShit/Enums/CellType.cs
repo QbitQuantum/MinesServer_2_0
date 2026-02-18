@@ -86,6 +86,6 @@
         HypnoRock = 119,
         GoldenRock = 120,
         DeepRock = 121,
-        GRock = 112
+        GRock = 122
     }
 }
