@@ -258,27 +258,12 @@ namespace MinesServer.GameShit.Consumables
         {
             var d = p.GetDirCord();
             int x = d.x, y = d.y;
-            var cell = World.GetCell(x, y);
-            if (World.TrueEmpty(x,y) && type != 10)
-            {
-                World.SetCell(x, y, type switch
-                {
-                    11 => CellType.AliveCyan,
-                    12 => CellType.AliveRed,
-                    13 => CellType.AliveViol,
-                    14 => CellType.AliveNigger,
-                    15 => CellType.AliveWhite,
-                    16 => CellType.AliveBlue,
-                    34 => CellType.HypnoRock,
-                    42 => CellType.NiggerRock,
-                    43 => CellType.RedRock,
-                    46 => CellType.AliveRainbow
-                });
-                return true;
-            }
-            else if (World.isAlive(cell))
-            {
-                var id = (CellType)cell switch
+            if (type == 10 /* Передано событие использование геопака */) {
+                // Проверяем на пустоты клетки перед игроком
+                if (World.TrueEmpty(x, y))
+                    return false;
+
+                var id = (CellType) World.GetCell(x, y) switch
                 {
                     CellType.AliveCyan => 11,
                     CellType.AliveRed => 12,
@@ -294,6 +279,26 @@ namespace MinesServer.GameShit.Consumables
                 World.Destroy(x, y);
                 p.inventory[id]++;
                 return true;
+            }
+            else // Передаем живки
+            {
+                if (World.TrueEmpty(x, y) )
+                {
+                    World.SetCell(x, y, type switch
+                    {
+                        11 => CellType.AliveCyan,
+                        12 => CellType.AliveRed,
+                        13 => CellType.AliveViol,
+                        14 => CellType.AliveNigger,
+                        15 => CellType.AliveWhite,
+                        16 => CellType.AliveBlue,
+                        34 => CellType.HypnoRock,
+                        42 => CellType.NiggerRock,
+                        43 => CellType.RedRock,
+                        46 => CellType.AliveRainbow
+                    });
+                    return true;
+                }
             }
             return false;
         }
