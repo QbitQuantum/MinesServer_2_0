@@ -2,6 +2,12 @@
 
 namespace MinesServer.GameShit.GUI.Horb.Canvas
 {
+    // Отрисовка происходит в координатах Height/2-Width/2
+    // dx-dy - конечная позиция линии
+    // originDX-originDY - Смещение позиций по X и Y относительно предыдущих элементов
+    // включая всех последущих, относительного кому было переданы параметры смещения
+    // offsetX-offsetY - смещение позиции начальной точки относительно точки начало (Конечная точка не перемещается)
+
     public readonly struct CanvasElement
     {
         public required CanvasElementType Type { get; init; }
