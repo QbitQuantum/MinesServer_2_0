@@ -133,18 +133,6 @@ namespace MinesServer.GameShit.Buildings
             };
             return InitialPage;
         }
-        
-        private Tab BuildSelltab(Player p)
-        {
-            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
-            return new Tab()
-            {
-                Label = "ПРОДАЖА",
-                Action = "sellcrys",
-                InitialPage = SellPage(p)
-            };
-        }
-
         public void Sell(long[] sliders, Player p)
         {
             if (sliders == null) return;
@@ -196,16 +184,6 @@ namespace MinesServer.GameShit.Buildings
             };
             return InitialPage;
         }
-        private Tab BuildBuytab(Player p)
-        {
-            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
-            return new Tab()
-            {
-                Label = "Покупка",
-                Action = "buycrys",
-                InitialPage = BuyPage(p)
-            };
-        }
         public void Buy(long[] sliders, Player p)
         {
             if (sliders == null)
@@ -230,13 +208,59 @@ namespace MinesServer.GameShit.Buildings
             p.win?.CurrentTab.SetInitialPage(page);
             p.SendWindow();
         }
-        private Tab AucTab(Player p)
+        private Tab TabCellCry(Player p)
         {
             return new Tab()
             {
-                InitialPage = MarketSystem.GlobalFirstPage(p)!,
-                Action = "auc",
-                Label = "Auc"
+                Label = "Продажа",
+                Action = "sellcrys",
+                InitialPage = SellPage(p)
+            };
+        }
+
+        private Tab TabBuyCry(Player p)
+        {
+            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+            return new Tab()
+            {
+                Label = "Покупка",
+                Action = "buycrys",
+                InitialPage = BuyPage(p)
+            };
+        }
+        private Tab TabProducts(Player p)
+        {
+            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+            return new Tab()
+            {
+                Label = "Товары",
+                Action = "buyproducts",
+                InitialPage = new Page()
+                {
+                    OnInventory = (int type) => { MarketSystem.OpenItemAuc(p, type); },
+                    Inventory = MarketSystem.Items(),
+                    Buttons = [],
+                    Style = new Style
+                    {
+                        Inventory = new GridStyle
+                        {
+                            CellHeight = 75,
+                        },
+                    }
+
+                }
+            };
+        }
+        private Tab TabAuction(Player p)
+        {
+            return new Tab()
+            {
+                Label = "Аукцион",
+                Action = "buyauction",
+                InitialPage = new Page()
+                {
+                    Buttons = [],
+                }
             };
         }
         public override Window? GUIWin(Player p)
@@ -244,8 +268,8 @@ namespace MinesServer.GameShit.Buildings
             return new Window()
             {
                 ShowTabs = true,
-                Title = "Market",
-                Tabs = [BuildSelltab(p),BuildBuytab(p),AucTab(p)]
+                Title = "МАРКЕТ",
+                Tabs = [TabBuyCry(p), TabCellCry(p), TabProducts(p), TabAuction(p)]
             };
         }
     }

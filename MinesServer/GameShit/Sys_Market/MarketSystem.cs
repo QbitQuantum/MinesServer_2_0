@@ -228,27 +228,54 @@ namespace MinesServer.GameShit.SysMarket
                 Card = new Card(CardImageType.Item, itemtype.ToString(), PackName(itemtype)),
             });
         }
-        private static InventoryItem[] Items()
+        public static InventoryItem[] Items()
         {
             using var db = new DataBase();
-            InventoryItem[] items = [];
+            var items = new List<InventoryItem>();
+
             for (int i = 0; i < 51; i++)
             {
-                if (i == 49)
-                    continue;
-                var c = db.orders.Where(z => z.itemid == i).OrderBy(i => i.cost).FirstOrDefault()?.cost.ToString();
-                var count = db.orders.Where(order => order.itemid == i).Count();
-                items = items.Append(InventoryItem.Item(i, (count > 0 ? count.ToString() : ""), (string.IsNullOrWhiteSpace(c) ? "" : c + "$"), false, InventoryTextColor.Default, InventoryTextColor.Green)).ToArray();
+                if (i == 31) continue;  // X3
+                if (i == 32) continue;  // FreeUP
+                if (i == 33) continue;  // MineX4
+                if (i == 49) continue;  // Деньги
+                if (i == 50) continue;  // ОПП
+
+                // Получаем минимальную цену из ордеров для этого предмета
+                var minCostOrder = db.orders
+                    .Where(z => z.itemid == i)
+                    .OrderBy(i => i.cost)
+                    .FirstOrDefault();
+
+                string cost = minCostOrder?.cost.ToString() ?? "";
+
+                // Получаем количество ордеров
+                var ordersCount = db.orders
+                    .Where(order => order.itemid == i)
+                    .Count();
+
+                string buy = "<b><color=yellow><size=9>C 134ККК</size></color></b>";
+                string sell = "<color=red><size=7>Нет в продаже</size></color>";
+                // Создаем предмет инвентаря
+                var item = InventoryItem.Item(
+                    code: i,
+                    upText: buy,
+                    downText: sell,
+                    faint: false
+                );
+
+                items.Add(item);
             }
-            return items;
+
+            return items.ToArray();
         }
         public static void OpenItemAuc(Player p, int item)
         {
             p.win?.CurrentTab.Open(new Page()
             {
-                Title = "Auc " + PackName(item),
+                Title = PackName(item),
                 Buttons = [new MButton("Создать Ордер", "createorder", (args) => { OpenOrderCreation(p, item); p.SendWindow(); })],
-                List = GetItems(p, item)
+                //List = GetItems(p, item)
             });
         }
         private static Random r = new Random();
@@ -279,16 +306,5 @@ namespace MinesServer.GameShit.SysMarket
             return ret;
         }
         private static int[] constypes = [5];
-        public static IPage? GlobalFirstPage(Player p)
-        {
-            var oninventory = (int type) => { OpenItemAuc(p, type); };
-            return new Page()
-            {
-                OnInventory = oninventory,
-                Inventory = Items(),
-                Title = "МАРКЕТ",
-                Buttons = [],
-            };
-        }
     }
 }
