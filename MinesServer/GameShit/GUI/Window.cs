@@ -215,9 +215,36 @@ namespace MinesServer.GameShit.GUI
                 if (horb.Inventory is not null)
                     obj["inv"] = string.Join(":", horb.Inventory!.Select(x =>
                     {
-                        if (x.Id == -1) return "-1:f";
-                        if (x.Amount is not null) return $"{(x.Id >= 2000 ? $"s{((SkillType)(x.Id - 2000)).GetCode()}" : x.Id)}:{(x.Faint ? "-" : "")}{x.Amount ?? 0}";
-                        if (x.Faint && string.IsNullOrWhiteSpace(x.UpText) && string.IsNullOrWhiteSpace(x.DownText)) return $"{(x.Id >= 2000 ? $"s{((SkillType)(x.Id - 2000)).GetCode()}" : x.Id)}:f";
+                        // ------------------------------------------------------------
+                        // ТИП 1: ПУСТОЙ СЛОТ ИНВЕНТАРЯ
+                        // Формат: "-1:f"
+                        // ------------------------------------------------------------
+                        if (x.Id == -1)
+                            return "-1:f";
+
+                        // ------------------------------------------------------------
+                        // ТИП 2: ПРЕДМЕТ С КОЛИЧЕСТВОМ
+                        // Формат: "ID:[-]количество"
+                        // Пример: "1500:5"
+                        //         "1500:-5"
+                        // ------------------------------------------------------------
+                        if (x.Amount is not null)
+                            return $"{(x.Id >= 2000 ? $"s{((SkillType)(x.Id - 2000)).GetCode()}" : x.Id)}:{(x.Faint ? "-" : "")}{x.Amount ?? 0}";
+
+                        // ------------------------------------------------------------
+                        // ТИП 3: ПУСТОЙ СЛОТ СКИЛЛА (без текста, только faint)
+                        // Формат: "sКОД:f"
+                        // Пример: "sAR:f" (пустой слот для скилла AR)
+                        // ------------------------------------------------------------
+                        if (x.Faint && string.IsNullOrWhiteSpace(x.UpText) && string.IsNullOrWhiteSpace(x.DownText))
+                            return $"{(x.Id >= 2000 ? $"s{((SkillType)(x.Id - 2000)).GetCode()}" : x.Id)}:f";
+
+                        // ------------------------------------------------------------
+                        // ТИП 4: ПРЕДМЕТ С КАСТОМНЫМ ТЕКСТОМ
+                        // Формат: "ID:[@]цветВерхТекст;цветНизТекст"
+                        // Пример: "1500:@§lМЕЧ;§cСломан"
+                        //         "sAR:@§aАктивен;§7Не активен"
+                        // ------------------------------------------------------------
                         return $"{(x.Id >= 2000 ? $"s{((SkillType)(x.Id - 2000)).GetCode()}" : x.Id)}:{(x.Faint ? "@" : "")}{(char)x.UpTextColor}{x.UpText};{(char)x.DownTextColor}{x.DownText}".Trim();
                     }));
                 return "horb:" + obj.ToString();
