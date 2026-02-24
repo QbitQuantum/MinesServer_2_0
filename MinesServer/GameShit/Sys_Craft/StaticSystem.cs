@@ -1,4 +1,4 @@
-﻿using MinesServer.GameShit.Buildings;
+using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
@@ -13,115 +13,313 @@ namespace MinesServer.GameShit.Sys_Craft
 {
     public static class StaticSystem
     {
-        public static string[] crysnames = { "<color=#00e600>зель</color>", "<color=#2929ff>синь</color>", "<color=#ff3333>крась</color>", "фиоль", "бель", "голь" };
+        private static readonly string[] crysNames =
+        {
+            "<color=#00e600>Зелёный кристалл</color>",
+            "<color=#2929ff>Синий кристалл</color>",
+            "<color=#ff3333>Красный кристалл</color>",
+            "Фиолетовый кристалл",
+            "Белый кристалл",
+            "Голубой кристалл"
+        };
+
         private static InventoryItem[] Items()
         {
-            InventoryItem[] items = [];
-            for (int i = 0; i < RDes.recipies.Count; i++)
+            var items = new List<InventoryItem>();
+
+            // Show all known market items so the player can see the full catalog.
+            for (int i = 0; i <= 50; i++)
             {
-                var cancraft = 1;
-                items = items.Append(InventoryItem.Item(RDes.recipies[i].result.id, (cancraft > 0 ? cancraft.ToString() : ""), "", false, InventoryTextColor.Default, InventoryTextColor.Green)).ToArray();
+                if (i == 8) continue;  // Cyan Alive
+
+                if (i == 11) continue;  // Cyan Alive
+                if (i == 12) continue;  // Red Alive
+                if (i == 13) continue;  // Violet Alive
+                if (i == 14) continue;  // Black Alive
+                if (i == 15) continue;  // White Alive
+                if (i == 16) continue;  // Blue Alive
+
+                if (i == 31) continue;  // X3
+                if (i == 32) continue;  // FreeUP
+                if (i == 33) continue;  // MineX4
+
+                if (i == 34) continue;  // Gypno Alive
+                if (i == 46) continue;  // Rainbow Alive
+
+                if (i == 49) continue;  // Деньги
+                if (i == 50) continue;  // ОПП
+
+
+                string UpText = "0"; // Stub, should depend on how much quantity is available depending on the player's resources
+                string DownText = "<color=#ff3333>+++</color>"; // Stub, should depend on the level of resource pumping(+/++/+++)
+                items.Add(InventoryItem.Item(
+                    i,
+                    upText: UpText,
+                    downText: DownText,
+                    faint: false,
+                    upTextColor: InventoryTextColor.Default,
+                    downTextColor: InventoryTextColor.Green));
             }
-            return items;
+
+            return items.ToArray();
         }
+
+        private static string BuildRequirementsText(Recipie recipe)
+        {
+            var lines = new List<string>();
+
+            if (recipe.costcrys is { Length: > 0 })
+            {
+                foreach (var cry in recipe.costcrys)
+                {
+                    var crystalName = cry.id >= 0 && cry.id < crysNames.Length
+                        ? crysNames[cry.id]
+                        : $"Кристалл #{cry.id}";
+                    lines.Add($"{crystalName} x{cry.num}");
+                }
+            }
+
+            if (recipe.costres is { Length: > 0 })
+            {
+                foreach (var res in recipe.costres)
+                {
+                    lines.Add($"{MarketSystem.PackName(res.id)} x{res.num}");
+                }
+            }
+
+            if (lines.Count == 0)
+            {
+                lines.Add("Без требований");
+            }
+
+            return string.Join("\n", lines);
+        }
+
         public static void OpenRecipie(Player p, int id)
         {
-            var recipie = RDes.recipies.FirstOrDefault(i => i.id == id);
-            var text = recipie.costcrys?.Select(i => $"{crysnames[i.id]} x{i.num}").Aggregate("", (str, obj) => str + obj.ToString() + "\n");
-            text += recipie.costres?.Select(i => $"{MarketSystem.PackName(i.id)} x{i.num}").Aggregate("", (str, obj) => str + obj.ToString() + "\n");
-            p.win?.CurrentTab.Open(new Page()
+            var recipe = RDes.recipies.FirstOrDefault(i => i.id == id);
+            if (recipe.result.id == 0 && recipe.time == 0)
             {
-                Title = $"recipie {MarketSystem.PackName(recipie.result.id)}",
-                Card = new Card(CardImageType.Item, recipie.result.id.ToString(), $" {MarketSystem.PackName(recipie.result.id)} x{recipie.result.num}\n Время сборки:{recipie.time} сек."),
-                Text = $"@@\n\nНужно для сборки четатам\n\n{text}\n\n",
-                Input = new InputConfig($"num", null, false),
-                Buttons = [new MButton("craft", $"craft:{ActionMacros.Input}", (a) => { if (int.TryParse(a.Input, out var num)) Craft(p, recipie, num); })],
-            });
-        }
-        public static void Craft(Player p, Recipie r, int num)
-        {
-            if (World.ContainsPack(p.x, p.y, out var craft) && MeetReqs(p, r, num) && num > 0)
-            {
-                DeleteReqs(p, r, num);
-                var c = (craft as Crafter);
-                using var db = new DataBase();
-                db.crafts.Attach(c);
-                c.currentcraft = new CraftEntry(r.id, num, DateTime.Now + (TimeSpan.FromSeconds(r.time) * num));
-                db.SaveChanges();
-                p.win?.CurrentTab.Open(FilledPage(p, c));
-                World.W.GetChunk(c.x, c.y).ResendPack(c);
-                p.SendInventory();
                 return;
             }
-            p.connection?.SendU(new OKPacket("Недостаточно ресов", "..."));
+
+            var requirementsText = BuildRequirementsText(recipe);
+            var itemName = MarketSystem.PackName(recipe.result.id);
+
+            p.win?.CurrentTab.Open(new Page
+            {
+                Title = $"Рецепт: {itemName}",
+                Card = new Card(
+                    CardImageType.Item,
+                    recipe.result.id.ToString(),
+                    $"{itemName} x{recipe.result.num}\nВремя сборки: {recipe.time} сек."),
+                Text = $"@@\nНеобходимо для сборки:\n\n{requirementsText}\n\n",
+                Input = new InputConfig("Количество", null, false),
+                Buttons =
+                [
+                    new MButton(
+                        "Собрать",
+                        $"craft:{ActionMacros.Input}",
+                        a =>
+                        {
+                            if (int.TryParse(a.Input, out var num))
+                            {
+                                Craft(p, recipe, num);
+                            }
+                        })
+                ],
+            });
         }
+
+        public static void Craft(Player p, Recipie r, int num)
+        {
+            if (!World.ContainsPack(p.x, p.y, out var craft) || num <= 0)
+            {
+                p.connection?.SendU(new OKPacket("Невозможно начать крафт", "Подойдите к крафтеру и попробуйте снова."));
+                return;
+            }
+
+            if (!MeetReqs(p, r, num))
+            {
+                p.connection?.SendU(new OKPacket("Недостаточно ресурсов", "У вас не хватает ресурсов или кристаллов для этого крафта."));
+                return;
+            }
+
+            DeleteReqs(p, r, num);
+
+            var c = craft as Crafter;
+            if (c is null)
+            {
+                p.connection?.SendU(new OKPacket("Ошибка крафта", "Здание крафтера не найдено."));
+                return;
+            }
+
+            using var db = new DataBase();
+            db.crafts.Attach(c);
+
+            c.currentcraft = new CraftEntry(r.id, num, DateTime.Now + (TimeSpan.FromSeconds(r.time) * num));
+            c.ready = false;
+
+            db.SaveChanges();
+            p.win?.CurrentTab.Open(FilledPage(p, c));
+            World.W.GetChunk(c.x, c.y).ResendPack(c);
+            p.SendInventory();
+        }
+
         public static void Claim(Player p, Crafter c)
         {
-            var recipie = c.currentcraft.GetRecipie();
+            if (c.currentcraft is null)
+            {
+                return;
+            }
+
+            var recipe = c.currentcraft.GetRecipie();
+
             using var db = new DataBase();
             db.crafts.Attach(c);
             db.players.Attach(p);
-            p.inventory[recipie.result.id] += c.currentcraft.num * recipie.result.num;
+
+            p.inventory[recipe.result.id] += c.currentcraft.num * recipe.result.num;
             db.craftentries.Remove(c.currentcraft);
             c.currentcraft = null;
             c.ready = false;
+
             db.SaveChanges();
+
             p.SendInventory();
             World.W.GetChunk(c.x, c.y).ResendPack(c);
             p.win = c.GUIWin(p);
         }
-        public static bool MeetReqs(Player p, Recipie r, int num) => (r.costcrys != null ? !r.costcrys.Select(i => { return p.crys.cry[i.id] >= (i.num * num); }).Contains(false) : true) && (r.costres != null ? !r.costres.Select(i => { return p.inventory[i.id] >= (i.num * num); }).Contains(false) : true);
+
+        public static bool MeetReqs(Player p, Recipie r, int num) =>
+            (r.costcrys is null || !r.costcrys.Select(i => p.crys.cry[i.id] >= (i.num * num)).Contains(false)) &&
+            (r.costres is null || !r.costres.Select(i => p.inventory[i.id] >= (i.num * num)).Contains(false));
+
         public static void DeleteReqs(Player p, Recipie r, int num)
         {
-            if (r.costcrys != null)
+            if (r.costcrys is not null)
+            {
                 foreach (var i in r.costcrys)
+                {
                     p.crys.RemoveCrys(i.id, i.num * num);
-            if (r.costres != null)
+                }
+            }
+
+            if (r.costres is not null)
+            {
                 foreach (var i in r.costres)
+                {
                     p.inventory[i.id] -= i.num * num;
+                }
+            }
+            
             p.SendInventory();
         }
         public static IPage? FilledPage(Player p, Crafter c)
         {
-            var progress = c.currentcraft?.progress <= 100 ? c.currentcraft?.progress : 100;
-            string bar = "<color=#aaeeaa>" + new string('|', (int)(progress / 2)) + "</color>" + new string('-', 50 - (int)(progress / 2));
-            bar += progress == 100 ? " ГОТОВА" : "";
-            string remain = progress != 100 ? $"осталось {(c.currentcraft.endtime - DateTime.Now)}" : "осталось нихуя";
-            if (c.currentcraft?.progress >= 100)
+            if (c.currentcraft is null)
             {
-                return new Page()
+                return GlobalFirstPage(p);
+            }
+
+            var rawProgress = c.currentcraft.progress;
+            var clamped = rawProgress <= 100 ? rawProgress : 100;
+            var progress = (int)Math.Round(clamped);
+
+            var filled = (int)(progress / 2);
+            var empty = 50 - filled;
+            var bar = "<color=#aaeeaa>" + new string('|', filled) + "</color>" + new string('-', empty);
+
+            var remainingTimeSpan = c.currentcraft.endtime - DateTime.Now;
+            var remaining = progress != 100
+                ? $"Осталось времени: {remainingTimeSpan:hh\\:mm\\:ss}"
+                : "Крафт завершён. Заберите результат.";
+
+            var text = $"@@\nПрогресс: {progress}% {bar}\n\n{remaining}";
+
+            if (c.currentcraft.progress >= 100)
+            {
+                return new Page
                 {
                     Title = "Крафтер",
-                    Text = $"@@\nprogress {progress}% {bar}\n\n{remain}",
-                    Buttons = [new MButton("claim", "claim", (a) => Claim(p, c))]
+                    Text = text,
+                    Buttons =
+                    [
+                        new MButton("Забрать результат", "claim", _ => Claim(p, c))
+                    ]
                 };
             }
-            return new Page()
+
+            return new Page
             {
                 Title = "Крафтер",
-                Text = $"@@\nprogress {progress}% {bar}\n\n{remain}",
+                Text = text,
                 Buttons = [],
             };
         }
-        public static void SecondPage(Player p,int type)
+
+        public static void SecondPage(Player p, int type)
         {
-            var lol = RDes.recipies.Where(i => i.result.id == type);
-            p.win?.CurrentTab.Open(new Page()
+            var recipesByResult = RDes.recipies.Where(i => i.result.id == type).ToArray();
+
+            if (recipesByResult.Length == 0)
             {
-                List = lol.Select(r => new ListEntry(r.result.id.ToString(), new MButton("open", $"openrecipie:{r.id}", (arg) => OpenRecipie(p, r.id)))).ToArray(),
-                Title = "Крафтер",
+                p.win?.CurrentTab.Open(new Page
+                {
+                    Title = "Крафтер",
+                    Text = "@@\nДля этого предмета пока нет рецептов.\n",
+                    Buttons = [],
+                });
+                return;
+            }
+
+            p.win?.CurrentTab.Open(new Page
+            {
+                Title = "Крафтер: выбор рецепта",
+                List = recipesByResult
+                    .Select(r =>
+                        new ListEntry(
+                            $"{MarketSystem.PackName(r.result.id)} x{r.result.num} ({r.time} сек.)",
+                            new MButton("Открыть", $"openrecipie:{r.id}", _ => OpenRecipie(p, r.id))))
+                    .ToArray(),
                 Buttons = [],
             });
         }
         public static IPage? GlobalFirstPage(Player p)
         {
-            var oninventory = (int type) => {SecondPage(p, type); };
-            return new Page()
+            var onInventoryClick = new Action<int>(type =>
             {
-                OnInventory = oninventory,
-                Inventory = Items(),
+                var recipesForItem = RDes.recipies.Where(r => r.result.id == type).ToArray();
+
+                if (recipesForItem.Length == 0)
+                {
+                    p.win?.CurrentTab.Open(new Page
+                    {
+                        Title = "Крафтер",
+                        Text = "@@\nДля этого предмета пока нет рецептов.\n",
+                        Buttons = [],
+
+                    });
+                    return;
+                }
+
+                // Open the first available recipe immediately (no intermediate list).
+                OpenRecipie(p, recipesForItem[0].id);
+            });
+
+            return new Page
+            {
                 Title = "Крафтер",
+                OnInventory = onInventoryClick,
+                Inventory = Items(),
                 Buttons = [],
+                Style = new Style
+                {
+                    Inventory = new GridStyle
+                    {
+                        CellHeight = 65,
+                    },
+                }
             };
         }
     }
