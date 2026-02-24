@@ -145,7 +145,6 @@ namespace MinesServer.GameShit
                                     ShowConsole(p);
                                 return;
                             }
-                            AddConsoleLine(p, "бля это че нахуй");
                             ShowConsole(p);
                         })]
                     }
