@@ -6,34 +6,32 @@ namespace MinesServer.GameShit.Buildings
 {
     public interface IDamagable
     {
+        private double GetRepairProgressPercentage()
+        {
+            var repairDuration = TimeSpan.FromHours(8);
+            var totalMs = repairDuration.TotalMilliseconds;
+            var elapsedMs = (ServerTime.Now - brokentimer).TotalMilliseconds;
+
+            // Ограничиваем от 0 до 100%
+            var percent = Math.Min(100, Math.Max(0, (elapsedMs / totalMs) * 100));
+            return Math.Round(percent, 2);
+        }
         public void Damage(int i)
         {
             if (ownerid == 0)
                 return;
             if (i > 5)
             {
-                if (charge - 100 > 0)
-                {
-                    charge -= 100;
-                }
-                else
-                {
-                    charge = 0;
-                }
+                charge = Math.Max(0, charge - 100);
             }
             if (hp == 0)
                 return;
-            if (hp - i >= 0)
+            
+            hp = Math.Max(0, hp - i);
+            if (hp == 0)
             {
-                hp -= i;
-                if (hp == 0)
-                {
-                    brokentimer = ServerTime.Now;
-                }
-                return;
+                brokentimer = ServerTime.Now;
             }
-            hp = 0;
-            brokentimer = ServerTime.Now;
         }
         public bool CanDestroy()
         {
@@ -47,10 +45,9 @@ namespace MinesServer.GameShit.Buildings
         {
             if (hp == 0)
             {
-                var value = Math.Round((((brokentimer.AddHours(8) - brokentimer) - (brokentimer.AddHours(8) - ServerTime.Now)) / (brokentimer.AddHours(8) - brokentimer)) * 100, 2);
-                var r = Physics.r.Next(0, 101);
-                if (r > value)
-                    return hp == 0;
+                var percentPassed = GetRepairProgressPercentage();
+                var random = Physics.r.Next(0, 101);
+                return random > percentPassed;
             }
             return false;
         }
