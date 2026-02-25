@@ -826,7 +826,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return false;
         }
 
-        public override void Hurt(int num, DamageType t = DamageType.Pure)
+        public override void Hurt(int num, DamageTypePlayer t = DamageTypePlayer.Pure)
         {
             foreach (var c in skillslist.skills.Values)
             {
@@ -837,7 +837,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         c.AddExp(this);
                     }
                 }
-                if (c != null && c.UseSkill(SkillEffectType.OnHurt, this) && t == DamageType.Gun)
+                if (c != null && c.UseSkill(SkillEffectType.OnHurt, this) && t == DamageTypePlayer.Gun)
                 {
                     if (c.type == SkillType.Induction)
                     {

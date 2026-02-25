@@ -162,7 +162,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 foreach (var player in playersInRange)
                 {
-                    player.Hurt(60, DamageType.Gun);
+                    player.Hurt(60, DamageTypePlayer.Gun);
                     player.SendDFToBots(7, x, y, player.id, 1);
 
                     float basecrys = 0.5f;

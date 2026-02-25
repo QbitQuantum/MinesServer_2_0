@@ -170,7 +170,7 @@ namespace MinesServer.GameShit.Entities
             return false;
         }
 
-        public override void Hurt(int num, DamageType type = DamageType.Pure)
+        public override void Hurt(int num, DamageTypePlayer type = DamageTypePlayer.Pure)
         {
             
         }

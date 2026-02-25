@@ -1,6 +1,6 @@
 ﻿namespace MinesServer.GameShit.Enums
 {
-    public enum DamageType
+    public enum DamageTypePlayer
     {
         Pure,
         Gun
