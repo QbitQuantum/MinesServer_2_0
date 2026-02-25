@@ -448,13 +448,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         }
                     }
                 }
-                this.x = x;this.y = y;
             }
-            else
-            {
-                tp(this.x, this.y);
-                return false;
-            }
+            this.x = x; 
+            this.y = y;
             SendMyMove();
             CheckChunkChanged();
             if (packhere && (pack.cid == cid || pack.cid == 0) && !programsData.ProgRunning)
