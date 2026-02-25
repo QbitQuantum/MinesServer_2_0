@@ -46,6 +46,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
+                    (int)Item.SpotBot,
+                    (p) =>
+                    {
+                        var coord = p.GetDirCord(true);
+                        if (World.W.CanBuildPack(1, 1, 1, 1, coord.x, coord.y, p))
+                        {
+                            new Spot(coord.x, coord.y - 2, p.id).Build();
+                            return true;
+                        }
+                        return false;
+                    }
+                },
+                {
                     (int)Item.Up,
                     (p) =>
                     {

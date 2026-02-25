@@ -1,6 +1,7 @@
 ﻿using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
+using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
@@ -40,6 +41,10 @@ namespace MinesServer.GameShit.Buildings
             db.spots.Add(this);
             db.SaveChanges();
         }
+        protected override void ClearBuilding()
+        {
+            World.SetCell(x, y, 32, true);
+        }
         public override void Build()
         {
             World.SetCell(x, y, 32, true);
@@ -47,20 +52,30 @@ namespace MinesServer.GameShit.Buildings
         }
         public override void Destroy(Player p)
         {
-            World.SetCell(x, y, 32, false);
-            //idk
+            ClearBuilding();
+            World.RemovePack(x, y);
+            using var db = new DataBase();
+            db.spots.Remove(this);
+            db.SaveChanges();
         }
 
         public override Window? GUIWin(Player p)
         {
             if (p.id != ownerid) return null;
             return new Window()
-            { Tabs = [] };
-        }
-
-        protected override void ClearBuilding()
-        {
-            //No dick no balls
+            {
+                Title = "Спот",
+                Tabs = [new Tab()
+                    {
+                        Action = "Spot",
+                        Label = "Спот",
+                        InitialPage = new Page()
+                        {
+                            Buttons = [],
+                        }
+                    }
+                ]
+            };
         }
     }
 }
