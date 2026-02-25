@@ -72,11 +72,6 @@ namespace MinesServer.GameShit.WorldSystem
                     {
                         World.SetDurability(d.x, d.y, World.GetDurability(d.x, d.y) + 1);
                     }
-                        /*StaticVulkan.CheckSpace(d.x, d.y).ContinueWith(i =>
-                        {
-                            if (i.Result > 500)
-                                new Vulkan(d.x, d.y).Build();
-                        });*/
                 }
             }
         }
