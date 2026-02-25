@@ -237,7 +237,7 @@ namespace MinesServer.GameShit.Consumables
                                 if (damagable.CanDestroy())
                                     damagable.Destroy(player);
                                 else
-                                    damagable.Damage(10);
+                                    damagable.Damage(10, DamageTypePacks.Raz);
 
                                 if (pack.charge == 0)
                                     World.W.GetChunk(pack.x, pack.y).ResendPack(pack);

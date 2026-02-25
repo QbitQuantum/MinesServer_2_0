@@ -1,4 +1,5 @@
 ﻿using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 
@@ -16,22 +17,24 @@ namespace MinesServer.GameShit.Buildings
             var percent = Math.Min(100, Math.Max(0, (elapsedMs / totalMs) * 100));
             return Math.Round(percent, 2);
         }
-        public void Damage(int i)
+        public void Damage(int i, DamageTypePacks DamageType = DamageTypePacks.Time)
         {
             if (ownerid == 0)
                 return;
-            if (i > 5)
+
+            switch (DamageType)
             {
-                charge = Math.Max(0, charge - 100);
+                case DamageTypePacks.Raz:
+                    charge = Math.Max(0, charge - 100);
+                    break;
+                case DamageTypePacks.Time:
+                    hp = Math.Max(0, hp - i);
+                    break;
+                default: break;
             }
-            if (hp == 0)
-                return;
             
-            hp = Math.Max(0, hp - i);
             if (hp == 0)
-            {
                 brokentimer = ServerTime.Now;
-            }
         }
         public bool CanDestroy()
         {

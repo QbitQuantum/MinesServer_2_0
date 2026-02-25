@@ -5,4 +5,9 @@
         Pure,
         Gun
     }
+    public enum DamageTypePacks
+    {
+        Time,
+        Raz
+    }
 }
