@@ -51,13 +51,6 @@ namespace MinesServer.GameShit.WorldSystem
                 Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({ChunksW} x {ChunksH} chunks)");
                 Console.WriteLine("EmptyMapGeneration");
                 gen.StartGeneration();
-                /*for(int x = 0;x < CellsWidth;x++)
-                {
-                    for (int y = 0; y < CellsHeight; y++)
-                    {
-                        SetCell(x, y, 32);
-                    }
-                }*/
                 Console.WriteLine("Generation End");
             }
             else
@@ -67,7 +60,6 @@ namespace MinesServer.GameShit.WorldSystem
                 durability = new($"{name}_durability.mapb", (ChunksW, ChunksH));
             }
             CommitWorld();
-            CreateSpawns();
             using var db = new DataBase();
             if (db.chats.FirstOrDefault(i => i.Name == "FED") == default)
             {
@@ -486,7 +478,6 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     player.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
                 }
-                MarketSystem.GenerateRandomOrders();
                 lazyupd = ServerTime.Now;
             }
             // Обновление паков с интервалом 1 час (с повреждением)
