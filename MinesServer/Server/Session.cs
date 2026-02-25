@@ -206,18 +206,9 @@ namespace MinesServer.Server
         private void Inus(TYPacket f, INUSPacket inus) => player?.inventory.Use(player);
         private void Incl(TYPacket f, INCLPacket incl)
         {
-            if (incl.selection.HasValue)
-            {
-                if (incl.selection == -1)
-                {
-                    player.inventory.Choose(-1, player);
-                }
-                else
-                {
-                    player.inventory.Choose(incl.selection.Value, player);
-                    player.SendInventory();
-                }
-            }
+            if (!incl.selection.HasValue || player is null)
+                return;
+            player.inventory.Choose(incl.selection.Value, player);
         }
         private void DigHandler(TYPacket parent, XdigPacket packet) => player?.TryAct(() => {
             player.Move(player.x, player.y, packet.Direction);
