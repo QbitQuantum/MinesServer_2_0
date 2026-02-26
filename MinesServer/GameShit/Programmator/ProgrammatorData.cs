@@ -76,6 +76,16 @@ namespace MinesServer.GameShit.Programmator
             if (ProgRunning || selected == null)
             {
                 ProgRunning = false;
+                if (selected != null)
+                {
+                    using var db = new DataBase();
+                    var dbProg = db.progs.Find(selected.id);
+                    if (dbProg != null)
+                    {
+                        dbProg.data = selected.data;
+                        db.SaveChanges();
+                    }
+                }
                 return;
             }
             Run(selected);
