@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MinesServer.Server;
 
 namespace MinesServer.GameShit.Entities
 {
@@ -20,6 +21,8 @@ namespace MinesServer.GameShit.Entities
             this.x = x;this.y = y;this.owner = owner;
             crys = new(true);
             crys.Changed += Translate;
+            MaxHealth = 100;
+            Health = 100;
         }
         public int tail => 1;
         public int skin => 3;
@@ -28,7 +31,30 @@ namespace MinesServer.GameShit.Entities
         public override Basket crys { get; set; }
         private void Translate()
         {
-            Console.WriteLine("should save basket and pos");
+            if (owner is null)
+            {
+                return;
+            }
+
+            try
+            {
+                using var db = new DataBase();
+                var spot = db.spots.FirstOrDefault(s => s.ownerid == owner.id);
+                if (spot is null)
+                {
+                    return;
+                }
+
+                db.Attach(spot);
+                spot.botx = x;
+                spot.boty = y;
+                spot.basket = crys.serialazed ?? string.Empty;
+                db.SaveChanges();
+            }
+            catch
+            {
+                // ignore persistence issues for bot state
+            }
         }
 
         public override void Build(string type)
@@ -36,148 +62,161 @@ namespace MinesServer.GameShit.Entities
            
         }
         private float cb;
-        private void Mine(byte cell, int x, int y)
-        {
-            float dob = 1 + (float)Math.Truncate(cb);
-            foreach (var c in owner.skillslist.skills.Values)
-            {
-                if (c != null && c.UseSkill(SkillEffectType.OnDigCrys, owner))
-                {
-                    if (c.type == SkillType.MineGeneral)
-                    {
-                        dob += c.Effect;
-                        c.AddExp(owner, (float)Math.Truncate(dob));
-                    }
-                }
-            }
-            dob *= (CellType)cell switch
-            {
-                CellType.XGreen => 4,
-                CellType.XBlue => 3,
-                CellType.XRed => 2,
-                CellType.XViolet => 2,
-                CellType.XCyan => 2,
-                _ => 1
-            };
-            cb -= (float)Math.Truncate(cb);
-            long odob = (long)Math.Truncate(dob);
-            var type = ParseCryType((CellType)cell);
-            cb += dob - odob;
-            crys.AddCrys(type, odob);
-            World.AddDob(type, odob);
-            SendDFToBots(2, x, y, id, (int)(odob < 255 ? odob : 255), type == 1 ? 3 : type == 2 ? 1 : type == 3 ? 2 : type);
-        }
-        private int ParseCryType(CellType cell)
-        {
-            return cell switch
-            {
-                CellType.XGreen or CellType.Green => 0,
-                CellType.XBlue or CellType.Blue => 1,
-                CellType.XRed or CellType.Red => 2,
-                CellType.XViolet or CellType.Violet => 3,
-                CellType.White => 4,
-                CellType.XCyan or CellType.Cyan => 5,
-                _ => 0
-            };
-        }
         public override void Bz()
         {
-            var cord = GetDirCord();
-            int x = cord.x, y = cord.y;
-            if (!World.W.ValidCoord(x, y))
+            if (owner is null)
             {
                 return;
             }
-            SendDFToBots(0, this.x, this.y, id, dir);
-            var cell = World.GetCell(x, y);
-            if (World.GetProp(cell).damage > 0)
-            {
-                Hurt(World.GetProp(cell).damage);
-            }
-            if (!World.GetProp(cell).is_diggable)
-            {
-                return;
-            }
-            if (cell == 90)
-            {
-                GetBox(x, y);
-                World.DamageCell(x, y, 1);
-                return;
-            }
-            if (cell == (byte)CellType.MilitaryBlock)
-            {
-                World.DamageCell(x, y, 1);
-                return;
-            }
-            float hitdmg = 0.2f;
-            if (World.isCry(cell))
-            {
-                hitdmg = 1f;
-                Mine(cell, x, y);
-            }
-            else
-            {
-                foreach (var c in owner.skillslist.skills.Values)
-                {
-                    if (c != null && c.UseSkill(SkillEffectType.OnDig, owner))
-                    {
-                        hitdmg = c.type switch
-                        {
-                            SkillType.Digging => hitdmg * (c.Effect / 100f),
-                            _ => 1f
-                        };
-                    }
-                }
-            }
-            if (World.DamageCell(x, y, hitdmg)) OnDestroy(cell);
-            if (World.GetProp(cell).isBoulder)
-            {
-                var plusy = dir == 2 ? -1 : dir == 0 ? 1 : 0;
-                var plusx = dir == 3 ? 1 : dir == 1 ? -1 : 0;
-                if (World.GetProp(World.GetCell(x + plusx, y + plusy)).isEmpty)
-                {
-                    World.MoveCell(x, y, plusx, plusy);
-                    foreach (var c in owner.skillslist.skills.Values)
-                    {
-                        if (c != null && c.UseSkill(SkillEffectType.OnDig, owner))
-                        {
-                            c.AddExp(owner);
-                        }
-                    }
-                }
-            }
+            ResourceExtractionService.PerformDig(this, owner, owner.skillslist.skills.Values, ref cb, crys);
         }
         private void OnDestroy(byte type)
         {
-            foreach (var c in owner.skillslist.skills.Values)
+            // Logic moved into ResourceExtractionService.PerformDig
+        }
+        private (int x, int y) FindEmptyForBox(int x, int y)
+        {
+            var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
+            var q = new Queue<(int x, int y)>();
+
+            bool IsValid(int tx, int ty) =>
+                World.W.ValidCoord(tx, ty) &&
+                World.GetProp(tx, ty).isEmpty &&
+                !World.PackPart(tx, ty);
+
+            if (IsValid(x, y))
+                return (x, y);
+
+            q.Enqueue((x, y));
+            var visited = new HashSet<(int, int)> { (x, y) };
+
+            while (q.Count > 0)
             {
-                if (c != null && c.UseSkill(SkillEffectType.OnDig, owner))
+                var (cx, cy) = q.Dequeue();
+                foreach (var (dx, dy) in dirs)
                 {
-                    c.AddExp(owner);
+                    int nx = cx + dx, ny = cy + dy;
+                    if (visited.Contains((nx, ny))) continue;
+
+                    if (IsValid(nx, ny))
+                        return (nx, ny);
+
+                    visited.Add((nx, ny));
+                    q.Enqueue((nx, ny));
                 }
             }
+            return (x, y);
         }
-
         public override void Death()
         {
-           
-        }
+            if (crys.AllCry > 0 && owner is not null)
+            {
+                var (bx, by) = FindEmptyForBox(x, y);
+                Box.BuildBox(bx, by, crys.cry, owner, true);
+            }
 
+            SendFXoBots(2, x, y);
+            Health = MaxHealth;
+            Translate();
+        }
         public override void Geo() => base.Geo();
 
         public override bool Heal(int num = -1)
         {
+            if (owner is null)
+            {
+                return false;
+            }
+
+            var heal = owner.skillslist.skills.Values.FirstOrDefault(i => i is not null && i.type == SkillType.Repair);
+            if (Health == MaxHealth || heal == default)
+                return false;
+            num = (int)heal.Effect;
+            if (num == -1)
+                return false;
+            if (crys.RemoveCrys(2, 1))
+            {
+                heal.AddExp(owner);
+                Health += num;
+                if (Health > MaxHealth)
+                    Health = MaxHealth;
+                SendDFToBots(5, 0, 0, id, 0);
+                Translate();
+                return true;
+            }
             return false;
         }
-
         public override void Hurt(int num, DamageTypePlayer type = DamageTypePlayer.Pure)
         {
-            
+            if (owner is null)
+            {
+                return;
+            }
+            foreach (var c in owner.skillslist.skills.Values)
+            {
+                if (c != null && c.UseSkill(SkillEffectType.OnHealth, owner))
+                {
+                    if (c.type == SkillType.Health)
+                    {
+                        c.AddExp(owner);
+                    }
+                }
+                if (c != null && c.UseSkill(SkillEffectType.OnHurt, owner) && type == DamageTypePlayer.Gun)
+                {
+                    if (c.type == SkillType.Induction)
+                    {
+                        c.AddExp(owner);
+                    }
+                    if (c.type == SkillType.AntiGun)
+                    {
+                        c.AddExp(owner);
+                        var eff = (int)(num * (c.Effect / 100));
+                        if (num - eff >= 0)
+                        {
+                            num -= eff;
+                        }
+                        else
+                        {
+                            num = 0;
+                        }
+                    }
+                }
+            }
+            if (Health - num > 0)
+            {
+                Health -= num;
+                SendDFToBots(6, 0, 0, id, 0);
+            }
+            else
+            {
+                Death();
+            }
         }
 
         public override bool Move(int x, int y, int dir = -1, bool prog = false)
         {
-            return false;
+            if (!World.W.ValidCoord(x, y))
+            {
+                return false;
+            }
+
+            if (dir > 9)
+                dir -= 10;
+            if (dir == -1 || this.x != x || this.y != y)
+                this.dir = this.x > x ? 1 : this.x < x ? 3 : this.y > y ? 2 : 0;
+            else
+                this.dir = dir;
+
+            var cell = World.GetCell(x, y);
+            if (!World.GetProp(cell).isEmpty)
+            {
+                return false;
+            }
+
+            this.x = x;
+            this.y = y;
+            Translate();
+            return true;
         }
 
         public override void Update() => _pdata.Step();

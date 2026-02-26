@@ -77,6 +77,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
             return false;
         }
+
+        /// <summary>
+        /// Notify subscribers that basket contents were changed (e.g. after direct array mutation).
+        /// </summary>
+        public void NotifyChanged() => Changed?.Invoke();
+
         private int Buildcap()
         {
             return 1;

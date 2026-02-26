@@ -260,19 +260,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return l.ToArray();
         }
         #endregion
-        private int ParseCryType(CellType cell)
-        {
-            return cell switch
-            {
-                CellType.XGreen or CellType.Green => 0,
-                CellType.XBlue or CellType.Blue => 1,
-                CellType.XRed or CellType.Red => 2,
-                CellType.XViolet or CellType.Violet => 3,
-                CellType.White => 4,
-                CellType.XCyan or CellType.Cyan => 5,
-                _ => 0
-            };
-        }
         public override void Geo()
         {
             base.Geo();
@@ -289,118 +276,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             connection?.CloseWindow();
 
         }
-        private void Mine(byte cell, int x, int y)
-        {
-            float dob = 1 + (float)Math.Truncate(cb);
-            foreach (var c in skillslist.skills.Values)
-            {
-                if (c != null && c.UseSkill(SkillEffectType.OnDigCrys, this))
-                {
-                    if (c.type == SkillType.MineGeneral)
-                    {
-                        dob += c.Effect;
-                        c.AddExp(this, (float)Math.Truncate(dob));
-                    }
-                }
-            }
-            dob *= (CellType)cell switch
-            {
-                CellType.XGreen => 4,
-                CellType.XBlue => 3,
-                CellType.XRed => 2,
-                CellType.XViolet => 2,
-                CellType.XCyan => 2,
-                _ => 1
-            };
-            cb -= (float)Math.Truncate(cb);
-            long odob = (long)Math.Truncate(dob);
-            var type = ParseCryType((CellType)cell);
-            cb += dob - odob;
-            crys.AddCrys(type, odob);
-            World.AddDob(type, odob);
-            SendDFToBots(2, x, y, id, (int)(odob < 255 ? odob : 255), type == 1 ? 3 : type == 2 ? 1 : type == 3 ? 2 : type);
-        }
         public void GetBox(int x, int y)
         {
             var result = base.GetBox(x, y);
             connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "+ " + result)]));
         }
-        private void OnDestroy(byte type)
-        {
-            foreach (var c in skillslist.skills.Values)
-            {
-                if (c != null && c.UseSkill(SkillEffectType.OnDig, this))
-                {
-                    c.AddExp(this);
-                }
-            }
-        }
         public override void Bz()
         {
-            var cord = GetDirCord();
-            int x = cord.x, y = cord.y;
-            if (!World.W.ValidCoord(x, y))
-            {
-                return;
-            }
-            SendDFToBots(0, this.x, this.y, id, dir);
-            var cell = World.GetCell(x, y);
-            if (World.GetProp(cell).damage > 0)
-            {
-                Hurt(World.GetProp(cell).damage);
-            }
-            if (!World.GetProp(cell).is_diggable)
-            {
-                return;
-            }
-            if (cell == 90)
-            {
-                GetBox(x, y);
-                World.DamageCell(x, y, 1);
-                return;
-            }
-            if (cell == (byte)CellType.MilitaryBlock)
-            {
-                World.DamageCell(x, y, 1);
-                return;
-            }
-            float hitdmg = 0.2f;
-            if (World.isCry(cell))
-            {
-                hitdmg = 1f;
-                Mine(cell, x, y);
-            }
-            else
-            {
-                foreach (var c in skillslist.skills.Values)
-                {
-                    if (c != null && c.UseSkill(SkillEffectType.OnDig, this))
-                    {
-                        hitdmg = c.type switch
-                        {
-                            SkillType.Digging => hitdmg * (c.Effect / 100f),
-                            _ => 1f
-                        };
-                    }
-                }
-            }
-            if (World.DamageCell(x, y, hitdmg)) OnDestroy(cell);
-            if (World.GetProp(cell).isBoulder)
-            {
-                var plusy = dir == 2 ? -1 : dir == 0 ? 1 : 0;
-                var plusx = dir == 3 ? 1 : dir == 1 ? -1 : 0;
-                if (World.GetProp(World.GetCell(x + plusx, y + plusy)).isEmpty)
-                {
-                    World.MoveCell(x, y, plusx, plusy);
-                    foreach (var c in skillslist.skills.Values)
-                    {
-                        if (c != null && c.UseSkill(SkillEffectType.OnDig, this))
-                        {
-                            c.AddExp(this);
-                        }
-                    }
-                }
-            }
+            ResourceExtractionService.PerformDig(this, this, skillslist.skills.Values, ref cb, crys);
         }
         public override bool Move(int x, int y, int dir = -1, bool prog = false)
         {
