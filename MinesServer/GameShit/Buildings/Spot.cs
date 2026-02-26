@@ -112,45 +112,35 @@ namespace MinesServer.GameShit.Buildings
         {
             using var db = new DataBase();
 
-            // Получаем спот из контекста
             var spot = db.spots.FirstOrDefault(s => s.id == this.id);
             if (spot == null) return;
 
-            // Убираем выбранную программу (ставим null)
             spot.selected = null;
 
-            // Сохраняем
             db.SaveChanges();
 
-            // Обновляем ссылку в текущем объекте
             this.selected = null;
 
-            // Обновляем интерфейс
             p.win = GUIWin(p);
         }
         private void InstallProgram(int progId, Player p)
         {
             using var db = new DataBase();
 
-            // 1. Получаем программу из БД
             var prog = db.progs.FirstOrDefault(pr => pr.id == progId);
             if (prog == null || prog.owner?.id != p.id)
                 return;
 
-            // 2. Получаем спот из ЭТОГО ЖЕ контекста (ВАЖНО!)
             var spot = db.spots.FirstOrDefault(s => s.id == this.id);
+
             if (spot == null) return;
 
-            // 3. Просто присваиваем программу - EF сам всё свяжет
             spot.selected = prog;
 
-            // 4. Сохраняем
             db.SaveChanges();
 
-            // 5. Обновляем ссылку в текущем объекте
             this.selected = prog;
 
-            // 6. Обновляем интерфейс
             p.win = GUIWin(p);
         }
 
@@ -162,9 +152,24 @@ namespace MinesServer.GameShit.Buildings
             entity.programsData.Run(selected);
             p.win = GUIWin(p);
         }
+        private void StopProgram(Player p)
+        {
+            EnsureEntity(p);
+            if (entity == null)
+                return;
+
+            if (entity.programsData.ProgRunning)
+            {
+                entity.programsData.Run();
+            }
+            entity.Death();
+            p.win = GUIWin(p);
+        }
 
         private IPage MainPage(Player p)
         {
+            EnsureEntity(p);
+
             using (var db = new DataBase())
             {
                 // Получаем свежую копию с загруженным selected
@@ -176,7 +181,6 @@ namespace MinesServer.GameShit.Buildings
 
                 // Копируем нужные поля
                 this.selected = freshSpot.selected;
-                this.entity = freshSpot.entity;
 
                 var botCrys = entity?.crys?.cry ?? new long[6];
                 var totalCrys = Enumerable.Range(0, 6).Select(i => p.crys.cry[i] + (i < botCrys.Length ? botCrys[i] : 0)).ToArray();
@@ -200,16 +204,21 @@ namespace MinesServer.GameShit.Buildings
                 )).ToArray();
 
                 var launchEnabled = freshSpot.selected != null;
+                var isRunning = entity?.programsData.ProgRunning == true;
 
                 var buttons = new List<MButton>
-        {
-            new MButton("Передать кристаллы", $"spotgive:{ActionMacros.CrystalSliders}",
-                       (args) => GiveCrystals(args.CrystalSliders, p))
-        };
+                {
+                    new MButton("Передать кристаллы", $"spotgive:{ActionMacros.CrystalSliders}",
+                               (args) => GiveCrystals(args.CrystalSliders, p))
+                };
 
-                if (launchEnabled)
+                if (launchEnabled && !isRunning)
                     buttons.Add(new MButton("Запустить программу", "spotlaunch",
                                (args) => LaunchProgram(p)));
+
+                if (isRunning)
+                    buttons.Add(new MButton("Остановить программу", "spotstop",
+                               (args) => StopProgram(p)));
 
                 return new Page()
                 {
