@@ -155,7 +155,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private void Sync()
         {
             using var db = new DataBase();
-            db.players.Update(this);
+
+            // Обновляем только игрока, без программ
+            db.Entry(this).State = EntityState.Modified;
+
+            // Явно указываем, что программы не трогаем
+            db.Entry(this).Collection(p => p.programs).IsModified = false;
+
             db.SaveChanges();
         }
         public void ProgrammatorUpdate()
