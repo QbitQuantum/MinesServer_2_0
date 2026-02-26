@@ -32,12 +32,25 @@ namespace MinesServer.GameShit.GUI.Horb.List.Rich
             _ => Action
         };
 
+        [Obsolete("Этот метод создаёт элемент с Action = \"\". " +
+                  "Использование с ActionMacros.RichList МОЖЕТ ВЫЗВАТЬ ИСКЛЮЧЕНИЕ, " +
+                  "если в RichList несколько элементов с пустым Action. " +
+                  "Вместо этого используйте Text(string id, string text) с уникальным ID.", false)]
         public static RichListEntry Text(string text) => new()
         {
             Label = text,
             Type = RichListEntryType.Text,
             Values = "",
             Action = "",
+            InitialValue = ""
+        };
+
+        public static RichListEntry Text(string id, string text) => new()
+        {
+            Label = text,
+            Type = RichListEntryType.Text,
+            Values = "",
+            Action = id,  // Уникальный идентификатор
             InitialValue = ""
         };
 
