@@ -29,7 +29,7 @@ namespace MinesServer.Network.HubEvents.Bots
             output[1] = Convert.ToByte(Skin);
             output[2] = Convert.ToByte(Tail);
             var bytesWritten = 3;
-            var tmpid = Convert.ToUInt16(Id);
+            var tmpid = Id;
             MemoryMarshal.Write(output[3..], in tmpid);
             bytesWritten += sizeof(ushort);
             var tmpx = Convert.ToUInt16(X);
