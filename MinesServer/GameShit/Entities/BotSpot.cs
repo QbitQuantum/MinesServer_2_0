@@ -219,6 +219,13 @@ namespace MinesServer.GameShit.Entities
             return true;
         }
 
-        public override void Update() => _pdata.Step();
+        public override void Update()
+        {
+            // Вызываем Step() ТОЛЬКО если программа запущена
+            if (_pdata.ProgRunning)
+            {
+                _pdata.Step();
+            }
+        }
     }
 }
