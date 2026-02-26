@@ -176,6 +176,11 @@ namespace MinesServer.Server
                     i.Build();
                     World.AddPack(i.x, i.y, i);
                 }
+                foreach (var i in db.spots)
+                {
+                    i.Build();
+                    World.AddPack(i.x, i.y, i);
+                }
             }
             catch (Exception ex)
             {
