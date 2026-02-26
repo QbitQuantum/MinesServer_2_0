@@ -4,6 +4,8 @@ using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.Skills;
 using MinesServer.GameShit.WorldSystem;
+using MinesServer.Network.HubEvents.Bots;
+using MinesServer.Network.World;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -218,12 +220,20 @@ namespace MinesServer.GameShit.Entities
             Translate();
             return true;
         }
-
+        public void SendMyMove()
+        {
+            foreach (var ch in vChunksAround())
+            {
+                var chunk = World.W.chunks[ch.x, ch.y];
+                foreach (var id in chunk.bots)
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(new HBPacket([new HBBotPacket(this.id, x, y, dir, skin, cid, tail)]));
+            }
+        }
         public override void Update()
         {
-            // Вызываем Step() ТОЛЬКО если программа запущена
             if (_pdata.ProgRunning)
             {
+                SendMyMove();
                 _pdata.Step();
             }
         }

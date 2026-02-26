@@ -158,47 +158,9 @@ namespace MinesServer.GameShit.Buildings
         {
             EnsureEntity(p);
             if (entity == null || selected == null)
-            {
-                Console.WriteLine("❌ Нет выбранной программы");
-                return;
-            }
-
-            if (entity.programsData.ProgRunning)
-            {
-                Console.WriteLine("❌ Программа уже запущена");
-                return;
-            }
-
-            using var db = new DataBase();
-
-            var program = db.progs.FirstOrDefault(pr => pr.id == selected.id);
-
-            if (program == null)
-            {
-                Console.WriteLine("❌ Программа не найдена");
-                return;
-            }
-
-            try
-            {
-                // ПРИНУДИТЕЛЬНО парсим программу ЗДЕСЬ
-                var parsed = program.programm;  // <-- вызовет parseNormal()
-
-                if (parsed == null || parsed.Count == 0)
-                {
-                    Console.WriteLine("❌ Программа не может быть распарсена");
-                    return;
-                }
-
-                // Теперь передаем боту
-                p.win = GUIWin(p);
-                Console.WriteLine("✅ Программа запущена");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Ошибка запуска: {ex.Message}");
-                Console.WriteLine($"LaunchProgram error: {ex}");
-            }
+                return; // Нет выбранной программы
+            entity.programsData.Run(selected);
+            p.win = GUIWin(p);
         }
 
         private IPage MainPage(Player p)
