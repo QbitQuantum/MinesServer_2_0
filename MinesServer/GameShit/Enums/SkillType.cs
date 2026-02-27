@@ -642,7 +642,7 @@ namespace MinesServer.Enums
             [SkillType.Deactivation] = new SkillInfo
             {
                 Name = "Деактивация",
-                Description = "Увеличивает скорость разрушение песка",
+                Description = "Увеличивает скорость разрушение слизи",
                 LevelingHint = "Деактивировать объекты",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
