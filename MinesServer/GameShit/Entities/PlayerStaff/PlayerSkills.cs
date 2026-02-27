@@ -112,6 +112,27 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         /// <summary>
+        /// Проверяет, выполнены ли требования для указанного навыка
+        /// </summary>
+        private bool MeetsRequirements(SkillType skillType)
+        {
+            var info = skillType.GetInfo();
+            if (info?.Requirements == null || !info.Requirements.Any())
+                return true; // Нет требований - можно устанавливать
+
+            foreach (var req in info.Requirements)
+            {
+                var hasReq = skills.Values.Any(s =>
+                    s?.type == req.RequiredSkill &&
+                    s?.lvl >= req.RequiredLevel);
+
+                if (!hasReq)
+                    return false; // Не выполнено хотя бы одно требование
+            }
+
+            return true; // Все требования выполнены
+        }
+        /// <summary>
         /// Установка навыка по его коду (ID) в указанный слот.
         /// Навык создаётся как "тонкий" объект, связанный с шаблоном через тип.
         /// </summary>
@@ -139,16 +160,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return;
             }
 
-            // Проверка требований (если есть)
-            if (info.Requirements != null)
-            {
-                foreach (var req in info.Requirements)
-                {
-                    var hasReq = skills.Values.Any(s => s?.type == req.RequiredSkill && s?.lvl >= req.RequiredLevel);
-                    if (!hasReq)
-                        return;
-                }
-            }
+            // Проверка требований
+            if (!MeetsRequirements(skillType))
+                return;
 
             skills[slot] = new Skill
             {
@@ -203,20 +217,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 if (skills.FirstOrDefault(skill => skill.Value?.type == skillType).Value == null)
                 {
                     // Проверяем требования
-                    bool meetsReqs = true;
-                    if (info.Requirements != null)
-                    {
-                        foreach (var req in info.Requirements)
-                        {
-                            var hasReq = skills.Values.Any(s => s?.type == req.RequiredSkill && s?.lvl >= req.RequiredLevel);
-                            if (!hasReq)
-                            {
-                                meetsReqs = false;
-                                break;
-                            }
-                        }
-                    }
-
+                    bool meetsReqs = MeetsRequirements(skillType);
                     d.Add(skillType, meetsReqs);
                 }
             }
