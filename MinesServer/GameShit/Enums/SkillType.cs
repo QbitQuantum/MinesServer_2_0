@@ -1,4 +1,6 @@
-﻿namespace MinesServer.Enums
+﻿using MinesServer.GameShit.Skills;
+
+namespace MinesServer.Enums
 {
     public enum SkillType
     {
@@ -122,159 +124,365 @@
         /// <summary>*g | gluo | Глюонная упаковка</summary>
         GluonPacking
     }
+    public class SkillInfo
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string LevelingHint { get; set; }
+        public Func<int, int> PriceFunc { get; set; }  // Функция цены от уровня
+        public Func<int, int> OppFunc { get; set; }    // Функция ОПП от уровня
+        public SkillEffectType EffectType { get; set; }
+        public Func<int, float> EffectFunc { get; set; }
+        public Func<int, float> CostFunc { get; set; }
+        public Func<int, float> ExpFunc { get; set; }
+        public Func<int, float> DopFunc { get; set; }
+        public List<SkillRequirement> Requirements { get; set; }
+
+        // Вспомогательные методы для получения значений на текущем уровне
+        public int GetPrice(int level) => PriceFunc?.Invoke(level) ?? 0;
+        public int GetOpp(int level) => OppFunc?.Invoke(level) ?? 0;
+    }
+
+    public class SkillRequirement
+    {
+        public SkillType RequiredSkill { get; set; }
+        public int RequiredLevel { get; set; }
+    }
+
     public static class SkillTypeExtensions
     {
+        private static readonly Dictionary<SkillType, SkillInfo> _skillInfos = new()
+        {
+            [SkillType.MineGreen] = new SkillInfo
+            {
+                Name = "Добыча зеленых кристаллов",
+                Description = "Увеличивает добычу зеленых кристаллов",
+                LevelingHint = "Копать кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineBlue] = new SkillInfo
+            {
+                Name = "Добыча синих кристаллов",
+                Description = "Увеличивает добычу синих кристаллов",
+                LevelingHint = "Копать кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineGeneral] = new SkillInfo
+            {
+                Name = "Добыча",
+                Description = "Увеличивает добычу синих и зеленых кристаллов",
+                LevelingHint = "Копать кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 0.08f + (float)(Math.Log10(lvl) * (Math.Pow(lvl, 0.5) / 4)),
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Digging] = new SkillInfo
+            {
+                Name = "Копание",
+                Description = "Позволяет быстрее разрушать кристаллы и разную породу",
+                LevelingHint = "Копать породу",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Movement] = new SkillInfo
+            {
+                Name = "Передвижение",
+                Description = "Увеличивает передвижение робота",
+                LevelingHint = "Передвигаться",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnMove,
+                EffectFunc = (lvl) => 70f - lvl * 0.05f > 30f ? 70f - lvl * 0.05f : 30f,
+                CostFunc = (lvl) => 0f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Health] = new SkillInfo
+            {
+                Name = "Защита",
+                Description = "Увеличивает прочность робота",
+                LevelingHint = "Получать урон любого вида (от пушек, ударами, С-190)",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnHealth,
+                EffectFunc = (lvl) => 100 + lvl * 3f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            // Стройка
+            [SkillType.BuildGreen] = new SkillInfo
+            {
+                Name = "Стройка",
+                Description = "Позволяет строить зеленые постройки",
+                LevelingHint = "Устанавливать зеленые блоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement { RequiredSkill = SkillType.MineGeneral, RequiredLevel = 5 }
+                }
+            },
+
+            [SkillType.BuildYellow] = new SkillInfo
+            {
+                Name = "Стройка желтых",
+                Description = "Позволяет строить желтые постройки",
+                LevelingHint = "Устанавливать желтые блоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.BuildRed] = new SkillInfo
+            {
+                Name = "Стройка красных",
+                Description = "Позволяет строить красные постройки",
+                LevelingHint = "Устанавливать красные блоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            // Упаковка
+            [SkillType.Packing] = new SkillInfo
+            {
+                Name = "Вместимость",
+                Description = "В хранилище влезает больше ресурсов",
+                LevelingHint = "Передвигаться с грузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 100 + 20 * lvl,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.PackingBlue] = new SkillInfo
+            {
+                Name = "Упаковка синих",
+                Description = "Синие кристаллы занимают меньше места",
+                LevelingHint = "Копать синие кристаллы с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.PackingCyan] = new SkillInfo
+            {
+                Name = "Упаковка голубых",
+                Description = "Голубые кристаллы занимают меньше места",
+                LevelingHint = "Копать голубые кристаллы с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.PackingGreen] = new SkillInfo
+            {
+                Name = "Упаковка зеленых",
+                Description = "Зеленые кристаллы занимают меньше места",
+                LevelingHint = "Копать зеленые кристаллы с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.PackingRed] = new SkillInfo
+            {
+                Name = "Упаковка красных",
+                Description = "Красные кристаллы занимают меньше места",
+                LevelingHint = "Копать красные кристаллы с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.PackingViolet] = new SkillInfo
+            {
+                Name = "Упаковка фиолетовых",
+                Description = "Фиолетовые кристаллы занимают меньше места",
+                LevelingHint = "Копать фиолетовые кристаллы с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.PackingWhite] = new SkillInfo
+            {
+                Name = "Упаковка белых",
+                Description = "Белые кристаллы занимают меньше места",
+                LevelingHint = "Копать белые кристаллы с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            // Боевые навыки
+            [SkillType.Induction] = new SkillInfo
+            {
+                Name = "Индукция",
+                Description = "Увеличивает расход пушек",
+                LevelingHint = "Получать урон от пушки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnHurt,
+                EffectFunc = (lvl) => 100f + lvl * 0.2f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.AntiGun] = new SkillInfo
+            {
+                Name = "Защита от пушек",
+                Description = "Защита от пушек",
+                LevelingHint = "Получать урон от пушки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnHurt,
+                EffectFunc = (lvl) => 
+                (float)Math.Round(1f + (lvl - (float)Math.Log10(lvl) * (float)Math.Pow(lvl, 0.9) / 2f - lvl * 0.098f)) >= 92 ? 
+                92 : (float)Math.Round(1f + (lvl - (float)Math.Log10(lvl) * (float)Math.Pow(lvl, 0.9) / 2f - lvl * 0.098f)),
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 0f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Repair] = new SkillInfo
+            {
+                Name = "Ремонт",
+                Description = "Позволяет чинить робота",
+                LevelingHint = "Чинить робота",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnHealth,
+                EffectFunc = (lvl) => lvl * 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.RoadMovement] = new SkillInfo
+            {
+                Name = "Передвижение по дорогам",
+                Description = "По дорогам робот бегает быстрее",
+                LevelingHint = "Передвигаться по дорогам",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnMove,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            }
+        };
+
+        public static SkillInfo GetInfo(this SkillType skill)
+        {
+            return _skillInfos.TryGetValue(skill, out var info) ? info : null;
+        }
+
         public static string GetName(this SkillType skill)
         {
-            return skill switch
-            {
-                SkillType.AntiSlime => "Защита от слизи",
-                SkillType.AntiBlock => "Анти-блок",
-                SkillType.AdjacentExtraction => "Смежное извлечение",
-                SkillType.Geology => "Геология",
-                SkillType.MineBlue => "Добыча синих",
-                SkillType.MineGreen => "Добыча зеленых",
-                SkillType.Destruction => "Разрушение",
-                SkillType.Annihilation => "Аннигиляция",
-                SkillType.Crystallography => "Кристаллография",
-                SkillType.Deconstruction => "Деконструкция",
-                SkillType.AntiGun => "Защита от пушек",
-                SkillType.BuildRed => "Стройка красных блоков",
-                SkillType.Digging => "Копание",
-                SkillType.Health => "Защита",
-                SkillType.MineGeneral => "Добыча",
-                SkillType.MineRed => "Добыча красных",
-                SkillType.BuildGreen => "Стройка зелёных блоков",
-                SkillType.BuildQuadro => "Стройка квадроблоков",
-                SkillType.Detection => "Обнаружение",
-                SkillType.Movement => "Передвижение",
-                SkillType.BuildYellow => "Стройка желтых блоков",
-                SkillType.Compression => "Компрессия",
-                SkillType.Fridge => "Охлаждение",
-                SkillType.MineCyan => "Добыча голубых",
-                SkillType.RoadMovement => "Передвижение по дорогам",
-                SkillType.Upgrade => "Экспертное обучение",
-                SkillType.Deactivation => "Деактивация",
-                SkillType.HyperPacking => "Гиперкомпрессия",
-                SkillType.MineViolet => "Добыча фиолетовых",
-                SkillType.Packing => "Вместимость",
-                SkillType.PackingBlue => "Упаковка синих",
-                SkillType.PackingCyan => "Упаковка голубых",
-                SkillType.PackingViolet => "Упаковка фиолетовых",
-                SkillType.Discount => "Оптимизация",
-                SkillType.Sort => "Сортировка",
-                SkillType.Turbo => "Турбо-охлаждение",
-                SkillType.DeMagnetizing => "Размагничивание",
-                SkillType.MineWhite => "Добыча белых",
-                SkillType.PackingRed => "Упаковка красных",
-                SkillType.PackingWhite => "Упаковка белых",
-                SkillType.PackingGreen => "Упаковка зеленых",
-                SkillType.Extraction => "Извлечение",
-                SkillType.Repair => "Ремонт",
-                SkillType.ExpertMining => "Экспертная добыча",
-                SkillType.Washing => "Промывание",
-                SkillType.Fracturing => "Дробление",
-                SkillType.NanoPacking => "Наноупаковка",
-                SkillType.BuildStructure => "Стройка опор",
-                SkillType.BuildRoad => "Стройка дорог",
-                SkillType.BuildUniversal => "Универсальная стройка",
-                SkillType.BuildWar => "Военный блок",
-                SkillType.Architecture => "Архитектура",
-                SkillType.TotalDestruction => "Тотальное разрушение",
-                SkillType.UltraWhite => "Ультра-добыча белых",
-                SkillType.Jewlery => "Ювелирная добыча фиолетовых",
-                SkillType.Induction => "Индукция",
-                SkillType.MineSlime => "Слизевая добыча",
-                SkillType.MineDeep => "Глубинная добыча",
-                SkillType.GluonPacking => "Глюонная упаковка",
-                SkillType.Unknown => "Неизвестный навык",
-                _ => skill.ToString()
-            };
+            return _skillInfos.TryGetValue(skill, out var info) ? info.Name : skill.ToString();
         }
+
         public static string GetDescription(this SkillType skill)
         {
-            return skill switch
-            {
-                SkillType.MineBlue => "Увеличивет добычу синих кристаллов",
-                SkillType.MineGreen => "Увеличивет добычу зеленых кристаллов",
-                SkillType.MineRed => "Увеличивет добычу красных кристаллов",
-                SkillType.MineViolet => "Увеличивет добычу фиолетовых кристаллов",
-                SkillType.MineWhite => "Увеличивет добычу белых кристаллов",
-                SkillType.MineCyan => "Увеличивет добычу голубых кристаллов",
+            return _skillInfos.TryGetValue(skill, out var info) ? info.Description : "Описание отсутствует";
+        }
 
-                SkillType.PackingGreen => "Зеленые кристаллы занимают меньше места",
-                SkillType.PackingBlue => "Синие кристаллы занимают меньше места",
-                SkillType.PackingRed => "Красные кристаллы занимают меньше места",
-                SkillType.PackingWhite => "Белые кристаллы занимают меньше места",
-                SkillType.PackingViolet => "Фиолетовые кристаллы занимают меньше места",
-                SkillType.PackingCyan => "Голубые кристаллы занимают меньше места",
+        public static string GetLevelingHint(this SkillType skill)
+        {
+            return _skillInfos.TryGetValue(skill, out var info) ? info.LevelingHint : "Неизвестно";
+        }
 
-                SkillType.Sort => "Позволяет добывать дополнительные кристаллы",
+        public static int GetPrice(this SkillType skill, int level)
+        {
+            return _skillInfos.TryGetValue(skill, out var info) ? info.GetPrice(level) : 0;
+        }
 
-                SkillType.BuildGreen => "Позволяет строить зеленые постройки",
-                SkillType.BuildYellow => "Позволяет строить желтые постройки",
-                SkillType.BuildRed => "Позволяет строить красные постройки",
-                SkillType.BuildQuadro => "Позволяет строить квадро-блоки",
+        public static int GetOpp(this SkillType skill, int level)
+        {
+            return _skillInfos.TryGetValue(skill, out var info) ? info.GetOpp(level) : 0;
+        }
+        public static Dictionary<SkillType, SkillInfo> GetAllInfos()
+        {
+            return _skillInfos;
+        }
 
-                SkillType.Movement => "Увеличивает передвижение робота",
-                SkillType.RoadMovement => "По дорогам робот бегает быстрее",
-
-                SkillType.Packing => "В хранилище влезает больше ресурсов",
-                SkillType.Compression => "Уплотняет руду для экономии места",
-                SkillType.HyperPacking => "Ещё сильнее плотняет руду для экономии места",
-                SkillType.NanoPacking => "Очень плотная упаковка ресурсов",
-
-                SkillType.BuildStructure => "Строит опоры и перекрытия",
-                SkillType.BuildRoad => "Строит дороги",
-                SkillType.BuildWar => "Строит Военный блок",
-
-               
-                SkillType.AdjacentExtraction => "Позволяет добывать зеленые кристаллы из синих и наоборот",
-                SkillType.Extraction => "Увеличивает добычу зеленых и синих кристаллов",
-                SkillType.Geology => "Позволяет таскать с собой кристаллы",
-
-                SkillType.Destruction => "Увеличивает скорость разрушение скал",
-                SkillType.Annihilation => "Увеличивает скорость разрушение песка",
-                SkillType.Crystallography => "Ускоряет разрушение кристаллов",
-
-                SkillType.Deconstruction => "Ускоряет разрушение блоков",
-
-                SkillType.AntiSlime => "Уменьшает урон слизи при поедание",
-                SkillType.AntiBlock => "Позволяет быстрее разрушать квадро-блоков",
-                SkillType.AntiGun => "Защита от пушек",
-
-                SkillType.Digging => "Позволяет быстрее разрушать кристаллы и разную породу",
-                SkillType.Health => "Увеличивает прочность робота",
-                SkillType.MineGeneral => "Увеличивает добычу синих и зеленых кристаллов",
-                SkillType.Detection => "Позволяет находить кристаллы из скал",
-
-                SkillType.Fridge => "Охлаждает робота при погружение на глубину",
-                SkillType.Turbo => "Охлаждение робота при погружение на глубину на полную мощность",
-
-                SkillType.Deactivation => "Увеличивает скорость поедание слизи",
-                SkillType.DeMagnetizing => "Ускоряет разрушение металического песка",
-                SkillType.Repair => "Позволяет чинить робота",
-                SkillType.Washing => "Извлекает чистые кристаллы из песка",
-                SkillType.Fracturing => "Ускоряет дробление валунов",
-
-                // =============== Скиллы за очки перепрошивки ===============
-                SkillType.Architecture => "Строит зеленые/красные/желтые блоки",
-                SkillType.BuildUniversal => "Строит опоры и дороги",
-                SkillType.Upgrade => "Ускоряет получение опыта",
-                SkillType.Discount => "Позволяет тратить меньше денег на прокачку скилов",
-                SkillType.ExpertMining => "Позволяет добывать огромное количество кристаллов",
-                SkillType.TotalDestruction => "Ломает более прочную и тяжелую породу скал",
-                SkillType.Induction => "Увеличивает расход пушек",
-                SkillType.Jewlery => "Аккуратная добыча фиолетовых без сколов",
-                SkillType.UltraWhite => "Добывает белые кристаллы за один удар",
-                SkillType.MineSlime => "Добыча кристаллов из слизи",
-                SkillType.MineDeep => "Копает глбинные породы",
-                SkillType.GluonPacking => "Увеличивает вместимость до огромнейшего размера",
-                // ==========================================================
-
-                SkillType.Unknown => "Неизвестный навык",
-                _ => "Описание отсутствует"
-            };
+        public static (string Name, string Description, string LevelingHint) GetFullInfo(this SkillType skill)
+        {
+            var info = skill.GetInfo();
+            if (info != null)
+                return (info.Name, info.Description, info.LevelingHint);
+            return (skill.ToString(), "Описание отсутствует", "Неизвестно");
         }
     }
 }

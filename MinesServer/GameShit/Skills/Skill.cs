@@ -10,13 +10,11 @@ namespace MinesServer.GameShit.Skills
         public Skill()
         {
         }
+
         public int lvl = 1;
         public float exp = 0;
         public SkillType type;
-        public Skill Clone()
-        {
-            return MemberwiseClone() as Skill;
-        }
+
         public void Up(Player p)
         {
             if (isUpReady())
@@ -29,30 +27,36 @@ namespace MinesServer.GameShit.Skills
                 p.SendLvl();
                 p.SendHealth();
                 p.skillslist.Save();
+
                 if (EffectType() == SkillEffectType.OnMove)
                 {
                     p.SendSpeed();
                 }
-                if(type == SkillType.Health)
+
+                if (type == SkillType.Health)
                 {
                     p.MaxHealth = (int)Effect;
                     p.SendHealth();
                 }
             }
         }
-        public bool Visible(Player p,out bool meet)
+
+        public bool Visible(Player p, out bool meet)
         {
-            bool visible = true; meet = true;
-            if (GetReqs is not null)
+            bool visible = true;
+            meet = true;
+
+            var reqs = GetReqs;
+            if (reqs is not null)
             {
-                foreach (var req in GetReqs)
+                foreach (var req in reqs)
                 {
                     var skill = p.skillslist.skills.FirstOrDefault(skill => skill.Value?.type == req.Key).Value;
                     if (skill == default)
                     {
                         visible = false;
                     }
-                    else if (skill.lvl - 3 < req.Value)
+                    else if (skill.lvl < req.Value)  // Изменил условие: убрал -3, так как теперь требования явные
                     {
                         meet = false;
                     }
@@ -60,12 +64,14 @@ namespace MinesServer.GameShit.Skills
             }
             return visible;
         }
+
         public void AddExp(Player p, float expv = 1)
         {
             Dictionary<string, int> v = new();
+            // Проверяем навык Upgrade для множителя опыта
             foreach (var i in p.skillslist.skills.Values)
             {
-                if (UseSkill(SkillEffectType.OnExp, p))
+                if (i != null && UseSkill(SkillEffectType.OnExp, p))
                 {
                     if (i.type == SkillType.Upgrade)
                     {
@@ -80,88 +86,134 @@ namespace MinesServer.GameShit.Skills
         }
         public bool UseSkill(SkillEffectType e, Player p)
         {
-            if (e == EffectType())
-            {
-                return true;
-            }
-            return false;
+            return e == EffectType();
         }
+
         public bool isUpReady()
         {
             return exp >= Expiriense;
         }
         public SkillEffectType EffectType()
         {
-            return PlayerSkills.skillz.First(i => i.type == type).effecttype;
+            return type.GetInfo()?.EffectType ?? SkillEffectType.OnExp;
         }
-        public float Expiriense { get
+
+        public float Expiriense
+        {
+            get
             {
-                expfunc ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type).expfunc;
-                return expfunc(lvl); 
-            } }
-        public string Description { 
-            get {
-                description = PlayerSkills.skillz.FirstOrDefault(i => i.type == type)?.description;
-                if (description != null)
-                    return description(lvl, Effect, AdditionalEffect, Cost, exp, Expiriense);
-                return "";
+                var info = type.GetInfo();
+                return info?.ExpFunc?.Invoke(lvl) ?? 100f;
             }
         }
-        public float Effect { get
+
+        public string Description
+        {
+            get
             {
-                effectfunc ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type).effectfunc;
-                return effectfunc(lvl);
+                // Используем новый TemplateDescription, который принимает SkillType
+                return TemplateDescription.Description(
+                    type,
+                    lvl,
+                    exp,
+                    Expiriense
+                );
+            }
+        }
+
+        public float Effect
+        {
+            get
+            {
+                var info = type.GetInfo();
+                return info?.EffectFunc?.Invoke(lvl) ?? 0f;
             }
         }
         public float AdditionalEffect
         {
             get
             {
-                dopfunc ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type).dopfunc;
-                return dopfunc == null ? 0 : dopfunc(lvl);
+                var info = type.GetInfo();
+                return info?.DopFunc?.Invoke(lvl) ?? 0f;
             }
         }
-        public float Cost { get {
-                costfunc ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type).costfunc;
-                return costfunc(lvl);
+
+        public float Cost
+        {
+            get
+            {
+                var info = type.GetInfo();
+                return info?.CostFunc?.Invoke(lvl) ?? 0f;
             }
         }
-        public Func<int, float,float, float, float, float, string> description {  
+
+        // Эти свойства больше не нужны, но оставим для обратной совместимости
+        // Можно будет удалить после полного перехода на новую систему
+        [Obsolete("Use type.GetInfo() instead")]
+        public Func<int, float, float, float, float, float, string> description
+        {
             private get;
             set;
         }
-        public SkillEffectType effecttype { 
+
+        [Obsolete("Use type.GetInfo() instead")]
+        public SkillEffectType effecttype
+        {
             private get;
             set;
         }
-        public Func<int, float> expfunc {
+
+        [Obsolete("Use type.GetInfo() instead")]
+        public Func<int, float> expfunc
+        {
             private get;
             set;
         }
-        public Func<int, float> effectfunc { 
-            private get; 
+
+        [Obsolete("Use type.GetInfo() instead")]
+        public Func<int, float> effectfunc
+        {
+            private get;
             set;
         }
-        public Func<int, float> costfunc { 
-            private get; 
-            set; 
+
+        [Obsolete("Use type.GetInfo() instead")]
+        public Func<int, float> costfunc
+        {
+            private get;
+            set;
         }
+
+        [Obsolete("Use type.GetInfo() instead")]
         public Func<int, float> dopfunc
         {
             private get;
             set;
         }
+
         public Dictionary<SkillType, int>? requirements
         {
             get;
             set;
         }
-        public Dictionary<SkillType,int>? GetReqs
+
+        public Dictionary<SkillType, int>? GetReqs
         {
             get
             {
-                requirements ??= PlayerSkills.skillz.FirstOrDefault(i => i.type == type)!.requirements;
-                return requirements;
+                // Сначала проверяем, есть ли локальные требования
+                if (requirements != null)
+                    return requirements;
+
+                // Иначе берем из централизованного хранилища
+                var info = type.GetInfo();
+                if (info?.Requirements != null)
+                {
+                    // Конвертируем List<SkillRequirement> в Dictionary<SkillType, int>
+                    return info.Requirements.ToDictionary(r => r.RequiredSkill, r => r.RequiredLevel);
+                }
+
+                return null;
             }
         }
     }
