@@ -440,6 +440,567 @@ namespace MinesServer.Enums
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DopFunc = (lvl) => lvl
+            },
+
+            // Прочие навыки — временные заглушки
+            [SkillType.Unknown] = new SkillInfo
+            {
+                Name = "Неизвестный навык",
+                Description = "Навык не используется",
+                LevelingHint = "Не используется",
+                PriceFunc = (lvl) => 0,
+                OppFunc = (lvl) => 0,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 0f,
+                CostFunc = (lvl) => 0f,
+                ExpFunc = (lvl) => 0f,
+                DopFunc = (lvl) => 0
+            },
+
+            [SkillType.AntiSlime] = new SkillInfo
+            {
+                Name = "Защита от слизи",
+                Description = "Снижает влияние слизи",
+                LevelingHint = "Копать разные виды слизи",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnHurt,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.AntiBlock] = new SkillInfo
+            {
+                Name = "Анти-блок",
+                Description = "Помогает быстрее копать квадроблоки",
+                LevelingHint = "Ломать квадроблоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnMove,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.AdjacentExtraction] = new SkillInfo
+            {
+                Name = "Смежное извлечение",
+                Description = "Позволяет извлекать дополнительные зеленые и синие кристаллы",
+                LevelingHint = "Извлекать ресурсы рядом с собой",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Geology] = new SkillInfo
+            {
+                Name = "Геология",
+                Description = "Увеличивает количество переносимых пород/кристаллов",
+                LevelingHint = "Переность породы/кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineRed] = new SkillInfo
+            {
+                Name = "Добыча красных",
+                Description = "Увеличивает добычу красных кристаллов",
+                LevelingHint = "Копать красные кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineCyan] = new SkillInfo
+            {
+                Name = "Добыча голубых",
+                Description = "Увеличивает добычу голубых кристаллов",
+                LevelingHint = "Копать голубые кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineViolet] = new SkillInfo
+            {
+                Name = "Добыча фиолетовых",
+                Description = "Увеличивает добычу фиолетовых кристаллов",
+                LevelingHint = "Копать фиолетовые кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineWhite] = new SkillInfo
+            {
+                Name = "Добыча белых",
+                Description = "Увеличивает добычу белых кристаллов",
+                LevelingHint = "Копать белые кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Extraction] = new SkillInfo
+            {
+                Name = "Извлечение",
+                Description = "Извлекает дополнительные кристаллы из пород",
+                LevelingHint = "Разрушать породу",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Crystallography] = new SkillInfo
+            {
+                Name = "Кристаллография",
+                Description = "Увеличивает скорость добычи кристаллов",
+                LevelingHint = "Работать с кристаллами",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Deconstruction] = new SkillInfo
+            {
+                Name = "Деконструкция",
+                Description = "Ускоряет разрушение блоков",
+                LevelingHint = "Разбирать конструкции",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Destruction] = new SkillInfo
+            {
+                Name = "Разрушение",
+                Description = "Увеличивает эффективность разрушения пород",
+                LevelingHint = "Разрушать объекты",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Annihilation] = new SkillInfo
+            {
+                Name = "Аннигиляция",
+                Description = "Увеличивает скорость разрушение лавы",
+                LevelingHint = "Разрушать лаву",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Deactivation] = new SkillInfo
+            {
+                Name = "Деактивация",
+                Description = "Увеличивает скорость разрушение песка",
+                LevelingHint = "Деактивировать объекты",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.HyperPacking] = new SkillInfo
+            {
+                Name = "Гиперкомпрессия",
+                Description = "Увеличиваем вместимость кристаллов",
+                LevelingHint = "Ходить с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Discount] = new SkillInfo
+            {
+                Name = "Оптимизация",
+                Description = "Снижает затраты на прокачку умений",
+                LevelingHint = "Выполнять различные действия",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnUp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Sort] = new SkillInfo
+            {
+                Name = "Сортировка",
+                Description = "Позволяет извлекать дополнительные кристаллы",
+                LevelingHint = "Сортировать ресурсы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Turbo] = new SkillInfo
+            {
+                Name = "Турбо-охлаждение",
+                Description = "Увеличивает глубину перемещения",
+                LevelingHint = "Спускаться на глубину",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.DeMagnetizing] = new SkillInfo
+            {
+                Name = "Размагничивание",
+                Description = "Увеличивает скорость разрушение песка",
+                LevelingHint = "Разрушать песок",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Compression] = new SkillInfo
+            {
+                Name = "Компрессия",
+                Description = "Увеличиваем вместимость кристаллов",
+                LevelingHint = "Ходить с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Fridge] = new SkillInfo
+            {
+                Name = "Охлаждение",
+                Description = "Увеличивает глубину перемещения",
+                LevelingHint = "Спускаться на глубину",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Upgrade] = new SkillInfo
+            {
+                Name = "Экспертное обучение",
+                Description = "Увелчичивает скорость прокачивания навыков",
+                LevelingHint = "Прокачивать навыки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnUp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.ExpertMining] = new SkillInfo
+            {
+                Name = "Экспертная добыча",
+                Description = "Сильно повышает добычу ресурсов",
+                LevelingHint = "Копать кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Washing] = new SkillInfo
+            {
+                Name = "Промывание",
+                Description = "Позволяет добывать кристаллы из песка",
+                LevelingHint = "Копать песок",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Fracturing] = new SkillInfo
+            {
+                Name = "Дробление",
+                Description = "Улучшает дробление валунов",
+                LevelingHint = "Копать валуны",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.NanoPacking] = new SkillInfo
+            {
+                Name = "Наноупаковка",
+                Description = "Увеличиваем вместимость кристаллов",
+                LevelingHint = "Ходить с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.BuildStructure] = new SkillInfo
+            {
+                Name = "Стройка опор",
+                Description = "Позволяет строить опоры",
+                LevelingHint = "Строить опорные конструкции",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.BuildRoad] = new SkillInfo
+            {
+                Name = "Стройка дорог",
+                Description = "Позволяет строить дороги",
+                LevelingHint = "Строить дороги",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.BuildQuadro] = new SkillInfo
+            {
+                Name = "Стройка квадроблоков",
+                Description = "Позволяет строить квадроблоки",
+                LevelingHint = "Строить квадроблоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.BuildUniversal] = new SkillInfo
+            {
+                Name = "Универсальная стройка",
+                Description = "Позволяет строить любые блоки",
+                LevelingHint = "Строить различные блоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.BuildWar] = new SkillInfo
+            {
+                Name = "Военный блок",
+                Description = "Позволяет строить боевые структуры",
+                LevelingHint = "Строить боевые блоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Architecture] = new SkillInfo
+            {
+                Name = "Архитектура",
+                Description = "Позволяет строить опоры/дорогу и квадроблоки",
+                LevelingHint = "Строить опоры/дорогу и квадроблоки",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnBld,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.TotalDestruction] = new SkillInfo
+            {
+                Name = "Тотальное разрушение",
+                Description = "Увеличивает скорость разрушения пород",
+                LevelingHint = "Разрушения породы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.UltraWhite] = new SkillInfo
+            {
+                Name = "Ультра-добыча белых",
+                Description = "Сильно повышает добычу белых кристаллов",
+                LevelingHint = "Копать белые кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Jewlery] = new SkillInfo
+            {
+                Name = "Ювелирная добыча фиолетовых",
+                Description = "Сильно повышает добычу фиолетовых кристаллов",
+                LevelingHint = "Копать фиолетовые кристаллы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDigCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineSlime] = new SkillInfo
+            {
+                Name = "Слизевая добыча",
+                Description = "Позволяет добывать крситаллы из слизи",
+                LevelingHint = "Добывать слизь",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.MineDeep] = new SkillInfo
+            {
+                Name = "Глубинная добыча",
+                Description = "Улучшает добычу на больших глубинах",
+                LevelingHint = "Копать на глубине",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnDig,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.GluonPacking] = new SkillInfo
+            {
+                Name = "Глюонная упаковка",
+                Description = "Увеличиваем вместимость кристаллов",
+                LevelingHint = "Ходить с перегрузом выше 50%",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnPackCrys,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
+            },
+
+            [SkillType.Detection] = new SkillInfo
+            {
+                Name = "Обнаружение",
+                Description = "Позволяет добывать крситаллы с глубинных пород",
+                LevelingHint = "Копать глубинные породы",
+                PriceFunc = (lvl) => lvl * 10000000,
+                OppFunc = (lvl) => lvl * 68,
+                EffectType = SkillEffectType.OnExp,
+                EffectFunc = (lvl) => 1f,
+                CostFunc = (lvl) => 1f,
+                ExpFunc = (lvl) => 1f,
+                DopFunc = (lvl) => lvl
             }
         };
 
