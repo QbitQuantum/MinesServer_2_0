@@ -992,7 +992,7 @@ namespace MinesServer.Enums
             [SkillType.Detection] = new SkillInfo
             {
                 Name = "Обнаружение",
-                Description = "Позволяет добывать крситаллы c пород",
+                Description = "Позволяет добывать кристаллы c пород",
                 LevelingHint = "Копать породы",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
