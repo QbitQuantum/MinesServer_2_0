@@ -124,6 +124,73 @@
     }
     public static class SkillTypeExtensions
     {
+        public static string GetName(this SkillType skill)
+        {
+            return skill switch
+            {
+                SkillType.AntiSlime => "Защита от слизи",
+                SkillType.AntiBlock => "Анти-блок",
+                SkillType.AdjacentExtraction => "Смежное извлечение",
+                SkillType.Geology => "Геология",
+                SkillType.MineBlue => "Добыча синих",
+                SkillType.MineGreen => "Добыча зеленых",
+                SkillType.Destruction => "Разрушение",
+                SkillType.Annihilation => "Аннигиляция",
+                SkillType.Crystallography => "Кристаллография",
+                SkillType.Deconstruction => "Деконструкция",
+                SkillType.AntiGun => "Защита от пушек",
+                SkillType.BuildRed => "Стройка красных",
+                SkillType.Digging => "Копание",
+                SkillType.Health => "Защита",
+                SkillType.MineGeneral => "Добыча",
+                SkillType.MineRed => "Добыча красных",
+                SkillType.BuildGreen => "Стройка",
+                SkillType.BuildQuadro => "Стройка квадроблоков",
+                SkillType.Detection => "Обнаружение",
+                SkillType.Movement => "Передвижение",
+                SkillType.BuildYellow => "Стройка желтых",
+                SkillType.Compression => "Компрессия",
+                SkillType.Fridge => "Охлаждение",
+                SkillType.MineCyan => "Добыча голубых",
+                SkillType.RoadMovement => "Передвижение по дорогам",
+                SkillType.Upgrade => "Экспертное обучение",
+                SkillType.Deactivation => "Деактивация",
+                SkillType.HyperPacking => "Гиперкомпрессия",
+                SkillType.MineViolet => "Добыча фиолетовых",
+                SkillType.Packing => "Вместимость",
+                SkillType.PackingBlue => "Упаковка синих",
+                SkillType.PackingCyan => "Упаковка голубых",
+                SkillType.PackingViolet => "Упаковка фиолетовых",
+                SkillType.Discount => "Оптимизация",
+                SkillType.Sort => "Сортировка",
+                SkillType.Turbo => "Турбо-охлаждение",
+                SkillType.DeMagnetizing => "Размагничивание",
+                SkillType.MineWhite => "Добыча белых",
+                SkillType.PackingRed => "Упаковка красных",
+                SkillType.PackingWhite => "Упаковка белых",
+                SkillType.PackingGreen => "Упаковка зеленых",
+                SkillType.Extraction => "Извлечение",
+                SkillType.Repair => "Ремонт",
+                SkillType.ExpertMining => "Экспертная добыча",
+                SkillType.Washing => "Промывание",
+                SkillType.Fracturing => "Дробление",
+                SkillType.NanoPacking => "Наноупаковка",
+                SkillType.BuildStructure => "Стройка опор",
+                SkillType.BuildRoad => "Стройка дорог",
+                SkillType.BuildUniversal => "Универсальная стройка",
+                SkillType.BuildWar => "Военный блок",
+                SkillType.Architecture => "Архитектура",
+                SkillType.TotalDestruction => "Тотальное разрушение",
+                SkillType.UltraWhite => "Ультра-добыча белых",
+                SkillType.Jewlery => "Ювелирная добыча фиолетовых",
+                SkillType.Induction => "Индукция",
+                SkillType.MineSlime => "Слизевая добыча",
+                SkillType.MineDeep => "Глубинная добыча",
+                SkillType.GluonPacking => "Глюонная упаковка",
+                SkillType.Unknown => "Неизвестный навык",
+                _ => skill.ToString()
+            };
+        }
         public static string GetDescription(this SkillType skill)
         {
             return skill switch
