@@ -993,7 +993,7 @@ namespace MinesServer.Enums
                 LevelingHint = "Разрушать песок",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
-                EffectType = SkillEffectType.OnExp,
+                EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
