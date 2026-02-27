@@ -164,7 +164,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 11
+                    }
+                }
             },
 
             [SkillType.MineBlue] = new SkillInfo
@@ -178,7 +186,20 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 13
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Extraction,
+                        RequiredLevel = 3
+                    }
+                }
             },
 
             [SkillType.MineGeneral] = new SkillInfo
@@ -192,7 +213,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 0.08f + (float)(Math.Log10(lvl) * (Math.Pow(lvl, 0.5) / 4)),
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 9
+                    }
+                }
             },
 
             [SkillType.Digging] = new SkillInfo
@@ -234,7 +263,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 100 + lvl * 3f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    { 
+                        RequiredSkill = SkillType.Digging, 
+                        RequiredLevel = 4 
+                    }
+                }
             },
 
             // Стройка
@@ -252,7 +289,10 @@ namespace MinesServer.Enums
                 DopFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
-                    new SkillRequirement { RequiredSkill = SkillType.MineGeneral, RequiredLevel = 5 }
+                    new SkillRequirement { 
+                        RequiredSkill = SkillType.Digging, 
+                        RequiredLevel = 7 
+                    }
                 }
             },
 
@@ -267,7 +307,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 6
+                    }
+                }
             },
 
             [SkillType.BuildRed] = new SkillInfo
@@ -281,7 +329,20 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 15
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.BuildYellow,
+                        RequiredLevel = 6
+                    }
+                }
             },
 
             // Упаковка
@@ -296,7 +357,16 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 100 + 20 * lvl,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 3
+                    }
+                }
+
             },
 
             [SkillType.PackingBlue] = new SkillInfo
@@ -310,7 +380,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.PackingCyan] = new SkillInfo
@@ -324,7 +402,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 13
+                    }
+                }
             },
 
             [SkillType.PackingGreen] = new SkillInfo
@@ -338,7 +424,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 3
+                    }
+                }
             },
 
             [SkillType.PackingRed] = new SkillInfo
@@ -352,7 +446,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 7
+                    }
+                }
             },
 
             [SkillType.PackingViolet] = new SkillInfo
@@ -366,7 +468,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 11
+                    }
+                }
             },
 
             [SkillType.PackingWhite] = new SkillInfo
@@ -380,7 +490,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 9
+                    }
+                }   
             },
 
             // Боевые навыки
@@ -411,7 +529,15 @@ namespace MinesServer.Enums
                 92 : (float)Math.Round(1f + (lvl - (float)Math.Log10(lvl) * (float)Math.Pow(lvl, 0.9) / 2f - lvl * 0.098f)),
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 0f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Health,
+                        RequiredLevel = 12
+                    }
+                }
             },
 
             [SkillType.Repair] = new SkillInfo
@@ -425,7 +551,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => lvl * 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Health,
+                        RequiredLevel = 12
+                    }
+                }
             },
 
             [SkillType.RoadMovement] = new SkillInfo
@@ -439,7 +573,20 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Fridge,
+                        RequiredLevel = 4
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Detection,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             // Прочие навыки — временные заглушки
@@ -468,7 +615,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Health,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.AntiBlock] = new SkillInfo
@@ -482,7 +637,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Deconstruction,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.AdjacentExtraction] = new SkillInfo
@@ -496,7 +659,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Extraction,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.Geology] = new SkillInfo
@@ -510,7 +681,20 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.MineGeneral,
+                        RequiredLevel = 10
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Detection,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.MineRed] = new SkillInfo
@@ -524,7 +708,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 15
+                    }
+                }
             },
 
             [SkillType.MineCyan] = new SkillInfo
@@ -538,7 +730,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 25
+                    }
+                }
             },
 
             [SkillType.MineViolet] = new SkillInfo
@@ -566,7 +766,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 18
+                    }
+                }
             },
 
             [SkillType.Extraction] = new SkillInfo
@@ -594,7 +802,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.Deconstruction] = new SkillInfo
@@ -608,7 +824,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 7
+                    }
+                }
             },
 
             [SkillType.Destruction] = new SkillInfo
@@ -622,7 +846,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.Annihilation] = new SkillInfo
@@ -636,7 +868,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 2
+                    }
+                }
             },
 
             [SkillType.Deactivation] = new SkillInfo
@@ -650,7 +890,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Annihilation,
+                        RequiredLevel = 8
+                    }
+                }
             },
 
             [SkillType.HyperPacking] = new SkillInfo
@@ -664,7 +912,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Compression,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.Discount] = new SkillInfo
@@ -692,7 +948,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Extraction,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.Turbo] = new SkillInfo
@@ -706,7 +970,20 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Fridge,
+                        RequiredLevel = 10
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Detection,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.DeMagnetizing] = new SkillInfo
@@ -720,7 +997,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Annihilation,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.Compression] = new SkillInfo
@@ -734,7 +1019,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.Fridge] = new SkillInfo
@@ -748,7 +1041,20 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 4
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 2
+                    }
+                }
             },
 
             [SkillType.Upgrade] = new SkillInfo
@@ -790,7 +1096,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.DeMagnetizing,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.Fracturing] = new SkillInfo
@@ -804,7 +1118,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Destruction,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.NanoPacking] = new SkillInfo
@@ -818,7 +1140,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.HyperPacking,
+                        RequiredLevel = 10
+                    }
+                }
             },
 
             [SkillType.BuildStructure] = new SkillInfo
@@ -832,7 +1162,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 4
+                    }
+                }
             },
 
             [SkillType.BuildRoad] = new SkillInfo
@@ -846,7 +1184,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Packing,
+                        RequiredLevel = 5
+                    }
+                }
             },
 
             [SkillType.BuildQuadro] = new SkillInfo
@@ -860,7 +1206,21 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.BuildStructure,
+                        RequiredLevel = 6
+                    },
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.BuildRed,
+                        RequiredLevel = 6
+                    }
+                }
+
             },
 
             [SkillType.BuildUniversal] = new SkillInfo
@@ -944,7 +1304,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 21
+                    }
+                }
             },
 
             [SkillType.MineSlime] = new SkillInfo
