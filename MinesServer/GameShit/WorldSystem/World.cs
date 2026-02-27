@@ -59,6 +59,7 @@ namespace MinesServer.GameShit.WorldSystem
                 road = new($"{name}_road.mapb", (ChunksW, ChunksH));
                 durability = new($"{name}_durability.mapb", (ChunksW, ChunksH));
             }
+            CreateSpawns();
             CommitWorld();
             using var db = new DataBase();
             if (db.chats.FirstOrDefault(i => i.Name == "FED") == default)
@@ -94,12 +95,13 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public void CreateSpawns()
         {
-            var r = new Random();
             using (var db = new DataBase())
             {
                 var y = 10;
                 var x = 10;
-                if (db.reqs.Count() < 1)
+
+                // Проверяем только наличие респауна (как ключевой структуры)
+                if (!db.resps.Any(r => r.x == x - 8 && r.y == y + 7))
                 {
                     for (int rx = -10; rx <= 10; rx++)
                     {
@@ -113,7 +115,6 @@ namespace MinesServer.GameShit.WorldSystem
                     new Up(x, y - 4, 0).Build();
                 }
             }
-
         }
         public void CreateChunks()
         {
