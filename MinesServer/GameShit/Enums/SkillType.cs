@@ -488,7 +488,7 @@ namespace MinesServer.Enums
             [SkillType.AdjacentExtraction] = new SkillInfo
             {
                 Name = "Смежное извлечение",
-                Description = "Позволяет извлекать дополнительные зеленые и синие кристаллы",
+                Description = "Позволяет извлекать зеленые крсталлы из синих и наоборот",
                 LevelingHint = "Извлекать ресурсы рядом с собой",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
@@ -572,8 +572,8 @@ namespace MinesServer.Enums
             [SkillType.Extraction] = new SkillInfo
             {
                 Name = "Извлечение",
-                Description = "Извлекает дополнительные кристаллы из пород",
-                LevelingHint = "Разрушать породу",
+                Description = "Позволяет добывать дополнительные зеленые и синие породы",
+                LevelingHint = "Копать зеленые и синие кристаллы",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
@@ -684,8 +684,8 @@ namespace MinesServer.Enums
             [SkillType.Sort] = new SkillInfo
             {
                 Name = "Сортировка",
-                Description = "Позволяет извлекать дополнительные кристаллы",
-                LevelingHint = "Сортировать ресурсы",
+                Description = "Позволяет извлекать дополнительные красные/фиолетовые/белые кристаллы",
+                LevelingHint = "Копать красные/фиолетовые/белые кристаллы",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnExp,
@@ -964,8 +964,8 @@ namespace MinesServer.Enums
             [SkillType.MineDeep] = new SkillInfo
             {
                 Name = "Глубинная добыча",
-                Description = "Улучшает добычу на больших глубинах",
-                LevelingHint = "Копать на глубине",
+                Description = "Позволяет добывать крсталлы с глубинных пород",
+                LevelingHint = "Копать глубинные породы",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
@@ -992,8 +992,8 @@ namespace MinesServer.Enums
             [SkillType.Detection] = new SkillInfo
             {
                 Name = "Обнаружение",
-                Description = "Позволяет добывать крситаллы с глубинных пород",
-                LevelingHint = "Копать глубинные породы",
+                Description = "Позволяет добывать крситаллы c пород",
+                LevelingHint = "Копать породы",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnExp,
