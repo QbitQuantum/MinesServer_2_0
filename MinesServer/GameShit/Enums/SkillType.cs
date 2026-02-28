@@ -737,7 +737,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 21
+                    }
+                }
             },
 
             [SkillType.MineWhite] = new SkillInfo
@@ -1289,15 +1297,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
-                Requirements = new List<SkillRequirement>
-                {
-                    new SkillRequirement
-                    {
-                        RequiredSkill = SkillType.Digging,
-                        RequiredLevel = 21
-                    }
-                }
+                DopFunc = (lvl) => lvl
             },
 
             [SkillType.MineSlime] = new SkillInfo
