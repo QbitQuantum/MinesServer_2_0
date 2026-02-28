@@ -85,13 +85,63 @@ namespace MinesServer.GameShit.Buildings
             },
             Buttons = []
         };
+        private bool TryPurchaseSlot(Player p, int nextSlot)
+        {
+            using var db = new DataBase();
+            db.Attach(p.skillslist);
+            db.Attach(p);
+
+            if (nextSlot <= 10)
+            {
+                if (PriceSlotsMoney.TryGetValue(nextSlot, out long requiredMoney) && p.money >= requiredMoney)
+                {
+                    p.money -= requiredMoney;
+                    p.skillslist.slots++;
+                    db.SaveChanges();
+                    return true;
+                }
+            }
+            else if (nextSlot <= 34)
+            {
+                if (PriceSlotsCreds.TryGetValue(nextSlot, out int requiredCreds) && p.creds >= requiredCreds)
+                {
+                    p.creds -= requiredCreds;
+                    p.skillslist.slots++;
+                    db.SaveChanges();
+                    return true;
+                }
+            }
+            return false;
+        }
+        private MButton? CreateBuySlotButton(Player p)
+        {
+            int nextSlot = p.skillslist.slots + 1;
+            string buttonText;
+
+            if (nextSlot <= 10)
+                buttonText = $"Купить слот за {PriceSlotsMoney[nextSlot]:N0} $";
+            else
+                buttonText = $"Купить слот за {PriceSlotsCreds[nextSlot]} C";
+
+            return new MButton(buttonText, "buyslot", (args) =>
+            {
+                if (p.skillslist.slots < 34)
+                {
+                    if (TryPurchaseSlot(p, nextSlot))
+                    {
+                        p.win = GUIWin(p);
+                        p.SendWindow();
+                    }
+                }
+            });
+        }
         public override Window? GUIWin(Player p)
         {
             Action? admn = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null;
             var onskill = (int arg) => { p.skillslist.selectedslot = arg; p.win = GUIWin(p); p.SendWindow(); };
 
-            // Базовые общие свойства
-            var basePageProps = new
+            // Создаем базовый объект с общими свойствами
+            var basePage = new UpPage
             {
                 OnAdmin = admn,
                 Skills = p.skillslist.GetSkills(),
@@ -103,105 +153,74 @@ namespace MinesServer.GameShit.Buildings
             var oninstall = (int slot, SkillType skilltype) =>
             {
                 var playerSkill = p.skillslist.skills.Values.FirstOrDefault(s => s?.type.GetCode() == skilltype.GetCode());
-                p.win?.CurrentTab.Replace(new UpPage()
+
+                var installPage = basePage with
                 {
-                    OnAdmin = basePageProps.OnAdmin,
-                    Skills = basePageProps.Skills,
-                    OnSkill = basePageProps.OnSkill,
-                    SlotAmount = basePageProps.SlotAmount,
-                    Title = basePageProps.Title,
                     SkillIcon = skilltype,
                     Text = playerSkill != null ? playerSkill.Description : SkillTypeExtensions.GetDescription(skilltype),
-                    Button = new MButton("Установить", "confirm", (args) => { p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot, p); p.win = GUIWin(p); p.SendWindow(); })
-                });
+                    Button = new MButton("Установить", "confirm", (args) =>
+                    {
+                        p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot, p);
+                        p.win = GUIWin(p);
+                        p.SendWindow();
+                    })
+                };
+
+                p.win?.CurrentTab.Replace(installPage);
                 p.SendWindow();
             };
 
-            var skillfromslot = p.skillslist.selectedslot > -1 ? (p.skillslist.skills.ContainsKey(p.skillslist.selectedslot) ? p.skillslist.skills[p.skillslist.selectedslot] : null) : null;
+            var skillfromslot = p.skillslist.selectedslot > -1 ?
+                (p.skillslist.skills.ContainsKey(p.skillslist.selectedslot) ? p.skillslist.skills[p.skillslist.selectedslot] : null) :
+                null;
 
-            var uppage = p.skillslist.selectedslot == -1 ? new UpPage()
+            UpPage uppage;
+
+            if (p.skillslist.selectedslot == -1)
             {
-                OnAdmin = basePageProps.OnAdmin,
-                Skills = basePageProps.Skills,
-                SkillsToInstall = null,
-                SlotAmount = basePageProps.SlotAmount,
-                OnSkill = basePageProps.OnSkill,
-                Title = basePageProps.Title,
-                Text = "Выберите скилл или пустой слот",
-                Button = p.skillslist.slots < 34 ? new MButton(
-        (p.skillslist.slots + 1 <= 10)
-            ? $"Купить слот за {PriceSlotsMoney[p.skillslist.slots + 1]:N0} $"
-            : $"Купить слот за {PriceSlotsCreds[p.skillslist.slots + 1]} C",
-        "buyslot",
-        (args) =>
-        {
-            if (p.skillslist.slots < 34)
-            {
-                int nextSlot = p.skillslist.slots + 1;
-
-                if (nextSlot <= 10)
+                uppage = basePage with
                 {
-                    // Покупка за монеты (слоты 1-10)
-                    if (PriceSlotsMoney.TryGetValue(nextSlot, out long requiredMoney))
-                    {
-                        if (p.money >= requiredMoney)
-                        {
-                            using var db = new DataBase();
-                            db.Attach(p.skillslist);
-                            db.Attach(p);
-
-                            p.money -= requiredMoney;
-                            p.skillslist.slots++;
-
-                            db.SaveChanges();
-                        }
-                    }
-                }
-                else if (nextSlot <= 34)
-                {
-                    // Покупка за кредиты (слоты 11-34)
-                    if (PriceSlotsCreds.TryGetValue(nextSlot, out int requiredCreds))
-                    {
-                        if (p.creds >= requiredCreds)
-                        {
-                            using var db = new DataBase();
-                            db.Attach(p.skillslist);
-                            db.Attach(p);
-
-                            p.creds -= requiredCreds;
-                            p.skillslist.slots++;
-
-                            db.SaveChanges();
-                        }
-                    }
-                }
-
-                p.win = GUIWin(p);
-                p.SendWindow();
+                    SkillsToInstall = null,
+                    Text = "Выберите скилл или пустой слот",
+                    Button = p.skillslist.slots < 34 ? CreateBuySlotButton(p) : null,
+                    SkillIcon = SkillType.Unknown
+                };
             }
-        }) : null,
-                SkillIcon = SkillType.Unknown
-            } : new UpPage()
+            else
             {
-                OnAdmin = basePageProps.OnAdmin,
-                SelectedSlot = p.skillslist.selectedslot,
-                Skills = basePageProps.Skills,
-                SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall(p) : null,
-                SlotAmount = basePageProps.SlotAmount,
-                OnInstall = skillfromslot == null ? oninstall : null,
-                OnSkill = basePageProps.OnSkill,
-                Title = basePageProps.Title,
-                Text = skillfromslot?.Description,
-                Button = skillfromslot != null && skillfromslot.isUpReady() ? new MButton("Прокачать", "upgrade", (args) => { skillfromslot.Up(p); p.win = GUIWin(p); p.SendWindow(); }) : null,
-                OnDelete = skillfromslot != null ? (slot) => { p.skillslist.DeleteSkill(p); p.win = GUIWin(p); p.SendWindow(); } : null,
-                SkillIcon = skillfromslot?.type
-            };
+                // Случай: слот выбран
+                uppage = basePage with
+                {
+                    SelectedSlot = p.skillslist.selectedslot,
+                    SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall(p) : null,
+                    OnInstall = skillfromslot == null ? oninstall : null,
+                    Text = skillfromslot?.Description,
+                    Button = skillfromslot != null && skillfromslot.isUpReady() ?
+                        new MButton("Прокачать", "upgrade", (args) =>
+                        {
+                            skillfromslot.Up(p);
+                            p.win = GUIWin(p);
+                            p.SendWindow();
+                        }) :
+                        null,
+                    OnDelete = skillfromslot != null ?
+                        (slot) =>
+                        {
+                            p.skillslist.DeleteSkill(p);
+                            p.win = GUIWin(p);
+                            p.SendWindow();
+                        }
+                    :
+                        null,
+                    SkillIcon = skillfromslot?.type
+                };
+            }
             return new Window()
             {
                 Tabs = [new Tab()
                 {
-                    Action = "хй",
-                    Label = "хуху",
+                    Action = "Upgrade",
+                    Label = "Здание прокачки",
                     InitialPage = uppage
                 }]
             };
