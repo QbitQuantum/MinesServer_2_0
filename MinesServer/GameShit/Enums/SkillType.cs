@@ -1353,7 +1353,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.MineGeneral,
+                        RequiredLevel = 3
+                    }
+                }
             }
         };
 
