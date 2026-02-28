@@ -202,22 +202,64 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public Dictionary<SkillType, bool> SkillToInstall()
         {
-            Dictionary<SkillType, bool> d = new();
+            var result = new Dictionary<SkillType, bool>();
+            var allSkills = SkillTypeExtensions.GetAllInfos();
 
-            foreach (var kvp in SkillTypeExtensions.GetAllInfos())
+            foreach (var kvp in allSkills)
             {
                 var skillType = kvp.Key;
                 var info = kvp.Value;
 
-                if (skills.FirstOrDefault(skill => skill.Value?.type == skillType).Value == null)
+                // Пропускаем если навык уже есть
+                if (skills.Values.Any(s => s?.type == skillType))
+                    continue;
+
+                // Если нет требований - сразу доступен
+                if (info?.Requirements == null || !info.Requirements.Any())
                 {
-                    // Проверяем требования
-                    bool meetsReqs = MeetsRequirements(skillType);
-                    d.Add(skillType, meetsReqs);
+                    result.Add(skillType, true);
+                    continue;
+                }
+
+                // Проверяем требования
+                bool allRequirementsMet = true;
+                bool allRequirementsExist = true;
+                int maxMissingLevels = 0;
+
+                foreach (var req in info.Requirements)
+                {
+                    var playerSkill = skills.Values.FirstOrDefault(s => s?.type == req.RequiredSkill);
+
+                    // Если требуемого навыка НЕТ У ИГРОКА - навык полностью недоступен
+                    if (playerSkill == null)
+                    {
+                        allRequirementsExist = false;
+                        break;
+                    }
+
+                    int playerLevel = playerSkill.lvl;
+
+                    // Проверяем уровень
+                    if (playerLevel < req.RequiredLevel)
+                    {
+                        allRequirementsMet = false;
+                        int missing = req.RequiredLevel - playerLevel;
+                        maxMissingLevels = Math.Max(maxMissingLevels, missing);
+                    }
+                }
+
+                // Если нет какого-то требуемого навыка - пропускаем (не показываем)
+                if (!allRequirementsExist)
+                    continue;
+
+                // Добавляем если все требования выполнены ИЛИ отстают максимум на 3 уровня
+                if (allRequirementsMet || maxMissingLevels <= 3)
+                {
+                    result.Add(skillType, allRequirementsMet);
                 }
             }
 
-            return d;
+            return result;
         }
 
         public int lvlsummary() => skills.Sum(i => i.Value?.lvl ?? 0);
