@@ -583,7 +583,7 @@ namespace MinesServer.Enums
                     },
                     new SkillRequirement
                     {
-                        RequiredSkill = SkillType.Detection,
+                        RequiredSkill = SkillType.Movement,
                         RequiredLevel = 5
                     }
                 }
