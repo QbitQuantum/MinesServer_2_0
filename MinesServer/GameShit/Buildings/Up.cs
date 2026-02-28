@@ -119,9 +119,9 @@ namespace MinesServer.GameShit.Buildings
             string buttonText;
 
             if (nextSlot <= 10)
-                buttonText = $"Купить слот за {PriceSlotsMoney[nextSlot]:N0} $";
+                buttonText = $"Купить слот за <color=green>{PriceSlotsMoney[nextSlot]:N0} $</color>";
             else
-                buttonText = $"Купить слот за {PriceSlotsCreds[nextSlot]} C";
+                buttonText = $"Купить слот за  <color=yellow>{PriceSlotsCreds[nextSlot]:N0} C</color>";
 
             return new MButton(buttonText, "buyslot", (args) =>
             {
