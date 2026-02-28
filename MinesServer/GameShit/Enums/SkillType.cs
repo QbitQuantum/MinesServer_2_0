@@ -676,7 +676,7 @@ namespace MinesServer.Enums
                     },
                     new SkillRequirement
                     {
-                        RequiredSkill = SkillType.Detection,
+                        RequiredSkill = SkillType.Packing,
                         RequiredLevel = 10
                     }
                 }
