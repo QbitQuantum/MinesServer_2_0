@@ -46,15 +46,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private PlayerSkills() { }
 
-        public PlayerSkills(Player p)
+        public PlayerSkills(bool initializeDefaultSkills)
         {
-            // базовые навыки
-            InstallSkill(SkillType.MineGeneral.GetCode(), 0, p);
-            InstallSkill(SkillType.Digging.GetCode(), 1, p);
-            InstallSkill(SkillType.Movement.GetCode(), 2, p);
-            InstallSkill(SkillType.Health.GetCode(), 3, p);
+            if (initializeDefaultSkills)
+            {
+                // Установка базовых навыков без Player
+                InstallSkill(SkillType.MineGeneral.GetCode(), 0);
+                InstallSkill(SkillType.Digging.GetCode(), 1);
+                InstallSkill(SkillType.Movement.GetCode(), 2);
+                InstallSkill(SkillType.Health.GetCode(), 3);
+            }
             slots = 20;
-            Save();
+            Save(); // Сохраняем после инициализации
         }
 
         /// <summary>
@@ -100,15 +103,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped]
         public int selectedslot = -1;
 
-        public void DeleteSkill(Player p)
+        public bool DeleteSkill()
         {
-            if (!skills.ContainsKey(selectedslot))
-            {
-                return;
-            }
+            if (!skills.ContainsKey(selectedslot) || skills[selectedslot] == null)
+                return false;
             skills.Remove(selectedslot);
-            p.SendLvl();
             Save();
+            return true;
         }
 
         /// <summary>
@@ -132,38 +133,32 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             return true; // Все требования выполнены
         }
-        /// <summary>
-        /// Установка навыка по его коду (ID) в указанный слот.
-        /// Навык создаётся как "тонкий" объект, связанный с шаблоном через тип.
-        /// </summary>
-        public void InstallSkill(string typeCode, int slot, Player p)
+        public bool CanInstallSkill(string typeCode, int slot)
         {
             if (slot > slots || slot < 0)
-            {
-                return;
-            }
+                return false;
 
             if (skills.ContainsKey(slot) && skills[slot] != null)
-            {
-                return;
-            }
+                return false;
 
             var skillType = Mines3Enums.SkillFromCode(typeCode);
             if (skillType == SkillType.Unknown)
-            {
-                return;
-            }
+                return false;
 
             var info = skillType.GetInfo();
             if (info == null)
-            {
-                return;
-            }
+                return false;
 
-            // Проверка требований
-            if (!MeetsRequirements(skillType))
-                return;
+            return MeetsRequirements(skillType);
+        }
 
+        public bool InstallSkill(string typeCode, int slot)
+        {
+            if (!CanInstallSkill(typeCode, slot))
+                return false;
+
+            var skillType = Mines3Enums.SkillFromCode(typeCode);
+            
             skills[slot] = new Skill
             {
                 type = skillType,
@@ -171,8 +166,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 exp = 0
             };
 
-            p.SendLvl();
             Save();
+            return true;
         }
 
         public void Save()
@@ -205,7 +200,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             db.SaveChanges();
         }
 
-        public Dictionary<SkillType, bool> SkillToInstall(Player p)
+        public Dictionary<SkillType, bool> SkillToInstall()
         {
             Dictionary<SkillType, bool> d = new();
 

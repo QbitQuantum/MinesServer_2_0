@@ -160,9 +160,12 @@ namespace MinesServer.GameShit.Buildings
                     Text = playerSkill != null ? playerSkill.Description : SkillTypeExtensions.GetDescription(skilltype),
                     Button = new MButton("Установить", "confirm", (args) =>
                     {
-                        p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot, p);
-                        p.win = GUIWin(p);
-                        p.SendWindow();
+                        if (p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot))
+                        {
+                            p.SendLvl();
+                            p.win = GUIWin(p);
+                            p.SendWindow();
+                        }
                     })
                 };
 
@@ -192,7 +195,7 @@ namespace MinesServer.GameShit.Buildings
                 uppage = basePage with
                 {
                     SelectedSlot = p.skillslist.selectedslot,
-                    SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall(p) : null,
+                    SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
                     OnInstall = skillfromslot == null ? oninstall : null,
                     Text = skillfromslot?.Description,
                     Button = skillfromslot != null && skillfromslot.isUpReady() ?
@@ -206,12 +209,15 @@ namespace MinesServer.GameShit.Buildings
                     OnDelete = skillfromslot != null ?
                         (slot) =>
                         {
-                            p.skillslist.DeleteSkill(p);
-                            p.win = GUIWin(p);
-                            p.SendWindow();
-                        }
-                    :
-                        null,
+                            if (p.skillslist.DeleteSkill())
+                            {
+                                p.SendLvl();
+                                p.win = GUIWin(p);
+                                p.SendWindow();
+                            }
+                        } 
+                    : 
+                    null,
                     SkillIcon = skillfromslot?.type
                 };
             }

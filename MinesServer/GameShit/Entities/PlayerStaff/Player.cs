@@ -466,7 +466,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             inventory = new Inventory();
             settings = new Settings(true);
             crys = new Basket(true);
-            skillslist = new PlayerSkills(this);
+            skillslist = new PlayerSkills(true); // Инициализация без передачи this
             x = 0;y = 0;
             dir = 0;
             clan = null;
