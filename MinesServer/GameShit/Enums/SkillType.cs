@@ -589,21 +589,6 @@ namespace MinesServer.Enums
                 }
             },
 
-            // Прочие навыки — временные заглушки
-            [SkillType.Unknown] = new SkillInfo
-            {
-                Name = "Неизвестный навык",
-                Description = "Навык не используется",
-                LevelingHint = "Не используется",
-                PriceFunc = (lvl) => 0,
-                OppFunc = (lvl) => 0,
-                EffectType = SkillEffectType.OnExp,
-                EffectFunc = (lvl) => 0f,
-                CostFunc = (lvl) => 0f,
-                ExpFunc = (lvl) => 0f,
-                DopFunc = (lvl) => 0
-            },
-
             [SkillType.AntiSlime] = new SkillInfo
             {
                 Name = "Защита от слизи",
