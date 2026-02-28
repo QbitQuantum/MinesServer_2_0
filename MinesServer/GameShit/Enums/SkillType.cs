@@ -773,7 +773,7 @@ namespace MinesServer.Enums
             [SkillType.Extraction] = new SkillInfo
             {
                 Name = "Извлечение",
-                Description = "Позволяет добывать дополнительные зеленые и синие породы",
+                Description = "Позволяет добывать дополнительные зеленые и синие кристаллы",
                 LevelingHint = "Копать зеленые и синие кристаллы",
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
@@ -781,7 +781,15 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                Requirements = new List<SkillRequirement>
+                {
+                    new SkillRequirement
+                    {
+                        RequiredSkill = SkillType.Detection,
+                        RequiredLevel = 6
+                    }
+                }
             },
 
             [SkillType.Crystallography] = new SkillInfo
