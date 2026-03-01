@@ -129,7 +129,7 @@ namespace MinesServer.Enums
         public string Name { get; set; }
         public string Description { get; set; }
         public string LevelingHint { get; set; }
-        public bool IsExpertSkill = false;
+        public bool IsExpertSkill { get; set; }
         public Func<int, int> PriceFunc { get; set; }  // Функция цены от уровня
         public Func<int, int> OppFunc { get; set; }    // Функция ОПП от уровня
         public SkillEffectType EffectType { get; set; }
