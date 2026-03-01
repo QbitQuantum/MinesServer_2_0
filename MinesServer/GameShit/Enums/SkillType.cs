@@ -129,6 +129,7 @@ namespace MinesServer.Enums
         public string Name { get; set; }
         public string Description { get; set; }
         public string LevelingHint { get; set; }
+        public bool IsExpertSkill = false;
         public Func<int, int> PriceFunc { get; set; }  // Функция цены от уровня
         public Func<int, int> OppFunc { get; set; }    // Функция ОПП от уровня
         public SkillEffectType EffectType { get; set; }
@@ -513,7 +514,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 100f + lvl * 0.2f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.AntiGun] = new SkillInfo
@@ -935,7 +937,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.Sort] = new SkillInfo
@@ -1069,7 +1072,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.ExpertMining] = new SkillInfo
@@ -1083,7 +1087,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.Washing] = new SkillInfo
@@ -1235,7 +1240,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.BuildWar] = new SkillInfo
@@ -1249,7 +1255,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.Architecture] = new SkillInfo
@@ -1263,7 +1270,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.TotalDestruction] = new SkillInfo
@@ -1277,7 +1285,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.UltraWhite] = new SkillInfo
@@ -1291,7 +1300,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.Jewlery] = new SkillInfo
@@ -1305,7 +1315,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.MineSlime] = new SkillInfo
@@ -1319,7 +1330,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.MineDeep] = new SkillInfo
@@ -1333,7 +1345,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.GluonPacking] = new SkillInfo
@@ -1347,7 +1360,8 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DopFunc = (lvl) => lvl,
+                IsExpertSkill = true
             },
 
             [SkillType.Detection] = new SkillInfo
