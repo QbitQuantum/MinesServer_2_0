@@ -135,7 +135,7 @@ namespace MinesServer.GameShit.Buildings
                 }
             });
         }
-        public override Window? GUIWin(Player p)
+        private Tab TabSkillPage(Player p)
         {
             Action? admn = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null;
             var onskill = (int arg) => { p.skillslist.selectedslot = arg; p.win = GUIWin(p); p.SendWindow(); };
@@ -147,7 +147,6 @@ namespace MinesServer.GameShit.Buildings
                 Skills = p.skillslist.GetSkills(),
                 SlotAmount = p.skillslist.slots,
                 OnSkill = onskill,
-                Title = "Здание прокачки умений"
             };
 
             var oninstall = (int slot, SkillType skilltype) =>
@@ -221,14 +220,20 @@ namespace MinesServer.GameShit.Buildings
                     SkillIcon = skillfromslot?.type
                 };
             }
+            return new Tab()
+            {
+                Action = "Upgrade",
+                Label = "Просмотр умений",
+                InitialPage = uppage
+            };
+        }
+        public override Window? GUIWin(Player p)
+        {
             return new Window()
             {
-                Tabs = [new Tab()
-                {
-                    Action = "Upgrade",
-                    Label = "Здание прокачки",
-                    InitialPage = uppage
-                }]
+                ShowTabs = true,
+                Title = "Здание прокачки умений",
+                Tabs = [TabSkillPage(p)]
             };
         }
         #region affectworld
