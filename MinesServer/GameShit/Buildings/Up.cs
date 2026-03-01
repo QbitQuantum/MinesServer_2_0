@@ -227,13 +227,125 @@ namespace MinesServer.GameShit.Buildings
                 InitialPage = uppage
             };
         }
+        private Card MainTitle(Player p, SkillType skilltype = SkillType.Unknown)
+        {
+            string InfoPlayerOpp = "Баллов перепрошивки: <color=yellow>" + p.opp + "</color>";
+            if (skilltype == SkillType.Unknown)
+                return new Card(CardImageType.Skill, SkillType.Architecture.GetCode(),
+                    "Удаляя умения вы получаете баллы перепрошивки которые открывают доступ в экспертным умениям.\n" +
+                    "Эти умения не доступны в стандратной прошивке робота.\n" +
+                    "(Рис.1 - Пример экспертного умения: Архитектура)\n\n" +
+                    InfoPlayerOpp);
+            else
+            {
+                return new Card(CardImageType.Skill, skilltype.GetCode(),
+                    skilltype.GetName() + "\n" +
+                    skilltype.GetDescription() + "\n" +
+                    InfoPlayerOpp);
+            }
+        }
+        private void UpdateSkillPage(Player p, SkillType currentDisplaySkill, SkillType? skillToShowPrice = null)
+        {
+            var allSkills = SkillTypeExtensions.GetAllInfos();
+            var rich = new List<RichListEntry> { };
+
+            foreach (var kvp in allSkills)
+            {
+                var skillType = kvp.Key;
+                var info = kvp.Value;
+
+                if (!info.IsExpertSkill)
+                    continue;
+
+                // Получаем цену для этого умения
+                int price = skillType.GetBasePriceOPP();
+
+                // Определяем текст и действие кнопки
+                string buttonText;
+                Action<ActionArgs> buttonAction;
+
+                if (skillToShowPrice.HasValue && skillToShowPrice.Value == skillType)
+                {
+                    // Если это выбранный скилл - показываем цену и списываем деньги
+                    buttonText = "Стоиомсть исследования: <color=yellow>" + price.ToString() + "</color>";
+                    buttonAction = _ =>
+                    {
+                        if (p.opp >= price)
+                        {
+                            using var db = new DataBase();
+                            db.players.Attach(p);
+                            p.opp -= price;
+                            db.SaveChanges();
+                        }
+                        // Обновляем страницу, убирая цену
+                        UpdateSkillPage(p, currentDisplaySkill, null);
+                    };
+                }
+                else
+                {
+                    // Обычный режим - показываем "Подробнее" и переключаем отображение
+                    buttonText = "Подробнее";
+                    buttonAction = _ =>
+                    {
+                        UpdateSkillPage(p, skillType, skillType);
+                    };
+                }
+
+                rich.Add(RichListEntry.Button(info.Name, new MButton(buttonText, info.Name, buttonAction)));
+            }
+
+            var updatedPage = new Page
+            {
+                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null,
+                Card = MainTitle(p, currentDisplaySkill),
+                RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
+                Buttons = []
+            };
+
+            p.win?.CurrentTab.Open(updatedPage);
+            p.SendWindow();
+        }
+        private Tab TabFlashing(Player p)
+        {
+            var allSkills = SkillTypeExtensions.GetAllInfos();
+            var rich = new List<RichListEntry> { };
+
+            foreach (var kvp in allSkills)
+            {
+                var skillType = kvp.Key;
+                var info = kvp.Value;
+
+                if (!info.IsExpertSkill)
+                    continue;
+
+                rich.Add(RichListEntry.Button(info.Name, new MButton("Подробнее", info.Name, _ =>
+                {
+                    UpdateSkillPage(p, skillType, skillType);
+                })));
+            }
+
+            var basePage = new Page
+            {
+                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null,
+                Card = MainTitle(p),
+                RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
+                Buttons = []
+            };
+
+            return new Tab()
+            {
+                Action = "Flashing",
+                Label = "Эксперт. умения",
+                InitialPage = basePage
+            };
+        }
         public override Window? GUIWin(Player p)
         {
             return new Window()
             {
                 ShowTabs = true,
                 Title = "Здание прокачки умений",
-                Tabs = [TabSkillPage(p)]
+                Tabs = [TabSkillPage(p), TabFlashing(p)]
             };
         }
         #region affectworld
