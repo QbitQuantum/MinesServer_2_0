@@ -118,6 +118,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public override int cid { get => clan == null ? 0 : clan.id; }
         public long money { get; set; }
         public long creds { get; set; }
+        public long opp { get; set; }
         public string hash { get; set; }
         public string passwd { get; set; }
         [NotMapped]
