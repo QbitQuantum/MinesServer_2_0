@@ -95,7 +95,7 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     var cx = pos.x + xxx;
                     var cy = pos.y + yyy;
-                    if (valid(cx, cy))
+                    if (World.W.ValidChunk(cx, cy))
                     {
                         var ch = World.W.chunks[cx, cy];
                         foreach (var id in ch.bots)
@@ -114,7 +114,7 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     var cx = pos.Item1 + xxx;
                     var cy = pos.Item2 + yyy;
-                    if (valid(cx, cy))
+                    if (World.W.ValidChunk(cx, cy))
                     {
                         var ch = World.W.chunks[cx, cy];
                         foreach (var id in ch.bots)
@@ -174,7 +174,7 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     var cx = pos.x + xxx;
                     var cy = pos.y + yyy;
-                    if (valid(cx, cy)) yield return World.W.chunks[cx,cy];
+                    if (World.W.ValidChunk(cx, cy)) yield return World.W.chunks[cx,cy];
                 }
             }
             yield break;
@@ -282,7 +282,6 @@ namespace MinesServer.GameShit.WorldSystem
                         return true;
             return false;
         }
-        public static bool valid(int x, int y) => x >= 0 && y >= 0 && x < World.ChunksW && y < World.ChunksH;
         private void SendCellToBots(int x, int y, byte cell)
         {
             foreach (var ch in vChunksAround())
