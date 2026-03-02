@@ -736,7 +736,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private IHubPacket[] GetBotsInChunk(int chunkX, int chunkY)
         {
-            if (!IsValidChunk(chunkX, chunkY))
+            if (!World.W.ValidChunk(chunkX, chunkY))
                 return Array.Empty<IHubPacket>();
 
             var packets = new List<IHubPacket>();
@@ -780,7 +780,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void CheckChunkChanged(bool force = false)
         {
-            if (!IsValidChunk(ChunkX, ChunkY))
+            if (!World.W.ValidChunk(ChunkX, ChunkY))
                 return;
 
             if (lastchunk != (ChunkX, ChunkY) || force)
@@ -864,15 +864,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     int chunkX = ChunkX + dx;
                     int chunkY = ChunkY + dy;
 
-                    if (IsValidChunk(chunkX, chunkY))
+                    if (World.W.ValidChunk(chunkX, chunkY))
                         yield return (chunkX, chunkY);
                 }
             }
         }
-
-        private static bool IsValidChunk(int x, int y) =>
-            x >= 0 && y >= 0 && x < World.ChunksW && y < World.ChunksH;
-
         #endregion
 
         #region UI

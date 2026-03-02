@@ -391,6 +391,7 @@ namespace MinesServer.GameShit.WorldSystem
             };
         }
         public bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
+        public bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < ChunksW && y < ChunksH;
         public (int, int) GetChunkPosByCoords(int x, int y) => ((int)Math.Floor((float)x / 32), (int)Math.Floor((float)y / 32));
         public void UpdateChunkByCoords(int x, int y)
         {
