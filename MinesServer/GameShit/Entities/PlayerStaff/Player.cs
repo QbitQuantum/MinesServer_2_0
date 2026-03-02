@@ -766,16 +766,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (connection == null)
                 return;
 
-            foreach (var ch in vChunksAround())
-            {
-                var chunk = World.W.chunks[ch.x, ch.y];
-
-                foreach (var (playerId, _) in chunk.bots)
-                {
-                    var player = DataBase.GetPlayer(playerId);
-                    player?.connection?.SendB(new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]));
-                }
-            }
+            SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
 
         public void CheckChunkChanged(bool force = false)

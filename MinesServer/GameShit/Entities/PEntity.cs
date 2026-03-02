@@ -3,6 +3,7 @@ using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
+using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.World;
 using MinesServer.Server;
@@ -116,6 +117,16 @@ namespace MinesServer.GameShit.Entities
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
                     player?.connection?.SendB(new HBPacket([new HBDirectedFXPacket(bid, fxx, fxy, fx, dir, col)]));
+                }
+            }
+        }
+        public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
+        {
+            foreach (var chunk in vChunksAroundEx())
+            {
+                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
+                {
+                    player?.connection?.SendB(new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]));
                 }
             }
         }
