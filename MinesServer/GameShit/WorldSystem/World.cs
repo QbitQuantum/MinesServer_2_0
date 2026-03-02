@@ -17,15 +17,29 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class World
     {
+        // ширина мира в чанках
         public const int ChunksW = 65;
+        // высота мира в чанках
         public const int ChunksH = 105;
-        public const int CellsWidth = ChunksW * ChunkWidth;
-        public const int CellsHeight = ChunksH * ChunkHeight;
+
+        // ширина чанка в клетках
         public const int ChunkWidth = 32;
+        // высота чанка в клетках
         public const int ChunkHeight = 32;
-        public const int ChunkVolume = ChunkWidth * ChunkHeight;
-        public const int TotalVolume = ChunksAmount * ChunkVolume;
+
+        // ширина мира в клетках
+        public const int CellsWidth = ChunksW * ChunkWidth;
+        // высота мира в клетках
+        public const int CellsHeight = ChunksH * ChunkHeight;
+
+        // всего чанков в мире
         public const int ChunksAmount = ChunksW * ChunksH;
+
+        // клеток в одном чанке
+        public const int ChunkVolume = ChunkWidth * ChunkHeight;
+        // всего клеток в мире
+        public const int TotalVolume = ChunksAmount * ChunkVolume;
+
 
         public string name { get; private set; }
         public WorldLayer<byte> road;
