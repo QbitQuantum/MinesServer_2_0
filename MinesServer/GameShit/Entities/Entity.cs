@@ -23,37 +23,24 @@ namespace MinesServer.GameShit.Entities
         {
             get => (int)Math.Floor((float)y / 32);
         }
-        public IEnumerable<(int x, int y)> vChunksAround()
+        public IEnumerable<(int x, int y)> vChunksAround(int radius = 2)
         {
-            for (int y = -2; y <= 2; y++)
+            for (int dy = -radius; dy <= radius; dy++)
             {
-                for (int x = -2; x <= 2; x++)
+                for (int dx = -radius; dx <= radius; dx++)
                 {
-                    var lchunkx = ChunkX + x;
-                    var lchunky = ChunkY + y;
-                    if (World.W.ValidChunk(lchunkx, lchunky))
-                    {
-                        yield return (lchunkx, lchunky);
-                    }
+                    int chunkX = ChunkX + dx;
+                    int chunkY = ChunkY + dy;
+
+                    if (World.W.ValidChunk(chunkX, chunkY))
+                        yield return (chunkX, chunkY);
                 }
             }
-            yield break;
         }
-        public IEnumerable<Chunk> vChunksAroundEx()
+        public IEnumerable<Chunk> vChunksAroundEx(int radius = 2)
         {
-            for (int y = -2; y <= 2; y++)
-            {
-                for (int x = -2; x <= 2; x++)
-                {
-                    var lchunkx = ChunkX + x;
-                    var lchunky = ChunkY + y;
-                    if (World.W.ValidChunk(lchunkx, lchunky))
-                    {
-                        yield return World.W.chunks[lchunkx,lchunky];
-                    }
-                }
-            }
-            yield break;
+            foreach (var (chunkX, chunkY) in vChunksAround(radius))
+                yield return World.W.chunks[chunkX, chunkY];
         }
     }
 }
