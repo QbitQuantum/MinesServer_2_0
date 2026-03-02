@@ -322,7 +322,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
 
             UpdatePosition(x, y, dir);
-            CheckChunkChanged();
 
             if (World.ContainsPack(x, y, out var pack) &&
                 (pack.cid == cid || pack.cid == 0) &&
