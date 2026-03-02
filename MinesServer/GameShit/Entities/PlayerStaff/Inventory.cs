@@ -174,7 +174,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     (p) =>
                     {
                         var coord = p.GetDirCord(true);
-                        World.W.GetChunkPosByCoords(coord.x,coord.y);
                         var chpos = World.W.GetChunkPosByCoords(coord.x,coord.y);
                         var ch = World.W.chunks[chpos.Item1, chpos.Item2];
                         int SearchCoord = (coord.x - ch.WorldX + ((coord.y - 2 - ch.WorldY) * 32));
