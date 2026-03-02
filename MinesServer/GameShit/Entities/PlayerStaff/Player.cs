@@ -727,7 +727,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var packets = new List<IHubPacket>();
 
-            foreach (var chunk in vChunksAround())
+            foreach (var chunk in vChunksAround(1))
                 packets.AddRange(GetBotsInChunk(chunk.x, chunk.y));
 
             connection?.SendB(new HBPacket(packets.ToArray()));
@@ -797,7 +797,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private void StupidVisabilityUpdate()
         {
             var packets = new List<IHubPacket>();
-            var currentChunks = vChunksAround().ToList();
+            var currentChunks = vChunksAround(1).ToList();
             var oldChunks = new List<(int x, int y)>(alreadyvisible);
 
             foreach (var chunk in currentChunks)
@@ -845,20 +845,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private IHubPacket[] fChunkInfo(int chunkx, int chunky) =>
             ChunkInfo(chunkx, chunky).Concat(GetBotsInChunk(chunkx, chunky)).ToArray();
 
-        private IEnumerable<(int x, int y)> vChunksAround()
-        {
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                for (int dy = -1; dy <= 1; dy++)
-                {
-                    int chunkX = ChunkX + dx;
-                    int chunkY = ChunkY + dy;
-
-                    if (World.W.ValidChunk(chunkX, chunkY))
-                        yield return (chunkX, chunkY);
-                }
-            }
-        }
         #endregion
 
         #region UI
