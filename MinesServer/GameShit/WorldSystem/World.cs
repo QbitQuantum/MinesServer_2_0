@@ -32,7 +32,6 @@ namespace MinesServer.GameShit.WorldSystem
             this.name = name;
             gen = new Gen(Chunk.CellsWidth, Chunk.CellsHeight);
             chunks = Chunk.CreateAllChunks();
-            CreateChunks();
             if (!File.Exists($"{name}.mapb"))
             {
                 cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
@@ -103,16 +102,6 @@ namespace MinesServer.GameShit.WorldSystem
                     new Market(x - 7, y - 4, 0).Build();
                     new Resp(x - 8, y + 7, 0).Build();
                     new Up(x, y - 4, 0).Build();
-                }
-            }
-        }
-        public void CreateChunks()
-        {
-            for (int chx = 0; chx < Chunk.ChunksW; chx++)
-            {
-                for (int chy = 0; chy < Chunk.ChunksH; chy++)
-                {
-                    chunks[chx, chy] = new Chunk((chx, chy));
                 }
             }
         }
