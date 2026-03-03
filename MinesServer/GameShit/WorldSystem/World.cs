@@ -23,6 +23,14 @@ namespace MinesServer.GameShit.WorldSystem
         public WorldLayer<float> durability;
         public Chunk[,] chunks;
         public static World W;
+
+        // ширина мира в клетках
+        public const int CellsWidth = Chunk.ChunksW * Chunk.ChunkWidth;
+        // высота мира в клетках
+        public const int CellsHeight = Chunk.ChunksH * Chunk.ChunkHeight;
+        // всего клеток в мире
+        public const int TotalVolume = CellsWidth * CellsHeight;
+
         public Gen gen;
         private Dictionary<(int, int), CancellationTokenSource?> shit = new();
         public World(string name)
@@ -30,7 +38,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             W = this;
             this.name = name;
-            gen = new Gen(Chunk.CellsWidth, Chunk.CellsHeight);
+            gen = new Gen(CellsWidth, CellsHeight);
             chunks = Chunk.CreateAllChunks();
 
             cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
@@ -39,7 +47,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             if (!File.Exists($"{name}.mapb"))
             {
-                Console.WriteLine($"Creating World Preset {Chunk.CellsWidth} x {Chunk.CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
+                Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
                 Console.WriteLine("EmptyMapGeneration");
                 gen.StartGeneration();
                 Console.WriteLine("Generation End");
@@ -201,20 +209,20 @@ namespace MinesServer.GameShit.WorldSystem
         {
             int cells = 0;
             var j = DateTime.Now;
-            for (int x = 0; x < Chunk.CellsWidth; x++)
+            for (int x = 0; x < CellsWidth; x++)
             {
-                for (int y = 0; y < Chunk.CellsHeight; y++)
+                for (int y = 0; y < CellsHeight; y++)
                 {
                     cells += 1;
                     SetCell(x, y, cell);
                 }
                 if (DateTime.Now - j > TimeSpan.FromSeconds(2))
                 {
-                    Console.Write($"\r{cells}/{Chunk.TotalVolume}");
+                    Console.Write($"\r{cells}/{TotalVolume}");
                     j = DateTime.Now;
                 }
             }
-            Console.Write($"\r{cells}/{Chunk.TotalVolume}");
+            Console.Write($"\r{cells}/{TotalVolume}");
             Console.WriteLine("");
         }
         public static Cell GetProp(byte type) => CellsSerializer.cells[type];
@@ -365,7 +373,7 @@ namespace MinesServer.GameShit.WorldSystem
                 _ => false
             };
         }
-        public bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < Chunk.CellsWidth && y < Chunk.CellsHeight;
+        public bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
         public bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
         public (int, int) GetChunkPosByCoords(int x, int y) => ((int)Math.Floor((float)x / 32), (int)Math.Floor((float)y / 32));
         public void UpdateChunkByCoords(int x, int y)

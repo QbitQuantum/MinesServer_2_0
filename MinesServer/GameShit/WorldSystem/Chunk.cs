@@ -23,20 +23,11 @@ namespace MinesServer.GameShit.WorldSystem
         // высота чанка в клетках
         public const int ChunkHeight = 32;
 
-        // ширина мира в клетках
-        public const int CellsWidth = ChunksW * ChunkWidth;
-        // высота мира в клетках
-        public const int CellsHeight = ChunksH * ChunkHeight;
-
         // всего чанков в мире
         public const int ChunksAmount = ChunksW * ChunksH;
-
         // клеток в одном чанке
         public const int ChunkVolume = ChunkWidth * ChunkHeight;
-        // всего клеток в мире
-        public const int TotalVolume = ChunksAmount * ChunkVolume;
-
-
+        
         private const int VIEW_RADIUS = 2;
         private const int ALIVE_UPDATE_MS = 5000;
         private const int SAND_UPDATE_MS = 400;
