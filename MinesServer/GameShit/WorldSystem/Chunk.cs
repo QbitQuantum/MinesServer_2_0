@@ -13,33 +13,51 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class Chunk
     {
-        public ConcurrentDictionary<int, Player> bots = new();
-        public (int x, int y) pos;
-        public bool[] packsprop;
-        public Chunk((int, int) pos) => this.pos = pos;
-        bool ContainsAlive = false;
-        public Dictionary<int, Pack> packs = new();
+        private const int CHUNK_SIZE = 32;
+        private const int CHUNK_CELLS = CHUNK_SIZE * CHUNK_SIZE; // 1024
+        private const int VIEW_RADIUS = 2;
+        private const int ALIVE_UPDATE_MS = 5000;
+        private const int SAND_UPDATE_MS = 400;
+        private const int NOT_VISIBLE_TIMEOUT_MINUTES = 5;
+
+        public ConcurrentDictionary<int, Player> bots { get; } = new();
+        public (int x, int y) pos { get; }
+        public bool[] packsprop { get; private set; }
+        public Dictionary<int, Pack> packs { get; } = new();
+
+        private bool ContainsAlive = false;
+        private DateTime lastupdalive = ServerTime.Now;
+        private DateTime sandandb = ServerTime.Now;
+        private DateTime notvisibleupd = ServerTime.Now;
+        public bool updlasttick = false;
+
+        public Chunk((int x, int y) pos)
+        {
+            this.pos = pos;
+        }
+
+        public int WorldX => pos.x * CHUNK_SIZE;
+        public int WorldY => pos.y * CHUNK_SIZE;
+
+        private bool shouldbeloaded => ShouldBeLoadedBots() || ContainsAlive || updlasttick;
+
+        public byte[] cells => Enumerable.Range(0, World.ChunkHeight)
+            .SelectMany(y => Enumerable.Range(0, World.ChunkWidth)
+                .Select(x => this[x, y]))
+            .ToArray();
+
         private byte this[int x, int y]
         {
             get => World.GetCell(WorldX + x, WorldY + y);
             set => World.SetCell(WorldX + x, WorldY + y, value);
         }
-        public int WorldX
-        {
-            get => pos.x * 32;
-        }
-        public int WorldY
-        {
-            get => pos.y * 32;
-        }
-        private DateTime lastupdalive = ServerTime.Now;
-        private DateTime sandandb = ServerTime.Now;
-        private DateTime notvisibleupd = ServerTime.Now;
-        bool shouldbeloaded => ShouldBeLoadedBots() || ContainsAlive || updlasttick;
-        public byte[] cells => Enumerable.Range(0, World.ChunkHeight).SelectMany(y => Enumerable.Range(0, World.ChunkWidth).Select(x => this[x, y])).ToArray();
+
+        #region Чанк менеджмент
+
         public void Update()
         {
             var now = ServerTime.Now;
+
             if (shouldbeloaded)
             {
                 CheckBots();
@@ -47,84 +65,160 @@ namespace MinesServer.GameShit.WorldSystem
                 UpdateCells();
                 return;
             }
-            else if (now - notvisibleupd > TimeSpan.FromMinutes(5))
+
+            if (now - notvisibleupd > TimeSpan.FromMinutes(NOT_VISIBLE_TIMEOUT_MINUTES))
             {
                 UpdateNotVisible();
                 notvisibleupd = now;
             }
+
             Dispose();
         }
-        public void SetProp(int x, int y, bool packmesh = false)
+
+        private void CheckBots()
         {
-            LoadPackProps();
-            packsprop[x + y * 32] = packmesh ? true : false;
-            SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
+            var botsToRemove = bots.Values
+                .Where(bot => bot.ChunkX != pos.x || bot.ChunkY != pos.y ||
+                              !DataBase.activeplayers.Contains(bot))
+                .Select(bot => bot.id)
+                .ToList();
+
+            foreach (var botId in botsToRemove)
+                bots.TryRemove(botId, out _);
         }
-        public void UpdateNotVisible()
+
+        private void UpdateCells()
         {
-            
-            for (int lx = 0; lx < 32; lx++)
+            var now = ServerTime.Now;
+
+            if (now - lastupdalive > TimeSpan.FromMilliseconds(ALIVE_UPDATE_MS))
             {
-                for (int ly = 0; ly < 32; ly++)
+                UpdateAlive();
+                lastupdalive = now;
+            }
+
+            if (now - sandandb > TimeSpan.FromMilliseconds(SAND_UPDATE_MS))
+            {
+                UpdateSandBoulders();
+                sandandb = now;
+            }
+        }
+
+        private bool ShouldBeLoadedBots()
+        {
+            return GetNeighboringChunks().Any(ch => ch.bots.Count > 0);
+        }
+
+        public void AddBot(Player player)
+        {
+            if (!bots.ContainsKey(player.id))
+                bots[player.id] = player;
+        }
+
+        public void Dispose()
+        {
+            World.W.cells.Unload(pos.x, pos.y);
+        }
+
+        #endregion
+
+        #region Обход соседних чанков
+
+        public IEnumerable<Chunk> GetNeighboringChunks(int radius = VIEW_RADIUS)
+        {
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                for (int dx = -radius; dx <= radius; dx++)
                 {
-                    (int x, int y) d = (WorldX + lx, WorldY + ly);
-                    if (World.isCry(World.GetCell(d.x, d.y)))
-                    {
-                        World.SetDurability(d.x, d.y, World.GetDurability(d.x, d.y) + 1);
-                    }
+                    int x = pos.x + dx;
+                    int y = pos.y + dy;
+
+                    if (World.W.ValidChunk(x, y))
+                        yield return World.W.chunks[x, y];
                 }
             }
         }
-        public void LoadPackProps()
+
+        public IEnumerable<(int x, int y)> GetNeighboringChunkCoordinates(int radius = VIEW_RADIUS)
         {
-            if (packsprop is null)
-            {
-                packsprop = new bool[1024];
-                foreach (var p in packs.Values) p.Build();
-            }
+            foreach (var chunk in GetNeighboringChunks(radius))
+                yield return (chunk.pos.x, chunk.pos.y);
         }
-        public void DestroyCell(int x, int y, World.destroytype t)
-        {
-                SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
-        }
+
+        // Для обратной совместимости
+        [Obsolete("Use GetNeighboringChunks() instead")]
+        private IEnumerable<Chunk> vChunksAround() => GetNeighboringChunks();
+
+        #endregion
+
+        #region Отправка сообщений
+
         public void SendDirectedFx(int fx, int x, int y, int dir, int bid = 0, int color = 0)
         {
-            for (var xxx = -2; xxx <= 2; xxx++)
+            foreach (var chunk in GetNeighboringChunks())
             {
-                for (var yyy = -2; yyy <= 2; yyy++)
+                foreach (var id in chunk.bots)
                 {
-                    var cx = pos.x + xxx;
-                    var cy = pos.y + yyy;
-                    if (World.W.ValidChunk(cx, cy))
-                    {
-                        var ch = World.W.chunks[cx, cy];
-                        foreach (var id in ch.bots)
-                        {
-                            DataBase.GetPlayer(id.Key)?.connection?.SendB(new HBPacket([new HBDirectedFXPacket(id.Key, x, y, fx, dir, color)]));
-                        }
-                    }
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(
+                        new HBPacket([new HBDirectedFXPacket(id.Key, x, y, fx, dir, color)]));
                 }
             }
         }
+
         public void SendFx(int x, int y, int fx)
         {
-            for (var xxx = -2; xxx <= 2; xxx++)
+            foreach (var chunk in GetNeighboringChunks())
             {
-                for (var yyy = -2; yyy <= 2; yyy++)
+                foreach (var id in chunk.bots)
                 {
-                    var cx = pos.Item1 + xxx;
-                    var cy = pos.Item2 + yyy;
-                    if (World.W.ValidChunk(cx, cy))
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(
+                        new HBPacket([new HBFXPacket(x, y, fx)]));
+                }
+            }
+        }
+
+        public void SendCellToBots(int x, int y, byte cell)
+        {
+            foreach (var chunk in GetNeighboringChunks())
+            {
+                foreach (var id in chunk.bots)
+                {
+                    DataBase.GetPlayer(id.Key)?.connection?.SendCell(x, y, cell);
+                }
+            }
+        }
+
+        public void SendPack(char type, int x, int y, int cid, int off)
+        {
+            foreach (var chunk in GetNeighboringChunks())
+            {
+                foreach (var id in chunk.bots)
+                {
+                    ClearPack(x, y);
+                    if (type != (char)PackType.None)
                     {
-                        var ch = World.W.chunks[cx, cy];
-                        foreach (var id in ch.bots)
-                        {
-                            DataBase.GetPlayer(id.Key)?.connection?.SendB(new HBPacket([new HBFXPacket(x, y, fx)]));
-                        }
+                        var player = DataBase.GetPlayer(id.Key);
+                        player?.connection?.SendB(new HBPacket([
+                            new HBPacksPacket(PACKPOS(x, y),
+                            [new HBPack(type, x, y, (byte)cid, (byte)off)])
+                        ]));
                     }
                 }
             }
         }
+
+        public void ClearPack(int x, int y)
+        {
+            foreach (var chunk in GetNeighboringChunks())
+            {
+                foreach (var id in chunk.bots)
+                {
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(
+                        new HBPacket([new HBPacksPacket(PACKPOS(x, y), [])]));
+                }
+            }
+        }
+
         public void ResendPack(Pack p)
         {
             if (p.type != PackType.None)
@@ -132,161 +226,148 @@ namespace MinesServer.GameShit.WorldSystem
                 SendPack((char)p.type, p.x, p.y, p.cid, p.off);
             }
         }
-        public void SendPack(char type, int x, int y, int cid, int off)
-        {
 
-                foreach (var ch in vChunksAround()) 
-                foreach (var id in ch.bots)
+        #endregion
+
+        #region Обновление клеток
+
+        public void UpdateNotVisible()
+        {
+            for (int lx = 0; lx < CHUNK_SIZE; lx++)
+            {
+                for (int ly = 0; ly < CHUNK_SIZE; ly++)
                 {
-                    ClearPack(x, y);
-                    if (type != (char)PackType.None)
+                    int worldX = WorldX + lx;
+                    int worldY = WorldY + ly;
+
+                    if (World.isCry(World.GetCell(worldX, worldY)))
                     {
-                        var player = DataBase.GetPlayer(id.Key);
-                        player?.connection?.SendB(new HBPacket([new HBPacksPacket(PACKPOS(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])]));
+                        int durability = (int)(World.GetDurability(worldX, worldY) + 1);
+                        World.SetDurability(worldX, worldY, durability);
                     }
                 }
+            }
         }
-        public void ClearDelay(int x, int y)
+
+        private void UpdateSandBoulders()
         {
-                foreach (var ch in vChunksAround())
-                foreach (var id in ch.bots)
-                {
-                    var player = DataBase.GetPlayer(id.Key);
-                    player?.connection?.SendB(new HBPacket([new HBPacksPacket(PACKPOS( x, y), [])]));
-                }
-            
-        }
-        public void ClearPack(int x,int y)
-        {
-            foreach (var ch in vChunksAround())
-                foreach (var id in ch.bots)
-                {
-                    var player = DataBase.GetPlayer(id.Key);
-                    player?.connection?.SendB(new HBPacket([new HBPacksPacket(PACKPOS(x, y), [])]));
-                }
-        }
-        public int PACKPOS(int x, int y) => x + y * World.ChunksW;
-        IEnumerable<Chunk> vChunksAround()
-        {
-            for (var xxx = -2; xxx <= 2; xxx++)
+            var cellsToUpdate = new List<(int x, int y, byte cell)>();
+
+            for (int y = 0; y < CHUNK_SIZE; y++)
             {
-                for (var yyy = -2; yyy <= 2; yyy++)
+                for (int x = 0; x < CHUNK_SIZE; x++)
                 {
-                    var cx = pos.x + xxx;
-                    var cy = pos.y + yyy;
-                    if (World.W.ValidChunk(cx, cy)) yield return World.W.chunks[cx,cy];
+                    byte cell = this[x, y];
+                    var prop = World.GetProp(cell);
+
+                    if (prop.isSand || prop.isBoulder)
+                        cellsToUpdate.Add((WorldX + x, WorldY + y, cell));
                 }
             }
-            yield break;
+
+            foreach (var (worldX, worldY, cell) in cellsToUpdate)
+            {
+                var prop = World.GetProp(cell);
+                if (prop.isSand && Physics.Sand(worldX, worldY))
+                    updlasttick = true;
+                else if (prop.isBoulder && Physics.Boulder(worldX, worldY))
+                    updlasttick = true;
+            }
         }
+
+        private void UpdateAlive()
+        {
+            var cellsToUpdate = new List<(int x, int y, byte cell)>();
+
+            for (int y = 0; y < CHUNK_SIZE; y++)
+            {
+                for (int x = 0; x < CHUNK_SIZE; x++)
+                {
+                    byte cell = this[x, y];
+                    if (World.isAlive(cell))
+                        cellsToUpdate.Add((WorldX + x, WorldY + y, cell));
+                }
+            }
+
+            foreach (var (worldX, worldY, cell) in cellsToUpdate)
+            {
+                if (World.isAlive(cell) && Physics.Alive(worldX, worldY))
+                    updlasttick = true;
+            }
+        }
+
+        #endregion
+
+        #region Pack менеджмент
+
+        public void SetProp(int x, int y, bool packmesh = false)
+        {
+            LoadPackProps();
+            packsprop[x + y * CHUNK_SIZE] = packmesh;
+            SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
+        }
+
+        public void LoadPackProps()
+        {
+            if (packsprop != null)
+                return;
+
+            packsprop = new bool[CHUNK_CELLS];
+            foreach (var p in packs.Values)
+                p.Build();
+        }
+
+        public void DestroyCell(int x, int y, World.destroytype t)
+        {
+            SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
+        }
+
+        public int PACKPOS(int x, int y) => x + y * World.ChunksW;
+
         public IHubPacket[] pPakcs(Player player)
         {
-            Dictionary<int, List<HBPack>> l = new();
-            foreach (var p in packs.Values)
-                if (p.type != PackType.None)
-                {
-                    var pos = PACKPOS(p.x, p.y);
-                    if (!l.ContainsKey(pos)) l.Add(pos, new List<HBPack>());
-                        l[pos].Add(new HBPack((char)p.type, p.x, p.y, (byte)p.cid, (byte)p.off));
-                };
-            return l.Select(i => (IHubPacket)new HBPacksPacket(i.Key, i.Value.ToArray())).ToArray();
+            var packGroups = new Dictionary<int, List<HBPack>>();
+
+            foreach (var p in packs.Values.Where(p => p.type != PackType.None))
+            {
+                int pos = PACKPOS(p.x, p.y);
+                if (!packGroups.ContainsKey(pos))
+                    packGroups[pos] = new List<HBPack>();
+
+                packGroups[pos].Add(new HBPack((char)p.type, p.x, p.y, (byte)p.cid, (byte)p.off));
+            }
+
+            return packGroups
+                .Select(g => (IHubPacket)new HBPacksPacket(g.Key, g.Value.ToArray()))
+                .ToArray();
         }
-        public Pack? GetPack(int x, int y) => packs.ContainsKey(x + y * 32) ? packs[x + y * 32] : null;
+
+        public Pack? GetPack(int x, int y)
+        {
+            int key = x + y * CHUNK_SIZE;
+            return packs.TryGetValue(key, out var pack) ? pack : null;
+        }
+
         public void SetPack(int x, int y, Pack p)
         {
-            packs[x + y * 32] = p;
+            int key = x + y * CHUNK_SIZE;
+            packs[key] = p;
+
             if (p.type != PackType.None)
             {
                 SendPack((char)p.type, WorldX + x, WorldY + y, p.cid, p.off);
             }
         }
+
         public void RemovePack(int x, int y)
         {
-            if (packs.ContainsKey(x + y * 32))
+            int key = x + y * CHUNK_SIZE;
+            if (packs.Remove(key))
             {
-                packs.Remove(x + y * 32);
                 ClearPack(WorldX + x, WorldY + y);
             }
         }
-        private void CheckBots()
-        {
-            foreach (var i in bots)
-            {
-                if (i.Value.ChunkX != pos.x || i.Value.ChunkY != pos.y || 
-                    !DataBase.activeplayers.Contains(i.Value))
-                {
-                    bots.Remove(i.Value.id, out var p);
-                }
-            }
-        }
-        private void UpdateSandBoulders()
-        {
-            List<(int, int, byte)> cellstoupd = new();
-            for (int y = 0; y < 32; y++)
-            {
-                for (int x = 0; x < 32; x++)
-                {
-                    var prop = World.GetProp(this[x, y]);
-                    if (prop.isSand || prop.isBoulder)
-                        cellstoupd.Add((WorldX + x, WorldY + y, this[x, y]));
-                }
-            }
-            foreach (var c in cellstoupd)
-            {
-                if (World.GetProp(c.Item3).isSand && Physics.Sand(c.Item1, c.Item2))
-                    updlasttick = true;
-                else if (World.GetProp(c.Item3).isBoulder && Physics.Boulder(c.Item1, c.Item2))
-                    updlasttick = true;
-            }
-        }
-        private void UpdateAlive()
-        {
-            List<(int, int, byte)> cellstoupd = new();
-            for (int y = 0; y < 32; y++)
-                for (int x = 0; x < 32; x++)
-                    if (World.isAlive(this[x, y])) cellstoupd.Add((WorldX + x, WorldY + y, this[x, y]));
-            foreach (var c in cellstoupd)
-            {
-                if (World.isAlive(c.Item3) && Physics.Alive(c.Item1, c.Item2)) 
-                    updlasttick = true;
-            }
-        }
-        private void UpdateCells()
-        {
-            var now = ServerTime.Now;
-            if (now - lastupdalive > TimeSpan.FromMilliseconds(5000))
-            {
-                UpdateAlive();
-                lastupdalive = now;
-            }
-            if (now - sandandb > TimeSpan.FromMilliseconds(400))    
-            {
-                UpdateSandBoulders();
-                sandandb = now;
-            }
-        }
-        public bool updlasttick = false;
-        public void AddBot(Player player)
-        {
-            if (this != null && !bots.ContainsKey(player.id)) 
-                bots[player.id] = player;
-        }
-        public void Dispose()
-        {
-            World.W.cells.Unload(pos.Item1, pos.Item2);
-        }
-        private bool ShouldBeLoadedBots()
-        {
-            foreach (var ch in vChunksAround()) 
-                if (ch.bots.Count > 0)
-                        return true;
-            return false;
-        }
-        private void SendCellToBots(int x, int y, byte cell)
-        {
-            foreach (var ch in vChunksAround())
-                foreach (var id in ch.bots) 
-                    DataBase.GetPlayer(id.Key)?.connection?.SendCell(x, y, cell);
-        }
+
+        #endregion
     }
 }
