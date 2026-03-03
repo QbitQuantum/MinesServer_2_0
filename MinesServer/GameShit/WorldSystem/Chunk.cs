@@ -34,7 +34,7 @@ namespace MinesServer.GameShit.WorldSystem
         private const int NOT_VISIBLE_TIMEOUT_MINUTES = 5;
 
         public ConcurrentDictionary<int, Player> bots { get; } = new();
-        public (int x, int y) pos { get; }
+        private (int x, int y) pos { get; }
         public bool[] packsprop { get; private set; }
         public Dictionary<int, Pack> packs { get; } = new();
 
