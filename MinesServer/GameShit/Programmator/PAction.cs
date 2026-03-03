@@ -92,7 +92,7 @@ namespace MinesServer.GameShit.Programmator
                     if (template is int)
                     {
                         var dir = p.GetDirCord();
-                        if (World.isCry(World.GetCell(dir.x, dir.y)))
+                        if (World.isCry(dir.x, dir.y))
                         {
                             p.Bz();
                             delay = 200;
@@ -101,7 +101,7 @@ namespace MinesServer.GameShit.Programmator
                     }
                     foreach(var i in dirz)
                     {
-                        if (World.isCry(World.GetCell(p.x + i.Value.dx, p.y + i.Value.dy)))
+                        if (World.isCry(p.x + i.Value.dx, p.y + i.Value.dy))
                         if (p.dir == i.Key)
                         {
                             p.Bz();
@@ -380,7 +380,7 @@ namespace MinesServer.GameShit.Programmator
                     Check(p, (x, y) => World.GetProp(x,y).is_diggable);
                     break;
                 case ActionType.IsCrystal:
-                    Check(p, (x, y) => World.isCry(World.GetCell(x,y)));
+                    Check(p, (x, y) => World.isCry(x, y));
                     break;
                 case ActionType.IsGreenBlock:
                     Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.GreenBlock);
@@ -395,7 +395,7 @@ namespace MinesServer.GameShit.Programmator
                     Check(p, (x, y) => World.GetProp(x,y).isSand || World.GetProp(x, y).isBoulder);
                     break;
                 case ActionType.IsLivingCrystal:
-                    Check(p, (x, y) => World.isAlive(World.GetCell(x,y))); 
+                    Check(p, (x, y) => World.isAlive(x, y)); 
                     break;
                 case ActionType.IsPillar:
                     Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Support);
@@ -404,7 +404,7 @@ namespace MinesServer.GameShit.Programmator
                     Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.QuadBlock);
                     break;
                 case ActionType.IsRoad:
-                    Check(p, (x, y) => World.isRoad(World.GetCell(x,y)));
+                    Check(p, (x, y) => World.isRoad(x, y));
                     break;
                 case ActionType.RunSub or ActionType.RunState or ActionType.RunFunction or ActionType.RunOnRespawn:
                     return label;

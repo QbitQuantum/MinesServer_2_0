@@ -83,7 +83,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public Settings settings { get; set; } = null!;
         public PlayerSkills skillslist { get; set; } = null!;
         public Queue<Line> console = new Queue<Line>();
-        public bool OnRoad => World.isRoad(World.GetCell(x, y));
+        public bool OnRoad => World.isRoad(x, y);
         public override double ServerPause => (OnRoad ? (pause * 5) * 0.80 : pause * 5) * 1.4 / 1000;
 
         public override int pause

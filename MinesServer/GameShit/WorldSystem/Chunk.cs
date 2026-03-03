@@ -269,7 +269,7 @@ namespace MinesServer.GameShit.WorldSystem
                     int worldX = WorldX + lx;
                     int worldY = WorldY + ly;
 
-                    if (World.isCry(World.GetCell(worldX, worldY)))
+                    if (World.isCry(worldX, worldY))
                     {
                         int durability = (int)(World.GetDurability(worldX, worldY) + 1);
                         World.SetDurability(worldX, worldY, durability);
@@ -313,14 +313,14 @@ namespace MinesServer.GameShit.WorldSystem
                 for (int x = 0; x < ChunkHeight; x++)
                 {
                     byte cell = this[x, y];
-                    if (World.isAlive(cell))
+                    if (World.isAlive(x, y))
                         cellsToUpdate.Add((WorldX + x, WorldY + y, cell));
                 }
             }
 
             foreach (var (worldX, worldY, cell) in cellsToUpdate)
             {
-                if (World.isAlive(cell) && Physics.Alive(worldX, worldY))
+                if (World.isAlive(worldX, worldY) && Physics.Alive(worldX, worldY))
                     updlasttick = true;
             }
         }

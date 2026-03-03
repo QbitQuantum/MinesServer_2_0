@@ -147,7 +147,7 @@ namespace MinesServer.GameShit.Entities
 
             float hitdmg = 0.2f;
 
-            if (World.isCry(cell))
+            if (World.isCry(x, y))
             {
                 hitdmg = 1f;
                 Mine(actor, skillOwner, skills, ref cb, basket, cell, x, y);

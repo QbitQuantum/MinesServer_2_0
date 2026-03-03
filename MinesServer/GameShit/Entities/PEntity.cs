@@ -60,7 +60,7 @@ namespace MinesServer.GameShit.Entities
             {
                 var cplaceable = geo.Pop();
                 World.SetCell(x, y, cplaceable);
-                World.SetDurability(x, y, World.isCry(cplaceable) ? 0 : Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(cplaceable).durability);
+                World.SetDurability(x, y, World.isCry(x, y) ? 0 : Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(cplaceable).durability);
             }
         }
         public abstract bool Heal(int num = -1);

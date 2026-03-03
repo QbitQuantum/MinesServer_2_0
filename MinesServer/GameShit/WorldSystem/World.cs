@@ -335,33 +335,33 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return true;
         }
-        public static bool isBuildingBlock(byte cell)
+        public static bool isBuildingBlock(int x, int y)
         {
-            return (CellType)cell switch
+            return (CellType)(GetCell(x, y)) switch
             {
                 CellType.GreenBlock or CellType.YellowBlock or CellType.RedBlock or CellType.MilitaryBlockFrame or CellType.MilitaryBlock or CellType.Support or CellType.QuadBlock => true,
                 _ => false
             };
         }
-        public static bool isAlive(byte cell)
+        public static bool isAlive(int x, int y)
         {
-            return (CellType)cell switch
+            return (CellType)(GetCell(x, y)) switch
             {
                 CellType.AliveBlue or CellType.AliveCyan or CellType.AliveRed or CellType.AliveNigger or CellType.AliveViol or CellType.AliveWhite or CellType.AliveRainbow => true,
                 _ => false
             };
         }
-        public static bool isRoad(byte cell)
+        public static bool isRoad(int x, int y)
         {
-            return (CellType)cell switch
+            return (CellType)(GetCell(x, y)) switch
             {
                 CellType.Road or CellType.GoldenRoad or CellType.PolymerRoad or CellType.BuildingDoor => true,
                 _ => false
             };
         }
-        public static bool isCry(byte cell)
+        public static bool isCry(int x, int y)
         {
-            return (CellType)cell switch
+            return (CellType)(GetCell(x, y)) switch
             {
                 CellType.XGreen or CellType.Green => true,
                 CellType.XBlue or CellType.Blue => true,

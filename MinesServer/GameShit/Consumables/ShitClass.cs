@@ -14,7 +14,11 @@ namespace MinesServer.GameShit.Consumables
         {
             var d = p.GetDirCord();
             int x = d.x, y = d.y;
-            var valid = (byte cell) => !World.isAlive(cell) && World.GetProp(cell).is_diggable && World.GetProp(cell).is_destructible && !World.isBuildingBlock(cell);
+            var valid = (int x, int y) => 
+                !World.isAlive(x, y) && 
+                World.GetProp(x, y).is_diggable && 
+                World.GetProp(x, y).is_destructible && 
+                !World.isBuildingBlock(x, y);
             int shotx = 0;
             int shoty = 0;
             switch (p.dir)
@@ -25,14 +29,13 @@ namespace MinesServer.GameShit.Consumables
                     p.SendDFToBots(7, x, shoty, p.id, 1);
                     for (; y <= shoty; y++)
                     {
-                        var c = World.GetCell(x, y);
                         foreach (var player in World.W.GetPlayersFromPos(x, y))
                         {
                             player.Hurt(20 + 60 * player.c190stacks);
                             player.c190stacks++;
                             player.lastc190hit = DateTime.Now;
                         }
-                        if (valid(c))
+                        if (valid(x, y))
                         {
                             World.DamageCell(x, y, 50);
                         }
@@ -44,14 +47,13 @@ namespace MinesServer.GameShit.Consumables
                     p.SendDFToBots(7, shotx, y, p.id, 1);
                     for (; x >= shotx; x--)
                     {
-                        var c = World.GetCell(x, y);
                         foreach (var player in World.W.GetPlayersFromPos(x, y))
                         {
                             player.Hurt(20 + 60 * player.c190stacks);
                             player.c190stacks++;
                             player.lastc190hit = DateTime.Now;
                         }
-                        if (valid(c))
+                        if (valid(x, y))
                         {
                             World.DamageCell(x, y, 50);
                         }
@@ -63,14 +65,13 @@ namespace MinesServer.GameShit.Consumables
                     p.SendDFToBots(7, x, shoty, p.id, 1);
                     for (; y >= shoty; y--)
                     {
-                        var c = World.GetCell(x, y);
                         foreach (var player in World.W.GetPlayersFromPos(x, y))
                         {
                             player.Hurt(20 + 60 * player.c190stacks);
                             player.c190stacks++;
                             player.lastc190hit = DateTime.Now;
                         }
-                        if (valid(c))
+                        if (valid(x, y))
                         {
                             World.DamageCell(x, y, 50);
                         }
@@ -82,14 +83,13 @@ namespace MinesServer.GameShit.Consumables
                     p.SendDFToBots(7, shotx, y, p.id, 1);
                     for (; x <= shotx; x++)
                     {
-                        var c = World.GetCell(x, y);
                         foreach (var player in World.W.GetPlayersFromPos(x, y))
                         {
                             player.Hurt(20 + 60 * player.c190stacks);
                             player.c190stacks++;
                             player.lastc190hit = DateTime.Now;
                         }
-                        if (valid(c))
+                        if (valid(x, y))
                         {
                             World.DamageCell(x, y, 50);
                         }

@@ -88,4 +88,59 @@
         DeepRock = 121,
         GRock = 122
     }
+    // Методы расширения для перечисления CellType
+    public static class CellTypeExtensions
+    {
+        public static bool IsBuildingBlock(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.GreenBlock or CellType.YellowBlock or CellType.RedBlock or
+                CellType.MilitaryBlockFrame or CellType.MilitaryBlock or
+                CellType.Support or CellType.QuadBlock => true,
+                _ => false
+            };
+        }
+
+        public static bool IsAlive(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.AliveBlue or CellType.AliveCyan or CellType.AliveRed or
+                CellType.AliveNigger or CellType.AliveViol or CellType.AliveWhite or
+                CellType.AliveRainbow => true,
+                _ => false
+            };
+        }
+
+        public static bool IsRoad(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.Road or CellType.GoldenRoad or CellType.PolymerRoad or
+                CellType.BuildingDoor => true,
+                _ => false
+            };
+        }
+
+        public static bool IsCry(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.XGreen or CellType.Green => true,
+                CellType.XBlue or CellType.Blue => true,
+                CellType.XRed or CellType.Red => true,
+                CellType.XViolet or CellType.Violet => true,
+                CellType.White => true,
+                CellType.XCyan or CellType.Cyan => true,
+                _ => false
+            };
+        }
+
+        // Перегрузки для работы с byte, если нужна обратная совместимость
+        public static bool IsBuildingBlock(byte cell) => ((CellType)cell).IsBuildingBlock();
+        public static bool IsAlive(byte cell) => ((CellType)cell).IsAlive();
+        public static bool IsRoad(byte cell) => ((CellType)cell).IsRoad();
+        public static bool IsCry(byte cell) => ((CellType)cell).IsCry();
+    }
 }
