@@ -81,12 +81,7 @@ namespace MinesServer.GameShit.Entities
             var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
             var q = new Queue<(int x, int y)>();
 
-            bool IsValid(int tx, int ty) =>
-                World.ValidCoord(tx, ty) &&
-                World.GetProp(tx, ty).isEmpty &&
-                !World.PackPart(tx, ty);
-
-            if (IsValid(x, y))
+            if (World.IsValidEmptyCell(x, y))
                 return (x, y);
 
             q.Enqueue((x, y));
@@ -100,7 +95,7 @@ namespace MinesServer.GameShit.Entities
                     int nx = cx + dx, ny = cy + dy;
                     if (visited.Contains((nx, ny))) continue;
 
-                    if (IsValid(nx, ny))
+                    if (World.IsValidEmptyCell(nx, ny))
                         return (nx, ny);
 
                     visited.Add((nx, ny));

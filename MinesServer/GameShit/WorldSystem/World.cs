@@ -231,6 +231,10 @@ namespace MinesServer.GameShit.WorldSystem
             return GetProp(x, y).isEmpty && !PackPart(x, y);
         }
         public static bool TrueEmpty(int x, int y) => GetProp(x, y).isEmpty && !PackPart(x, y) && GetCell(x, y) is not (36 or 37 or 0 or 39);
+
+        public static bool IsValidEmptyCell(int x, int y)
+            => ValidCoord(x, y) && GetProp(x, y).isEmpty && !PackPart(x, y);
+
         public static Cell GetProp(int x, int y)
         {
             return ValidCoord(x,y) ? GetProp(GetCell(x, y)) : GetProp(0);

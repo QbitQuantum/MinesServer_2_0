@@ -665,12 +665,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var queue = new Queue<(int x, int y)>();
             var visited = new HashSet<(int, int)>();
 
-            bool IsValid(int tx, int ty) =>
-                World.ValidCoord(tx, ty) &&
-                World.GetProp(tx, ty).isEmpty &&
-                !World.PackPart(tx, ty);
-
-            if (IsValid(startX, startY))
+            if (World.IsValidEmptyCell(startX, startY))
                 return (startX, startY);
 
             queue.Enqueue((startX, startY));
@@ -687,7 +682,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     if (visited.Contains((nx, ny)))
                         continue;
 
-                    if (IsValid(nx, ny))
+                    if (World.IsValidEmptyCell(nx, ny))
                         return (nx, ny);
 
                     visited.Add((nx, ny));
