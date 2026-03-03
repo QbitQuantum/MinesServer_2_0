@@ -327,8 +327,7 @@ namespace MinesServer.GameShit.WorldSystem
                 p = null;
                 return true;
             }
-            var chpos = W.GetChunkPosByCoords(x, y);
-            var ch = W.chunks[chpos.Item1, chpos.Item2];
+            var ch = W.GetChunk(x, y);
             p = ch.GetPack(x - ch.WorldX, y - ch.WorldY)!;
             if (p == null)
             {
