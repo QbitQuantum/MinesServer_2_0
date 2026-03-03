@@ -26,7 +26,7 @@ namespace MinesServer.GameShit.WorldSystem
         public static void BuildBox(int x, int y, long[] cry, Player p, bool force = false)
         {
             var cell = World.GetCell(x, y);
-            if (!(World.GetProp(cell).isEmpty && World.GetProp(cell).can_place_over && !World.PackPart(x, y)) && !force)
+            if (!(World.GetProp(cell).can_place_over && World.IsEmpty(x, y)) && !force)
             {
                 return;
             }
