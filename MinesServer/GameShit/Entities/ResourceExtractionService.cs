@@ -104,7 +104,7 @@ namespace MinesServer.GameShit.Entities
         {
             var cord = actor.GetDirCord();
             int x = cord.x, y = cord.y;
-            if (!World.W.ValidCoord(x, y))
+            if (!World.ValidCoord(x, y))
             {
                 return;
             }

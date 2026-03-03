@@ -301,7 +301,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override bool Move(int x, int y, int dir = -1, bool prog = false)
         {
-            if (!World.W.ValidCoord(x, y) || (win != null && !prog))
+            if (!World.ValidCoord(x, y) || (win != null && !prog))
             {
                 tp(this.x, this.y);
                 return false;
@@ -408,7 +408,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private bool CanBuildAt(int x, int y)
         {
-            return World.W.ValidCoord(x, y) &&
+            return World.ValidCoord(x, y) &&
                    World.AccessGun(x, y, cid).access &&
                    !World.PackPart(x, y);
         }
@@ -531,7 +531,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var (x, y) = GetDirCord();
 
-            if (!World.W.ValidCoord((int)x, (int)y) || c == null)
+            if (!World.ValidCoord((int)x, (int)y) || c == null)
                 return;
 
             Box.BuildBox((int)x, (int)y, c, this);
@@ -666,7 +666,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var visited = new HashSet<(int, int)>();
 
             bool IsValid(int tx, int ty) =>
-                World.W.ValidCoord(tx, ty) &&
+                World.ValidCoord(tx, ty) &&
                 World.GetProp(tx, ty).isEmpty &&
                 !World.PackPart(tx, ty);
 
@@ -735,7 +735,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private IHubPacket[] GetBotsInChunk(int chunkX, int chunkY)
         {
-            if (!World.W.ValidChunk(chunkX, chunkY))
+            if (!World.ValidChunk(chunkX, chunkY))
                 return Array.Empty<IHubPacket>();
 
             var packets = new List<IHubPacket>();
@@ -770,7 +770,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void CheckChunkChanged(bool force = false)
         {
-            if (!World.W.ValidChunk(ChunkX, ChunkY))
+            if (!World.ValidChunk(ChunkX, ChunkY))
                 return;
 
             if (lastchunk != (ChunkX, ChunkY) || force)

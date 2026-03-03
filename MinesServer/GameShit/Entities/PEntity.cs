@@ -46,7 +46,7 @@ namespace MinesServer.GameShit.Entities
         public virtual void Geo()
         {
             int x = (int)GetDirCord().x, y = (int)GetDirCord().y;
-            if (!World.W.ValidCoord(x, y) || !World.AccessGun(x, y, cid).access)
+            if (!World.ValidCoord(x, y) || !World.AccessGun(x, y, cid).access)
             {
                 return;
             }

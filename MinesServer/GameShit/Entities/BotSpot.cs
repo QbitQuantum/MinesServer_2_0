@@ -82,7 +82,7 @@ namespace MinesServer.GameShit.Entities
             var q = new Queue<(int x, int y)>();
 
             bool IsValid(int tx, int ty) =>
-                World.W.ValidCoord(tx, ty) &&
+                World.ValidCoord(tx, ty) &&
                 World.GetProp(tx, ty).isEmpty &&
                 !World.PackPart(tx, ty);
 
@@ -197,7 +197,7 @@ namespace MinesServer.GameShit.Entities
 
         public override bool Move(int x, int y, int dir = -1, bool prog = false)
         {
-            if (!World.W.ValidCoord(x, y))
+            if (!World.ValidCoord(x, y))
             {
                 return false;
             }

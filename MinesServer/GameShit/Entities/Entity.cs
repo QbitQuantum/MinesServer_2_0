@@ -32,7 +32,7 @@ namespace MinesServer.GameShit.Entities
                     int chunkX = ChunkX + dx;
                     int chunkY = ChunkY + dy;
 
-                    if (World.W.ValidChunk(chunkX, chunkY))
+                    if (World.ValidChunk(chunkX, chunkY))
                         yield return (chunkX, chunkY);
                 }
             }

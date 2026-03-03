@@ -162,7 +162,7 @@ namespace MinesServer.GameShit.WorldSystem
                     int x = pos.x + dx;
                     int y = pos.y + dy;
 
-                    if (World.W.ValidChunk(x, y))
+                    if (World.ValidChunk(x, y))
                         yield return World.W.chunks[x, y];
                 }
             }

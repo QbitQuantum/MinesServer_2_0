@@ -16,7 +16,7 @@ namespace MinesServer.GameShit.WorldSystem
         private Box(bool n) { }
         public static Box? GetBox(int x, int y)
         {
-            if (!World.W.ValidCoord(x, y))
+            if (!World.ValidCoord(x, y))
             {
                 return null;
             }

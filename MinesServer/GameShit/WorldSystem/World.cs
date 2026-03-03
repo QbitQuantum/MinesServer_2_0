@@ -159,7 +159,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static void Destroy(int x, int y, destroytype t = destroytype.Cell)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return;
             }
@@ -191,7 +191,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static float GetDurability(int x, int y)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return 0f;
             }
@@ -199,7 +199,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static void SetDurability(int x, int y, float d)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return;
             }
@@ -233,11 +233,11 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool TrueEmpty(int x, int y) => GetProp(x, y).isEmpty && !PackPart(x, y) && GetCell(x, y) is not (36 or 37 or 0 or 39);
         public static Cell GetProp(int x, int y)
         {
-            return W.ValidCoord(x,y) ? GetProp(GetCell(x, y)) : GetProp(0);
+            return ValidCoord(x,y) ? GetProp(GetCell(x, y)) : GetProp(0);
          }
         public static void MoveCell(int x, int y, int plusx, int plusy)
         {
-            if (!W.ValidCoord(x + plusx, y + plusy)) return;
+            if (!ValidCoord(x + plusx, y + plusy)) return;
             var cell = GetCell(x, y);
             var durability = GetDurability(x, y);
             Destroy(x, y, destroytype.Cell);
@@ -248,7 +248,7 @@ namespace MinesServer.GameShit.WorldSystem
         public static void SetCell(int x, int y, CellType type) => SetCell(x, y, (byte)type);
         public static void SetCell(int x, int y, byte cell, bool packmesh = false)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return;
             }
@@ -269,7 +269,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static bool PackPart(int x, int y)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return false;
             }
@@ -279,7 +279,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static void AddPack(int x, int y, Pack p)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return;
             }
@@ -288,7 +288,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static void RemovePack(int x, int y)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 return;
             }
@@ -297,7 +297,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static byte GetCell(int x, int y)
         {
-            if (!W.ValidCoord(x, y)) return 0;
+            if (!ValidCoord(x, y)) return 0;
             var cell = W.cells[x, y] ?? 0;
             if (cell == 0)
             {
@@ -322,7 +322,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static bool ContainsPack(int x, int y, out Pack p)
         {
-            if (!W.ValidCoord(x, y))
+            if (!ValidCoord(x, y))
             {
                 p = null;
                 return true;
@@ -372,8 +372,8 @@ namespace MinesServer.GameShit.WorldSystem
                 _ => false
             };
         }
-        public bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
-        public bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
+        public static bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
+        public static bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
         public (int, int) GetChunkPosByCoords(int x, int y) => ((int)Math.Floor((float)x / 32), (int)Math.Floor((float)y / 32));
         public void UpdateChunkByCoords(int x, int y)
         {
@@ -406,7 +406,7 @@ namespace MinesServer.GameShit.WorldSystem
                     // Проверяем квадрат расстояния
                     if (dxSqr + dy * dy <= Gun.sqrRadius)
                     {
-                        if (W.ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var p) && p is Gun)
+                        if (ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var p) && p is Gun)
                         {
                             anygun = true;
                             var gun = (Gun)p;

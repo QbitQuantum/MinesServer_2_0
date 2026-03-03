@@ -21,7 +21,7 @@ namespace MinesServer.GameShit.Consumables
             {
                 case 0:
                     shoty = y + 9;
-                    if (!World.W.ValidCoord(0, shoty)) return false;
+                    if (!World.ValidCoord(0, shoty)) return false;
                     p.SendDFToBots(7, x, shoty, p.id, 1);
                     for (; y <= shoty; y++)
                     {
@@ -40,7 +40,7 @@ namespace MinesServer.GameShit.Consumables
                     return true;
                 case 1:
                     shotx = x - 9;
-                    if (!World.W.ValidCoord(shotx, 0)) return false;
+                    if (!World.ValidCoord(shotx, 0)) return false;
                     p.SendDFToBots(7, shotx, y, p.id, 1);
                     for (; x >= shotx; x--)
                     {
@@ -59,7 +59,7 @@ namespace MinesServer.GameShit.Consumables
                     return true;
                 case 2:
                     shoty = y - 9;
-                    if (!World.W.ValidCoord(0, shoty)) return false;
+                    if (!World.ValidCoord(0, shoty)) return false;
                     p.SendDFToBots(7, x, shoty, p.id, 1);
                     for (; y >= shoty; y--)
                     {
@@ -78,7 +78,7 @@ namespace MinesServer.GameShit.Consumables
                     return true;
                 case 3:
                     shotx = x + 9;
-                    if (!World.W.ValidCoord(shotx, 0)) return false;
+                    if (!World.ValidCoord(shotx, 0)) return false;
                     p.SendDFToBots(7, shotx, y, p.id, 1);
                     for (; x <= shotx; x++)
                     {
@@ -125,7 +125,7 @@ namespace MinesServer.GameShit.Consumables
                     for (int dy = -4; dy <= 4; dy++)
                     {
                         int tx = x + dx, ty = y + dy;
-                        if (!World.W.ValidCoord(tx, ty)) continue;
+                        if (!World.ValidCoord(tx, ty)) continue;
 
                         if (Vector2.Distance(new Vector2(x, y), new Vector2(tx, ty)) <= 3.5f)
                         {
@@ -175,7 +175,7 @@ namespace MinesServer.GameShit.Consumables
                     for (int dy = -1; dy <= 1; dy++)
                     {
                         int tx = x + dx, ty = y + dy;
-                        if (!World.W.ValidCoord(tx, ty)) continue;
+                        if (!World.ValidCoord(tx, ty)) continue;
 
                         if (Vector2.Distance(new Vector2(x, y), new Vector2(tx, ty)) <= 3.5f)
                         {
@@ -219,7 +219,7 @@ namespace MinesServer.GameShit.Consumables
                     for (int dy = -10; dy <= 10; dy++)
                     {
                         int tx = x + dx, ty = y + dy;
-                        if (!World.W.ValidCoord(tx, ty)) continue;
+                        if (!World.ValidCoord(tx, ty)) continue;
 
                         if (Vector2.Distance(new Vector2(x, y), new Vector2(tx, ty)) <= 9.5f)
                         {
