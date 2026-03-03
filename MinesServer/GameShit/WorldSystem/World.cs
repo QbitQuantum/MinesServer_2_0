@@ -32,21 +32,17 @@ namespace MinesServer.GameShit.WorldSystem
             this.name = name;
             gen = new Gen(Chunk.CellsWidth, Chunk.CellsHeight);
             chunks = Chunk.CreateAllChunks();
+
+            cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+            road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+            durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+
             if (!File.Exists($"{name}.mapb"))
             {
-                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
                 Console.WriteLine($"Creating World Preset {Chunk.CellsWidth} x {Chunk.CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
                 Console.WriteLine("EmptyMapGeneration");
                 gen.StartGeneration();
                 Console.WriteLine("Generation End");
-            }
-            else
-            { 
-                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
             }
             CreateSpawns();
             CommitWorld();
