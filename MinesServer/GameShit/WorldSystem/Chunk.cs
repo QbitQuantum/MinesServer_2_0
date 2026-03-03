@@ -53,9 +53,25 @@ namespace MinesServer.GameShit.WorldSystem
         private DateTime notvisibleupd = ServerTime.Now;
         public bool updlasttick = false;
 
-        public Chunk((int x, int y) pos)
+        private Chunk((int x, int y) pos)
         {
             this.pos = pos;
+        }
+
+        // Статический метод для создания всех чанков мира
+        public static Chunk[,] CreateAllChunks()
+        {
+            var chunks = new Chunk[ChunksW, ChunksH];
+
+            for (int x = 0; x < ChunksW; x++)
+            {
+                for (int y = 0; y < ChunksH; y++)
+                {
+                    chunks[x, y] = new Chunk((x, y));
+                }
+            }
+
+            return chunks;
         }
 
         public int WorldX => pos.x * ChunkWidth;

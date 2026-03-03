@@ -31,7 +31,7 @@ namespace MinesServer.GameShit.WorldSystem
             W = this;
             this.name = name;
             gen = new Gen(Chunk.CellsWidth, Chunk.CellsHeight);
-            chunks = new Chunk[Chunk.ChunksW, Chunk.ChunksH];
+            chunks = Chunk.CreateAllChunks();
             CreateChunks();
             if (!File.Exists($"{name}.mapb"))
             {
