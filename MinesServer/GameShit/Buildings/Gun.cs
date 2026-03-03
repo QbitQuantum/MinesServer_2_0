@@ -124,9 +124,9 @@ namespace MinesServer.GameShit.Buildings
         }
         public override void Update()
         {
-            int chunkX = x / World.ChunkWidth;
-            int chunkY = y / World.ChunkHeight;
-            int chunkRadius = (int)Math.Ceiling(radius / World.ChunkWidth);
+            int chunkX = x / Chunk.ChunkWidth;
+            int chunkY = y / Chunk.ChunkHeight;
+            int chunkRadius = (int)Math.Ceiling(radius / Chunk.ChunkWidth);
 
             List<Player> playersInRange = new List<Player>();
 
@@ -138,7 +138,7 @@ namespace MinesServer.GameShit.Buildings
                     int tgChunkY = chunkY + cy;
 
                     if (tgChunkX < 0 || tgChunkY < 0 ||
-                        tgChunkX >= World.ChunksW || tgChunkY >= World.ChunksH)
+                        tgChunkX >= Chunk.ChunksW || tgChunkY >= Chunk.ChunksH)
                         continue;
 
                     var chunk = World.W.chunks[tgChunkX, tgChunkY];

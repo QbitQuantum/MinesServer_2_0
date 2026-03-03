@@ -834,7 +834,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var packets = new List<IHubPacket>();
             var chunk = World.W.chunks[chunkx, chunky];
 
-            packets.Add(new HBMapPacket(chunk.WorldX, chunk.WorldY, World.ChunkWidth, World.ChunkHeight, chunk.cells));
+            packets.Add(new HBMapPacket(chunk.WorldX, chunk.WorldY, Chunk.ChunkWidth, Chunk.ChunkHeight, chunk.cells));
 
             if (!alreadyvisible.Contains((chunkx, chunky)))
                 packets.AddRange(chunk.pPakcs(this));

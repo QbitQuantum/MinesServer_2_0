@@ -13,8 +13,30 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class Chunk
     {
-        private const int CHUNK_SIZE = 32;
-        private const int CHUNK_CELLS = CHUNK_SIZE * CHUNK_SIZE; // 1024
+        // ширина мира в чанках
+        public const int ChunksW = 65;
+        // высота мира в чанках
+        public const int ChunksH = 105;
+
+        // ширина чанка в клетках
+        public const int ChunkWidth = 32;
+        // высота чанка в клетках
+        public const int ChunkHeight = 32;
+
+        // ширина мира в клетках
+        public const int CellsWidth = ChunksW * ChunkWidth;
+        // высота мира в клетках
+        public const int CellsHeight = ChunksH * ChunkHeight;
+
+        // всего чанков в мире
+        public const int ChunksAmount = ChunksW * ChunksH;
+
+        // клеток в одном чанке
+        public const int ChunkVolume = ChunkWidth * ChunkHeight;
+        // всего клеток в мире
+        public const int TotalVolume = ChunksAmount * ChunkVolume;
+
+
         private const int VIEW_RADIUS = 2;
         private const int ALIVE_UPDATE_MS = 5000;
         private const int SAND_UPDATE_MS = 400;
@@ -36,13 +58,13 @@ namespace MinesServer.GameShit.WorldSystem
             this.pos = pos;
         }
 
-        public int WorldX => pos.x * CHUNK_SIZE;
-        public int WorldY => pos.y * CHUNK_SIZE;
+        public int WorldX => pos.x * ChunkWidth;
+        public int WorldY => pos.y * ChunkHeight;
 
         private bool shouldbeloaded => ShouldBeLoadedBots() || ContainsAlive || updlasttick;
 
-        public byte[] cells => Enumerable.Range(0, World.ChunkHeight)
-            .SelectMany(y => Enumerable.Range(0, World.ChunkWidth)
+        public byte[] cells => Enumerable.Range(0, ChunkHeight)
+            .SelectMany(y => Enumerable.Range(0, ChunkWidth)
                 .Select(x => this[x, y]))
             .ToArray();
 
@@ -233,9 +255,9 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void UpdateNotVisible()
         {
-            for (int lx = 0; lx < CHUNK_SIZE; lx++)
+            for (int lx = 0; lx < ChunkWidth; lx++)
             {
-                for (int ly = 0; ly < CHUNK_SIZE; ly++)
+                for (int ly = 0; ly < ChunkHeight; ly++)
                 {
                     int worldX = WorldX + lx;
                     int worldY = WorldY + ly;
@@ -253,9 +275,9 @@ namespace MinesServer.GameShit.WorldSystem
         {
             var cellsToUpdate = new List<(int x, int y, byte cell)>();
 
-            for (int y = 0; y < CHUNK_SIZE; y++)
+            for (int y = 0; y < ChunkWidth; y++)
             {
-                for (int x = 0; x < CHUNK_SIZE; x++)
+                for (int x = 0; x < ChunkHeight; x++)
                 {
                     byte cell = this[x, y];
                     var prop = World.GetProp(cell);
@@ -279,9 +301,9 @@ namespace MinesServer.GameShit.WorldSystem
         {
             var cellsToUpdate = new List<(int x, int y, byte cell)>();
 
-            for (int y = 0; y < CHUNK_SIZE; y++)
+            for (int y = 0; y < ChunkWidth; y++)
             {
-                for (int x = 0; x < CHUNK_SIZE; x++)
+                for (int x = 0; x < ChunkHeight; x++)
                 {
                     byte cell = this[x, y];
                     if (World.isAlive(cell))
@@ -303,7 +325,7 @@ namespace MinesServer.GameShit.WorldSystem
         public void SetProp(int x, int y, bool packmesh = false)
         {
             LoadPackProps();
-            packsprop[x + y * CHUNK_SIZE] = packmesh;
+            packsprop[x + y * ChunkWidth] = packmesh;
             SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
         }
 
@@ -312,7 +334,7 @@ namespace MinesServer.GameShit.WorldSystem
             if (packsprop != null)
                 return;
 
-            packsprop = new bool[CHUNK_CELLS];
+            packsprop = new bool[ChunkVolume];
             foreach (var p in packs.Values)
                 p.Build();
         }
@@ -322,7 +344,7 @@ namespace MinesServer.GameShit.WorldSystem
             SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
         }
 
-        public int PACKPOS(int x, int y) => x + y * World.ChunksW;
+        public int PACKPOS(int x, int y) => x + y * ChunksW;
 
         public IHubPacket[] pPakcs(Player player)
         {
@@ -344,13 +366,13 @@ namespace MinesServer.GameShit.WorldSystem
 
         public Pack? GetPack(int x, int y)
         {
-            int key = x + y * CHUNK_SIZE;
+            int key = x + y * ChunkWidth;
             return packs.TryGetValue(key, out var pack) ? pack : null;
         }
 
         public void SetPack(int x, int y, Pack p)
         {
-            int key = x + y * CHUNK_SIZE;
+            int key = x + y * ChunkWidth;
             packs[key] = p;
 
             if (p.type != PackType.None)
@@ -361,7 +383,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void RemovePack(int x, int y)
         {
-            int key = x + y * CHUNK_SIZE;
+            int key = x + y * ChunkWidth;
             if (packs.Remove(key))
             {
                 ClearPack(WorldX + x, WorldY + y);

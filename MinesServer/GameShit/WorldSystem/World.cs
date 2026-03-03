@@ -17,30 +17,6 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class World
     {
-        // ширина мира в чанках
-        public const int ChunksW = 65;
-        // высота мира в чанках
-        public const int ChunksH = 105;
-
-        // ширина чанка в клетках
-        public const int ChunkWidth = 32;
-        // высота чанка в клетках
-        public const int ChunkHeight = 32;
-
-        // ширина мира в клетках
-        public const int CellsWidth = ChunksW * ChunkWidth;
-        // высота мира в клетках
-        public const int CellsHeight = ChunksH * ChunkHeight;
-
-        // всего чанков в мире
-        public const int ChunksAmount = ChunksW * ChunksH;
-
-        // клеток в одном чанке
-        public const int ChunkVolume = ChunkWidth * ChunkHeight;
-        // всего клеток в мире
-        public const int TotalVolume = ChunksAmount * ChunkVolume;
-
-
         public string name { get; private set; }
         public WorldLayer<byte> road;
         public WorldLayer<byte> cells;
@@ -54,24 +30,24 @@ namespace MinesServer.GameShit.WorldSystem
 
             W = this;
             this.name = name;
-            gen = new Gen(CellsWidth, CellsHeight);
-            chunks = new Chunk[ChunksW, ChunksH];
+            gen = new Gen(Chunk.CellsWidth, Chunk.CellsHeight);
+            chunks = new Chunk[Chunk.ChunksW, Chunk.ChunksH];
             CreateChunks();
             if (!File.Exists($"{name}.mapb"))
             {
-                cells = new($"{name}.mapb", (ChunksW, ChunksH));
-                road = new($"{name}_road.mapb", (ChunksW, ChunksH));
-                durability = new($"{name}_durability.mapb", (ChunksW, ChunksH));
-                Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({ChunksW} x {ChunksH} chunks)");
+                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                Console.WriteLine($"Creating World Preset {Chunk.CellsWidth} x {Chunk.CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
                 Console.WriteLine("EmptyMapGeneration");
                 gen.StartGeneration();
                 Console.WriteLine("Generation End");
             }
             else
             { 
-                cells = new($"{name}.mapb", (ChunksW, ChunksH));
-                road = new($"{name}_road.mapb", (ChunksW, ChunksH));
-                durability = new($"{name}_durability.mapb", (ChunksW, ChunksH));
+                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
             }
             CreateSpawns();
             CommitWorld();
@@ -132,9 +108,9 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public void CreateChunks()
         {
-            for (int chx = 0; chx < ChunksW; chx++)
+            for (int chx = 0; chx < Chunk.ChunksW; chx++)
             {
-                for (int chy = 0; chy < ChunksH; chy++)
+                for (int chy = 0; chy < Chunk.ChunksH; chy++)
                 {
                     chunks[chx, chy] = new Chunk((chx, chy));
                 }
@@ -240,20 +216,20 @@ namespace MinesServer.GameShit.WorldSystem
         {
             int cells = 0;
             var j = DateTime.Now;
-            for (int x = 0; x < CellsWidth; x++)
+            for (int x = 0; x < Chunk.CellsWidth; x++)
             {
-                for (int y = 0; y < CellsHeight; y++)
+                for (int y = 0; y < Chunk.CellsHeight; y++)
                 {
                     cells += 1;
                     SetCell(x, y, cell);
                 }
                 if (DateTime.Now - j > TimeSpan.FromSeconds(2))
                 {
-                    Console.Write($"\r{cells}/{TotalVolume}");
+                    Console.Write($"\r{cells}/{Chunk.TotalVolume}");
                     j = DateTime.Now;
                 }
             }
-            Console.Write($"\r{cells}/{TotalVolume}");
+            Console.Write($"\r{cells}/{Chunk.TotalVolume}");
             Console.WriteLine("");
         }
         public static Cell GetProp(byte type) => CellsSerializer.cells[type];
@@ -404,8 +380,8 @@ namespace MinesServer.GameShit.WorldSystem
                 _ => false
             };
         }
-        public bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
-        public bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < ChunksW && y < ChunksH;
+        public bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < Chunk.CellsWidth && y < Chunk.CellsHeight;
+        public bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
         public (int, int) GetChunkPosByCoords(int x, int y) => ((int)Math.Floor((float)x / 32), (int)Math.Floor((float)y / 32));
         public void UpdateChunkByCoords(int x, int y)
         {
@@ -421,9 +397,9 @@ namespace MinesServer.GameShit.WorldSystem
             bool anygun = false;
 
             int minX = Math.Max(0, x - 21);
-            int maxX = Math.Min(World.ChunksW - 1, x + 21);
+            int maxX = Math.Min(Chunk.ChunksW - 1, x + 21);
             int minY = Math.Max(0, y - 21);
-            int maxY = Math.Min(World.ChunksH - 1, y + 21);
+            int maxY = Math.Min(Chunk.ChunksH - 1, y + 21);
 
             // Перебираем координаты в найденных пределах
             for (int checkX = minX; checkX <= maxX; checkX++)
@@ -460,9 +436,9 @@ namespace MinesServer.GameShit.WorldSystem
             if (ServerTime.Now - lastUpdate < interval)
                 return;
             using var db = new DataBase();
-            for (int chx = 0; chx < ChunksW; chx++)
+            for (int chx = 0; chx < Chunk.ChunksW; chx++)
             {
-                for (int chy = 0; chy < ChunksH; chy++)
+                for (int chy = 0; chy < Chunk.ChunksH; chy++)
                 {
                     foreach (var pack in W.chunks[chx, chy].packs)
                     {
