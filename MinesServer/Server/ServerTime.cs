@@ -16,6 +16,7 @@ namespace MinesServer.Server
         private DateTime _lastProgUpdate = DateTime.UtcNow;
         private DateTime _lastOrdersUpdate = DateTime.UtcNow;
         private DateTime _lastActionsUpdate = DateTime.UtcNow;
+        private DateTime _lastCommitWorld = DateTime.UtcNow;
 
         // Очередь действий
         public readonly Queue<(Action action, Player initiator)> gameActions = new();
@@ -102,6 +103,13 @@ namespace MinesServer.Server
                         }
                     }
                     _lastActionsUpdate = now;
+                }
+
+                // === Сохранение мира (чанков) — раз в минуту ===
+                if ((now - _lastCommitWorld).TotalMinutes >= 1)
+                {
+                    World.CommitWorld();
+                    _lastCommitWorld = now;
                 }
 
                 // Небольшая пауза, чтобы не грузить CPU на 100%
