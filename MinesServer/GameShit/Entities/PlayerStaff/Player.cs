@@ -616,7 +616,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (crys.AllCry > 0)
             {
-                var (boxX, boxY) = FindEmptyForBox(x, y);
+                var (boxX, boxY) = World.FindEmptyForBox(x, y);
                 Box.BuildBox(boxX, boxY, crys.cry, this, true);
             }
 
@@ -657,40 +657,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 RunProgramm(null);
                 connection?.SendU(new ProgrammatorPacket(false));
             }
-        }
-
-        private (int x, int y) FindEmptyForBox(int startX, int startY)
-        {
-            var dirs = new[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
-            var queue = new Queue<(int x, int y)>();
-            var visited = new HashSet<(int, int)>();
-
-            if (World.IsValidEmptyCell(startX, startY))
-                return (startX, startY);
-
-            queue.Enqueue((startX, startY));
-            visited.Add((startX, startY));
-
-            while (queue.Count > 0)
-            {
-                var (cx, cy) = queue.Dequeue();
-
-                foreach (var (dx, dy) in dirs)
-                {
-                    int nx = cx + dx, ny = cy + dy;
-
-                    if (visited.Contains((nx, ny)))
-                        continue;
-
-                    if (World.IsValidEmptyCell(nx, ny))
-                        return (nx, ny);
-
-                    visited.Add((nx, ny));
-                    queue.Enqueue((nx, ny));
-                }
-            }
-
-            return (startX, startY);
         }
 
         #endregion

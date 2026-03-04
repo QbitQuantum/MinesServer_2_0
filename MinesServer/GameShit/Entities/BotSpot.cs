@@ -76,39 +76,12 @@ namespace MinesServer.GameShit.Entities
         {
             // Logic moved into ResourceExtractionService.PerformDig
         }
-        private (int x, int y) FindEmptyForBox(int x, int y)
-        {
-            var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
-            var q = new Queue<(int x, int y)>();
-
-            if (World.IsValidEmptyCell(x, y))
-                return (x, y);
-
-            q.Enqueue((x, y));
-            var visited = new HashSet<(int, int)> { (x, y) };
-
-            while (q.Count > 0)
-            {
-                var (cx, cy) = q.Dequeue();
-                foreach (var (dx, dy) in dirs)
-                {
-                    int nx = cx + dx, ny = cy + dy;
-                    if (visited.Contains((nx, ny))) continue;
-
-                    if (World.IsValidEmptyCell(nx, ny))
-                        return (nx, ny);
-
-                    visited.Add((nx, ny));
-                    q.Enqueue((nx, ny));
-                }
-            }
-            return (x, y);
-        }
+        
         public override void Death()
         {
             if (crys.AllCry > 0 && owner is not null)
             {
-                var (bx, by) = FindEmptyForBox(x, y);
+                var (bx, by) = World.FindEmptyForBox(x, y);
                 Box.BuildBox(bx, by, crys.cry, owner, true);
             }
 

@@ -245,6 +245,35 @@ namespace MinesServer.GameShit.WorldSystem
                 Cell.is_destructible;
         }
 
+        public static (int x, int y) FindEmptyForBox(int x, int y)
+        {
+            var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
+            var q = new Queue<(int x, int y)>();
+
+            if (World.IsValidEmptyCell(x, y))
+                return (x, y);
+
+            q.Enqueue((x, y));
+            var visited = new HashSet<(int, int)> { (x, y) };
+
+            while (q.Count > 0)
+            {
+                var (cx, cy) = q.Dequeue();
+                foreach (var (dx, dy) in dirs)
+                {
+                    int nx = cx + dx, ny = cy + dy;
+                    if (visited.Contains((nx, ny))) continue;
+
+                    if (World.IsValidEmptyCell(nx, ny))
+                        return (nx, ny);
+
+                    visited.Add((nx, ny));
+                    q.Enqueue((nx, ny));
+                }
+            }
+            return (x, y);
+        }
+
         public static void MoveCell(int x, int y, int plusx, int plusy)
         {
             if (!ValidCoord(x + plusx, y + plusy)) return;
