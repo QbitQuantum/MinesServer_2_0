@@ -34,7 +34,7 @@ namespace MinesServer.GameShit.WorldSystem
         private const int NOT_VISIBLE_TIMEOUT_MINUTES = 5;
 
         public ConcurrentDictionary<int, Player> bots { get; } = new();
-        private (int x, int y) pos { get; }
+        public (int x, int y) pos { get; }
         public bool[] packsprop { get; private set; }
         public Dictionary<int, Pack> packs { get; } = new();
 
@@ -107,8 +107,11 @@ namespace MinesServer.GameShit.WorldSystem
         private void CheckBots()
         {
             var botsToRemove = bots.Values
-                .Where(bot => bot.ChunkX != pos.x || bot.ChunkY != pos.y ||
-                              !DataBase.activeplayers.Contains(bot))
+                .Where(bot => {
+                    var chunkPos = GetChunkPosByCoords(bot.x, bot.y);
+                    return chunkPos.x != pos.x || chunkPos.y != pos.y ||
+                           !DataBase.activeplayers.Contains(bot);
+                })
                 .Select(bot => bot.id)
                 .ToList();
 
@@ -398,5 +401,8 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         #endregion
+        private static int GetChunkPosCoordsX(int x) => (int)Math.Floor((float)x / ChunkWidth);
+        private static int GetChunkPosCoordsY(int y) => (int)Math.Floor((float)y / ChunkHeight);
+        public static (int x, int y) GetChunkPosByCoords(int x, int y) => (GetChunkPosCoordsX(x), GetChunkPosCoordsY(y));
     }
 }

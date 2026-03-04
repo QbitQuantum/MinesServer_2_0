@@ -378,7 +378,6 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
         public static bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
-        public (int, int) GetChunkPosByCoords(int x, int y) => ((int)Math.Floor((float)x / 32), (int)Math.Floor((float)y / 32));
         public void UpdateChunkByCoords(int x, int y)
         {
             var ch = GetChunk(x, y);
@@ -524,8 +523,8 @@ namespace MinesServer.GameShit.WorldSystem
         public long[] summary = new long[6];
         public Chunk GetChunk(int x, int y)
         {
-            var pos = GetChunkPosByCoords(x, y);
-            return chunks[pos.Item1, pos.Item2];
+            var pos = Chunk.GetChunkPosByCoords(x, y);
+            return chunks[pos.x, pos.y];
         }
     }
 }

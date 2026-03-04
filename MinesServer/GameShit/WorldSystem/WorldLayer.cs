@@ -33,7 +33,7 @@ namespace MinesServer.GameShit.WorldSystem
             get
             {
                 if (x < 0 || x >= chunks.width * chunksize || y < 0 || y >= chunks.height * chunksize) return null;
-                var pos = GetChunkPos(x, y);
+                var pos = Chunk.GetChunkPosByCoords(x, y);
                 T[] temp = null;
                 do temp = Read(pos.x, pos.y);
                 while (temp is null);
@@ -42,7 +42,7 @@ namespace MinesServer.GameShit.WorldSystem
             set
             {
                 if (x < 0 || x >= chunks.width * chunksize || y < 0 || y >= chunks.height * chunksize) return;
-                var pos = GetChunkPos(x, y);
+                var pos = Chunk.GetChunkPosByCoords(x, y);
                 var buffer = Read(pos.x, pos.y);
                 buffer[GetCellIndex(x, y)] = value!.Value;
                 _updatedChunks.Add(pos);
@@ -115,11 +115,10 @@ namespace MinesServer.GameShit.WorldSystem
             return _buffer[chunkindex];
         }
         public void Write(int chunkx, int chunky, T[] data) => Write(GetChunkIndex(chunkx, chunky), data);
-        private (int x, int y) GetChunkPos(int x, int y) => ((int)Math.Floor((float)x / 32), (int)Math.Floor((float)y / 32));
         private int GetChunkIndex(int chunkx, int chunky) => chunky + chunks.height * chunkx;
         private int GetCellIndex(int x, int y)
         {
-            var chpos = GetChunkPos(x, y);
+            var chpos = Chunk.GetChunkPosByCoords(x, y);
             return y - chpos.y * 32 + chunksize * (x - chpos.x * 32);
         }
     }

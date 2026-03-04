@@ -136,7 +136,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             MaxHealth = CalculateMaxHealth();
             Health = Health <= 0 ? MaxHealth : Health;
 
-            MoveToChunk(ChunkX, ChunkY);
+            MoveToChunk();
 
             SendInitialData();
             SubscribeToEvents();
@@ -765,14 +765,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void CheckChunkChanged(bool force = false)
         {
-            if (!World.ValidChunk(ChunkX, ChunkY))
+            // TODO: 
+            // Выпилить ссылку на GetChunkPosByCoords, чтобы в итоге сделать ее приватной
+            // Так как внешне она больше нигде не вызывается
+            // А может и не надо делать приватной
+            var ChunkPos = Chunk.GetChunkPosByCoords(x, y);
+            if (!World.ValidChunk(ChunkPos.x, ChunkPos.y))
                 return;
 
-            if (lastchunk != (ChunkX, ChunkY) || force)
-                MoveToChunk(ChunkX, ChunkY);
+            if (lastchunk != (ChunkPos.x, ChunkPos.y) || force)
+                MoveToChunk();
         }
 
-        private void MoveToChunk(int x, int y)
+        private void MoveToChunk()
         {
             StupidVisabilityUpdate();
 
@@ -782,8 +787,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 oldChunk.bots.Remove(id, out var p);
             }
 
-            var newChunk = World.W.chunks[x, y];
-            lastchunk = (x, y);
+            var newChunk = World.W.GetChunk(x, y);
+
+            lastchunk = newChunk.pos;
 
             if (!newChunk.bots.ContainsKey(id))
                 newChunk.AddBot(this);

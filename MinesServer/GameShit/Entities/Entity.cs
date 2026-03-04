@@ -15,22 +15,15 @@ namespace MinesServer.GameShit.Entities
         public int id { get; set; }
         public int x { get; set; }
         public int y { get; set; }
-        public int ChunkX
-        {
-            get => (int)Math.Floor((float)x / 32);
-        }
-        public int ChunkY
-        {
-            get => (int)Math.Floor((float)y / 32);
-        }
         public IEnumerable<(int x, int y)> vChunksAround(int radius = 2)
         {
             for (int dy = -radius; dy <= radius; dy++)
             {
                 for (int dx = -radius; dx <= radius; dx++)
                 {
-                    int chunkX = ChunkX + dx;
-                    int chunkY = ChunkY + dy;
+                    var ChunkPos = Chunk.GetChunkPosByCoords(x, y);
+                    int chunkX = ChunkPos.x + dx;
+                    int chunkY = ChunkPos.y + dy;
 
                     if (World.ValidChunk(chunkX, chunkY))
                         yield return (chunkX, chunkY);
