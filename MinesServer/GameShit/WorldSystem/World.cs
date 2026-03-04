@@ -250,7 +250,7 @@ namespace MinesServer.GameShit.WorldSystem
             var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
             var q = new Queue<(int x, int y)>();
 
-            if (World.IsValidEmptyCell(x, y))
+            if (IsValidEmptyCell(x, y))
                 return (x, y);
 
             q.Enqueue((x, y));
@@ -264,7 +264,7 @@ namespace MinesServer.GameShit.WorldSystem
                     int nx = cx + dx, ny = cy + dy;
                     if (visited.Contains((nx, ny))) continue;
 
-                    if (World.IsValidEmptyCell(nx, ny))
+                    if (IsValidEmptyCell(nx, ny))
                         return (nx, ny);
 
                     visited.Add((nx, ny));
