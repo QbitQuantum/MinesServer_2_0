@@ -452,41 +452,40 @@ namespace MinesServer.GameShit.WorldSystem
             lastUpdate = ServerTime.Now;
         }
 
-        public static void Update()
+        private static void UpdateOnlineStatus(TimeSpan interval, ref DateTime lastUpdate)
         {
-            if (ServerTime.Now - lazyupd >= TimeSpan.FromMinutes(1))
+            if (ServerTime.Now - lastUpdate < interval)
+                return;
+            foreach (var player in DataBase.activeplayers)
             {
-                foreach (var player in DataBase.activeplayers)
-                {
-                    player.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
-                }
-                lazyupd = ServerTime.Now;
+                player.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
             }
-            // Обновление паков с интервалом 1 час (с повреждением)
-            UpdatePacks(TimeSpan.FromHours(1), ref lastpackupd, shouldDamage: true);
-            // Обновление паков с интервалом 0.5 секунд (без повреждения, только эффекты)
-            UpdatePacks(TimeSpan.FromSeconds(0.5), ref lastpackeffect, shouldDamage: false);
-            if (ServerTime.Now - lastcryupdate >= TimeSpan.FromHours(1))
+            lastUpdate = ServerTime.Now;
+        }
+
+        private static void UpdateCry(TimeSpan interval, ref DateTime lastUpdate)
+        {
+            for (int i = 0; i < W.cryscostmod.Length; i++)
             {
-                for (int i = 0; i < W.cryscostmod.Length; i++)
+                var p = (W.summary[i] + W.summary.Sum()) / 100;
+                if (p > 0)
                 {
-                    var p = (W.summary[i] + W.summary.Sum()) / 100;
-                    if (p > 0)
+                    if (p > 20 && W.cryscostbase[i] + W.cryscostmod[i] > W.cryscostbase[i])
                     {
-                        if (p > 20 && W.cryscostbase[i] + W.cryscostmod[i] > W.cryscostbase[i])
-                        {
-                            W.cryscostmod[i] -= 1;
-                        }
-                        else if (p < 10 && W.cryscostbase[i] + W.cryscostmod[i] < 70)
-                        {
-                            W.cryscostmod[i] += 1;
-                        }
+                        W.cryscostmod[i] -= 1;
+                    }
+                    else if (p < 10 && W.cryscostbase[i] + W.cryscostmod[i] < 70)
+                    {
+                        W.cryscostmod[i] += 1;
                     }
                 }
-                W.summary = new long[6];
-                lastcryupdate = ServerTime.Now;
             }
+            W.summary = new long[6];
+            lastUpdate = ServerTime.Now;
+        }
 
+        private static void UpdateDelay()
+        {
             for (int i = _delayedActions.Count - 1; i >= 0; i--)
             {
                 var (triggerTime, action) = _delayedActions[i];
@@ -503,6 +502,24 @@ namespace MinesServer.GameShit.WorldSystem
                     }
                 }
             }
+        }
+
+        public static void Update()
+        {
+            // Обновление значение количество онлайн игроков
+            UpdateOnlineStatus(TimeSpan.FromMinutes(1), ref lazyupd);
+
+            // Обновление паков с интервалом 1 час (с повреждением)
+            UpdatePacks(TimeSpan.FromHours(1), ref lastpackupd, shouldDamage: true);
+
+            // Обновление паков с интервалом 0.5 секунд (без повреждения, только эффекты)
+            UpdatePacks(TimeSpan.FromSeconds(0.5), ref lastpackeffect, shouldDamage: false);
+
+            // Обновление цен кристаллов
+            UpdateCry(TimeSpan.FromHours(1), ref lastcryupdate);
+
+            // Обновление отложенный действий
+            UpdateDelay();
         }
 
         public static void ChunkUpdate()
