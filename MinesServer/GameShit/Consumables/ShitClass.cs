@@ -13,92 +13,71 @@ namespace MinesServer.GameShit.Consumables
         public static bool C190Shot(Player p)
         {
             var d = p.GetDirCord();
-            int x = d.x, y = d.y;
-            var valid = (int x, int y) => 
-                !World.isAlive(x, y) && 
-                World.GetProp(x, y).is_diggable && 
-                World.GetProp(x, y).is_destructible && 
-                !World.isBuildingBlock(x, y);
-            int shotx = 0;
-            int shoty = 0;
-            switch (p.dir)
-            {
-                case 0:
-                    shoty = y + 9;
-                    if (!World.ValidCoord(0, shoty)) return false;
-                    p.SendDFToBots(7, x, shoty, p.id, 1);
-                    for (; y <= shoty; y++)
-                    {
-                        foreach (var player in World.W.GetPlayersFromPos(x, y))
-                        {
-                            player.Hurt(20 + 60 * player.c190stacks);
-                            player.c190stacks++;
-                            player.lastc190hit = DateTime.Now;
-                        }
-                        if (valid(x, y))
-                        {
-                            World.DamageCell(x, y, 50);
-                        }
-                    }
-                    return true;
-                case 1:
-                    shotx = x - 9;
-                    if (!World.ValidCoord(shotx, 0)) return false;
-                    p.SendDFToBots(7, shotx, y, p.id, 1);
-                    for (; x >= shotx; x--)
-                    {
-                        foreach (var player in World.W.GetPlayersFromPos(x, y))
-                        {
-                            player.Hurt(20 + 60 * player.c190stacks);
-                            player.c190stacks++;
-                            player.lastc190hit = DateTime.Now;
-                        }
-                        if (valid(x, y))
-                        {
-                            World.DamageCell(x, y, 50);
-                        }
-                    }
-                    return true;
-                case 2:
-                    shoty = y - 9;
-                    if (!World.ValidCoord(0, shoty)) return false;
-                    p.SendDFToBots(7, x, shoty, p.id, 1);
-                    for (; y >= shoty; y--)
-                    {
-                        foreach (var player in World.W.GetPlayersFromPos(x, y))
-                        {
-                            player.Hurt(20 + 60 * player.c190stacks);
-                            player.c190stacks++;
-                            player.lastc190hit = DateTime.Now;
-                        }
-                        if (valid(x, y))
-                        {
-                            World.DamageCell(x, y, 50);
-                        }
-                    }
-                    return true;
-                case 3:
-                    shotx = x + 9;
-                    if (!World.ValidCoord(shotx, 0)) return false;
-                    p.SendDFToBots(7, shotx, y, p.id, 1);
-                    for (; x <= shotx; x++)
-                    {
-                        foreach (var player in World.W.GetPlayersFromPos(x, y))
-                        {
-                            player.Hurt(20 + 60 * player.c190stacks);
-                            player.c190stacks++;
-                            player.lastc190hit = DateTime.Now;
-                        }
-                        if (valid(x, y))
-                        {
-                            World.DamageCell(x, y, 50);
-                        }
-                    }
-                    return true;
+            int startX = d.x, startY = d.y;
 
-            }
-            return false;
+            // Определяем координаты выстрела в зависимости от направления
+            var target = GetShotTarget(startX, startY, p.dir, 9);
+
+            // Проверка валидности координат
+            if (!World.ValidCoord(target.x, target.y)) return false;
+
+            // Отправка уведомления ботам
+            p.SendDFToBots(7, target.x, target.y, p.id, 1);
+
+            // Обработка линии выстрела
+            ProcessShotLine(startX, startY, target.x, target.y);
+
+            return true;
         }
+
+        private static void ProcessShotLine(int startX, int startY, int targetX, int targetY)
+        {
+            // Определяем направление движения на основе разницы координат
+            int stepX = Math.Sign(targetX - startX);
+            int stepY = Math.Sign(targetY - startY);
+
+            int currentX = startX;
+            int currentY = startY;
+
+            // Проходим по всем клеткам от старта до цели включительно
+            while (currentX != targetX + stepX || currentY != targetY + stepY)
+            {
+                ProcessCell(currentX, currentY);
+
+                currentX += stepX;
+                currentY += stepY;
+            }
+        }
+
+        private static void ProcessCell(int x, int y)
+        {
+            // Обработка игроков в текущей клетке
+            foreach (var player in World.W.GetPlayersFromPos(x, y))
+            {
+                player.Hurt(20 + 60 * player.c190stacks);
+                player.c190stacks++;
+                player.lastc190hit = DateTime.Now;
+            }
+
+            // Повреждение клетки, если возможно
+            if (World.CanDamageCell(x, y))
+            {
+                World.DamageCell(x, y, 50);
+            }
+        }
+
+        private static (int x, int y) GetShotTarget(int startX, int startY, int direction, int radius)
+        {
+            return direction switch
+            {
+                0 => (startX, startY + radius),
+                1 => (startX - radius, startY),
+                2 => (startX, startY - radius),
+                3 => (startX + radius, startY),
+                _ => throw new ArgumentException($"Invalid direction: {direction}")
+            };
+        }
+
         public static bool Poli(Player p)
         {
             var d = p.GetDirCord();

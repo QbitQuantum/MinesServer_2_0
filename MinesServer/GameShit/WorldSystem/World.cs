@@ -233,7 +233,18 @@ namespace MinesServer.GameShit.WorldSystem
         public static Cell GetProp(int x, int y)
         {
             return ValidCoord(x,y) ? GetProp(GetCell(x, y)) : GetProp(0);
-         }
+        }
+
+        public static bool CanDamageCell(int x, int y)
+        {
+            var Cell = GetProp(x, y);
+            return 
+                !isAlive(x, y) && 
+                !isBuildingBlock(x, y) &&
+                Cell.is_diggable &&
+                Cell.is_destructible;
+        }
+
         public static void MoveCell(int x, int y, int plusx, int plusy)
         {
             if (!ValidCoord(x + plusx, y + plusy)) return;
