@@ -811,7 +811,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 }
                 else
                 {
-                    packets.AddRange(fChunkInfo(chunk.x, chunk.y));
+                    
+                    packets.AddRange(ChunkInfo(chunk.x, chunk.y).Concat(GetBotsInChunk(chunk.x, chunk.y)).ToArray());
                     alreadyvisible.Add(tuple);
                 }
             }

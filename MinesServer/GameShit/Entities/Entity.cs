@@ -30,10 +30,10 @@ namespace MinesServer.GameShit.Entities
                 }
             }
         }
-        public IEnumerable<Chunk> vChunksAroundEx(int radius = 2)
+
+        public IEnumerable<Chunk> GetVisibleChunks(int radius = 2)
         {
-            foreach (var (chunkX, chunkY) in vChunksAround(radius))
-                yield return World.W.chunks[chunkX, chunkY];
+            return World.W.GetChunk(x, y).GetNeighboringChunks(radius);
         }
     }
 }
