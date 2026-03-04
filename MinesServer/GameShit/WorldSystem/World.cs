@@ -504,6 +504,18 @@ namespace MinesServer.GameShit.WorldSystem
                 }
             }
         }
+
+        public static void ChunkUpdate()
+        {
+            for (int x = 0; x < Chunk.ChunksW; x++)
+            {
+                for (int y = 0; y < Chunk.ChunksH; y++)
+                {
+                    W.chunks[x, y]?.Update();
+                }
+            }
+        }
+
         public static DateTime lastcryupdate = DateTime.MinValue;
         public static int GetCrysCost(int i)
         {

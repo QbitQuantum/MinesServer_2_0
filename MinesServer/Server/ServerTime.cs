@@ -41,13 +41,7 @@ namespace MinesServer.Server
                 // === Обновление мира (чанков) — раз в секунду ===
                 if ((now - _lastChunksUpdate).TotalSeconds >= 1)
                 {
-                    for (int x = 0; x < Chunk.ChunksW; x++)
-                    {
-                        for (int y = 0; y < Chunk.ChunksH; y++)
-                        {
-                            World.W?.chunks[x, y]?.Update();
-                        }
-                    }
+                    World.ChunkUpdate();
                     World.Update();
                     World.CommitWorld();
                     _lastChunksUpdate = now;
