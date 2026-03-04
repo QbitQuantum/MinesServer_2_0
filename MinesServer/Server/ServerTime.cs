@@ -44,7 +44,6 @@ namespace MinesServer.Server
                 {
                     World.ChunkUpdate();
                     World.Update();
-                    World.CommitWorld();
                     _lastChunksUpdate = now;
                 }
 
@@ -105,7 +104,7 @@ namespace MinesServer.Server
                     _lastActionsUpdate = now;
                 }
 
-                // === Сохранение мира (чанков) — раз в минуту ===
+                // === Сохранение мира на диск — раз в минуту ===
                 if ((now - _lastCommitWorld).TotalMinutes >= 1)
                 {
                     World.CommitWorld();
