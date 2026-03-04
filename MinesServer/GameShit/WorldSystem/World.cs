@@ -139,12 +139,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return true;
         }
-        public enum destroytype
-        {
-            Cell,
-            Road,
-            CellAndRoad
-        }
+
         public static bool DamageCell(int x, int y, float dmg)
         {
             var d = GetDurability(x, y);
@@ -157,7 +152,7 @@ namespace MinesServer.GameShit.WorldSystem
             SetDurability(x, y, d - dmg);
             return false;
         }
-        public static void Destroy(int x, int y, destroytype t = destroytype.Cell)
+        public static void Destroy(int x, int y, DestroyCellType t = DestroyCellType.Cell)
         {
             if (!ValidCoord(x, y))
             {
@@ -166,20 +161,20 @@ namespace MinesServer.GameShit.WorldSystem
             var ch = W.GetChunk(x, y);
             switch (t)
             {
-                case destroytype.Cell:
+                case DestroyCellType.Cell:
                     if (W.cells[x, y] != 0)
                     {
                         W.cells[x, y] = 32;
                         W.road[x, y] = W.road[x, y] == 0 ? 32 : W.road[x, y];
                     }
                     break;
-                case destroytype.Road:
+                case DestroyCellType.Road:
                     if (W.road[x, y] is not (32 or 37 or 36))
                     {
                         W.road[x, y] = 32;
                     }
                     break;
-                case destroytype.CellAndRoad:
+                case DestroyCellType.CellAndRoad:
                     W.cells[x, y] = 32;
                     if (W.road[x, y] is not (32 or 37 or 36))
                     {
@@ -244,7 +239,7 @@ namespace MinesServer.GameShit.WorldSystem
             if (!ValidCoord(x + plusx, y + plusy)) return;
             var cell = GetCell(x, y);
             var durability = GetDurability(x, y);
-            Destroy(x, y, destroytype.Cell);
+            Destroy(x, y, DestroyCellType.Cell);
             SetCell(x + plusx, y + plusy, cell);
             SetDurability(x + plusx, y + plusy, durability);
             W.GetChunk(x + plusx, y + plusy).updlasttick = true;

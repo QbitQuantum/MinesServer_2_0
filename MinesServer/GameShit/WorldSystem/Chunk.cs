@@ -1,13 +1,14 @@
-﻿using MinesServer.GameShit.Buildings;
+﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.VulkSystem;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.HubEvents.Packs;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using System.Collections.Concurrent;
-using System.Security.Cryptography;
 
 namespace MinesServer.GameShit.WorldSystem
 {
@@ -349,7 +350,7 @@ namespace MinesServer.GameShit.WorldSystem
                 p.Build();
         }
 
-        public void DestroyCell(int x, int y, World.destroytype t)
+        public void DestroyCell(int x, int y, DestroyCellType t)
         {
             SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
         }

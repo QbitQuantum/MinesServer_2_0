@@ -149,7 +149,7 @@ namespace MinesServer.GameShit.Consumables
                                 }
                                 else if (c != 117 && c != 118)
                                 {
-                                    World.Destroy(tx, ty, World.destroytype.CellAndRoad);
+                                    World.Destroy(tx, ty, DestroyCellType.CellAndRoad);
                                 }
                             }
                         }
@@ -192,7 +192,7 @@ namespace MinesServer.GameShit.Consumables
                             var c = World.GetCell(tx, ty);
                             if (World.GetProp(c).is_destructible && !World.PackPart(tx, ty))
                             {
-                                World.Destroy(tx, ty, World.destroytype.CellAndRoad);
+                                World.Destroy(tx, ty, DestroyCellType.CellAndRoad);
                             }
                         }
                     }
