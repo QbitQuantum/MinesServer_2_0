@@ -217,12 +217,7 @@ namespace MinesServer.GameShit.Entities
         }
         public void SendMyMove()
         {
-            foreach (var ch in vChunksAround())
-            {
-                var chunk = World.W.chunks[ch.x, ch.y];
-                foreach (var id in chunk.bots)
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(new HBPacket([new HBBotPacket(this.id, x, y, dir, skin, cid, tail)]));
-            }
+            SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
         public override void Update()
         {
