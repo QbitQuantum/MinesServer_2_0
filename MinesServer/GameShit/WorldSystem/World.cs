@@ -442,7 +442,7 @@ namespace MinesServer.GameShit.WorldSystem
                     int dy = checkY - y;
 
                     // Проверяем квадрат расстояния
-                    if (dxSqr + dy * dy <= Gun.sqrRadius)
+                    if (dxSqr + dy * dy <= Gun.attackRadiusSq)
                     {
                         if (ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var p) && p is Gun)
                         {

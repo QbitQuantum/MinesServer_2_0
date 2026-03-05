@@ -25,8 +25,10 @@ namespace MinesServer.GameShit.Buildings
         public override int off { get { return charge > 0 ? 1 : 0; } }
         public DateTime brokentimer { get; set; }
         #endregion
-        public static float radius = 20f;
-        public static float sqrRadius { get => radius * radius; }
+        private const int attackRadius = 20;
+        private const int chunkRadius = (attackRadius + Chunk.ChunkWidth - 1) / Chunk.ChunkWidth;
+        public const int attackRadiusSq = attackRadius * attackRadius;
+
         public override int PackId => 26;
         public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid)
         {
@@ -126,7 +128,6 @@ namespace MinesServer.GameShit.Buildings
         {
             int chunkX = x / Chunk.ChunkWidth;
             int chunkY = y / Chunk.ChunkHeight;
-            int chunkRadius = (int)Math.Ceiling(radius / Chunk.ChunkWidth);
 
             List<Player> playersInRange = new List<Player>();
 
@@ -153,7 +154,7 @@ namespace MinesServer.GameShit.Buildings
                         float dy = player.y - y;
                         float sqrDistance = dx * dx + dy * dy;
 
-                        if (sqrDistance <= sqrRadius)
+                        if (sqrDistance <= attackRadiusSq)
                             playersInRange.Add(player);
                     }
                 }
