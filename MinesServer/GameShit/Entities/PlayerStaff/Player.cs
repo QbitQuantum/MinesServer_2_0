@@ -725,7 +725,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (connection == null)
                 return;
 
-            SendBotsInfo(id, x, y, dir, skin, cid, tail);
+            World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
 
         public void CheckChunkChanged(bool force = false)

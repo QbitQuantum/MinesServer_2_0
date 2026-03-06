@@ -188,7 +188,7 @@ namespace MinesServer.GameShit.Entities
         }
         public void SendMyMove()
         {
-            SendBotsInfo(id, x, y, dir, skin, cid, tail);
+            World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
         public override void Update()
         {

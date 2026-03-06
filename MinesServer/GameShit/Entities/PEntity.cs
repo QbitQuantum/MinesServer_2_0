@@ -90,16 +90,6 @@ namespace MinesServer.GameShit.Entities
             return (x, y);
         }
         #region Renders
-        public void SendFXoBots(int x, int y, int fx)
-        {
-            foreach (var chunk in World.W.GetVisibleChunks(x, y))
-            {
-                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
-                {
-                    player?.connection?.SendB(new HBPacket([new HBFXPacket(x, y, fx)]));
-                }
-            }
-        }
         public void SendLocalMsg(string msg)
         {
             foreach (var chunk in World.W.GetVisibleChunks(x, y))
@@ -117,16 +107,6 @@ namespace MinesServer.GameShit.Entities
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
                     player?.connection?.SendB(new HBPacket([new HBDirectedFXPacket(bid, fxx, fxy, fx, dir, col)]));
-                }
-            }
-        }
-        public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
-        {
-            foreach (var chunk in World.W.GetVisibleChunks(x, y))
-            {
-                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
-                {
-                    player?.connection?.SendB(new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]));
                 }
             }
         }
