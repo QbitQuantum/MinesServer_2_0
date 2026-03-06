@@ -138,8 +138,7 @@ namespace MinesServer.GameShit.Buildings
                     int tgChunkX = chunkX + cx;
                     int tgChunkY = chunkY + cy;
 
-                    if (tgChunkX < 0 || tgChunkY < 0 ||
-                        tgChunkX >= Chunk.ChunksW || tgChunkY >= Chunk.ChunksH)
+                    if (!World.ValidChunk(tgChunkX, tgChunkY))
                         continue;
 
                     var chunk = World.W.chunks[tgChunkX, tgChunkY];
