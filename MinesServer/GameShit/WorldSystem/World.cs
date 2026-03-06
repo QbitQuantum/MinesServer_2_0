@@ -374,43 +374,26 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return true;
         }
+        #region TODO: Унести типизированную структуру Cell (Cell.cs)
+
         public static bool isBuildingBlock(int x, int y)
         {
-            return (CellType)(GetCell(x, y)) switch
-            {
-                CellType.GreenBlock or CellType.YellowBlock or CellType.RedBlock or CellType.MilitaryBlockFrame or CellType.MilitaryBlock or CellType.Support or CellType.QuadBlock => true,
-                _ => false
-            };
+            return ((CellType)GetCell(x, y)).IsBuildingBlock();
         }
         public static bool isAlive(int x, int y)
         {
-            return (CellType)(GetCell(x, y)) switch
-            {
-                CellType.AliveBlue or CellType.AliveCyan or CellType.AliveRed or CellType.AliveNigger or CellType.AliveViol or CellType.AliveWhite or CellType.AliveRainbow => true,
-                _ => false
-            };
+            return ((CellType)GetCell(x, y)).IsAlive();
         }
         public static bool isRoad(int x, int y)
         {
-            return (CellType)(GetCell(x, y)) switch
-            {
-                CellType.Road or CellType.GoldenRoad or CellType.PolymerRoad or CellType.BuildingDoor => true,
-                _ => false
-            };
+            return ((CellType)GetCell(x, y)).IsRoad();
         }
         public static bool isCry(int x, int y)
         {
-            return (CellType)(GetCell(x, y)) switch
-            {
-                CellType.XGreen or CellType.Green => true,
-                CellType.XBlue or CellType.Blue => true,
-                CellType.XRed or CellType.Red => true,
-                CellType.XViolet or CellType.Violet => true,
-                CellType.White => true,
-                CellType.XCyan or CellType.Cyan => true,
-                _ => false
-            };
+            return ((CellType)GetCell(x, y)).IsCry();
         }
+        #endregion
+
         public static bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
         public static bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
         public void UpdateChunkByCoords(int x, int y)
