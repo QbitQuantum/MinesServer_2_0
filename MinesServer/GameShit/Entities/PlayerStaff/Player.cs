@@ -640,7 +640,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             y = newY;
 
             tp(x, y);
-            BotsRender();
             CheckChunkChanged();
             this.SendHealth();
 
