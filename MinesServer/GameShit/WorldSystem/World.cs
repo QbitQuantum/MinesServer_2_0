@@ -5,6 +5,7 @@ using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.SysMarket;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
+using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.World;
 using MinesServer.Server;
@@ -581,6 +582,16 @@ namespace MinesServer.GameShit.WorldSystem
         public IEnumerable<Chunk> GetVisibleChunks(int x, int y, int radius = 2)
         {
             return GetChunk(x, y).GetNeighboringChunks(radius);
+        }
+        public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
+        {
+            foreach (var chunk in GetVisibleChunks(x, y))
+            {
+                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
+                {
+                    player?.connection?.SendB(new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]));
+                }
+            }
         }
     }
 }
