@@ -84,8 +84,6 @@ namespace MinesServer.GameShit.Entities
                 var (bx, by) = World.FindEmptyForBox(x, y);
                 Box.BuildBox(bx, by, crys.cry, owner, true);
             }
-
-            SendFXoBots(x, y, 2);
             Health = MaxHealth;
             Translate();
         }
