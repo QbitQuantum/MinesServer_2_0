@@ -15,14 +15,5 @@ namespace MinesServer.GameShit.Entities
         public int id { get; set; }
         public int x { get; set; }
         public int y { get; set; }
-        public IEnumerable<(int x, int y)> vChunksAround(int radius = 2)
-        {
-            return World.W.GetChunk(x, y).GetNeighboringChunkCoordinates(radius);
-        }
-
-        public IEnumerable<Chunk> GetVisibleChunks(int radius = 2)
-        {
-            return World.W.GetChunk(x, y).GetNeighboringChunks(radius);
-        }
     }
 }

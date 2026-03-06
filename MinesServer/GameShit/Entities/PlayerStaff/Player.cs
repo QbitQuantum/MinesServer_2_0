@@ -688,7 +688,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var packets = new List<IHubPacket>();
 
-            foreach (var chunk in vChunksAround(1))
+            foreach (var chunk in World.W.GetVisibleChunksPos(x, y, 1))
                 packets.AddRange(GetBotsInChunk(chunk.x, chunk.y));
 
             connection?.SendB(new HBPacket(packets.ToArray()));
@@ -764,7 +764,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private void StupidVisabilityUpdate()
         {
             var packets = new List<IHubPacket>();
-            var currentChunks = vChunksAround(1).ToList();
+            var currentChunks = World.W.GetVisibleChunksPos(x, y, 1).ToList();
             var oldChunks = new List<(int x, int y)>(alreadyvisible);
 
             foreach (var chunk in currentChunks)

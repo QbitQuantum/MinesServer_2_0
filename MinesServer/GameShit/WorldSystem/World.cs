@@ -573,5 +573,14 @@ namespace MinesServer.GameShit.WorldSystem
             var pos = Chunk.GetChunkPosByCoords(x, y);
             return chunks[pos.x, pos.y];
         }
+        public IEnumerable<(int x, int y)> GetVisibleChunksPos(int x, int y, int radius = 2)
+        {
+            return GetChunk(x, y).GetNeighboringChunkCoordinates(radius);
+        }
+
+        public IEnumerable<Chunk> GetVisibleChunks(int x, int y, int radius = 2)
+        {
+            return GetChunk(x, y).GetNeighboringChunks(radius);
+        }
     }
 }

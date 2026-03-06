@@ -92,7 +92,7 @@ namespace MinesServer.GameShit.Entities
         #region Renders
         public void SendFXoBots(int fx, int fxx, int fxy)
         {
-            foreach (var chunk in GetVisibleChunks())
+            foreach (var chunk in World.W.GetVisibleChunks(x, y))
             {
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
@@ -102,7 +102,7 @@ namespace MinesServer.GameShit.Entities
         }
         public void SendLocalMsg(string msg)
         {
-            foreach (var chunk in GetVisibleChunks())
+            foreach (var chunk in World.W.GetVisibleChunks(x, y))
             {
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
@@ -112,7 +112,7 @@ namespace MinesServer.GameShit.Entities
         }
         public void SendDFToBots(int fx, int fxx, int fxy, int bid, int dir, int col = 0)
         {
-            foreach (var chunk in GetVisibleChunks())
+            foreach (var chunk in World.W.GetVisibleChunks(x, y))
             {
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
@@ -122,7 +122,7 @@ namespace MinesServer.GameShit.Entities
         }
         public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
         {
-            foreach (var chunk in GetVisibleChunks())
+            foreach (var chunk in World.W.GetVisibleChunks(x, y))
             {
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
