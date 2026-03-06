@@ -126,36 +126,24 @@ namespace MinesServer.GameShit.Buildings
         }
         public override void Update()
         {
-            int chunkX = x / Chunk.ChunkWidth;
-            int chunkY = y / Chunk.ChunkHeight;
-
+            var chunksInRange = World.W.GetChunksInRange(x, y, chunkRadius);
             List<Player> playersInRange = new List<Player>();
 
-            for (int cx = -chunkRadius; cx <= chunkRadius; cx++)
+            foreach (var chunk in chunksInRange)
             {
-                for (int cy = -chunkRadius; cy <= chunkRadius; cy++)
+                if (chunk.bots.Count == 0) continue;
+
+                foreach (var playerId in chunk.bots.Keys)
                 {
-                    int tgChunkX = chunkX + cx;
-                    int tgChunkY = chunkY + cy;
+                    var player = DataBase.GetPlayer(playerId);
+                    if (player == null || player.cid == cid) continue;
 
-                    if (!World.ValidChunk(tgChunkX, tgChunkY))
-                        continue;
+                    float dx = player.x - x;
+                    float dy = player.y - y;
+                    float sqrDistance = dx * dx + dy * dy;
 
-                    var chunk = World.W.chunks[tgChunkX, tgChunkY];
-                    if (chunk.bots.Count == 0) continue;
-
-                    foreach (var playerId in chunk.bots.Keys)
-                    {
-                        var player = DataBase.GetPlayer(playerId);
-                        if (player == null || player.cid == cid) continue;
-
-                        float dx = player.x - x;
-                        float dy = player.y - y;
-                        float sqrDistance = dx * dx + dy * dy;
-
-                        if (sqrDistance <= attackRadiusSq)
-                            playersInRange.Add(player);
-                    }
+                    if (sqrDistance <= attackRadiusSq)
+                        playersInRange.Add(player);
                 }
             }
             if (playersInRange.Count != 0 && charge != 0)

@@ -583,6 +583,27 @@ namespace MinesServer.GameShit.WorldSystem
         {
             return GetChunk(x, y).GetNeighboringChunks(radius);
         }
+        public IEnumerable<Chunk> GetChunksInRange(int x, int y, int radius)
+        {
+            var pos = Chunk.GetChunkPosByCoords(x, y);
+
+            int chunkX = pos.x;
+            int chunkY = pos.y;
+
+            for (int cx = -radius; cx <= radius; cx++)
+            {
+                for (int cy = -radius; cy <= radius; cy++)
+                {
+                    int tgChunkX = chunkX + cx;
+                    int tgChunkY = chunkY + cy;
+
+                    if (!ValidChunk(tgChunkX, tgChunkY))
+                        continue;
+
+                    yield return chunks[tgChunkX, tgChunkY];
+                }
+            }
+        }
         public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
         {
             foreach (var chunk in GetVisibleChunks(x, y))
