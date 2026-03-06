@@ -90,13 +90,13 @@ namespace MinesServer.GameShit.Entities
             return (x, y);
         }
         #region Renders
-        public void SendFXoBots(int fx, int fxx, int fxy)
+        public void SendFXoBots(int x, int y, int fx)
         {
             foreach (var chunk in World.W.GetVisibleChunks(x, y))
             {
                 foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
                 {
-                    player?.connection?.SendB(new HBPacket([new HBFXPacket(fxx, fxy, fx)]));
+                    player?.connection?.SendB(new HBPacket([new HBFXPacket(x, y, fx)]));
                 }
             }
         }

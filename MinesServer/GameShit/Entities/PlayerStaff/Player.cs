@@ -622,7 +622,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             win = null;
             SendWindow();
-            SendFXoBots(2, x, y);
+            SendFXoBots(x, y, 2);
 
             Health = MaxHealth;
 
