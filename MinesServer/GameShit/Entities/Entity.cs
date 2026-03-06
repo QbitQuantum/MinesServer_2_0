@@ -17,18 +17,7 @@ namespace MinesServer.GameShit.Entities
         public int y { get; set; }
         public IEnumerable<(int x, int y)> vChunksAround(int radius = 2)
         {
-            for (int dy = -radius; dy <= radius; dy++)
-            {
-                for (int dx = -radius; dx <= radius; dx++)
-                {
-                    var ChunkPos = Chunk.GetChunkPosByCoords(x, y);
-                    int chunkX = ChunkPos.x + dx;
-                    int chunkY = ChunkPos.y + dy;
-
-                    if (World.ValidChunk(chunkX, chunkY))
-                        yield return (chunkX, chunkY);
-                }
-            }
+            return World.W.GetChunk(x, y).GetNeighboringChunkCoordinates(radius);
         }
 
         public IEnumerable<Chunk> GetVisibleChunks(int radius = 2)
