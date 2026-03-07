@@ -5,6 +5,7 @@ using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.VulkSystem;
 using MinesServer.Network.Constraints;
+using MinesServer.Network.HubEvents;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.HubEvents.Packs;
 using MinesServer.Network.World;
@@ -399,6 +400,16 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 ClearPack(WorldX + x, WorldY + y);
             }
+        }
+
+        public HBMapPacket MapPacket()
+        {
+            return new HBMapPacket(
+                WorldX,
+                WorldY,
+                ChunkWidth,
+                ChunkHeight,
+                cells);
         }
 
         #endregion

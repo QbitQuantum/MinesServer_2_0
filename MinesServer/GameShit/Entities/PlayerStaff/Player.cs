@@ -30,6 +30,7 @@ using MinesServer.Server.Network;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -684,63 +685,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void BotsRender()
         {
-            var packets = new List<IHubPacket>();
+            if (connection == null) return;
 
-            foreach (var chunks in World.W.GetVisibleChunks(x, y, 1))
-            {
-                foreach (var (playerId, _) in chunks.bots)
-                {
-                    var player = DataBase.GetPlayer(playerId);
-                    if (player != null)
-                    {
-                        packets.Add(new HBBotPacket(
-                            player.id,
-                            player.x,
-                            player.y,
-                            player.dir,
-                            player.skin,
-                            player.cid,
-                            player.tail));
-                    }
-                }
-            }
-
-            connection?.SendB(new HBPacket(packets.ToArray()));
-        }
-
-        private IHubPacket[] GetBotsInChunk(int chunkX, int chunkY)
-        {
-            if (!World.ValidChunk(chunkX, chunkY))
-                return Array.Empty<IHubPacket>();
-
-            var packets = new List<IHubPacket>();
-            var chunk = World.W.chunks[chunkX, chunkY];
-
-            foreach (var (playerId, _) in chunk.bots)
-            {
-                var player = DataBase.GetPlayer(playerId);
-                if (player != null)
-                {
-                    packets.Add(new HBBotPacket(
-                        player.id,
-                        player.x,
-                        player.y,
-                        player.dir,
-                        player.skin,
-                        player.cid,
-                        player.tail));
-                }
-            }
-
-            return packets.ToArray();
+            World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
 
         public void SendMyMove()
         {
-            if (connection == null)
-                return;
-
-            World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
+            BotsRender();
         }
 
         public void CheckChunkChanged(bool force = false)
@@ -759,69 +711,120 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void MoveToChunk()
         {
-            StupidVisabilityUpdate();
+            UpdateChunkRegistration();
+            UpdateVisibility();
+        }
 
+        private void UpdateChunkRegistration()
+        {
+            // Удаляем игрока из старого чанка
             if (lastchunk != null)
             {
                 var oldChunk = World.W.chunks[lastchunk.Value.Item1, lastchunk.Value.Item2];
                 oldChunk.bots.Remove(id, out var p);
             }
 
+            // Добавляем игрока в новый чанк
             var newChunk = World.W.GetChunk(x, y);
-
             lastchunk = newChunk.pos;
 
             if (!newChunk.bots.ContainsKey(id))
                 newChunk.AddBot(this);
         }
 
-        private void StupidVisabilityUpdate()
+        private void UpdateVisibility()
         {
-            var packets = new List<IHubPacket>();
-            var currentChunks = World.W.GetVisibleChunksPos(x, y, 1).ToList();
-            var oldChunks = new List<(int x, int y)>(alreadyvisible);
+            var currentChunks = GetCurrentVisibleChunks();
+            var chunksToAdd = GetNewChunks(currentChunks);
+            var chunksToRemove = GetObsoleteChunks(currentChunks);
 
-            foreach (var chunk in currentChunks)
-            {
-                var tuple = (chunk.x, chunk.y);
+            SendChunksAdded(chunksToAdd);
+            SendChunksRemoved(chunksToRemove);
 
-                if (oldChunks.Contains(tuple))
-                {
-                    oldChunks.Remove(tuple);
-                }
-                else
-                {
-                    
-                    packets.AddRange(ChunkInfo(chunk.x, chunk.y).Concat(GetBotsInChunk(chunk.x, chunk.y)).ToArray());
-                    alreadyvisible.Add(tuple);
-                }
-            }
-
-            foreach (var abandoned in oldChunks)
-            {
-                alreadyvisible.Remove(abandoned);
-                var chunk = World.W.chunks[abandoned.x, abandoned.y];
-                foreach (var pack in chunk.packs.Values)
-                {
-                    packets.Add(new HBPacksPacket(
-                        chunk.PACKPOS(pack.x, pack.y), []));
-                }
-            }
-            if (packets.Any())
-                connection?.SendB(new HBPacket(packets.ToArray()));
+            UpdateTrackedChunks(chunksToAdd, chunksToRemove);
         }
 
-        private IHubPacket[] ChunkInfo(int chunkx, int chunky)
+        private List<(int x, int y)> GetCurrentVisibleChunks()
+        {
+            return World.W.GetVisibleChunksPos(x, y, 1).ToList();
+        }
+
+        private List<(int x, int y)> GetNewChunks(List<(int x, int y)> currentChunks)
+        {
+            return currentChunks.Where(chunk => !alreadyvisible.Contains(chunk)).ToList();
+        }
+
+        private List<(int x, int y)> GetObsoleteChunks(List<(int x, int y)> currentChunks)
+        {
+            return alreadyvisible.Where(chunk => !currentChunks.Contains(chunk)).ToList();
+        }
+
+        private void SendChunksAdded(List<(int x, int y)> chunksToAdd)
+        {
+            if (!chunksToAdd.Any())
+                return;
+
+            var packets = new List<IHubPacket>();
+
+            foreach (var chunk in chunksToAdd)
+            {
+                packets.AddRange(GetChunkPackets(chunk.x, chunk.y));
+            }
+
+            SendPackets(packets);
+        }
+
+        private void SendChunksRemoved(List<(int x, int y)> chunksToRemove)
+        {
+            if (!chunksToRemove.Any())
+                return;
+
+            var packets = new List<IHubPacket>();
+
+            foreach (var (x, y) in chunksToRemove)
+            {
+                packets.AddRange(GetPackRemovalPackets(World.W.chunks[x, y]));
+            }
+
+            SendPackets(packets);
+        }
+
+        private IEnumerable<IHubPacket> GetChunkPackets(int chunkX, int chunkY)
         {
             var packets = new List<IHubPacket>();
-            var chunk = World.W.chunks[chunkx, chunky];
+            var chunk = World.W.chunks[chunkX, chunkY];
 
-            packets.Add(new HBMapPacket(chunk.WorldX, chunk.WorldY, Chunk.ChunkWidth, Chunk.ChunkHeight, chunk.cells));
+            // Отправляем карту чанка
+            packets.Add(chunk.MapPacket());
 
-            if (!alreadyvisible.Contains((chunkx, chunky)))
-                packets.AddRange(chunk.pPakcs());
+            // Отправляем паки чанка
+            packets.AddRange(chunk.pPakcs());
 
-            return packets.ToArray();
+            return packets;
+        }
+
+        private IEnumerable<IHubPacket> GetPackRemovalPackets(Chunk chunk)
+        {
+            return chunk.packs.Values.Select(pack =>
+                (IHubPacket)new HBPacksPacket(chunk.PACKPOS(pack.x, pack.y), Array.Empty<HBPack>()));
+        }
+
+        private void SendPackets(IEnumerable<IHubPacket> packets)
+        {
+            var packetArray = packets.ToArray();
+            if (packetArray.Any())
+                connection?.SendB(new HBPacket(packetArray));
+        }
+
+        private void UpdateTrackedChunks(
+            List<(int x, int y)> chunksToAdd,
+            List<(int x, int y)> chunksToRemove)
+        {
+            foreach (var chunk in chunksToAdd)
+                alreadyvisible.Add(chunk);
+
+            foreach (var chunk in chunksToRemove)
+                alreadyvisible.Remove(chunk);
         }
 
         #endregion
