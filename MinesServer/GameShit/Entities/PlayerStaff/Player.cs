@@ -391,7 +391,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public override void Build(string type)
         {
             var (targetX, targetY) = GetDirCord();
-            int x = (int)targetX, y = (int)targetY;
+            int x = targetX, y = targetY;
 
             if (!CanBuildAt(x, y))
                 return;
@@ -532,10 +532,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var (x, y) = GetDirCord();
 
-            if (!World.ValidCoord((int)x, (int)y) || c == null)
+            if (!World.ValidCoord(x, y) || c == null)
                 return;
 
-            Box.BuildBox((int)x, (int)y, c, this);
+            Box.BuildBox(x, y, c, this);
             connection?.CloseWindow();
         }
 
@@ -936,7 +936,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region Helpers
 
-        private (float x, float y) GetDirCord()
+        private (int x, int y) GetDirCord()
         {
             return base.GetDirCord();
         }
