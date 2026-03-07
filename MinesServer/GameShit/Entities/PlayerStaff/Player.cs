@@ -393,7 +393,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var (targetX, targetY) = GetDirCord();
             int x = targetX, y = targetY;
 
-            if (!CanBuildAt(x, y))
+            if (!World.CanBuildAt(x, y, cid))
                 return;
 
             var buildskills = skillslist.skills.Values.Where(s => s?.EffectType() == SkillEffectType.OnBld);
@@ -405,13 +405,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 case "R": BuildRoad(x, y, buildskills); break;
                 case "O": BuildSupport(x, y, buildskills); break;
             }
-        }
-
-        private bool CanBuildAt(int x, int y)
-        {
-            return World.ValidCoord(x, y) &&
-                   World.AccessGun(x, y, cid).access &&
-                   !World.PackPart(x, y);
         }
 
         private void BuildBlock(int x, int y, IEnumerable<Skill> buildskills)

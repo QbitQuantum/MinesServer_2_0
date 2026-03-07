@@ -233,6 +233,13 @@ namespace MinesServer.GameShit.WorldSystem
             return ValidCoord(x,y) ? GetProp(GetCell(x, y)) : GetProp(0);
         }
 
+        public static bool CanBuildAt(int x, int y, int cid)
+        {
+            return ValidCoord(x, y) &&
+                   AccessGun(x, y, cid).access &&
+                   !PackPart(x, y);
+        }
+
         public static bool CanDamageCell(int x, int y)
         {
             var Cell = GetProp(x, y);
