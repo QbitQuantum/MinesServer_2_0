@@ -720,7 +720,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             // Удаляем игрока из старого чанка
             if (lastchunk != null)
             {
-                var oldChunk = World.W.chunks[lastchunk.Value.X, lastchunk.Value.Y];
+                var oldChunk = World.W.GetPosChunk(lastchunk.Value.X, lastchunk.Value.Y);
                 oldChunk.bots.Remove(id, out var p);
             }
 
@@ -781,9 +781,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             var packets = new List<IHubPacket>();
 
-            foreach (var (x, y) in chunksToRemove)
+            foreach (var (chunkX, chunkY) in chunksToRemove)
             {
-                packets.AddRange(GetPackRemovalPackets(World.W.chunks[x, y]));
+                packets.AddRange(GetPackRemovalPackets(
+                    World.W.GetPosChunk(chunkX, chunkY)));
             }
 
             SendPackets(packets);
@@ -792,7 +793,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private IEnumerable<IHubPacket> GetChunkPackets(int chunkX, int chunkY)
         {
             var packets = new List<IHubPacket>();
-            var chunk = World.W.chunks[chunkX, chunkY];
+            var chunk = World.W.GetPosChunk(chunkX, chunkY);
 
             // Отправляем карту чанка
             packets.Add(chunk.MapPacket());

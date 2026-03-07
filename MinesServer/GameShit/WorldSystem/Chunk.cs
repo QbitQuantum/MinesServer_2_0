@@ -168,7 +168,7 @@ namespace MinesServer.GameShit.WorldSystem
                     int y = pos.y + dy;
 
                     if (World.ValidChunk(x, y))
-                        yield return World.W.chunks[x, y];
+                        yield return World.W.GetPosChunk(x, y);
                 }
             }
         }

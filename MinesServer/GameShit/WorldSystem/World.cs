@@ -18,11 +18,11 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class World
     {
+        private readonly Chunk[,] chunks;
         public string name { get; private set; }
         public WorldLayer<byte> road;
         public WorldLayer<byte> cells;
         public WorldLayer<float> durability;
-        public Chunk[,] chunks;
         public static World W;
 
         // ширина мира в клетках
@@ -443,7 +443,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 for (int chy = 0; chy < Chunk.ChunksH; chy++)
                 {
-                    foreach (var pack in W.chunks[chx, chy].packs)
+                    foreach (var pack in W.GetPosChunk(chx, chy).packs)
                     {
                         if (pack.Value != null && pack.Value is IDamagable damagable)
                         {
@@ -541,7 +541,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 for (int y = 0; y < Chunk.ChunksH; y++)
                 {
-                    W.chunks[x, y]?.Update();
+                    W.GetPosChunk(x, y)?.Update();
                 }
             }
         }
@@ -558,10 +558,15 @@ namespace MinesServer.GameShit.WorldSystem
         public int[] cryscostmod = { 10, 10, 15, 10, 15, 15 };
         public int[] cryscostbase = { 8, 16, 24, 26, 24, 40 };
         public long[] summary = new long[6];
+
+        public Chunk GetPosChunk(int Chunk, int ChunkY)
+        {
+            return chunks[Chunk, ChunkY];
+        }
         public Chunk GetChunk(int x, int y)
         {
             var pos = Chunk.GetChunkPosByCoords(x, y);
-            return chunks[pos.x, pos.y];
+            return GetPosChunk(pos.x, pos.y);
         }
         public IEnumerable<(int x, int y)> GetVisibleChunksPos(int x, int y, int radius = 2)
         {
@@ -589,7 +594,7 @@ namespace MinesServer.GameShit.WorldSystem
                     if (!ValidChunk(tgChunkX, tgChunkY))
                         continue;
 
-                    yield return chunks[tgChunkX, tgChunkY];
+                    yield return GetPosChunk(tgChunkX, tgChunkY);
                 }
             }
         }

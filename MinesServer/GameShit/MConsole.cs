@@ -67,7 +67,7 @@ namespace MinesServer.GameShit
                 {
                     for (int y = 0; y < Chunk.ChunksH; y++)
                     {
-                        p.connection?.SendB(new HBPacket([new HBMapPacket(x * 32, y * 32, 32, 32, World.W.chunks[x, y].cells)]));
+                        p.connection?.SendB(new HBPacket([new HBMapPacket(x * 32, y * 32, 32, 32, World.W.GetPosChunk(x, y).cells)]));
                     }
                 }
             });
