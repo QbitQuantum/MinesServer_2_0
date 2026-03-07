@@ -686,8 +686,24 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var packets = new List<IHubPacket>();
 
-            foreach (var chunk in World.W.GetVisibleChunksPos(x, y, 1))
-                packets.AddRange(GetBotsInChunk(chunk.x, chunk.y));
+            foreach (var chunks in World.W.GetVisibleChunks(x, y, 1))
+            {
+                foreach (var (playerId, _) in chunks.bots)
+                {
+                    var player = DataBase.GetPlayer(playerId);
+                    if (player != null)
+                    {
+                        packets.Add(new HBBotPacket(
+                            player.id,
+                            player.x,
+                            player.y,
+                            player.dir,
+                            player.skin,
+                            player.cid,
+                            player.tail));
+                    }
+                }
+            }
 
             connection?.SendB(new HBPacket(packets.ToArray()));
         }
@@ -807,9 +823,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             return packets.ToArray();
         }
-
-        private IHubPacket[] fChunkInfo(int chunkx, int chunky) =>
-            ChunkInfo(chunkx, chunky).Concat(GetBotsInChunk(chunkx, chunky)).ToArray();
 
         #endregion
 
