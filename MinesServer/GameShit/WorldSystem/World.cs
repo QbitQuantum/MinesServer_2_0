@@ -397,14 +397,6 @@ namespace MinesServer.GameShit.WorldSystem
 
         public static bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
         public static bool ValidChunk(int x, int y) => x >= 0 && y >= 0 && x < Chunk.ChunksW && y < Chunk.ChunksH;
-        public void UpdateChunkByCoords(int x, int y)
-        {
-            var ch = GetChunk(x, y);
-            if (ch != null)
-            {
-                ch.Update();
-            }
-        }
         public static (bool access,bool anygun) AccessGun(int x, int y, int cid)
         {
             bool ret = true;
