@@ -357,7 +357,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         public int PACKPOS(int x, int y) => x + y * ChunksW;
 
-        public IHubPacket[] pPakcs(Player player)
+        public IHubPacket[] pPakcs()
         {
             var packGroups = new Dictionary<int, List<HBPack>>();
 

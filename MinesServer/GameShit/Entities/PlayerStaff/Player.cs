@@ -819,7 +819,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             packets.Add(new HBMapPacket(chunk.WorldX, chunk.WorldY, Chunk.ChunkWidth, Chunk.ChunkHeight, chunk.cells));
 
             if (!alreadyvisible.Contains((chunkx, chunky)))
-                packets.AddRange(chunk.pPakcs(this));
+                packets.AddRange(chunk.pPakcs());
 
             return packets.ToArray();
         }
