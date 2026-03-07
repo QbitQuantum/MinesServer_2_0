@@ -728,8 +728,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var newChunk = World.W.GetChunk(x, y);
             lastchunk = newChunk.pos;
 
-            if (!newChunk.bots.ContainsKey(id))
-                newChunk.AddBot(this);
+            // AddBot уже проверяет на ContainsKey
+            newChunk.AddBot(this);
         }
 
         private void UpdateVisibility()
