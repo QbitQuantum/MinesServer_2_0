@@ -147,50 +147,6 @@ namespace MinesServer.GameShit.Skills
             }
         }
 
-        // Эти свойства больше не нужны, но оставим для обратной совместимости
-        // Можно будет удалить после полного перехода на новую систему
-        [Obsolete("Use type.GetInfo() instead")]
-        public Func<int, float, float, float, float, float, string> description
-        {
-            private get;
-            set;
-        }
-
-        [Obsolete("Use type.GetInfo() instead")]
-        public SkillEffectType effecttype
-        {
-            private get;
-            set;
-        }
-
-        [Obsolete("Use type.GetInfo() instead")]
-        public Func<int, float> expfunc
-        {
-            private get;
-            set;
-        }
-
-        [Obsolete("Use type.GetInfo() instead")]
-        public Func<int, float> effectfunc
-        {
-            private get;
-            set;
-        }
-
-        [Obsolete("Use type.GetInfo() instead")]
-        public Func<int, float> costfunc
-        {
-            private get;
-            set;
-        }
-
-        [Obsolete("Use type.GetInfo() instead")]
-        public Func<int, float> dopfunc
-        {
-            private get;
-            set;
-        }
-
         public Dictionary<SkillType, int>? requirements
         {
             get;
