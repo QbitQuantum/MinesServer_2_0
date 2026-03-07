@@ -222,14 +222,11 @@ namespace MinesServer.GameShit.WorldSystem
             Console.WriteLine("");
         }
         public static Cell GetProp(byte type) => CellsSerializer.cells[type];
-        public static bool IsEmpty(int x, int y)
-        {
-            return GetProp(x, y).isEmpty && !PackPart(x, y);
-        }
-        public static bool TrueEmpty(int x, int y) => GetProp(x, y).isEmpty && !PackPart(x, y) && GetCell(x, y) is not (36 or 37 or 0 or 39);
 
-        public static bool IsValidEmptyCell(int x, int y)
+        public static bool IsEmpty(int x, int y)
             => ValidCoord(x, y) && GetProp(x, y).isEmpty && !PackPart(x, y);
+
+        public static bool TrueEmpty(int x, int y) => IsEmpty(x, y) && GetCell(x, y) is not (36 or 37 or 0 or 39);
 
         public static Cell GetProp(int x, int y)
         {
@@ -251,7 +248,7 @@ namespace MinesServer.GameShit.WorldSystem
             var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };
             var q = new Queue<(int x, int y)>();
 
-            if (IsValidEmptyCell(x, y))
+            if (IsEmpty(x, y))
                 return (x, y);
 
             q.Enqueue((x, y));
@@ -265,7 +262,7 @@ namespace MinesServer.GameShit.WorldSystem
                     int nx = cx + dx, ny = cy + dy;
                     if (visited.Contains((nx, ny))) continue;
 
-                    if (IsValidEmptyCell(nx, ny))
+                    if (IsEmpty(nx, ny))
                         return (nx, ny);
 
                     visited.Add((nx, ny));
