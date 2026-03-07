@@ -608,5 +608,15 @@ namespace MinesServer.GameShit.WorldSystem
                 }
             }
         }
+        public static void SendWorldInfo(Player player)
+        {
+            var mapPackets = new List<IHubPacket>();
+
+            for (int x = 0; x < Chunk.ChunksW; x++)
+                for (int y = 0; y < Chunk.ChunksH; y++)
+                    mapPackets.Add(W.GetPosChunk(x, y).MapPacket());
+
+            player.connection?.SendB(new HBPacket(mapPackets.ToArray()));
+        }
     }
 }

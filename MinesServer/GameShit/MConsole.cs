@@ -63,13 +63,7 @@ namespace MinesServer.GameShit
             });
             commands.Add("getallmap", (p, arg) =>
             {
-                for (int x = 0; x < Chunk.ChunksW; x++)
-                {
-                    for (int y = 0; y < Chunk.ChunksH; y++)
-                    {
-                        p.connection?.SendB(new HBPacket([new HBMapPacket(x * 32, y * 32, 32, 32, World.W.GetPosChunk(x, y).cells)]));
-                    }
-                }
+                World.SendWorldInfo(p);
             });
             commands.Add("setnick", (p, arg) =>
             {
