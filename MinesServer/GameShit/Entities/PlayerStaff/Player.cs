@@ -720,7 +720,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             // Удаляем игрока из старого чанка
             if (lastchunk != null)
             {
-                var oldChunk = World.W.chunks[lastchunk.Value.Item1, lastchunk.Value.Item2];
+                var oldChunk = World.W.chunks[lastchunk.Value.X, lastchunk.Value.Y];
                 oldChunk.bots.Remove(id, out var p);
             }
 
