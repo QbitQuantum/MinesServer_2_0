@@ -138,7 +138,7 @@ namespace MinesServer.Enums
         public Func<int, float> EffectFunc { get; set; }
         public Func<int, float> CostFunc { get; set; }
         public Func<int, float> ExpFunc { get; set; }
-        public Func<int, float> DopFunc { get; set; }
+        public Func<int, float> DurabilityFunc { get; set; }
         public List<SkillRequirement> Requirements { get; set; }
 
         // Вспомогательные методы для получения значений на текущем уровне
@@ -167,7 +167,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -189,7 +189,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -216,7 +216,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 0.08f + (float)(Math.Log10(lvl) * (Math.Pow(lvl, 0.5) / 4)),
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -238,7 +238,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DurabilityFunc = (lvl) => lvl
             },
 
             [SkillType.Movement] = new SkillInfo
@@ -252,7 +252,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 70f - lvl * 0.05f > 30f ? 70f - lvl * 0.05f : 30f,
                 CostFunc = (lvl) => 0f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl
+                DurabilityFunc = (lvl) => lvl
             },
 
             [SkillType.Health] = new SkillInfo
@@ -266,7 +266,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 100 + lvl * 3f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -289,7 +289,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement { 
@@ -310,7 +310,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -332,7 +332,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -360,7 +360,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 100 + 20 * lvl,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -383,7 +383,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -405,7 +405,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -427,7 +427,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -449,7 +449,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -471,7 +471,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -493,7 +493,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -519,7 +519,7 @@ namespace MinesServer.Enums
                 92 : (float)Math.Round(1f + (lvl - (float)Math.Log10(lvl) * (float)Math.Pow(lvl, 0.9) / 2f - lvl * 0.098f)),
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 0f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -541,7 +541,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => lvl * 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -563,7 +563,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -590,7 +590,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -612,7 +612,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -634,7 +634,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -656,7 +656,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -683,7 +683,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -705,7 +705,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -727,7 +727,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -749,7 +749,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -771,7 +771,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -793,7 +793,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -815,7 +815,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -837,7 +837,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -859,7 +859,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -881,7 +881,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -903,7 +903,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -927,7 +927,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -949,7 +949,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -976,7 +976,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -998,7 +998,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1020,7 +1020,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1047,7 +1047,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1069,7 +1069,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1091,7 +1091,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1113,7 +1113,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1135,7 +1135,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1157,7 +1157,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1185,7 +1185,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1210,7 +1210,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 100f + lvl * 0.2f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 900
             },
@@ -1228,7 +1228,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 600
             },
@@ -1245,7 +1245,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 300
             },
@@ -1262,7 +1262,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 700
             },
@@ -1280,7 +1280,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 200
             },
@@ -1297,7 +1297,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 100
             },
@@ -1314,7 +1314,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 50
             },
@@ -1331,7 +1331,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 1500
             },
@@ -1349,7 +1349,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 800
             },
@@ -1366,7 +1366,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 1000
             },
@@ -1384,7 +1384,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 1000
             },
@@ -1401,7 +1401,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 3000
             },
@@ -1418,7 +1418,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DopFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 5000
             } 

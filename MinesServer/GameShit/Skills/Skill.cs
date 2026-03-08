@@ -129,12 +129,12 @@ namespace MinesServer.GameShit.Skills
                 return info?.EffectFunc?.Invoke(lvl) ?? 0f;
             }
         }
-        public float AdditionalEffect
+        public float DurabilityEffect
         {
             get
             {
                 var info = type.GetInfo();
-                return info?.DopFunc?.Invoke(lvl) ?? 0f;
+                return info?.DurabilityFunc?.Invoke(lvl) ?? 0f;
             }
         }
 

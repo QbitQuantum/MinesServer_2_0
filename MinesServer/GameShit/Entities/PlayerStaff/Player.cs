@@ -420,7 +420,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         c.AddExp(this);
                         World.SetCell(x, y, CellType.GreenBlock);
-                        World.SetDurability(x, y, (int)c.AdditionalEffect);
+                        World.SetDurability(x, y, (int)c.DurabilityEffect);
                     }
                     return;
                 }
@@ -431,7 +431,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         c.AddExp(this);
                         World.SetCell(x, y, CellType.YellowBlock);
-                        World.SetDurability(x, y, World.GetDurability(x, y) + (int)c.AdditionalEffect);
+                        World.SetDurability(x, y, World.GetDurability(x, y) + (int)c.DurabilityEffect);
                     }
                     return;
                 }
@@ -442,7 +442,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         c.AddExp(this);
                         World.SetCell(x, y, CellType.RedBlock);
-                        World.SetDurability(x, y, World.GetDurability(x, y) + (int)c.AdditionalEffect);
+                        World.SetDurability(x, y, World.GetDurability(x, y) + (int)c.DurabilityEffect);
                     }
                     return;
                 }
@@ -458,7 +458,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     c.AddExp(this);
                     World.SetCell(x, y, CellType.MilitaryBlockFrame);
 
-                    var finalDurability = (int)c.AdditionalEffect;
+                    var finalDurability = (int)c.DurabilityEffect;
                     _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>
                     {
                         if (World.GetCell(x, y) == (byte)CellType.MilitaryBlockFrame)
