@@ -112,20 +112,25 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
         {
+            if (player == null) return false;
+
             var h = 0;
             List<IHubPacket> packets = new();
             for (int cx = left; cx <= right; cx++)
             {
                 for (int cy = bottom; cy <= top; cy++)
                 {
-                    var p = GetProp(GetCell(x + cx, y + cy));
-                    if (!ValidCoord(x + cx, y + cy) || ignoreplace && (!p.is_diggable || !p.is_destructible || GetCell(x + cx, y + cy) == 36) || PackPart(x + cx, y + cy) || ((player != null) ? !AccessGun(x, y, player.cid).access : false) || (!p.can_place_over || !p.isEmpty) && !ignoreplace)
+                    int targetX = x + cx;
+                    int targetY = y + cy;
+                    var p = GetProp(GetCell(targetX, targetY));
+                    if (!ValidCoord(targetX, targetY) ||
+                        PackPart(targetX, targetY) ||
+                        !AccessGun(x, y, player.cid).access ||
+                        ignoreplace && (!p.is_diggable || !p.is_destructible || GetCell(targetX, targetY) == 36) || 
+                        
+                        (!p.can_place_over || !p.isEmpty) && !ignoreplace)
                     {
-                        if (player != null && ValidCoord(x + cx, y + cy))
-                        {
-                            packets.Add(new HBFXPacket(x + cx, y + cy, 0));
-                        }
-
+                        packets.Add(new HBFXPacket(targetX, targetY, 0));
                         h++;
                     }
                 }
@@ -134,7 +139,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 if (packets.Count > 0)
                 {
-                    player?.connection?.SendB(new HBPacket(packets.ToArray()));
+                    player.connection?.SendB(new HBPacket(packets.ToArray()));
                 }
                 return false;
             }
