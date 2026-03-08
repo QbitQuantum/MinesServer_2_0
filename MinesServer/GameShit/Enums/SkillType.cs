@@ -289,7 +289,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DurabilityFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement { 
@@ -310,7 +310,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DurabilityFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -332,7 +332,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DurabilityFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
@@ -1280,7 +1280,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DurabilityFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 IsExpertSkill = true,
                 BasePriceOPP = 200
             },
@@ -1297,7 +1297,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DurabilityFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => { if (lvl <= 667) { return (float)(0.375375375375375 * lvl + (-0.375375375375375)); } else { return 250; } },
                 IsExpertSkill = true,
                 BasePriceOPP = 100
             },
@@ -1314,7 +1314,7 @@ namespace MinesServer.Enums
                 EffectFunc = (lvl) => 1f,
                 CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
-                DurabilityFunc = (lvl) => lvl,
+                DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 IsExpertSkill = true,
                 BasePriceOPP = 50
             },
