@@ -151,7 +151,7 @@ namespace MinesServer.GameShit.Buildings
         #endregion
         private CanvasElement[] BuildGraph()
         {
-            var panel = new CanvasPanel(1600, 1200, Color.Black);
+            var panel = new CanvasPanel("", 1600, 1200, Color.Black);
             var connections = new List<Connection>();
 
             var Urlen = new TeleportPoint("Urlen 1.0", 20, 300, Color.Blue);

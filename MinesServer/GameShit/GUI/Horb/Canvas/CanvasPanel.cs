@@ -16,13 +16,14 @@ namespace MinesServer.GameShit.GUI.Horb.Canvas
         // Domain objects like TeleportPoint can be stored separately and
         // converted to CanvasElement[] during Render().
         private readonly List<object> _logicalChildren = new();
-
+        public string Name { get; }
         public int Width { get; }
         public int Height { get; }
         public Color BackgroundColor { get; }
 
-        public CanvasPanel(int width, int height, Color backgroundColor)
+        public CanvasPanel(string name, int width, int height, Color backgroundColor)
         {
+            Name = name;
             Width = width;
             Height = height;
             BackgroundColor = backgroundColor;
@@ -69,7 +70,7 @@ namespace MinesServer.GameShit.GUI.Horb.Canvas
             var result = new List<CanvasElement>();
 
             // Background fill (same behavior as old Buttonsg: Image + Rect)
-            result.Add(CanvasElement.Image("", Width, Height));
+            result.Add(CanvasElement.Image(Name, Width, Height));
             result.Add(CanvasElement.Rect(BackgroundColor, Width, Height, offsetX: 0, offsetY: 0));
 
             // 1) Connections
