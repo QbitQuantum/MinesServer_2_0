@@ -42,6 +42,7 @@ namespace MinesServer.Server
         public DbSet<Crafter> crafts { get; set; }
         public DbSet<Teleport> teleports { get; set; }
         public DbSet<Gate> gates { get; set; }
+        public DbSet<NC> ncs { get; set; }
         #endregion
         public DataBase() : base() => Database.EnsureCreated();
         public void Delete() => Database.EnsureDeleted();
@@ -177,6 +178,11 @@ namespace MinesServer.Server
                     World.AddPack(i.x, i.y, i);
                 }
                 foreach (var i in db.spots)
+                {
+                    i.Build();
+                    World.AddPack(i.x, i.y, i);
+                }
+                foreach (var i in db.ncs)
                 {
                     i.Build();
                     World.AddPack(i.x, i.y, i);
