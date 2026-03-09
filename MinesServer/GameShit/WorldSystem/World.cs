@@ -468,8 +468,8 @@ namespace MinesServer.GameShit.WorldSystem
                             {
                                 damagable.SendBrokenEffect();
                             }
-                            pack.Value.Update();
                         }
+                        pack.Value.Update();
                     }
                 }
             }
