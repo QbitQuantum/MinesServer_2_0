@@ -196,6 +196,45 @@ namespace MinesServer.GameShit.Buildings
             n.Add(CanvasElement.TextField("<size=15><color=white>60000</color></size>", originDX: 17, originDY: -28));
             return n.ToArray();
         }
+        private Tab MiningExploration(Player p)
+        {
+            RichListConfig richList = new RichListConfig()
+            {
+                Entries = [
+                    RichListEntry.Button("<color=purple>ФИОЛЕТОВЫЕ ЖИВЫЕ КРИСТАЛЛЫ</color>",
+                        new MButton(". . .", "purple", (args) => {  })),
+                    RichListEntry.Button("<color=blue>СИНИЕ ЖИВЫЕ КРИСТАЛЛЫ</color>",
+                        new MButton(". . .", "blue", (args) => {  })),
+                    RichListEntry.Button("<color=red>КРАСНЫЕ ЖИВЫЕ КРИСТАЛЛЫ</color>",
+                        new MButton(". . .", "red", (args) => {  })),
+                    RichListEntry.Button("<color=white>БЕЛЫЕ ЖИВЫЕ КРИСТАЛЛЫ</color>",
+                        new MButton(". . .", "white", (args) => {  })),
+                    RichListEntry.Button("<color=green>РАДУЖНЫЕ ЖИВЫЕ КРИСТАЛЛЫ</color>",
+                        new MButton(". . .", "green", (args) => {  })),
+                    RichListEntry.Button("<color=cyan>ГОЛУБЫЕ ЖИВЫЕ КРИСТАЛЛЫ</color>",
+                        new MButton(". . .", "cyan", (args) => {  })),
+                ]
+            };
+
+            return new Tab()
+            {
+                Label = "ИЗУЧ. ДОБЫЧИ",
+                Action = "MiningExploration",
+                InitialPage = new Page()
+                {
+                    Text = "Собирайте <color=yellow>живые кристаллы</color> и увеличивайте доход клана:\n" +
+                    "При вложении живых кристаллов, клан получает бонус сразу.\n" +
+                    "Вклад расходуется сразу со временем <color=yellow>(5% в сутки)</color>\n" +
+                    "Максимальный бонус к добыче каждого крситалла составляет не более <color=red>+15 кристаллов</color>",
+                    Style = new Style()
+                    {
+                        Space = 2,
+                    },
+                    RichList = richList,
+                    Buttons = []
+                }
+            };
+        }
         private Tab ExploringWorld(Player p)
         {
 
@@ -242,7 +281,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 ShowTabs = true,
                 Title = "Научный центр",
-                Tabs = [ExploringWorld(p)]
+                Tabs = [ExploringWorld(p), MiningExploration(p)]
             };
         }
     }
