@@ -138,7 +138,6 @@ namespace MinesServer.GameShit.Buildings
         private void Buy(string _value, Player p)
         {
             // TODO: Реализовать
-            Console.WriteLine("private void Buy: " + _value);
         }
 
         private CanvasElement[] BuildExploringWorldGraph()
