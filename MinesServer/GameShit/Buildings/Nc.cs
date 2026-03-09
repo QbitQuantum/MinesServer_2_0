@@ -1,6 +1,10 @@
+using System.Drawing;
+using MinesServer.Enums;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
+using MinesServer.GameShit.GUI.Horb.Canvas;
+using MinesServer.GameShit.GUI.Horb.List.Rich;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
@@ -131,15 +135,105 @@ namespace MinesServer.GameShit.Buildings
         }
         #endregion
         
-        private Tab TabNC(Player p)
+        private void Buy(string _value, Player p)
         {
+            // TODO: Реализовать
+            Console.WriteLine("private void Buy: " + _value);
+        }
+
+        private CanvasElement[] BuildExploringWorldGraph()
+        {
+            List<CanvasElement> n = new();
+
+            n.Add(CanvasElement.TextField("Глобальная <color=yellow>КРИТИЧЕСКАЯ ГЛУБИНА</color>:", originDX: -100, originDY: -25));
+            n.Add(CanvasElement.TextField("Клановая <color=yellow>КРИТИЧЕСКАЯ ГЛУБИНА</color>:", originDX: 5, originDY: -100));
+            n.Add(CanvasElement.Rect(Color.Green, width: 53, height: 31, originDX: -126, originDY: 80));
+            n.Add(CanvasElement.Rect(Color.Green, width: 49, height: 27));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: -29, originDY: 15, dx: 500));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, dy: -34));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDY: -34, dx: 500));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 500, originDY: 35, dy: -35));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: -500, dx: 500));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 1, originDY: -1, dy: -34));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDY: -33, dx: 499));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 498, originDY: 34, dy: -35));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: -498, originDY: -35, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>0</color></size>", originDX: 32, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 51, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>10000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>20000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>30000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>40000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>50000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>60000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Rect(Color.Green, width: 5, height: 31, originDX: -511, originDY: -53));
+            n.Add(CanvasElement.Rect(Color.Green, width: 1, height: 27));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: -5, originDY: 15, dx: 500));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, dy: -34));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDY: -34, dx: 500));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 500, originDY: 35, dy: -35));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: -500, dx: 500));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 1, originDY: -1, dy: -34));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDY: -33, dx: 499));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 498, originDY: 34, dy: -35));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: -498, originDY: -35, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>0</color></size>", originDX: 32, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 51, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>10000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>20000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>30000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>40000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>50000</color></size>", originDX: 17, originDY: -28));
+            n.Add(CanvasElement.Line(Color.White, thickness: 2, originDX: 66, originDY: 28, dy: -11));
+            n.Add(CanvasElement.TextField("<size=15><color=white>60000</color></size>", originDX: 17, originDY: -28));
+            return n.ToArray();
+        }
+        private Tab ExploringWorld(Player p)
+        {
+
+            RichListConfig richList = new RichListConfig()
+            {
+                Entries = [
+                    RichListEntry.Text("",""),
+                ]
+            };
+
             return new Tab()
             {
-                Label = "",
-                Action = "",
+                Label = "ИЗУЧ. МИРА",
+                Action = "ExploringWorld",
                 InitialPage = new Page()
                 {
-                    Buttons = [],
+                    Text = "Изучение <color=cyan>протоплазменных технологий</color> для увелечения мощности и глубины\n" +
+                        "Общая <color=yellow>КРИТИЧЕСКАЯ ГЛУБИНА</color>: <color=white>6 056</color>\n" +
+                        "Клановая <color=yellow>КРИТИЧЕСКАЯ ГЛУБИНА</color>: <color=white>212</color>\n" +
+                        "Формула высчитывания ГЛОБАЛЬНОЙ КРИТ. глубины: \n" +
+                        "<color=red>Сумма клановых ворот крит. глубин / кол-во кланов </color>\n" +
+                        "<color=yellow>Плазменная бомба х 2</color> = <color=cyan>1 блок</color>",
+                    Canvas = BuildExploringWorldGraph(),
+                    Style = new Style()
+                    {
+                        Space = 2,
+                        Canvas = new GridStyle()
+                        {
+                            Height = 0
+                        }
+                    },
+                    RichList = richList,
+                    Buttons = [
+                        new MButton("Вложить <color=yellow>Плазму x 2</color>", $"boomtonc2", (args) => Buy(args.Input, p)),
+                        new MButton("Вложить <color=yellow>Плазму x 20</color>", $"boomtonc20", (args) => Buy(args.Input, p)),
+                        new MButton("Вложить <color=yellow>Плазму x 200</color>", $"boomtonc200", (args) => Buy(args.Input, p))
+                    ],
                 }
             };
         }
@@ -149,7 +243,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 ShowTabs = true,
                 Title = "Научный центр",
-                Tabs = [TabNC(p)]
+                Tabs = [ExploringWorld(p)]
             };
         }
     }
