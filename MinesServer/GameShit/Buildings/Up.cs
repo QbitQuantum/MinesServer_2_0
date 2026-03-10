@@ -76,7 +76,24 @@ namespace MinesServer.GameShit.Buildings
         {
             Title ="UP",
             RichList = new RichListConfig() {
-                Entries = [RichListEntry.Text($"hp {hp}/{maxhp}"), RichListEntry.Text("динаху")]
+                Entries = [
+                    RichListEntry.Text("hp", $"Прочность здания {hp}/{maxhp}"), 
+                    RichListEntry.Button("Доход со здания составляет " + moneyinside, new MButton("Собрать", "collect", _ =>
+                    {
+                        using var db = new DataBase();
+                        var player = DataBase.GetPlayer(ownerid);
+                        if (player == null) return;
+
+                        db.Attach(player);
+                        db.Attach(this);
+                        player.money += moneyinside;
+                        moneyinside = 0;
+                        db.SaveChanges();
+                        player.SendMoney();
+                        player.win = GUIWin(player);
+                        player.SendWindow();
+
+                    }))]
             },
             Buttons = []
         };
@@ -195,6 +212,16 @@ namespace MinesServer.GameShit.Buildings
                     Button = skillfromslot != null && skillfromslot.isUpReady() ?
                         new MButton("Прокачать", "upgrade", (args) =>
                         {
+                            // Добавляем 10% от стоимости в moneyinside
+                            long tenPercent = (long)(skillfromslot.Cost * 0.1);
+
+                            using (var db = new DataBase())
+                            {
+                                db.ups.Attach(this);
+                                moneyinside += tenPercent;
+                                db.SaveChanges();
+                            }
+
                             skillfromslot.Up(p);
                             p.win = GUIWin(p);
                             p.SendWindow();

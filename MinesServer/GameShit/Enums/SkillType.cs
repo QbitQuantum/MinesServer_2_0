@@ -136,7 +136,6 @@ namespace MinesServer.Enums
         public Func<int, int> OppFunc { get; set; }    // Функция ОПП от уровня
         public SkillEffectType EffectType { get; set; }
         public Func<int, float> EffectFunc { get; set; }
-        public Func<int, float> CostFunc { get; set; }
         public Func<int, float> ExpFunc { get; set; }
         public Func<int, float> DurabilityFunc { get; set; }
         public List<SkillRequirement> Requirements { get; set; }
@@ -165,7 +164,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1000 ? 0.0209f * lvl + 0.179f : 0.02f * lvl + 1.125f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -187,7 +185,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.016f * lvl + 2.101f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -214,7 +211,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 250 ? 0.0337f * lvl + 0.166f : 0.015f * lvl + 4.85f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -236,7 +232,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 1 ? 1f : lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl
             },
@@ -250,7 +245,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnMove,
                 EffectFunc = (lvl) => lvl <= 400 ? -0.386f * lvl + 200.386f : 46f,
-                CostFunc = (lvl) => 0f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl
             },
@@ -264,7 +258,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHealth,
                 EffectFunc = (lvl) => lvl <= 500 ? 2.18f * lvl + 7.82f : lvl + 598f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -287,7 +280,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
@@ -308,7 +300,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
@@ -329,8 +320,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
-                EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => 1f,              
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
@@ -357,8 +347,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1 ? 50f : 50f * lvl,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1 ? 50f : 50f * lvl,               
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -380,8 +369,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.976f * lvl + 83.524f : 0.875f * lvl + 3185f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.976f * lvl + 83.524f : 0.875f * lvl + 3185f,               
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -402,8 +390,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 2.272f * lvl + 47.728f : 0.5f * lvl + 1820f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 2.272f * lvl + 47.728f : 0.5f * lvl + 1820f,               
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -424,8 +411,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,               
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -446,8 +432,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,              
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -468,8 +453,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,               
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -490,8 +474,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 2.84f * lvl + 59.66f : 0.625f * lvl + 2275f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 2.84f * lvl + 59.66f : 0.625f * lvl + 2275f,                
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -514,8 +497,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHurt,
-                EffectFunc = (lvl) => lvl <= 520 ? 0.1753f * lvl + 0.825f : 92f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 520 ? 0.1753f * lvl + 0.825f : 92f,               
                 ExpFunc = (lvl) => 0f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -536,8 +518,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHealth,
-                EffectFunc = (lvl) => lvl <= 2000 ? 0.00825f * lvl + 0.992f : 0.0025f * lvl + 12.5f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 2000 ? 0.00825f * lvl + 0.992f : 0.0025f * lvl + 12.5f,               
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -558,8 +539,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnMove,
-                EffectFunc = (lvl) => lvl <= 1000 ? 0.000933f * lvl + 0.303f : 0.00015f * lvl + 1.087f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 0.000933f * lvl + 0.303f : 0.00015f * lvl + 1.087f,                
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -585,8 +565,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHurt,
-                EffectFunc = (lvl) => lvl <= 167 ? 0.59f * lvl + 0.41f : 99f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 167 ? 0.59f * lvl + 0.41f : 99f,          
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -607,8 +586,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
-                EffectFunc = (lvl) => lvl <= 183 ? 0.533f * lvl + 1.467f : 99f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 183 ? 0.533f * lvl + 1.467f : 99f,              
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -629,8 +607,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 0.00951f * lvl + 0.49f : 0.0025f * lvl + 7.5f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? 0.00951f * lvl + 0.49f : 0.0025f * lvl + 7.5f,                
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -651,8 +628,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnExp,
-                EffectFunc = (lvl) => lvl <= 1 ? 1f : lvl,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1 ? 1f : lvl,          
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -678,8 +654,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
-                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,            
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -701,7 +676,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.008f * lvl + 10.099f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -722,8 +696,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
-                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,           
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -745,7 +718,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.008f * lvl + 10.099f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -767,7 +739,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1000 ? 0.01316f * lvl + 0.387f : 0.005f * lvl + 8.55f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -789,7 +760,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 73 ? 1.306f * lvl + 3.694f : 99f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -811,7 +781,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 121 ? 0.817f * lvl + 0.183f : 99f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -833,7 +802,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 89 ? lvl : 89f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -855,7 +823,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 30 ? 1.621f * lvl + 3.379f : 52f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -877,7 +844,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 94 ? 1.054f * lvl - 0.054f : 99f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -899,7 +865,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
                 EffectFunc = (lvl) => lvl <= 1 ? 250f : 250f * lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -923,7 +888,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1000 ? 0.00951f * lvl + 0.49f : 0.0025f * lvl + 7.5f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -945,7 +909,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnExp,
                 EffectFunc = (lvl) => lvl <= 1 ? 750f : 750f * lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -972,7 +935,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 80 ? 1.241f * lvl - 0.241f : 99f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -994,7 +956,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
                 EffectFunc = (lvl) => lvl <= 1 ? 100f : 100f * lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1016,7 +977,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnExp,
                 EffectFunc = (lvl) => lvl <= 1 ? 100f : 100f * lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1043,7 +1003,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1065,7 +1024,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 67 ? 1.485f * lvl - 0.485f : 99f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1087,7 +1045,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
                 EffectFunc = (lvl) => lvl <= 1 ? 500f : 500f * lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1109,7 +1066,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1131,7 +1087,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1153,7 +1108,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1181,7 +1135,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -1206,7 +1159,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHurt,
                 EffectFunc = (lvl) => 13f * (float)Math.Sqrt(lvl),
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1224,7 +1176,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnUp,
                 EffectFunc = (lvl) => lvl <= 200 ? 0.201f * lvl + 9.799f : 50f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1241,7 +1192,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnUp,
                 EffectFunc = (lvl) => lvl <= 500 ? 0.782f * lvl + 9.218f : 0.4f * lvl + 200f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1258,7 +1208,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 2000 ? 0.0324f * lvl + 0.178f : 0.01f * lvl + 45f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1276,7 +1225,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 IsExpertSkill = true,
@@ -1292,8 +1240,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
-                EffectFunc = (lvl) => lvl <= 1000 ? -0.801f * lvl + 1000.801f : 200f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => lvl <= 1000 ? -0.801f * lvl + 1000.801f : 200f, 
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => { if (lvl <= 667) { return (float)(0.375375375375375 * lvl + (-0.375375375375375)); } else { return 250; } },
                 IsExpertSkill = true,
@@ -1309,8 +1256,7 @@ namespace MinesServer.Enums
                 PriceFunc = (lvl) => lvl * 10000000,
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
-                EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
+                EffectFunc = (lvl) => 1f, 
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 IsExpertSkill = true,
@@ -1327,7 +1273,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1743 ? 0.02186f * lvl + 0.363f : 38.462f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1345,7 +1290,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => lvl <= 174 ? 0.566f * lvl + 0.434f : 99f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1362,7 +1306,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
                 EffectFunc = (lvl) => lvl <= 1088 ? 0.0819f * lvl + 0.918f : 90f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1380,7 +1323,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1397,7 +1339,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
                 EffectFunc = (lvl) => 1f,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
@@ -1414,7 +1355,6 @@ namespace MinesServer.Enums
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
                 EffectFunc = (lvl) => lvl <= 1 ? 5000f : 5000f * lvl,
-                CostFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => 1f,
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,

@@ -143,7 +143,7 @@ namespace MinesServer.GameShit.Skills
             get
             {
                 var info = type.GetInfo();
-                return info?.CostFunc?.Invoke(lvl) ?? 0f;
+                return info?.PriceFunc?.Invoke(lvl) ?? 0f;
             }
         }
 
