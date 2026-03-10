@@ -42,16 +42,22 @@ namespace MinesServer.GameShit.WorldSystem
             gen = new Gen(CellsWidth, CellsHeight);
             chunks = Chunk.CreateAllChunks();
 
-            cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-            road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-            durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-
+            // TODO: проблема в том, что cells/road/durability создают файл, и если вынести то сломается проверка на File.Exists($"{name}.mapb")
             if (!File.Exists($"{name}.mapb"))
             {
+                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
                 Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
                 Console.WriteLine("EmptyMapGeneration");
                 gen.StartGeneration();
                 Console.WriteLine("Generation End");
+            }
+            else
+            {
+                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
             }
             CreateSpawns();
             CommitWorld();
