@@ -23,7 +23,7 @@ namespace MinesServer.GameShit.Buildings
         public virtual int hp { get; set; }
         public virtual float charge { get; set; }
         public virtual float maxcharge { get; set; }
-        private double GetRepairProgressPercentage()
+        private static double GetRepairProgressPercentage(DateTime? brokentimer)
         {
             if (brokentimer == null)
                 return 0;
@@ -70,7 +70,7 @@ namespace MinesServer.GameShit.Buildings
         {
             if (hp == 0 && brokentimer != null)
             {
-                var percentPassed = GetRepairProgressPercentage();
+                var percentPassed = GetRepairProgressPercentage(brokentimer);
                 var random = Physics.r.Next(0, 101);
                 return random > percentPassed;
             }
