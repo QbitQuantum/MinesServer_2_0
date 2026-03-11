@@ -463,7 +463,6 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     foreach (var pack in W.GetPosChunk(chx, chy).packs)
                     {
-                        if (pack.Value != null && pack.Value is IDamagable damagable)
                         var Pack = pack.Value;
 
                         if (Pack == null)
@@ -473,10 +472,6 @@ namespace MinesServer.GameShit.WorldSystem
                         {
                             db.Attach(pack.Value);
                             if (shouldDamage)
-                            {
-                                damagable?.Damage(2);
-                            }
-                            if (damagable != null && damagable.NeedEffect())
                             {
                                 damagable.Damage(2);
                             }
