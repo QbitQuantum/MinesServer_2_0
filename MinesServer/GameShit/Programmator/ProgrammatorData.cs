@@ -19,8 +19,13 @@ namespace MinesServer.GameShit.Programmator
         public int checkY;
         public int shiftX;
         public int shiftY;
-        public (string name,int pos) startpoint;
+        public (string name, int pos) startpoint;
         public bool flipstate = false;
+
+        public bool autoDig = false; 
+        public bool aggressive = false;  
+        public bool handMode = false;
+
         private void Drop()
         {
             startpoint = ("", 0);
@@ -31,46 +36,58 @@ namespace MinesServer.GameShit.Programmator
             shiftX = 0;
             shiftY = 0;
             flipstate = false;
+            // Сброс режимов
+            autoDig = false;
+            aggressive = false;
+            handMode = false;
+
             foreach (var function in currentprog)
                 function.Value.Reset();
         }
-        public bool ProgRunning { 
-            get; 
-            set; 
-        }
+
+        public bool ProgRunning { get; set; }
         public Dictionary<string, PFunction> currentprog { get; set; }
         public DateTime delay;
         private string cFunction;
         public Program? selected { get; set; }
+
         private PFunction current
         {
             get => currentprog[cFunction];
         }
+
         public void Run(Program p)
         {
             selected = p;
             currentprog = p.programm;
-            //func logger
+
+            // Логирование функций
             foreach (var i in currentprog)
             {
                 Console.WriteLine($"{i.Key} - {string.Join(' ', i.Value.actions.Select(i => $"{i.type} {(i.label is not null ? $"({i.label})" : "")}"))}");
             }
+
             foreach (var i in currentprog.Values)
                 i.Close();
+
             delay = DateTime.UtcNow;
             Drop();
             ProgRunning = true;
         }
+
         public bool RespawnOnProg
         {
             get => entity is Player && (entity as Player).resp.cost == 0 && GotoDeath != null;
         }
+
         public void OnDeath()
         {
             current.Reset();
             cFunction = GotoDeath;
         }
+
         private string? GotoDeath;
+
         public void Run()
         {
             if (ProgRunning || selected == null)
@@ -90,6 +107,7 @@ namespace MinesServer.GameShit.Programmator
             }
             Run(selected);
         }
+
         private void Next()
         {
             var i = currentprog.Keys.ToList().IndexOf(cFunction);
@@ -98,14 +116,18 @@ namespace MinesServer.GameShit.Programmator
             else
                 cFunction = currentprog.First().Key;
         }
+
         public void IncreaseDelay(double ms) => delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
+
         private object? temp = null;
+
         public void Step()
         {
             if (current == null || ServerTime.Now < delay)
             {
                 return;
             }
+
             PAction action;
             if (current.actions.Count <= 0 || current.actions.Count - 1 < current.current)
             {
@@ -113,9 +135,10 @@ namespace MinesServer.GameShit.Programmator
                 Next();
                 return;
             }
+
             action = current.Next;
-            //Console.WriteLine(action.type + "(" + action.label + ")");
             object result = action.Execute(entity, ref temp)!;
+
             switch (result)
             {
                 case string label:
@@ -138,6 +161,7 @@ namespace MinesServer.GameShit.Programmator
                                 current.current = startpoint.pos;
                             }
                             break;
+
                         case ActionType.RunSub:
                             if (currentprog.TryGetValue(label, out var _))
                             {
@@ -145,6 +169,7 @@ namespace MinesServer.GameShit.Programmator
                                 cFunction = label;
                             }
                             break;
+
                         case ActionType.RunFunction:
                             if (currentprog.TryGetValue(label, out var _))
                             {
@@ -154,6 +179,7 @@ namespace MinesServer.GameShit.Programmator
                                 cFunction = label;
                             }
                             break;
+
                         case ActionType.RunState:
                             if (currentprog.TryGetValue(label, out var _))
                             {
@@ -165,6 +191,7 @@ namespace MinesServer.GameShit.Programmator
                                 cFunction = label;
                             }
                             break;
+
                         case ActionType.RunIfTrue or ActionType.RunIfFalse:
                             if (currentprog.TryGetValue(label, out var _))
                             {
@@ -179,6 +206,7 @@ namespace MinesServer.GameShit.Programmator
                                 cFunction = label;
                             }
                             break;
+
                         case ActionType.RunOnRespawn:
                             if (currentprog.TryGetValue(label, out var _))
                             {
@@ -187,6 +215,7 @@ namespace MinesServer.GameShit.Programmator
                             break;
                     }
                     break;
+
                 case bool state:
                     switch (action.type)
                     {
@@ -200,11 +229,13 @@ namespace MinesServer.GameShit.Programmator
                             current.state = state;
                             current.startoffset = (0, 0);
                             break;
+
                         case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
                             if (state) current.current--;
                             break;
                     }
                     break;
+
                 case null:
                     switch (action.type)
                     {
@@ -215,14 +246,16 @@ namespace MinesServer.GameShit.Programmator
                             {
                                 current.startoffset = (0, 0);
                             }
-                                break;
+                            break;
+
                         case ActionType.Return:
-                              current.Reset();
-                              if (current.calledfrom is not null)
-                              {
-                                    cFunction = current.calledfrom;
-                              }
-                              break;
+                            current.Reset();
+                            if (current.calledfrom is not null)
+                            {
+                                cFunction = current.calledfrom;
+                            }
+                            break;
+
                         case ActionType.ReturnState:
                             current.Reset();
                             if (current.calledfrom is not null)
@@ -234,19 +267,23 @@ namespace MinesServer.GameShit.Programmator
                                 cFunction = current.calledfrom;
                             }
                             break;
+
                         case ActionType.Stop:
                             Run();
                             break;
+
                         case ActionType.Start:
                             startpoint = (cFunction, current.current);
                             break;
+
                         case ActionType.Flip:
                             flipstate = !flipstate;
                             break;
                     }
                     break;
             }
-            IncreaseDelay(action.delay);
+
+            //IncreaseDelay(action.delay);
         }
     }
 }

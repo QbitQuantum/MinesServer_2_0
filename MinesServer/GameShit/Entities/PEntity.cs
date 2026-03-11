@@ -1,4 +1,5 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using MinesServer.GameShit.Buildings;
+using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
@@ -62,6 +63,39 @@ namespace MinesServer.GameShit.Entities
                 World.SetCell(x, y, cplaceable);
                 World.SetDurability(x, y, World.isCry(x, y) ? 0 : Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(cplaceable).durability);
             }
+        }
+        public virtual void Beep()
+        {
+            // TODO
+        }
+        public virtual void SpecialAction(ActionType Type)
+        {
+            // TODO
+        }
+        public virtual void InverseDirection(ActionType Type)
+        {
+            // TODO
+        }
+        public virtual void RestartProgram()
+        {
+            // TODO
+        }
+        public virtual bool HasGun()
+        {
+            var coord = GetDirCord();
+            var ch = World.W.GetChunk(coord.x, coord.y);
+            int SearchCoord = (coord.x - ch.WorldX + ((coord.y - 2 - ch.WorldY) * 32));
+
+            if (ch.packs.TryGetValue(SearchCoord, out var pack))
+            {
+                if (pack == null)
+                    return false;
+                if (pack is Gun)
+                    return true;
+            }
+
+            return false;
+
         }
         public abstract bool Heal(int num = -1);
         public abstract void Hurt(int num, DamageTypePlayer type = DamageTypePlayer.Pure);
