@@ -18,9 +18,9 @@ namespace MinesServer.GameShit.Sys_Craft
             "<color=#00e600>Зелёный кристалл</color>",
             "<color=#2929ff>Синий кристалл</color>",
             "<color=#ff3333>Красный кристалл</color>",
-            "Фиолетовый кристалл",
-            "Белый кристалл",
-            "Голубой кристалл"
+            "<color=purple>Фиолетовый кристалл</color>",
+            "<color=white>Белый кристалл</color>",
+            "<color=cyan>Голубой кристалл</color>"
         };
 
         private static InventoryItem[] Items()
