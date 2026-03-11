@@ -31,24 +31,19 @@ namespace MinesServer.GameShit.Sys_Craft
             for (int i = 0; i <= 50; i++)
             {
                 if (i == 8) continue;  // Cyan Alive
-
                 if (i == 11) continue;  // Cyan Alive
                 if (i == 12) continue;  // Red Alive
                 if (i == 13) continue;  // Violet Alive
                 if (i == 14) continue;  // Black Alive
                 if (i == 15) continue;  // White Alive
                 if (i == 16) continue;  // Blue Alive
-
                 if (i == 31) continue;  // X3
                 if (i == 32) continue;  // FreeUP
                 if (i == 33) continue;  // MineX4
-
                 if (i == 34) continue;  // Gypno Alive
                 if (i == 46) continue;  // Rainbow Alive
-
                 if (i == 49) continue;  // Деньги
                 if (i == 50) continue;  // ОПП
-
 
                 string UpText = "0"; // Stub, should depend on how much quantity is available depending on the player's resources
                 string DownText = "<color=#ff3333>+++</color>"; // Stub, should depend on the level of resource pumping(+/++/+++)
@@ -212,7 +207,7 @@ namespace MinesServer.GameShit.Sys_Craft
                     p.inventory[i.id] -= i.num * num;
                 }
             }
-            
+
             p.SendInventory();
         }
         public static IPage? FilledPage(Player p, Crafter c)
@@ -237,53 +232,91 @@ namespace MinesServer.GameShit.Sys_Craft
 
             var text = $"@@\nПрогресс: {progress}% {bar}\n\n{remaining}";
 
+            // Создаем список кнопок
+            var buttons = new List<MButton>();
+
+            // Всегда добавляем кнопку для забора готовых предметов (если есть хоть один готовый)
+            if (c.currentcraft.num > 0)
+            {
+                // Проверяем, есть ли уже готовые предметы
+                var readyItems = 0;
+                var recipe = c.currentcraft.GetRecipie();
+                // Рассчитываем количество готовых предметов на основе прошедшего времени
+                var elapsed = DateTime.Now - (c.currentcraft.endtime - TimeSpan.FromSeconds(recipe.time * c.currentcraft.num));
+                var totalSeconds = recipe.time * c.currentcraft.num;
+                var progressSeconds = Math.Min(elapsed.TotalSeconds, totalSeconds);
+                readyItems = (int)(progressSeconds / recipe.time);
+
+                if (readyItems > 0)
+                {
+                    buttons.Add(new MButton(
+                        $"Забрать готовые ({readyItems} шт.)",
+                        "claimready",
+                        _ => ClaimReady(p, c, readyItems)));
+                }
+            }
+
+            // Добавляем кнопку завершения, если крафт полностью готов
             if (c.currentcraft.progress >= 100)
             {
-                return new Page
-                {
-                    Title = "Крафтер",
-                    Text = text,
-                    Buttons =
-                    [
-                        new MButton("Забрать результат", "claim", _ => Claim(p, c))
-                    ]
-                };
+                buttons.Add(new MButton("Забрать всё", "claimall", _ => Claim(p, c)));
             }
 
             return new Page
             {
                 Title = "Крафтер",
                 Text = text,
-                Buttons = [],
+                Buttons = buttons.ToArray(),
             };
         }
 
-        public static void SecondPage(Player p, int type)
+        public static void ClaimReady(Player p, Crafter c, int readyCount)
         {
-            var recipesByResult = RDes.recipies.Where(i => i.result.id == type).ToArray();
-
-            if (recipesByResult.Length == 0)
+            if (c.currentcraft is null || readyCount <= 0)
             {
-                p.win?.CurrentTab.Open(new Page
-                {
-                    Title = "Крафтер",
-                    Text = "@@\nДля этого предмета пока нет рецептов.\n",
-                    Buttons = [],
-                });
                 return;
             }
 
-            p.win?.CurrentTab.Open(new Page
+            var recipe = c.currentcraft.GetRecipie();
+
+            using var db = new DataBase();
+            db.crafts.Attach(c);
+            db.players.Attach(p);
+
+            // Добавляем готовые предметы в инвентарь
+            p.inventory[recipe.result.id] += readyCount * recipe.result.num;
+
+            // Уменьшаем количество в текущем крафте
+            c.currentcraft.num -= readyCount;
+
+            // Если все предметы забрали, удаляем крафт
+            if (c.currentcraft.num <= 0)
             {
-                Title = "Крафтер: выбор рецепта",
-                List = recipesByResult
-                    .Select(r =>
-                        new ListEntry(
-                            $"{MarketSystem.PackName(r.result.id)} x{r.result.num} ({r.time} сек.)",
-                            new MButton("Открыть", $"openrecipie:{r.id}", _ => OpenRecipie(p, r.id))))
-                    .ToArray(),
-                Buttons = [],
-            });
+                db.craftentries.Remove(c.currentcraft);
+                c.currentcraft = null;
+                c.ready = false;
+            }
+            else
+            {
+                // Корректируем время окончания для оставшихся предметов
+                var remainingTime = TimeSpan.FromSeconds(recipe.time * c.currentcraft.num);
+                c.currentcraft.endtime = DateTime.Now + remainingTime;
+            }
+
+            db.SaveChanges();
+
+            p.SendInventory();
+            World.W.GetChunk(c.x, c.y).ResendPack(c);
+
+            // Обновляем интерфейс
+            if (c.currentcraft != null)
+            {
+                p.win?.CurrentTab.Open(FilledPage(p, c));
+            }
+            else
+            {
+                p.win = c.GUIWin(p);
+            }
         }
         public static IPage? GlobalFirstPage(Player p)
         {
@@ -297,8 +330,10 @@ namespace MinesServer.GameShit.Sys_Craft
                     {
                         Title = "Крафтер",
                         Text = "@@\nДля этого предмета пока нет рецептов.\n",
-                        Buttons = [],
-
+                        Buttons =
+                        [
+                            new MButton("Назад", "back", _ => p.win?.CurrentTab.Open(GlobalFirstPage(p)))
+                        ],
                     });
                     return;
                 }
