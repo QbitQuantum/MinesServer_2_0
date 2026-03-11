@@ -1,11 +1,12 @@
 ﻿using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace MinesServer.GameShit.Buildings
 {
-    public abstract class Pack
+    public abstract class Pack : Entity
     {
         public Pack() {
         }
@@ -15,9 +16,6 @@ namespace MinesServer.GameShit.Buildings
                 throw new Exception("Админ, не занимайся фигнёй");
             this.x = x; this.y = y; this.ownerid = ownerid;
         }
-        public virtual int id { get; set; }
-        public virtual int x { get; set; }
-        public virtual int y { get; set; }
         public virtual int cid { get; set; }
         [NotMapped]
         public virtual int off { get; set; }
