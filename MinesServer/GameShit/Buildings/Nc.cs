@@ -16,15 +16,12 @@ namespace MinesServer.GameShit.Buildings
     {
         #region fields
         public override PackType type => PackType.NC;
-        public int maxhp { get; set; }
-        public int hp { get; set; }
         public override int PackId => 46;
         #endregion;
         private NC() { }
         public NC(int ownerid, int x, int y) : base(ownerid, x, y)
         {
             using var db = new DataBase();
-            hp = 100;
             db.ncs.Add(this);
             db.SaveChanges();
         }

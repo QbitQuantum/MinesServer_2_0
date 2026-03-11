@@ -209,7 +209,7 @@ namespace MinesServer.GameShit.Consumables
                             }
 
                             // Работа с повреждаемыми объектами
-                            if (World.ContainsPack(tx, ty, out var pack) && pack is IDamagable damagable)
+                            if (World.ContainsPack(tx, ty, out var pack) && pack is PackDamage damagable)
                             {
                                 db.Attach(pack); // привязываем к контексту
 
@@ -218,7 +218,7 @@ namespace MinesServer.GameShit.Consumables
                                 else
                                     damagable.Damage(10, DamageTypePacks.Raz);
 
-                                if (pack.charge == 0)
+                                if (damagable.charge == 0)
                                     World.W.GetChunk(pack.x, pack.y).ResendPack(pack);
                             }
                         }

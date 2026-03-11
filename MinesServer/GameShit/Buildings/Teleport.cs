@@ -81,25 +81,18 @@ namespace MinesServer.GameShit.Buildings
             return elements;
         }
     }
-    public class Teleport : Pack, IDamagable
+    public class Teleport : PackDamage
     {
         public override PackType type => PackType.Teleport;
-        public DateTime brokentimer { get; set; }
-        public float maxcharge { get; set; }
-        public int hp { get; set; }
-        public int maxhp { get; set; }
         public int cost { get; set; }
         [NotMapped]
         public override int off => charge > 0 ? 1 : 0;
         public override int PackId => 0;
         private Teleport() {}
-        public Teleport(int x, int y, int ownerid) : base(x, y, ownerid)
+        public Teleport(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
-            cost = 10;
             charge = 1000;
             maxcharge = 10000;
-            hp = 1000;
-            maxhp = 1000;
             using var db = new DataBase();
             db.teleports.Add(this);
             db.SaveChanges();

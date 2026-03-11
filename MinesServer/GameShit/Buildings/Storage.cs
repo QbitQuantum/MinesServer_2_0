@@ -9,20 +9,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Storage : Pack, IDamagable
+    public class Storage : PackDamage
     {
         public long this[int index]
         {
             get => crysinside[index];
             set => crysinside[index] = value;
         }
-        [NotMapped]
-        public override float charge { get; set; }
-        public override int PackId => 29;
+		[NotMapped]
+		public override float charge { get; set; }
+		[NotMapped]
+		public override float maxcharge { get; set; }
+		public override int PackId => 29;
         public override PackType type => PackType.Storage;
         public DateTime brokentimer { get; set; }
-        public int hp { get; set; }
-        public int maxhp { get; set; }
         #region crysshit
         public long[] crysinside = new long[6];
         public long ze
@@ -62,10 +62,8 @@ namespace MinesServer.GameShit.Buildings
         }
         #endregion
         private Storage() { }
-        public Storage(int x, int y, int ownerid) : base(x, y, ownerid)
+        public Storage(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
-            hp = 1000;
-            maxhp = 1000;
             using var db = new DataBase();
             db.storages.Add(this);
             db.SaveChanges();

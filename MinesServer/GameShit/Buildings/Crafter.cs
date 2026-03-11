@@ -13,25 +13,17 @@ namespace MinesServer.GameShit.Buildings
     /// <summary>
     /// Crafter building. Stores a single timed crafting job and exposes a clean crafting UI.
     /// </summary>
-    public class Crafter : Pack, IDamagable
+    public class Crafter : PackDamage
     {
-        private const int DefaultHp = 1000;
         private const int CrafterPackId = 24;
         // EF Core requires a parameterless constructor
         private Crafter() { }
-        public Crafter(int x, int y, int ownerid) : base(x, y, ownerid)
+        public Crafter(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
-            hp = DefaultHp;
-            maxhp = DefaultHp;
-
             using var db = new DataBase();
             db.crafts.Add(this);
             db.SaveChanges();
         }
-
-        [NotMapped]
-        public override float charge { get; set; }
-
         public override int PackId => CrafterPackId;
 
         /// <summary>
@@ -40,8 +32,11 @@ namespace MinesServer.GameShit.Buildings
         [NotMapped]
         public bool ready { get; set; } = false;
 
+        [NotMapped]
+        public override float charge { get; set; }
+        [NotMapped]
+        public override float maxcharge { get; set; }
         public CraftEntry? currentcraft { get; set; }
-        public DateTime brokentimer { get; set; }
         /// <summary>
         /// Encodes current visual state for the client.
         /// Base value depends on recipe result id; +50 when the job is complete.
@@ -63,8 +58,7 @@ namespace MinesServer.GameShit.Buildings
             }
         }
         public override PackType type => PackType.Craft;
-        public int hp { get; set; }
-        public int maxhp { get; set; }
+
         #region affectworld
         public override void Build()
         {

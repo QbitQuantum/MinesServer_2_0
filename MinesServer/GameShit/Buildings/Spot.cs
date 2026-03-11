@@ -20,19 +20,18 @@ using Newtonsoft.Json;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Spot : Pack, IDamagable
+    public class Spot : PackDamage
     {
         public override PackType type => PackType.Spot;
         #region Shit
         [NotMapped]
         public override float charge { get; set; }
         [NotMapped]
+        public override float maxcharge { get; set; }
+        [NotMapped]
         public override int cid { get; set; }
         public override int PackId => 47;
         #endregion
-        public DateTime brokentimer { get; set; }
-        public int hp { get; set; }
-        public int maxhp { get; set; }
         public Program? selected { get; set; }
         public BotSpot? entity;
         [NotMapped]
@@ -42,10 +41,8 @@ namespace MinesServer.GameShit.Buildings
         [NotMapped]
         public string basket { get; set; } = string.Empty;
         private Spot() { }
-        public Spot(int x, int y, int ownerid) : base(x, y, ownerid)
+        public Spot(int x, int y, int ownerid) : base(x, y, ownerid, 100)
         {
-            maxhp = 100;
-            hp = 100;
             using var db = new DataBase();
             db.spots.Add(this);
             db.SaveChanges();

@@ -1,23 +1,42 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 
+
 namespace MinesServer.GameShit.Buildings
 {
-    public interface IDamagable
+
+    public abstract class PackDamage : Pack
     {
+        protected PackDamage() { }
+
+        protected PackDamage(int x, int y, int ownerid, int maxHp) : base(x, y, ownerid)
+        {
+            maxhp = maxHp;
+            hp = maxHp;
+            brokentimer = null;
+        }
+
+        public virtual DateTime? brokentimer { get; set; }
+        public virtual int maxhp { get; set; }
+        public virtual int hp { get; set; }
+        public virtual float charge { get; set; }
+        public virtual float maxcharge { get; set; }
         private double GetRepairProgressPercentage()
         {
+            if (brokentimer == null)
+                return 0;
+
             var repairDuration = TimeSpan.FromHours(8);
             var totalMs = repairDuration.TotalMilliseconds;
-            var elapsedMs = (ServerTime.Now - brokentimer).TotalMilliseconds;
+            var elapsedMs = (ServerTime.Now - brokentimer.Value).TotalMilliseconds;
 
-            // Ограничиваем от 0 до 100%
             var percent = Math.Min(100, Math.Max(0, (elapsedMs / totalMs) * 100));
             return Math.Round(percent, 2);
         }
-        public void Damage(int i, DamageTypePacks DamageType = DamageTypePacks.Time)
+
+        public virtual void Damage(int i, DamageTypePacks DamageType = DamageTypePacks.Time)
         {
             if (ownerid == 0)
                 return;
@@ -30,23 +49,26 @@ namespace MinesServer.GameShit.Buildings
                 case DamageTypePacks.Time:
                     hp = Math.Max(0, hp - i);
                     break;
-                default: break;
+                default:
+                    break;
             }
-            
-            if (hp == 0)
+
+            if (hp == 0 && brokentimer == null)
                 brokentimer = ServerTime.Now;
         }
-        public bool CanDestroy()
+
+        public virtual bool CanDestroy()
         {
-            if (ServerTime.Now - brokentimer < TimeSpan.FromHours(8))
+            if (brokentimer != null && ServerTime.Now - brokentimer.Value < TimeSpan.FromHours(8))
             {
                 return false;
             }
             return hp == 0;
         }
-        public bool NeedEffect()
+
+        public virtual bool NeedEffect()
         {
-            if (hp == 0)
+            if (hp == 0 && brokentimer != null)
             {
                 var percentPassed = GetRepairProgressPercentage();
                 var random = Physics.r.Next(0, 101);
@@ -54,24 +76,18 @@ namespace MinesServer.GameShit.Buildings
             }
             return false;
         }
-        public void TrySendBrokenEffect()
+
+        public virtual void TrySendBrokenEffect()
         {
             if (NeedEffect())
             {
                 SendBrokenEffect();
             }
         }
-        public abstract void Destroy(Player p);
-        public void SendBrokenEffect()
+
+        protected void SendBrokenEffect()
         {
             World.W.GetChunk(x, y).SendFx(x, y, 12);
         }
-        public DateTime brokentimer { get; set; }
-        public int ownerid { get; set; }
-        public int x { get; set; }
-        public int y { get; set; }
-        public float charge { get; set; }
-        public int hp { get; set; }
-        public int maxhp { get; set; }
     }
 }

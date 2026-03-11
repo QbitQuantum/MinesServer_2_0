@@ -11,27 +11,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 namespace MinesServer.GameShit.Buildings
 {
-    public class Resp : Pack, IDamagable
+    public class Resp : PackDamage
     {
         #region fields
         public override PackType type => PackType.Resp;
-        public float maxcharge { get; set; }
         public int cost { get; set; }
-        public override int cid { get; set; }
         public long moneyinside { get; set; }
-        public int hp { get; set; }
-        public int maxhp { get; set; }
-        public DateTime brokentimer { get; set; }
         public override int PackId => 1;
         #endregion
         private Resp(){ }
-        public Resp(int x, int y, int ownerid) : base(x, y, ownerid)
+        public Resp(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
-            cost = 10;
             charge = 100;
             maxcharge = 1000;
-            hp = 1000;
-            maxhp = 1000;
             using var db = new DataBase();
             db.resps.Add(this);
             db.SaveChanges();

@@ -15,8 +15,6 @@ namespace MinesServer.GameShit.VulkSystem
         [NotMapped]
         public override int cid { get; set; }
         [NotMapped]
-        public override float charge { get; set; }
-        [NotMapped]
         public override int ownerid { get; set; }
         #endregion
         public override PackType type => PackType.Vulkan;

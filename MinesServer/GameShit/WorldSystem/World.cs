@@ -468,7 +468,7 @@ namespace MinesServer.GameShit.WorldSystem
                         if (Pack == null)
                             continue;
 
-                        if (Pack is IDamagable damagable)
+                        if (Pack is PackDamage damagable)
                         {
                             db.Attach(pack.Value);
                             if (shouldDamage)

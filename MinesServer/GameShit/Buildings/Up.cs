@@ -12,16 +12,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Up : Pack, IDamagable
+    public class Up : PackDamage
     {
         #region fields
         [NotMapped]
         public override float charge { get; set; }
+        [NotMapped]
+        public override float maxcharge { get; set; }
         public override int PackId => 2;
         public override PackType type => PackType.Up;
-        public int hp { get; set; }
-        public int maxhp { get; set; }
-        public DateTime brokentimer { get; set; }
         public long moneyinside { get; set; }
 
         public static Dictionary<int, long> PriceSlots =
@@ -63,11 +62,9 @@ namespace MinesServer.GameShit.Buildings
                 { 34, 5600 },
             };
         #endregion
-        public Up(int x, int y, int ownerid) : base(x, y, ownerid)
+        public Up(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
             using var db = new DataBase();
-            hp = 1000;
-            maxhp = 1000;
             db.ups.Add(this);
             db.SaveChanges();
         }

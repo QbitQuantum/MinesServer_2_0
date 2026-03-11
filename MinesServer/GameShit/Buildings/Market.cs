@@ -13,20 +13,19 @@ using Newtonsoft.Json;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Market : Pack, IDamagable
+    public class Market : PackDamage
     {
         #region fields
         [NotMapped]
         public override float charge { get; set; }
+        [NotMapped]
+        public override float maxcharge { get; set; }
         public override PackType type => PackType.Market;
-        public int maxhp { get; set; }
-        public int hp { get; set; }
         public long moneyinside { get; set; }
-        public DateTime brokentimer { get; set; }
         public override int PackId => 3;
         #endregion;
         private Market() {}
-        public Market(int ownerid, int x, int y) : base(ownerid, x, y)
+        public Market(int ownerid, int x, int y) : base(ownerid, x, y, 1000)
         {
             using var db = new DataBase();
             hp = 100;

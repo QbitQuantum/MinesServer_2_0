@@ -13,28 +13,20 @@ using System.Numerics;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Gun : Pack, IDamagable
+    public class Gun : PackDamage
     {
         #region fields
         public override PackType type => PackType.Gun;
-        public int hp { get; set; }
-        public int maxhp { get; set; }
-        public override float charge { get => base.charge; set => base.charge = value; }
-        public float maxcharge { get; set; }
-        public override int cid { get; set; }
         public override int off { get { return charge > 0 ? 1 : 0; } }
-        public DateTime brokentimer { get; set; }
         #endregion
         private const int attackRadius = 20;
         private const int chunkRadius = (attackRadius + Chunk.ChunkWidth - 1) / Chunk.ChunkWidth;
         public const int attackRadiusSq = attackRadius * attackRadius;
 
         public override int PackId => 26;
-        public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid)
+        public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid, 1000)
         {
             this.cid = cid;
-            hp = 1000;
-            maxhp = 1000;
             charge = 1000;
             maxcharge = 10000;
         }
