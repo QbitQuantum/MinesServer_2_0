@@ -279,6 +279,12 @@ namespace MinesServer.GameShit.Buildings
                 if (!info.IsExpertSkill)
                     continue;
 
+                // Получаем строковый код умения
+                string skillCode = skillType.GetCode();
+
+                // Проверяем, куплено ли это умение игроком
+                bool isPurchased = p.skillslist.PurchasedExpertSkills.Contains(skillCode);
+
                 // Получаем цену для этого умения
                 int price = skillType.GetBasePriceOPP();
 
@@ -286,21 +292,48 @@ namespace MinesServer.GameShit.Buildings
                 string buttonText;
                 Action<ActionArgs> buttonAction;
 
-                if (skillToShowPrice.HasValue && skillToShowPrice.Value == skillType)
+                if (isPurchased)
                 {
-                    // Если это выбранный скилл - показываем цену и списываем деньги
-                    buttonText = "Стоиомсть исследования: <color=yellow>" + price.ToString() + "</color>";
+                    // Если умение уже куплено - показываем зеленую надпись "Куплено"
+                    buttonText = "<color=lime>Куплено</color>";
+                    buttonAction = _ =>
+                    {
+                        // Просто показываем информацию без возможности покупки
+                        UpdateSkillPage(p, skillType, null);
+                    };
+                }
+                else if (skillToShowPrice.HasValue && skillToShowPrice.Value == skillType)
+                {
+                    // Если это выбранный скилл для покупки - показываем цену и кнопку покупки
+                    buttonText = $"Стоимость исследования: <color=yellow>{price}</color>";
                     buttonAction = _ =>
                     {
                         if (p.opp >= price)
                         {
                             using var db = new DataBase();
                             db.players.Attach(p);
+                            db.skills.Attach(p.skillslist);
+
                             p.opp -= price;
+
+                            // Добавляем умение в список купленных у игрока
+                            if (!p.skillslist.PurchasedExpertSkills.Contains(skillCode))
+                            {
+                                p.skillslist.PurchasedExpertSkills.Add(skillCode);
+                            }
+
+                            // Сохраняем изменения
+                            p.skillslist.Save();
                             db.SaveChanges();
+
+                            // Обновляем страницу
+                            UpdateSkillPage(p, currentDisplaySkill, null);
                         }
-                        // Обновляем страницу, убирая цену
-                        UpdateSkillPage(p, currentDisplaySkill, null);
+                        else
+                        {
+                            // Можно добавить сообщение о нехватке OPP
+                            UpdateSkillPage(p, currentDisplaySkill, null);
+                        }
                     };
                 }
                 else
@@ -313,7 +346,14 @@ namespace MinesServer.GameShit.Buildings
                     };
                 }
 
-                rich.Add(RichListEntry.Button(info.Name, new MButton(buttonText, info.Name, buttonAction)));
+                // Добавляем информацию о том, куплен ли скилл в название
+                string skillName = info.Name;
+                if (isPurchased)
+                {
+                    skillName = $"✓ {skillName}";
+                }
+
+                rich.Add(RichListEntry.Button(skillName, new MButton(buttonText, info.Name, buttonAction)));
             }
 
             var updatedPage = new Page
@@ -340,7 +380,18 @@ namespace MinesServer.GameShit.Buildings
                 if (!info.IsExpertSkill)
                     continue;
 
-                rich.Add(RichListEntry.Button(info.Name, new MButton("Подробнее", info.Name, _ =>
+                // Получаем строковый код умения и проверяем, куплено ли оно
+                string skillCode = skillType.GetCode();
+                bool isPurchased = p.skillslist.PurchasedExpertSkills.Contains(skillCode);
+
+                // Добавляем визуальное отличие для купленных умений
+                string skillName = info.Name;
+                if (isPurchased)
+                {
+                    skillName = $"✓ {skillName}"; // Добавляем галочку
+                }
+
+                rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", info.Name, _ =>
                 {
                     UpdateSkillPage(p, skillType, skillType);
                 })));

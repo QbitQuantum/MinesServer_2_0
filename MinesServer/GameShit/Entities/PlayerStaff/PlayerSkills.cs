@@ -57,6 +57,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 InstallSkill(SkillType.Health.GetCode(), 3);
             }
             slots = 20;
+
+            // Инициализируем пустой список купленных экспертных скиллов
+            _purchasedExpertSkills = new List<string>();
+            expertSkill = "[]";
+
             Save(); // Сохраняем после инициализации
         }
 
@@ -64,6 +69,39 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// Сериализованное представление словаря слот -> (код навыка, уровень, опыт).
         /// </summary>
         public string ser { get; set; } = "";
+
+        /// <summary>
+        /// JSON поле для хранения купленных экспертных скиллов (храним строковые коды)
+        /// </summary>
+        public string expertSkill { get; set; } = "[]";
+
+        [NotMapped]
+        private List<string> _purchasedExpertSkills;
+
+        [NotMapped]
+        public List<string> PurchasedExpertSkills
+        {
+            get
+            {
+                if (_purchasedExpertSkills == null)
+                {
+                    try
+                    {
+                        _purchasedExpertSkills = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(expertSkill ?? "[]") ?? new List<string>();
+                    }
+                    catch
+                    {
+                        _purchasedExpertSkills = new List<string>();
+                    }
+                }
+                return _purchasedExpertSkills;
+            }
+            set
+            {
+                _purchasedExpertSkills = value;
+                expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+            }
+        }
 
         public void LoadSkills()
         {
@@ -133,6 +171,25 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             return true; // Все требования выполнены
         }
+
+        /// <summary>
+        /// Проверяет, куплен ли экспертный навык игроком
+        /// </summary>
+        private bool IsExpertSkillPurchased(SkillType skillType)
+        {
+            var info = skillType.GetInfo();
+
+            // Если это не экспертный навык - считаем что доступен всегда
+            if (info == null || !info.IsExpertSkill)
+                return true;
+
+            // Получаем строковый код навыка
+            string skillCode = skillType.GetCode();
+
+            // Проверяем наличие кода навыка в списке купленных
+            return PurchasedExpertSkills.Contains(skillCode);
+        }
+
         public bool CanInstallSkill(string typeCode, int slot)
         {
             if (slot > slots || slot < 0)
@@ -147,6 +204,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             var info = skillType.GetInfo();
             if (info == null)
+                return false;
+
+            // Для экспертных навыков проверяем, куплен ли он
+            if (info.IsExpertSkill && !IsExpertSkillPurchased(skillType))
                 return false;
 
             return MeetsRequirements(skillType);
@@ -197,6 +258,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
 
             ser = Newtonsoft.Json.JsonConvert.SerializeObject(raw, Newtonsoft.Json.Formatting.None);
+
+            // Сохраняем из поля _purchasedExpertSkills, а не создаем новый список
+            if (_purchasedExpertSkills != null)
+            {
+                expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
+            }
+
             db.SaveChanges();
         }
 
@@ -212,6 +280,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
                 // Пропускаем если навык уже есть
                 if (skills.Values.Any(s => s?.type == skillType))
+                    continue;
+
+                // Для экспертных навыков проверяем, куплен ли он
+                if (info.IsExpertSkill && !IsExpertSkillPurchased(skillType))
                     continue;
 
                 // Если нет требований - сразу доступен
