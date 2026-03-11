@@ -54,6 +54,13 @@ namespace MinesServer.GameShit.Buildings
             }
             return false;
         }
+        public void TrySendBrokenEffect()
+        {
+            if (NeedEffect())
+            {
+                SendBrokenEffect();
+            }
+        }
         public abstract void Destroy(Player p);
         public void SendBrokenEffect()
         {

@@ -464,6 +464,12 @@ namespace MinesServer.GameShit.WorldSystem
                     foreach (var pack in W.GetPosChunk(chx, chy).packs)
                     {
                         if (pack.Value != null && pack.Value is IDamagable damagable)
+                        var Pack = pack.Value;
+
+                        if (Pack == null)
+                            continue;
+
+                        if (Pack is IDamagable damagable)
                         {
                             db.Attach(pack.Value);
                             if (shouldDamage)
@@ -472,10 +478,11 @@ namespace MinesServer.GameShit.WorldSystem
                             }
                             if (damagable != null && damagable.NeedEffect())
                             {
-                                damagable.SendBrokenEffect();
+                                damagable.Damage(2);
                             }
+                            damagable.TrySendBrokenEffect();
                         }
-                        pack.Value.Update();
+                        Pack.Update();
                     }
                 }
             }
