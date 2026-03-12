@@ -90,7 +90,7 @@ namespace MinesServer.GameShit.Sys_Craft
             return string.Join("\n", lines);
         }
 
-        public static void OpenRecipie(Player p, int id)
+        private static void OpenRecipie(Player p, int id)
         {
             var recipe = RDes.recipies.FirstOrDefault(i => i.id == id);
             if (recipe.result.id == 0 && recipe.time == 0)
@@ -126,7 +126,7 @@ namespace MinesServer.GameShit.Sys_Craft
             });
         }
 
-        public static void Craft(Player p, Recipie r, int num)
+        private static void Craft(Player p, Recipie r, int num)
         {
             if (!World.ContainsPack(p.x, p.y, out var craft) || num <= 0)
             {
@@ -161,7 +161,7 @@ namespace MinesServer.GameShit.Sys_Craft
             p.SendInventory();
         }
 
-        public static void Claim(Player p, Crafter c)
+        private static void Claim(Player p, Crafter c)
         {
             if (c.currentcraft is null)
             {
@@ -186,11 +186,11 @@ namespace MinesServer.GameShit.Sys_Craft
             p.win = c.GUIWin(p);
         }
 
-        public static bool MeetReqs(Player p, Recipie r, int num) =>
+        private static bool MeetReqs(Player p, Recipie r, int num) =>
             (r.costcrys is null || !r.costcrys.Select(i => p.crys.cry[i.id] >= (i.num * num)).Contains(false)) &&
             (r.costres is null || !r.costres.Select(i => p.inventory[i.id] >= (i.num * num)).Contains(false));
 
-        public static void DeleteReqs(Player p, Recipie r, int num)
+        private static void DeleteReqs(Player p, Recipie r, int num)
         {
             if (r.costcrys is not null)
             {
@@ -270,7 +270,7 @@ namespace MinesServer.GameShit.Sys_Craft
             };
         }
 
-        public static void ClaimReady(Player p, Crafter c, int readyCount)
+        private static void ClaimReady(Player p, Crafter c, int readyCount)
         {
             if (c.currentcraft is null || readyCount <= 0)
             {
