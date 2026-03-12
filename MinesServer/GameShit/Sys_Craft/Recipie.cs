@@ -11,6 +11,11 @@ namespace MinesServer.GameShit.SysCraft
         public RC[]? costres { get; init; }
         public RC[]? costcrys { get; init; }
         public required int time { get; init; }
+        public Recipie()
+        {
+            costres = [];
+            costcrys = [];
+        }
     }
     public record struct RC(int id,int num);
 }
