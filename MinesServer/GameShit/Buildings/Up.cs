@@ -23,8 +23,8 @@ namespace MinesServer.GameShit.Buildings
         public override PackType type => PackType.Up;
         public long moneyinside { get; set; }
 
-        public static Dictionary<int, long> PriceSlots =
-            new Dictionary<int, long>()
+        public static readonly Dictionary<int, long> PriceSlots =
+            new()
             {
                 { 1, 2_500_000 },
                 { 2, 5_000_000 },
