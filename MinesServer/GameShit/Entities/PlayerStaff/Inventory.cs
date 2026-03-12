@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Consumables;
 using MinesServer.GameShit.SysMarket;
@@ -306,7 +307,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (id == -1)
                 packet = InventoryPacket.Close();
             else
-                packet = InventoryPacket.Choose("Выбран предмет - " + MarketSystem.PackName(id), new bool[0, 0], 123, 123, 12);
+                packet = InventoryPacket.Choose("Выбран предмет - " + ItemTypeExt.PackName(id), new bool[0, 0], 123, 123, 12);
             p.connection?.SendU(InvToSend());
             p.connection?.SendU(packet);
         }

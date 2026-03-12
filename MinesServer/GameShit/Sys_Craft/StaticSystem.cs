@@ -1,3 +1,4 @@
+using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
@@ -78,7 +79,7 @@ namespace MinesServer.GameShit.Sys_Craft
             {
                 foreach (var res in recipe.costres)
                 {
-                    lines.Add($"{MarketSystem.PackName(res.id)} x{res.num}");
+                    lines.Add($"{ItemTypeExt.PackName(res.id)} x{res.num}");
                 }
             }
 
@@ -99,7 +100,7 @@ namespace MinesServer.GameShit.Sys_Craft
             }
 
             var requirementsText = BuildRequirementsText(recipe);
-            var itemName = MarketSystem.PackName(recipe.result.id);
+            var itemName = ItemTypeExt.PackName(recipe.result.id);
 
             p.win?.CurrentTab.Open(new Page
             {
