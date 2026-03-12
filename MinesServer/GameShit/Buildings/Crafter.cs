@@ -119,9 +119,7 @@ namespace MinesServer.GameShit.Buildings
             if (p.id != ownerid)
                 return null;
 
-            var initialPage = currentcraft is not null
-                ? StaticSystem.FilledPage(p, this)
-                : StaticSystem.GlobalFirstPage(p);
+            var initialPage = StaticSystem.GetPageForCrafter(p, this);
 
             return new Window
             {

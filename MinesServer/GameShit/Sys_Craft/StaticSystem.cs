@@ -210,7 +210,7 @@ namespace MinesServer.GameShit.Sys_Craft
 
             p.SendInventory();
         }
-        public static IPage? FilledPage(Player p, Crafter c)
+        private static IPage? FilledPage(Player p, Crafter c)
         {
             if (c.currentcraft is null)
             {
@@ -318,7 +318,7 @@ namespace MinesServer.GameShit.Sys_Craft
                 p.win = c.GUIWin(p);
             }
         }
-        public static IPage? GlobalFirstPage(Player p)
+        private static IPage? GlobalFirstPage(Player p)
         {
             var onInventoryClick = new Action<int>(type =>
             {
@@ -356,6 +356,12 @@ namespace MinesServer.GameShit.Sys_Craft
                     },
                 }
             };
+        }
+        public static IPage? GetPageForCrafter(Player p, Crafter c)
+        {
+            return c.currentcraft is not null
+                ? FilledPage(p, c)      // внутренний, приватный
+                : GlobalFirstPage(p);   // внутренний, приватный
         }
     }
 }
