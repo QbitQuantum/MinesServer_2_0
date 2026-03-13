@@ -20,8 +20,8 @@ namespace MinesServer.GameShit.Skills
             if (isUpReady())
             {
                 Dictionary<string, int> v = new();
-                lvl += 1;
                 exp -= Expiriense;
+                lvl += 1;
                 v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
                 p.connection?.SendU(new SkillsPacket(v));
                 p.SendLvl();
