@@ -1,10 +1,11 @@
-﻿using MinesServer.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection.Metadata.Ecma335;
+using MinesServer.Enums;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.GameShit.Skills;
 using MinesServer.Server;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection.Metadata.Ecma335;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {
@@ -346,6 +347,185 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     ski.Add(new UpSkill(i, skills[i].lvl, skills[i].isUpReady(), skills[i].type));
             }
             return ski.ToArray();
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта для навыков по типу эффекта
+        /// </summary>
+        public void HandleExperience(Player player, SkillEffectType effectType, float baseExp = 1f)
+        {
+            LoadSkills();
+
+            foreach (var skill in skills.Values.Where(s => s != null))
+            {
+                if (skill != null && skill.UseSkill(effectType, player))
+                {
+                    skill.AddExp(player, baseExp);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта для конкретного типа навыка
+        /// </summary>
+        public void HandleExperience(Player player, SkillType skillType, float baseExp = 1f)
+        {
+            LoadSkills();
+
+            var skill = skills.Values.FirstOrDefault(s => s?.type == skillType);
+            skill?.AddExp(player, baseExp);
+        }
+
+
+        /// <summary>
+        /// Обрабатывает получение опыта при добыче ресурсов
+        /// </summary>
+        public void HandleMiningExperience(Player player, float baseExp = 1f)
+        {
+            HandleExperience(player, SkillType.MineGeneral, baseExp);
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта при ударах по кристаллам
+        /// </summary>
+        public void HandleDiggingExperience(Player player, float baseExp = 1f)
+        {
+            HandleExperience(player, SkillType.Digging, baseExp);
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта при строительстве
+        /// </summary>
+        public void HandleBuildingExperience(Player player, string buildType, float baseExp = 1f)
+        {
+            LoadSkills();
+
+            // Определяем, какой навык строительства использовать
+            SkillType skillType = buildType switch
+            {
+                "G" => SkillType.BuildGreen,
+                "Y" => SkillType.BuildYellow,
+                "R" => SkillType.BuildRed,
+                "V" => SkillType.BuildWar,
+                "O" => SkillType.BuildStructure,
+                _ => SkillType.Unknown
+            };
+
+            if (skillType != SkillType.Unknown)
+                HandleExperience(player, skillType, baseExp);
+
+            /*
+            // Также обрабатываем общий навык OnBld для всех строительных навыков
+            foreach (var skill in skills.Values.Where(s => s != null && s.EffectType() == SkillEffectType.OnBld))
+            {
+                if (skill != null && skill.type != skillType) // Чтобы не дублировать для конкретного навыка
+                {
+                    skill.AddExp(player, Exp); // Меньше опыта за смежные навыки
+                }
+            }
+            */
+
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта при получении урона
+        /// </summary>
+        public void HandleDamageExperience(Player player, DamageTypePlayer damageType, float baseExp = 1f)
+        {
+            LoadSkills();
+
+            // Навык здоровья получает опыт при любом уроне
+            HandleExperience(player, SkillType.Health, baseExp);
+
+            // Специфические навыки для урона
+            if (damageType == DamageTypePlayer.Gun)
+            {
+                HandleExperience(player, SkillType.Induction, baseExp);
+
+                HandleExperience(player, SkillType.AntiGun, baseExp);
+            }
+        }
+
+        /// <summary>
+        /// Обрабатывает получение урона, начисляет опыт и возвращает модифицированный урон
+        /// </summary>
+        public int HandleDamageReceived(Player player, int damage, DamageTypePlayer damageType, float baseExp = 1f)
+        {
+            LoadSkills();
+
+            int modifiedDamage = damage;
+
+            HandleDamageExperience(player, damageType, baseExp);
+
+            foreach (var skill in skills.Values.Where(s => s != null))
+            {
+                if (skill != null && skill.type == SkillType.AntiGun)
+                {
+                    // Уменьшаем урон
+                    int reduction = (int)(damage * (skill.Effect / 100));
+                    modifiedDamage = Math.Max(0, modifiedDamage - reduction);
+                }
+                break;
+            }
+            return modifiedDamage;
+        }
+
+        /// <summary>
+        /// Получает множитель добычи от навыков
+        /// </summary>
+        public float GetMiningMultiplier(Player player, ref float cb)
+        {
+            LoadSkills();
+
+            float multiplier = 1 + (float)Math.Truncate(cb);
+
+            // TODO: Может стоять ExpertMining
+            var miningSkill = skills.Values.FirstOrDefault(s => s?.type == SkillType.MineGeneral);
+            if (miningSkill != null)
+            {
+                multiplier += miningSkill.Effect;
+            }
+
+            // Обновляем дробную часть cb
+            float floorMult = (float)Math.Truncate(multiplier);
+            cb -= (float)Math.Truncate(cb);
+            cb += multiplier - floorMult;
+
+            return floorMult;
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта при перемещении валуна
+        /// </summary>
+        public void HandleBoulderMoveExperience(Player player)
+        {
+            HandleExperience(player, SkillEffectType.OnDig, 10); // Больше опыта за перемещение
+        }
+
+        /// <summary>
+        /// Обрабатывает получение опыта при разрушении блока (без кристаллов)
+        /// </summary>
+        public void HandleDestructionExperience(Player player)
+        {
+            HandleExperience(player, SkillEffectType.OnDig);
+        }
+
+        /// <summary>
+        /// Получает множитель урона при копании
+        /// </summary>
+        public float GetDiggingDamageMultiplier(float baseDamage)
+        {
+            LoadSkills();
+
+            float damage = baseDamage;
+
+            var diggingSkill = skills.Values.FirstOrDefault(s => s?.type == SkillType.Digging);
+            if (diggingSkill != null)
+            {
+                damage = baseDamage * (diggingSkill.Effect / 100f);
+            }
+
+            return damage;
         }
 
         public int slots { get; set; }

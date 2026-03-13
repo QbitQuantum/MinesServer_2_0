@@ -1,4 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
@@ -27,14 +35,6 @@ using MinesServer.Network.Programmator;
 using MinesServer.Network.World;
 using MinesServer.Server;
 using MinesServer.Server.Network;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.Marshalling;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {
@@ -171,12 +171,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
         private int CalculateMaxHealth()
         {
-            var healthSkill = skillslist.skills.Values.FirstOrDefault(s =>
-                s != null &&
-                s.UseSkill(SkillEffectType.OnHealth, this) == true &&
-                s.type == SkillType.Health);
-
-            return healthSkill != null ? (int)healthSkill.Effect : 100;
+            var healthSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.Health);
+            return 100 + (healthSkill != null ? (int)healthSkill.Effect : 0);
         }
 
         private void SendInitialData()
@@ -370,13 +366,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private void UpdatePosition(int x, int y, int dir)
         {
             if (Vector2.Distance(new Vector2(this.x, this.y), new Vector2(x, y)) < 1.2f)
-            {
-                var moveSkill = skillslist.skills.Values.FirstOrDefault(s =>
-                    s != null &&
-                    s.UseSkill(SkillEffectType.OnMove, this) == true &&
-                    s.type == SkillType.Movement);
-                moveSkill?.AddExp(this);
-            }
+                skillslist.HandleExperience(this, SkillType.Movement, 1);
 
             this.x = x;
             this.y = y;
@@ -396,69 +386,75 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (!World.CanBuildAt(x, y, cid))
                 return;
 
-            var buildskills = skillslist.skills.Values.Where(s => s?.EffectType() == SkillEffectType.OnBld);
-
+            // Убираем buildskills IEnumerable, работаем напрямую
+            bool success = false;
             switch (type)
             {
-                case "G": BuildBlock(x, y, buildskills); break;
-                case "V": BuildMilitary(x, y, buildskills); break;
-                case "R": BuildRoad(x, y, buildskills); break;
-                case "O": BuildSupport(x, y, buildskills); break;
+                case "G": success = BuildBlock(x, y); break;
+                case "V": success = BuildMilitary(x, y); break;
+                case "R": success = BuildRoad(x, y); break;
+                case "O": success = BuildSupport(x, y); break;
+            }
+
+            if (success)
+            {
+                skillslist.HandleBuildingExperience(this, type, 1);
             }
         }
 
-        private void BuildBlock(int x, int y, IEnumerable<Skill> buildskills)
+        private bool BuildBlock(int x, int y)
         {
             var cell = World.GetCell(x, y);
             var cellprop = World.GetProp(cell);
 
-            foreach (var c in buildskills)
+            // Проверяем наличие навыков
+            var greenSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildGreen);
+            var yellowSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildYellow);
+            var redSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildRed);
+
+            if (greenSkill != null && (World.TrueEmpty(x, y) || cellprop.isSand))
             {
-                if (c.type == SkillType.BuildGreen && (World.TrueEmpty(x, y) || cellprop.isSand))
+                if (crys.RemoveCrys((int)CrystalType.Green, (long)greenSkill.Cost))
                 {
-                    if (crys.RemoveCrys(0, (long)c.Effect))
-                    {
-                        c.AddExp(this);
-                        World.SetCell(x, y, CellType.GreenBlock);
-                        World.SetDurability(x, y, (int)c.DurabilityEffect);
-                    }
-                    return;
-                }
-
-                if (c.type == SkillType.BuildYellow && cell == (byte)CellType.GreenBlock)
-                {
-                    if (crys.RemoveCrys(4, (long)c.Effect))
-                    {
-                        c.AddExp(this);
-                        World.SetCell(x, y, CellType.YellowBlock);
-                        World.SetDurability(x, y, World.GetDurability(x, y) + (int)c.DurabilityEffect);
-                    }
-                    return;
-                }
-
-                if (c.type == SkillType.BuildRed && cell == (byte)CellType.YellowBlock)
-                {
-                    if (crys.RemoveCrys(2, (long)c.Effect))
-                    {
-                        c.AddExp(this);
-                        World.SetCell(x, y, CellType.RedBlock);
-                        World.SetDurability(x, y, World.GetDurability(x, y) + (int)c.DurabilityEffect);
-                    }
-                    return;
+                    World.SetCell(x, y, CellType.GreenBlock);
+                    World.SetDurability(x, y, (int)greenSkill.DurabilityEffect);
+                    return true;
                 }
             }
+            else if (yellowSkill != null && cell == (byte)CellType.GreenBlock)
+            {
+                if (crys.RemoveCrys((int)CrystalType.Violet, (long)yellowSkill.Cost))
+                {
+                    World.SetCell(x, y, CellType.YellowBlock);
+                    World.SetDurability(x, y, World.GetDurability(x, y) + (int)yellowSkill.DurabilityEffect);
+                    return true;
+                }
+            }
+            else if (redSkill != null && cell == (byte)CellType.YellowBlock)
+            {
+                if (crys.RemoveCrys((int)CrystalType.Red, (long)redSkill.Cost))
+                {
+                    World.SetCell(x, y, CellType.RedBlock);
+                    World.SetDurability(x, y, World.GetDurability(x, y) + (int)redSkill.DurabilityEffect);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        private void BuildMilitary(int x, int y, IEnumerable<Skill> buildskills)
+        private bool BuildMilitary(int x, int y)
         {
-            foreach (var c in buildskills.Where(s => s.type == SkillType.BuildWar))
-            {
-                if (crys.RemoveCrys(5, (long)c.Effect) && World.TrueEmpty(x, y))
-                {
-                    c.AddExp(this);
-                    World.SetCell(x, y, CellType.MilitaryBlockFrame);
+            long cost = 0;
+            var warSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildWar);
 
-                    var finalDurability = (int)c.DurabilityEffect;
+            if (warSkill != null)
+            {
+                cost = (long)warSkill.Cost;
+                if (crys.RemoveCrys(5, cost) && World.TrueEmpty(x, y))
+                {
+                    World.SetCell(x, y, CellType.MilitaryBlockFrame);
+                    var finalDurability = (int)warSkill.DurabilityEffect;
                     _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>
                     {
                         if (World.GetCell(x, y) == (byte)CellType.MilitaryBlockFrame)
@@ -467,39 +463,44 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                             World.SetDurability(x, y, finalDurability);
                         }
                     });
+                    return true;
                 }
-                return;
             }
+            return false;
         }
 
-        private void BuildRoad(int x, int y, IEnumerable<Skill> buildskills)
+        private bool BuildRoad(int x, int y)
         {
-            foreach (var c in buildskills.Where(s => s.type == SkillType.BuildRoad))
+            long cost = 0;
+            var roadSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildRoad);
+
+            if (roadSkill != null)
             {
-                if (crys.RemoveCrys(0, (long)c.Effect) && World.TrueEmpty(x, y))
+                cost = (long)roadSkill.Cost;
+                if (crys.RemoveCrys(0, cost) && World.TrueEmpty(x, y))
                 {
-                    c.AddExp(this);
                     World.SetCell(x, y, CellType.Road);
+                    return true;
                 }
-                return;
             }
+            return false;
         }
 
-        private void BuildSupport(int x, int y, IEnumerable<Skill> buildskills)
+        private bool BuildSupport(int x, int y)
         {
+            var structureSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildStructure);
             var cellprop = World.GetProp(World.GetCell(x, y));
 
-            foreach (var c in buildskills.Where(s => s.type == SkillType.BuildStructure))
+            if (structureSkill != null)
             {
-                if (crys.RemoveCrys(0, (long)c.Effect) && (World.TrueEmpty(x, y) || cellprop.isSand))
+                if (crys.RemoveCrys((int)CrystalType.Green, (long)structureSkill.Cost) && (World.TrueEmpty(x, y) || cellprop.isSand))
                 {
-                    c.AddExp(this);
                     World.SetCell(x, y, CellType.Support);
+                    return true;
                 }
-                return;
             }
+            return false;
         }
-
         #endregion
 
         #region Actions
@@ -518,7 +519,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Bz()
         {
-            ResourceExtractionService.PerformDig(this, this, skillslist.skills.Values, ref cb, crys);
+            ResourceExtractionService.PerformDig(this, this, ref cb, crys);
         }
 
         public void BBox(long[]? c)
@@ -552,50 +553,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override bool Heal(int num = -1)
         {
-            if (Health == MaxHealth)
-                return false;
-
-            var heal = skillslist.skills.Values.FirstOrDefault(s => s.type == SkillType.Repair);
-            if (heal == default)
-                return false;
-
-            num = (int)heal.Effect;
-
-            if (!crys.RemoveCrys(2, 1))
-                return false;
-
-            heal.AddExp(this);
-            Health = Math.Min(Health + num, MaxHealth);
-
-            SendDFToBots(5, 0, 0, id, 0);
-            this.SendHealth();
-
-            return true;
+            return ResourceExtractionService.PerformRepair(this, this);
         }
 
-        public override void Hurt(int num, DamageTypePlayer t = DamageTypePlayer.Pure)
+        public override void Hurt(int damage, DamageTypePlayer type = DamageTypePlayer.Pure)
         {
-            foreach (var c in skillslist.skills.Values.Where(s => s != null))
+            skillslist.HandleDamageReceived(this, damage, type, damage);
+
+            if (Health - damage > 0)
             {
-                if (c.UseSkill(SkillEffectType.OnHealth, this) && c.type == SkillType.Health)
-                    c.AddExp(this);
-
-                if (c.UseSkill(SkillEffectType.OnHurt, this) && t == DamageTypePlayer.Gun)
-                {
-                    if (c.type == SkillType.Induction)
-                        c.AddExp(this);
-
-                    if (c.type == SkillType.AntiGun)
-                    {
-                        c.AddExp(this);
-                        num = (int)Math.Max(0, num - num * (c.Effect / 100));
-                    }
-                }
-            }
-
-            if (Health - num > 0)
-            {
-                Health -= num;
+                Health -= damage;
                 SendDFToBots(6, 0, 0, id, 0);
             }
             else
