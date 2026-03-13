@@ -202,16 +202,19 @@ namespace MinesServer.GameShit.Buildings
                     SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
                     OnInstall = skillfromslot == null ? oninstall : null,
                     Text = skillfromslot?.Description,
-                    Button = skillfromslot != null && skillfromslot.isUpReady() ?
+                    Button = skillfromslot != null && skillfromslot.isUpReady() && p.money > skillfromslot.Cost ?
                         new MButton("Прокачать", "upgrade", (args) =>
                         {
-                            // Добавляем 10% от стоимости в moneyinside
-                            long tenPercent = (long)(skillfromslot.Cost * 0.1);
-
                             using (var db = new DataBase())
                             {
+                                long money = (long)(skillfromslot.Cost);
+
                                 db.ups.Attach(this);
-                                moneyinside += tenPercent;
+                                db.players.Attach(p);
+                                p.money -= money;
+
+                                // Добавляем 10% от стоимости в moneyinside
+                                moneyinside += (long)(money * 0.1);
                                 db.SaveChanges();
                             }
 
