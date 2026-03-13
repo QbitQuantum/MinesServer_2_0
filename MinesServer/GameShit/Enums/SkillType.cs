@@ -124,6 +124,95 @@ namespace MinesServer.Enums
         /// <summary>*g | gluo | Глюонная упаковка</summary>
         GluonPacking
     }
+    public class SkillConflict
+    {
+        /// <summary>
+        /// Навык, который конфликтует
+        /// </summary>
+        public SkillType Skill { get; set; }
+
+        /// <summary>
+        /// С кем конфликтует
+        /// </summary>
+        public SkillType ConflictsWith { get; set; }
+
+        /// <summary>
+        /// Тип конфликта (опционально, для пояснения)
+        /// </summary>
+        public string ConflictType { get; set; } = string.Empty;
+    }
+
+    public static class SkillConflicts
+    {
+        private static readonly List<SkillConflict> _conflicts = new()
+        {
+            // Разрушение
+            new SkillConflict { Skill = SkillType.TotalDestruction, ConflictsWith = SkillType.Destruction, ConflictType = "Заменяет" },
+            
+            // Стройка
+            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildGreen, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildYellow, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildRed, ConflictType = "Заменяет" },
+
+            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildStructure, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildRoad, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildQuadro, ConflictType = "Заменяет" },
+            
+            // Добыча
+            new SkillConflict { Skill = SkillType.ExpertMining, ConflictsWith = SkillType.MineGeneral, ConflictType = "Заменяет" },
+
+        };
+
+        /// <summary>
+        /// Проверяет, конфликтуют ли два навыка
+        /// </summary>
+        public static bool HasConflict(SkillType skill1, SkillType skill2)
+        {
+            return _conflicts.Any(c =>
+                (c.Skill == skill1 && c.ConflictsWith == skill2) ||
+                (c.Skill == skill2 && c.ConflictsWith == skill1));
+        }
+
+        /// <summary>
+        /// Возвращает тип конфликта между навыками
+        /// </summary>
+        public static string GetConflictType(SkillType skill1, SkillType skill2)
+        {
+            var conflict = _conflicts.FirstOrDefault(c =>
+                (c.Skill == skill1 && c.ConflictsWith == skill2) ||
+                (c.Skill == skill2 && c.ConflictsWith == skill1));
+
+            return conflict?.ConflictType ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Получает все конфликты для навыка
+        /// </summary>
+        public static IEnumerable<SkillType> GetConflictsFor(SkillType skill)
+        {
+            return _conflicts
+                .Where(c => c.Skill == skill)
+                .Select(c => c.ConflictsWith);
+        }
+
+        /// <summary>
+        /// Проверяет, можно ли изучить навык при текущих навыках
+        /// </summary>
+        public static (bool CanLearn, SkillType? ConflictWith, string ConflictType) CanLearn(
+            SkillType newSkill,
+            IEnumerable<SkillType> currentSkills)
+        {
+            foreach (var currentSkill in currentSkills)
+            {
+                if (HasConflict(newSkill, currentSkill))
+                {
+                    return (false, currentSkill, GetConflictType(newSkill, currentSkill));
+                }
+            }
+            return (true, null, null);
+        }
+    }
+
     public class SkillInfo
     {
         public string Name { get; set; }

@@ -158,11 +158,34 @@ namespace MinesServer.GameShit.Buildings
             {
                 var playerSkill = p.skillslist.skills.Values.FirstOrDefault(s => s?.type.GetCode() == skilltype.GetCode());
 
+                // Получаем текущие навыки игрока для проверки конфликтов
+                var currentSkills = p.skillslist.skills.Values
+                    .Where(s => s != null)
+                    .Select(s => s.type)
+                    .ToList();
+
+                // Проверяем конфликты
+                var (canLearn, conflictWith, conflictType) = SkillConflicts.CanLearn(skilltype, currentSkills);
+
+                // Создаем описание навыка
+                string description = playerSkill != null ? playerSkill.Description : SkillTypeExtensions.GetDescription(skilltype);
+
+                // Если есть конфликт - добавляем сообщение о конфликте в описание и не показываем кнопку установки
+                if (!canLearn && conflictWith.HasValue)
+                {
+                    description = $"НЕЛЬЗЯ УСТАНОВИТЬ ⚠️\n\n" +
+                                 $"Навык \"{skilltype.GetName()}\" конфликтует с навыком \"{conflictWith?.GetName()}\".\n" +
+                                 $"Тип конфликта: {conflictType}\n\n" +
+                                 $"Для установки этого навыка необходимо сначала удалить конфликтующий навык.\n\n" +
+                                 $"---\n\n{description}";
+                }
+
                 var installPage = basePage with
                 {
                     SkillIcon = skilltype,
-                    Text = playerSkill != null ? playerSkill.Description : SkillTypeExtensions.GetDescription(skilltype),
-                    Button = new MButton("Установить", "confirm", (args) =>
+                    Text = description,
+                    // Показываем кнопку установки только если нет конфликта
+                    Button = canLearn ? new MButton("Установить", "confirm", (args) =>
                     {
                         if (p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot))
                         {
@@ -170,7 +193,7 @@ namespace MinesServer.GameShit.Buildings
                             p.win = GUIWin(p);
                             p.SendWindow();
                         }
-                    })
+                    }) : null
                 };
 
                 p.win?.CurrentTab.Replace(installPage);
