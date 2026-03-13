@@ -21,8 +21,6 @@ namespace MinesServer.GameShit.Buildings
         public virtual DateTime? brokentimer { get; set; }
         public virtual int maxhp { get; set; }
         public virtual int hp { get; set; }
-        public virtual float charge { get; set; }
-        public virtual float maxcharge { get; set; }
         private static double GetRepairProgressPercentage(DateTime? brokentimer)
         {
             if (brokentimer == null)
@@ -43,13 +41,13 @@ namespace MinesServer.GameShit.Buildings
 
             switch (DamageType)
             {
-                case DamageTypePacks.Raz:
-                    charge = Math.Max(0, charge - 100);
-                    break;
                 case DamageTypePacks.Time:
                     hp = Math.Max(0, hp - i);
                     if (hp == 0 && brokentimer == null)
                         brokentimer = ServerTime.Now;
+                    break;
+                case DamageTypePacks.Raz:
+                    // Будет переопределено в PackCharge
                     break;
                 default:
                     break;

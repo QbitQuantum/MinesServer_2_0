@@ -81,7 +81,7 @@ namespace MinesServer.GameShit.Buildings
             return elements;
         }
     }
-    public class Teleport : PackDamage
+    public class Teleport : PackCharge
     {
         public override PackType type => PackType.Teleport;
         public int cost { get; set; }
@@ -89,10 +89,9 @@ namespace MinesServer.GameShit.Buildings
         public override int off => charge > 0 ? 1 : 0;
         public override int PackId => 0;
         private Teleport() {}
-        public Teleport(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
+        public Teleport(int x, int y, int ownerid) : base(x, y, ownerid, 1000, 10000)
         {
             charge = 1000;
-            maxcharge = 10000;
             using var db = new DataBase();
             db.teleports.Add(this);
             db.SaveChanges();

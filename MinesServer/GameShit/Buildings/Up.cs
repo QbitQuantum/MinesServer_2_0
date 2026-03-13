@@ -15,10 +15,6 @@ namespace MinesServer.GameShit.Buildings
     public class Up : PackDamage
     {
         #region fields
-        [NotMapped]
-        public override float charge { get; set; }
-        [NotMapped]
-        public override float maxcharge { get; set; }
         public override int PackId => 2;
         public override PackType type => PackType.Up;
         public long moneyinside { get; set; }

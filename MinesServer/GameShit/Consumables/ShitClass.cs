@@ -209,7 +209,7 @@ namespace MinesServer.GameShit.Consumables
                             }
 
                             // Работа с повреждаемыми объектами
-                            if (World.ContainsPack(tx, ty, out var pack) && pack is PackDamage damagable)
+                            if (World.ContainsPack(tx, ty, out var pack) && pack is PackCharge damagable)
                             {
                                 db.Attach(pack); // привязываем к контексту
 

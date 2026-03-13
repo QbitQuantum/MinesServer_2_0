@@ -31,11 +31,6 @@ namespace MinesServer.GameShit.Buildings
         /// </summary>
         [NotMapped]
         public bool ready { get; set; } = false;
-
-        [NotMapped]
-        public override float charge { get; set; }
-        [NotMapped]
-        public override float maxcharge { get; set; }
         public CraftEntry? currentcraft { get; set; }
         /// <summary>
         /// Encodes current visual state for the client.

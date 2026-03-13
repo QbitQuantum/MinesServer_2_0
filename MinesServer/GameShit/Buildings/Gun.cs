@@ -13,7 +13,7 @@ using System.Numerics;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Gun : PackDamage
+    public class Gun : PackCharge
     {
         #region fields
         public override PackType type => PackType.Gun;
@@ -24,11 +24,10 @@ namespace MinesServer.GameShit.Buildings
         public const int attackRadiusSq = attackRadius * attackRadius;
 
         public override int PackId => 26;
-        public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid, 1000)
+        public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid, 1000, 10000)
         {
             this.cid = cid;
             charge = 1000;
-            maxcharge = 10000;
         }
         private Gun() { }
         #region affectworld

@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 namespace MinesServer.GameShit.Buildings
 {
-    public class Resp : PackDamage
+    public class Resp : PackCharge
     {
         #region fields
         public override PackType type => PackType.Resp;
@@ -20,10 +20,9 @@ namespace MinesServer.GameShit.Buildings
         public override int PackId => 1;
         #endregion
         private Resp(){ }
-        public Resp(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
+        public Resp(int x, int y, int ownerid) : base(x, y, ownerid, 1000, 1000)
         {
             charge = 100;
-            maxcharge = 1000;
             using var db = new DataBase();
             db.resps.Add(this);
             db.SaveChanges();

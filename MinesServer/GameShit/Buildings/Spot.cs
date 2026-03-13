@@ -25,10 +25,6 @@ namespace MinesServer.GameShit.Buildings
         public override PackType type => PackType.Spot;
         #region Shit
         [NotMapped]
-        public override float charge { get; set; }
-        [NotMapped]
-        public override float maxcharge { get; set; }
-        [NotMapped]
         public override int cid { get; set; }
         public override int PackId => 47;
         #endregion

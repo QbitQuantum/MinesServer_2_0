@@ -16,13 +16,8 @@ namespace MinesServer.GameShit.Buildings
             get => crysinside[index];
             set => crysinside[index] = value;
         }
-		[NotMapped]
-		public override float charge { get; set; }
-		[NotMapped]
-		public override float maxcharge { get; set; }
-		public override int PackId => 29;
+        public override int PackId => 29;
         public override PackType type => PackType.Storage;
-        public DateTime brokentimer { get; set; }
         #region crysshit
         public long[] crysinside = new long[6];
         public long ze
