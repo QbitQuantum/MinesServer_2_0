@@ -216,6 +216,8 @@ namespace MinesServer.GameShit.Buildings
                                 // Добавляем 10% от стоимости в moneyinside
                                 moneyinside += (long)(money * 0.1);
                                 db.SaveChanges();
+
+                                p.SendMoney();
                             }
 
                             skillfromslot.Up(p);
