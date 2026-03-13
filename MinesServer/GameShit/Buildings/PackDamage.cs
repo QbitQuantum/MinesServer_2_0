@@ -48,13 +48,12 @@ namespace MinesServer.GameShit.Buildings
                     break;
                 case DamageTypePacks.Time:
                     hp = Math.Max(0, hp - i);
+                    if (hp == 0 && brokentimer == null)
+                        brokentimer = ServerTime.Now;
                     break;
                 default:
                     break;
             }
-
-            if (hp == 0 && brokentimer == null)
-                brokentimer = ServerTime.Now;
         }
 
         public virtual bool CanDestroy()
