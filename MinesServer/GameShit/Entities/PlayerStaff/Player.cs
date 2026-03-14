@@ -551,7 +551,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region Health
 
-        public override bool Heal(int num = -1)
+        public override bool Heal()
         {
             return ResourceExtractionService.PerformRepair(this, this);
         }

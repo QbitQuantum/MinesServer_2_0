@@ -85,7 +85,7 @@ public class BotSpot : PEntity
 
     public override void Geo() => base.Geo();
 
-    public override bool Heal(int num = -1)
+    public override bool Heal()
     {
         if (owner == null)
             return false;
