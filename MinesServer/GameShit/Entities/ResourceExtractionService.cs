@@ -22,7 +22,6 @@ public static class ResourceExtractionService
 
     private static void Mine(
         PEntity actor,
-        Player skillOwner,
         ref float cb,
         Basket basket,
         byte cell,
@@ -129,7 +128,7 @@ public static class ResourceExtractionService
             float multiplier = skillOwner.skillslist.GetMiningMultiplier(skillOwner, ref cb);
 
             // Передаём множитель в Mine
-            Mine(actor, skillOwner, ref cb, basket, cell, x, y, multiplier);
+            Mine(actor, ref cb, basket, cell, x, y, multiplier);
 
             // Начисляем опыт за добычу кристаллов
             skillOwner.skillslist.HandleMiningExperience(skillOwner, 1);
