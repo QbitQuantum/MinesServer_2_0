@@ -155,8 +155,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public int cap = 0;
 
-        public long AllCry => Enum.GetValues<CrystalType>().Sum(t => this[t]);
+        public long AllCry => CrystalTypeExt.CrysType.Sum(t => this[t]);
 
-        public string GetCry => string.Join(":", Enum.GetValues<CrystalType>().Select(t => this[t])) + ":" + cap;
+        public string GetCry => string.Join(":", CrystalTypeExt.CrysType.Select(t => this[t])) + ":" + cap;
     }
 }
