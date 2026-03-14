@@ -146,7 +146,7 @@ namespace MinesServer.GameShit.Buildings
 
                     float basecrys = 0.5f;
 
-                    if (player.skillslist?.skills != null)
+                    if (player.skillslist != null)
                     {
                         basecrys *= player.skillslist.HandleInductionReceived();
                     }
