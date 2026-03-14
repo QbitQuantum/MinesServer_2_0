@@ -570,7 +570,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 for (int y = 0; y < Chunk.ChunksH; y++)
                 {
-                    W.GetPosChunk(x, y)?.Update();
+                    W.GetPosChunk(x, y).Update();
                 }
             }
         }
