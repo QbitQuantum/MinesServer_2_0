@@ -7,7 +7,6 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class Box
     {
-        public int Id { get; set; }
         public int x { get; set; }
         public int y { get; set; }
         [NotMapped]
