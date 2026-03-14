@@ -140,52 +140,42 @@ namespace MinesServer.Server
                 foreach (var i in db.vulkans)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.resps)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.markets)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.ups)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.guns)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.storages)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.crafts)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.teleports)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.spots)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
                 foreach (var i in db.ncs)
                 {
                     i.Build();
-                    World.AddPack(i);
                 }
             }
             catch (Exception ex)
