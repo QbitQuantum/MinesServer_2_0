@@ -249,11 +249,11 @@ namespace MinesServer.GameShit.Consumables
                     CellType.AliveCyan => 11,
                     CellType.AliveRed => 12,
                     CellType.AliveViol =>13,
-                    CellType.AliveNigger =>14,
+                    CellType.AliveBlack =>14,
                     CellType.AliveWhite => 15,
                     CellType.AliveBlue => 16,
                     CellType.HypnoRock => 34,
-                    CellType.NiggerRock => 42,
+                    CellType.BlackRock => 42,
                     CellType.RedRock => 43,
                     CellType.AliveRainbow => 46
                 };
@@ -270,11 +270,11 @@ namespace MinesServer.GameShit.Consumables
                         11 => CellType.AliveCyan,
                         12 => CellType.AliveRed,
                         13 => CellType.AliveViol,
-                        14 => CellType.AliveNigger,
+                        14 => CellType.AliveBlack,
                         15 => CellType.AliveWhite,
                         16 => CellType.AliveBlue,
                         34 => CellType.HypnoRock,
-                        42 => CellType.NiggerRock,
+                        42 => CellType.BlackRock,
                         43 => CellType.RedRock,
                         46 => CellType.AliveRainbow
                     });

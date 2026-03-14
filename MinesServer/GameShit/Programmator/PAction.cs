@@ -514,7 +514,7 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.IsBlackRock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.NiggerRock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.BlackRock);
                     break;
 
                 case ActionType.IsBoulder:

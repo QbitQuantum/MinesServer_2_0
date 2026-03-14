@@ -226,7 +226,7 @@ namespace MinesServer.GameShit.Generator
             {
                 for (int y = 0; y < size.Item2; y++)
                 {
-                    map[x * size.Item2 + y].type = map[x * size.Item2 + y].value == 2 ? CellType.NiggerRock : (map[x * size.Item2 + y].value == 1 ? CellType.RedRock : CellType.Empty);
+                    map[x * size.Item2 + y].type = map[x * size.Item2 + y].value == 2 ? CellType.BlackRock : (map[x * size.Item2 + y].value == 1 ? CellType.RedRock : CellType.Empty);
                 }
             }
             Console.WriteLine("end");

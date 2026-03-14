@@ -88,7 +88,7 @@ namespace MinesServer.GameShit.WorldSystem
                 CellType.AliveBlue => AliveBlue(x, y, mod),
                 CellType.AliveRed => AliveRed(x, y, mod),
                 CellType.AliveCyan => AliveCyan(x, y, mod),
-                CellType.AliveNigger => AliveNigger(x, y, mod),
+                CellType.AliveBlack => AliveNigger(x, y, mod),
                 CellType.AliveWhite => AliveWhite(x, y, mod),
                 _ => false
             };
@@ -139,7 +139,7 @@ namespace MinesServer.GameShit.WorldSystem
                 for (int ay = -1; ay <= 1; ay++)
                 {
                     var cell = World.GetCell(x + ax, y + ay);
-                    if (cell == (byte)CellType.AliveNigger)
+                    if (cell == (byte)CellType.AliveBlack)
                     {
                         c++;
                     }
@@ -155,7 +155,7 @@ namespace MinesServer.GameShit.WorldSystem
                 foreach (var i in baseddirs)
                 {
                     var cell = World.GetCell(x + i.Item1, y + i.Item2);
-                    if (cell == (byte)CellType.AliveNigger && World.IsEmpty(x + -i.Item1, y + -i.Item2) && World.W.GetPlayersFromPos(x + -i.Item1, y + -i.Item2).Count == 0)
+                    if (cell == (byte)CellType.AliveBlack && World.IsEmpty(x + -i.Item1, y + -i.Item2) && World.W.GetPlayersFromPos(x + -i.Item1, y + -i.Item2).Count == 0)
                     {
                         if (r.Next(1, 101) > 50)
                         {
@@ -218,7 +218,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 for (int cy = -1; cy <= 1; cy++)
                 {
-                    if (World.GetCell(x + cx, y + cy) == (byte)CellType.NiggerRock)
+                    if (World.GetCell(x + cx, y + cy) == (byte)CellType.BlackRock)
                     {
                         chs++;
                     }
@@ -249,7 +249,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 for (int cy = -1; cy <= 1; cy++)
                 {
-                    if (World.GetCell(x + cx, y + cy) == (byte)CellType.NiggerRock)
+                    if (World.GetCell(x + cx, y + cy) == (byte)CellType.BlackRock)
                     {
                         chs++;
                     }

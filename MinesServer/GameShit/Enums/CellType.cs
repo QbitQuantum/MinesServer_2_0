@@ -24,7 +24,7 @@
         AliveCyan = 50,
         AliveRed = 51,
         AliveViol = 52,
-        AliveNigger = 53,
+        AliveBlack = 53,
         AliveWhite = 54,
         AliveRainbow = 55,
         WhiteSand = 60,
@@ -78,7 +78,7 @@
         White = 111,
         Cyan = 112,
         HeavyRock = 113,
-        NiggerRock = 114,
+        BlackRock = 114,
         LivingBlackRock = 115,
         AliveBlue = 116,
         RedRock = 117,
@@ -107,7 +107,7 @@
             return cell switch
             {
                 CellType.AliveBlue or CellType.AliveCyan or CellType.AliveRed or
-                CellType.AliveNigger or CellType.AliveViol or CellType.AliveWhite or
+                CellType.AliveBlack or CellType.AliveViol or CellType.AliveWhite or
                 CellType.AliveRainbow => true,
                 _ => false
             };

@@ -38,7 +38,7 @@ namespace MinesServer.GameShit.Generator
                     {
                         for (int chy = 0; chy < 32; chy++)
                         {
-                            var t = map[(x + chx) * height + (y + chy)].value == 2 ? (byte)CellType.NiggerRock : map[(x + chx) * height + (y + chy)].value == 1 ? (byte)CellType.RedRock : (byte)0;
+                            var t = map[(x + chx) * height + (y + chy)].value == 2 ? (byte)CellType.BlackRock : map[(x + chx) * height + (y + chy)].value == 1 ? (byte)CellType.RedRock : (byte)0;
                             if (t != 0)
                             {
                                 World.SetCell((x + chx), (y + chy), t);
