@@ -27,6 +27,8 @@ namespace MinesServer.GameShit.Buildings
             db.resps.Add(this);
             db.SaveChanges();
         }
+
+        // TODO: Попытаться понять что это и убрать рекурсию
         public void OnRespawn(Player p)
         {
             using var db = new DataBase();
@@ -50,7 +52,7 @@ namespace MinesServer.GameShit.Buildings
                     p.resp.OnRespawn(p);
                 }
                 p.SendMoney();
-                World.W.GetChunk(x, y).ResendPack(this);
+                base.Update();
             }
             db.SaveChanges();
         }

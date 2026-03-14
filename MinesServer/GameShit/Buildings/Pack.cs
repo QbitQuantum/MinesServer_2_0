@@ -32,7 +32,7 @@ namespace MinesServer.GameShit.Buildings
         public abstract void Destroy(Player p);
         public virtual void Update()
         {
-            World.W.GetChunk(x, y).ResendPack(this);
+            World.UpdatePack(x, y, this);
         }
     }
 }

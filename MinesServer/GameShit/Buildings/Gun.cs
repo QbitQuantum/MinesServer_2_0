@@ -85,7 +85,6 @@ namespace MinesServer.GameShit.Buildings
             if (p.crys.RemoveCrys(CrystalType.Cyan, val))
             {
                 charge += (int)val;
-                World.W.GetChunk(x, y).ResendPack(this);
             }
             db.SaveChanges();
             p.win = GUIWin(p);
@@ -154,7 +153,7 @@ namespace MinesServer.GameShit.Buildings
                     charge = MathF.Max(0, charge - basecrys);
                 }
             }
-            World.W.GetChunk(x, y).ResendPack(this);
+            base.Update();
         }
     }
 }

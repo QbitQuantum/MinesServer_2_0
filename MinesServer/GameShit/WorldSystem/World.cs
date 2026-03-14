@@ -333,6 +333,7 @@ namespace MinesServer.GameShit.WorldSystem
             ch.LoadPackProps();
             return ch.packsprop[x - ch.WorldX + (y - ch.WorldY) * 32];
         }
+
         public static void AddPack(int x, int y, Pack p)
         {
             if (!ValidCoord(x, y))
@@ -342,6 +343,7 @@ namespace MinesServer.GameShit.WorldSystem
             var ch = W.GetChunk(x, y);
             ch.SetPack(x - ch.WorldX, y - ch.WorldY, p);
         }
+
         public static void RemovePack(int x, int y)
         {
             if (!ValidCoord(x, y))
@@ -351,6 +353,12 @@ namespace MinesServer.GameShit.WorldSystem
             var ch = W.GetChunk(x, y);
             ch.RemovePack(x - ch.WorldX, y - ch.WorldY);
         }
+
+        public static void UpdatePack(int x, int y, Pack pack)
+        {
+            W.GetChunk(x, y).ResendPack(pack);
+        }
+
         public static byte GetCell(int x, int y)
         {
             if (!ValidCoord(x, y)) return 0;
