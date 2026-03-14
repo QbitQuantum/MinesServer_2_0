@@ -558,11 +558,15 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Hurt(int damage, DamageTypePlayer type = DamageTypePlayer.Pure)
         {
-            skillslist.HandleDamageReceived(this, damage, type, damage);
+            // Обработка опыта
+            skillslist.HandleDamageExperience(this, type, 1);
 
-            if (Health - damage > 0)
+            // Получение модифицированного урона
+            int modifiedDamage = skillslist.HandleDamageReceived(damage);
+
+            if (Health - modifiedDamage > 0)
             {
-                Health -= damage;
+                Health -= modifiedDamage;
                 SendDFToBots(6, 0, 0, id, 0);
             }
             else

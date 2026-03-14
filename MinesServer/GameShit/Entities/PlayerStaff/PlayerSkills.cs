@@ -447,15 +447,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         /// <summary>
-        /// Обрабатывает получение урона, начисляет опыт и возвращает модифицированный урон
+        /// Возвращает модифицированный урон
         /// </summary>
-        public int HandleDamageReceived(Player player, int damage, DamageTypePlayer damageType, float baseExp = 1f)
+        public int HandleDamageReceived(int damage)
         {
             LoadSkills();
-
             int modifiedDamage = damage;
-
-            HandleDamageExperience(player, damageType, baseExp);
 
             foreach (var skill in skills.Values.Where(s => s != null))
             {

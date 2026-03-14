@@ -98,12 +98,15 @@ public class BotSpot : PEntity
         if (owner is null)
             return;
 
-        // Обработка опыта через PlayerSkills и получение модифицированного урона
-        int modifiedDamage = owner.skillslist.HandleDamageReceived(owner, damage, type, damage);
+        // Обработка опыта через PlayerSkills 
+        owner.skillslist.HandleDamageExperience(owner, type, 1);
 
-        if (Health - damage > 0)
+        // Получение модифицированного урона
+        int modifiedDamage = owner.skillslist.HandleDamageReceived(damage);
+
+        if (Health - modifiedDamage > 0)
         {
-            Health -= damage;
+            Health -= modifiedDamage;
             SendDFToBots(6, 0, 0, id, 0);
         }
         else
