@@ -1,15 +1,13 @@
 ﻿using MinesServer.Enums;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.Server;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.WorldSystem
 {
-    public class Box
+    public class Box : Entity
     {
-        public int id { get; set; }
-        public int x { get; set; }
-        public int y { get; set; }
         [NotMapped]
         public long[] bxcrys = new long[6];
         private Box() { }
