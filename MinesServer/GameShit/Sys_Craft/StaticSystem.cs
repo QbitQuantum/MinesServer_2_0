@@ -197,7 +197,7 @@ namespace MinesServer.GameShit.Sys_Craft
             {
                 foreach (var i in r.costcrys)
                 {
-                    p.crys.RemoveCrys(i.id, i.num * num);
+                    p.crys.RemoveCrys(CrystalTypeExt.CrysType[i.id], i.num * num);
                 }
             }
 

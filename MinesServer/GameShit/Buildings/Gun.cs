@@ -82,7 +82,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 val = p.crys[CrystalType.Cyan];
             }
-            if (p.crys.RemoveCrys((int)CrystalType.Cyan, val))
+            if (p.crys.RemoveCrys(CrystalType.Cyan, val))
             {
                 charge += (int)val;
                 World.W.GetChunk(x, y).ResendPack(this);

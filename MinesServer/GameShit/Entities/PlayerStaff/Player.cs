@@ -414,7 +414,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             if (greenSkill != null && (World.TrueEmpty(x, y) || cellprop.isSand))
             {
-                if (crys.RemoveCrys((int)CrystalType.Green, (long)greenSkill.Cost))
+                if (crys.RemoveCrys(CrystalType.Green, (long)greenSkill.Cost))
                 {
                     World.SetCell(x, y, CellType.GreenBlock);
                     World.SetDurability(x, y, (int)greenSkill.DurabilityEffect);
@@ -423,7 +423,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
             else if (yellowSkill != null && cell == (byte)CellType.GreenBlock)
             {
-                if (crys.RemoveCrys((int)CrystalType.Violet, (long)yellowSkill.Cost))
+                if (crys.RemoveCrys(CrystalType.Violet, (long)yellowSkill.Cost))
                 {
                     World.SetCell(x, y, CellType.YellowBlock);
                     World.SetDurability(x, y, World.GetDurability(x, y) + (int)yellowSkill.DurabilityEffect);
@@ -432,7 +432,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
             else if (redSkill != null && cell == (byte)CellType.YellowBlock)
             {
-                if (crys.RemoveCrys((int)CrystalType.Red, (long)redSkill.Cost))
+                if (crys.RemoveCrys(CrystalType.Red, (long)redSkill.Cost))
                 {
                     World.SetCell(x, y, CellType.RedBlock);
                     World.SetDurability(x, y, World.GetDurability(x, y) + (int)redSkill.DurabilityEffect);
@@ -451,7 +451,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (warSkill != null)
             {
                 cost = (long)warSkill.Cost;
-                if (crys.RemoveCrys(5, cost) && World.TrueEmpty(x, y))
+                if (crys.RemoveCrys(CrystalType.Cyan, cost) && World.TrueEmpty(x, y))
                 {
                     World.SetCell(x, y, CellType.MilitaryBlockFrame);
                     var finalDurability = (int)warSkill.DurabilityEffect;
@@ -493,7 +493,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             if (structureSkill != null)
             {
-                if (crys.RemoveCrys((int)CrystalType.Green, (long)structureSkill.Cost) && (World.TrueEmpty(x, y) || cellprop.isSand))
+                if (crys.RemoveCrys(CrystalType.Green, (long)structureSkill.Cost) && (World.TrueEmpty(x, y) || cellprop.isSand))
                 {
                     World.SetCell(x, y, CellType.Support);
                     return true;

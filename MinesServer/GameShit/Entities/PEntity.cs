@@ -106,7 +106,7 @@ namespace MinesServer.GameShit.Entities
         {
             var b = Box.GetBox(x, y);
             if (b == null)return 0;
-            crys?.Boxcrys(b.bxcrys);
+            crys?.BoxCrys(b.bxcrys);
             using var db = new DataBase();
             db.Remove(b);
             db.SaveChanges();

@@ -81,7 +81,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 var arr = JsonConvert.DeserializeObject<long[]>(basket ?? "[0,0,0,0,0,0]");
                 if (arr != null && arr.Length >= 6)
-                    entity.crys.Boxcrys(arr);
+                    entity.crys.BoxCrys(arr);
             }
             catch { /* ignore invalid basket */ }
         }

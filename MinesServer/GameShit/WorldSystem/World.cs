@@ -1,4 +1,9 @@
-﻿using MinesServer.GameShit.Buildings;
+﻿using System.ComponentModel.DataAnnotations;
+using System.IO.Pipes;
+using System.Numerics;
+using System.Security.Cryptography;
+using MinesServer.Enums;
+using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Generator;
@@ -9,10 +14,6 @@ using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using System.ComponentModel.DataAnnotations;
-using System.IO.Pipes;
-using System.Numerics;
-using System.Security.Cryptography;
 
 namespace MinesServer.GameShit.WorldSystem
 {
@@ -571,12 +572,39 @@ namespace MinesServer.GameShit.WorldSystem
         {
             return W.cryscostbase[i] + W.cryscostmod[i];
         }
-        public static void AddDob(int t, long dob)
+
+        // TODO: Заменить на типизированный CrystalSummary
+        // Сейчас используем временное приведение, потом переделаем на нормальную типизацию
+        public static void AddDob(CrystalType type, long dob)
         {
-            W.summary[t] += dob;
+            W.summary[(int)type] += dob;
         }
         public int[] cryscostmod = { 10, 10, 15, 10, 15, 15 };
         public int[] cryscostbase = { 8, 16, 24, 26, 24, 40 };
+
+        #region TODO:Заменить public long[] summary = new long[6];
+        public class CrystalSummary
+        {
+            private long[] _values = new long[6];
+
+            public long this[CrystalType type]
+            {
+                get => _values[(int)type];
+                set => _values[(int)type] = value;
+            }
+
+            public void Add(CrystalType type, long value) => this[type] += value;
+
+            public long Total => _values.Sum();
+
+            public IReadOnlyDictionary<CrystalType, long> ToDictionary()
+            {
+                return Enum.GetValues<CrystalType>()
+                    .ToDictionary(t => t, t => this[t]);
+            }
+        }
+        #endregion
+
         public long[] summary = new long[6];
 
         public Chunk GetPosChunk(int Chunk, int ChunkY)

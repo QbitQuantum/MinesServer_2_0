@@ -72,7 +72,7 @@ namespace MinesServer.GameShit.Buildings
                 num = p.crys[CrystalType.Blue];
             }
             db.Attach(this);
-            if (p.crys.RemoveCrys((int)CrystalType.Blue, num))
+            if (p.crys.RemoveCrys(CrystalType.Blue, num))
             {
                 charge += (int)num;
             }

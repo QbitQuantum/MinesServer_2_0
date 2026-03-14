@@ -4,10 +4,8 @@ using MinesServer.GameShit.GUI.Horb;
 using MinesServer.Network.GUI;
 using MinesServer.Server;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
-
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {
@@ -15,11 +13,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
     {
         public int Id { get; set; }
         public string? serialazed { get; set; }
+
         public Basket(bool n)
         {
-            _cry = [0, 0, 0, 0, 0, 0];
+            _cry = new long[6];
             serialazed = JsonConvert.SerializeObject(_cry);
         }
+
         public event Action Changed;
         public bool shouldsubscribe => Changed is null;
 
@@ -30,18 +30,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             get => cry[(int)type];
             set => cry[(int)type] = value;
         }
-        private long[] _cry = null;
+
+        private long[]? _cry = null;
+
         [NotMapped]
         public long[] cry
         {
             get
             {
-                _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed ?? "[]");
+                _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed ?? "[]") ?? new long[6];
                 return _cry;
             }
         }
 
-        // НОВЫЙ МЕТОД: явно сохранить изменения
         public void SaveToDatabase()
         {
             if (_cry != null)
@@ -52,41 +53,67 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 db.SaveChanges();
             }
         }
-        public void AddCrys(int index, long val)
+
+        public void AddCrys(CrystalType type, long val)
         {
-            cry[index] += val;
-            if (cry[index] < 0)
-                cry[index] = long.MaxValue;
+            this[type] += val;
+            if (this[type] < 0)
+                this[type] = long.MaxValue;
             Changed?.Invoke();
         }
-        public void Boxcrys(long[] crys)
-        {
-            for (var i = 0; i < cry.Length; i++)
-                cry[i] += crys[i];
-            if (Changed is not null) Changed();
 
+        public void BoxCrys(IReadOnlyDictionary<CrystalType, long> crys)
+        {
+            foreach (var kvp in crys)
+            {
+                this[kvp.Key] += kvp.Value;
+            }
+            Changed?.Invoke();
         }
-        public bool RemoveCrys(int index, long val)
+
+        public void BoxCrys(long[] crys)
+        {
+            if (crys.Length != 6) throw new ArgumentException("Массив должен содержать 6 элементов", nameof(crys));
+
+            // Для обратной совместимости с массивами используем индексатор с приведением типов
+            this[CrystalType.Red] += crys[0];
+            this[CrystalType.Green] += crys[1];
+            this[CrystalType.Blue] += crys[2];
+            this[CrystalType.White] += crys[3];
+            this[CrystalType.Violet] += crys[4];
+            this[CrystalType.Cyan] += crys[5];
+
+            Changed?.Invoke();
+        }
+
+        public bool RemoveCrys(CrystalType type, long val)
         {
             if (val < 0) return false;
-            if (cry[index] >= val)
+
+            if (this[type] >= val)
             {
-                cry[index] -= val;
+                this[type] -= val;
                 Changed?.Invoke();
                 return true;
             }
             return false;
         }
 
-        /// <summary>
-        /// Notify subscribers that basket contents were changed (e.g. after direct array mutation).
-        /// </summary>
+        public long GetCrys(CrystalType type) => this[type];
+
+        public void SetCrys(CrystalType type, long value)
+        {
+            this[type] = value;
+            Changed?.Invoke();
+        }
+
         public void NotifyChanged() => Changed?.Invoke();
 
         private int Buildcap()
         {
             return 1;
         }
+
         public Window OpenBoxGui(Player p)
         {
             return new Window()
@@ -99,12 +126,15 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     Action = "dropbox",
                     InitialPage = new Page()
                     {
-                        CrystalConfig = new CrystalConfig("  останется", "будет в боксе", [new CrysLine("", 0, 0, cry[0], 0),
-                            new CrysLine("", 0, 0, cry[1], 0),
-                            new CrysLine("", 0, 0, cry[2], 0),
-                            new CrysLine("", 0, 0, cry[3], 0),
-                            new CrysLine("", 0, 0, cry[4], 0),
-                            new CrysLine("", 0, 0, cry[5], 0)]),
+                        CrystalConfig = new CrystalConfig("  останется", "будет в боксе",
+                            [
+                                new CrysLine("", 0, 0, this[CrystalType.Red], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.Green], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.Blue], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.White], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.Violet], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.Cyan], 0)
+                            ]),
                         Text = "\nИспользуйте полосы прокрутки, чтобы выбрать сколько положить в бокс\",\r\n" +
                         "                    \"ВНИМАНИЕ! При создании бокса, количество кристаллов не уменьшается\n",
                         Buttons = [new MButton("<color=green>Добавить в бокс</color>", $"dropbox:{ActionMacros.CrystalSliders}", (args) => { p.BBox(args.CrystalSliders); })]
@@ -112,9 +142,21 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 }]
             };
         }
-        public BasketPacket BPacket => new BasketPacket(cry[0], cry[1], cry[2], cry[3], cry[4], cry[5], Buildcap());
+
+        public BasketPacket BPacket => new BasketPacket(
+            this[CrystalType.Red],
+            this[CrystalType.Green],
+            this[CrystalType.Blue],
+            this[CrystalType.White],
+            this[CrystalType.Violet],
+            this[CrystalType.Cyan],
+            Buildcap()
+        );
+
         public int cap = 0;
-        public long AllCry => cry.Select((t, i) => cry[i]).Sum();
-        public string GetCry => cry.Aggregate("", (current, t) => current + t + ":") + cap;
+
+        public long AllCry => Enum.GetValues<CrystalType>().Sum(t => this[t]);
+
+        public string GetCry => string.Join(":", Enum.GetValues<CrystalType>().Select(t => this[t])) + ":" + cap;
     }
 }

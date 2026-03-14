@@ -38,7 +38,7 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     box.bxcrys[i] = remcry;
                 }
-                else if (p.crys.RemoveCrys(i, remcry))
+                else if (p.crys.RemoveCrys(CrystalTypeExt.CrysType[i], remcry))
                 {
                     box.bxcrys[i] = remcry;
                 }

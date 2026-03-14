@@ -122,12 +122,24 @@ namespace MinesServer.GameShit.Buildings
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4)}$</color>", 0, 0, p.crys[CrystalType.White], 0),
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
                 ]),
-                Text = "Продажа кристаллов" + (money == -1 ? "": $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
-                Buttons = [new MButton("Продать всё", $"sellallcrys", (args) => Sell(p.crys.cry, p)),
+                Text = "Продажа кристаллов" + (money == -1 ? "" : $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
+                Buttons = [new MButton("Продать всё", $"sellallcrys", (args) => SellAllCrys(p)),
                         new MButton("Продать", $"sellcrys:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))]
             };
             return InitialPage;
         }
+
+        // Новый метод для продажи всех кристаллов
+        private void SellAllCrys(Player p)
+        {
+            long[] allCrys = new long[6];
+            for (int i = 0; i < 6; i++)
+            {
+                allCrys[i] = p.crys[CrystalTypeExt.CrysType[i]];
+            }
+            Sell(allCrys, p);
+        }
+
         public void Sell(long[] sliders, Player p)
         {
             if (sliders == null) return;
@@ -138,8 +150,11 @@ namespace MinesServer.GameShit.Buildings
             for (int i = 0; i < 6; i++)
             {
                 var value = sliders[i];
-                if (value > 0 && p.crys.RemoveCrys(i, value))
-                    money += value * World.GetCrysCost(i);
+                if (value > 0)
+                {
+                    if (p.crys.RemoveCrys(CrystalTypeExt.CrysType[i], value))
+                        money += value * World.GetCrysCost(i);
+                }
             }
 
             moneyinside += (long)(money * 0.1);
@@ -179,6 +194,7 @@ namespace MinesServer.GameShit.Buildings
             };
             return InitialPage;
         }
+
         public void Buy(long[] sliders, Player p)
         {
             if (sliders == null)
@@ -193,7 +209,7 @@ namespace MinesServer.GameShit.Buildings
                 if (sliders[i] <= 0 || p.money - (sliders[i] * World.GetCrysCost(i) * 10) < 0)
                     continue;
                 money -= sliders[i] * (World.GetCrysCost(i) * 10);
-                p.crys.AddCrys(i, sliders[i]);
+                p.crys.AddCrys(CrystalTypeExt.CrysType[i], sliders[i]);
             }
             p.money += money;
             p.crys.SaveToDatabase();
@@ -203,6 +219,7 @@ namespace MinesServer.GameShit.Buildings
             p.win?.CurrentTab.SetInitialPage(page);
             p.SendWindow();
         }
+
         private Tab TabCellCry(Player p)
         {
             return new Tab()

@@ -6,17 +6,17 @@ using MinesServer.GameShit.WorldSystem;
 
 public static class ResourceExtractionService
 {
-    public static int ParseCryType(CellType cell)
+    public static CrystalType ParseCryType(CellType cell)
     {
         return cell switch
         {
-            CellType.XGreen or CellType.Green => 0,
-            CellType.XBlue or CellType.Blue => 1,
-            CellType.XRed or CellType.Red => 2,
-            CellType.XViolet or CellType.Violet => 3,
-            CellType.White => 4,
-            CellType.XCyan or CellType.Cyan => 5,
-            _ => 0
+            CellType.XGreen or CellType.Green => CrystalType.Green,
+            CellType.XBlue or CellType.Blue => CrystalType.Blue,
+            CellType.XRed or CellType.Red => CrystalType.Red,
+            CellType.XViolet or CellType.Violet => CrystalType.Violet,
+            CellType.White => CrystalType.White,
+            CellType.XCyan or CellType.Cyan => CrystalType.Cyan,
+            _ => CrystalType.Unknown
         };
     }
 
@@ -50,13 +50,19 @@ public static class ResourceExtractionService
         basket.AddCrys(type, odob);
         World.AddDob(type, odob);
 
+        int sendType =
+            type == CrystalType.Green ? 3 :
+            type == CrystalType.Red ? 1 :
+            type == CrystalType.Blue ? 2 :
+            (int)type;
+
         actor.SendDFToBots(
             2,
             x,
             y,
             actor.id,
             (int)(odob < 255 ? odob : 255),
-            type == 1 ? 3 : type == 2 ? 1 : type == 3 ? 2 : type);
+            sendType);
     }
 
     /// <summary>
@@ -173,7 +179,7 @@ public static class ResourceExtractionService
         if (heal == default)
             return false;
 
-        if (!actor.crys.RemoveCrys(2, 1))
+        if (!actor.crys.RemoveCrys(CrystalType.Red, 1))
             return false;
 
         heal.AddExp(skillOwner);
