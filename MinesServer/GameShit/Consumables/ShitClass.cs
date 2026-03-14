@@ -218,8 +218,10 @@ namespace MinesServer.GameShit.Consumables
                                 else
                                     damagable.Damage(10, DamageTypePacks.Raz);
 
+                                // TODO: Наверное стоит убрать
+                                // Потому что игровой цикл вызывает потоянный апдейт пака
                                 if (damagable.charge == 0)
-                                    World.W.GetChunk(pack.x, pack.y).ResendPack(pack);
+                                    pack.Update();
                             }
                         }
                     }
