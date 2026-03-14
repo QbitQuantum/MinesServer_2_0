@@ -555,7 +555,7 @@ namespace MinesServer.GameShit.WorldSystem
             UpdatePacks(TimeSpan.FromHours(1), ref lastpackupd, shouldDamage: true);
 
             // Обновление паков с интервалом 0.5 секунд (без повреждения, только эффекты)
-            UpdatePacks(TimeSpan.FromSeconds(0.5), ref lastpackeffect, shouldDamage: false);
+            UpdatePacks(TimeSpan.FromMilliseconds(100), ref lastpackeffect, shouldDamage: false);
 
             // Обновление цен кристаллов
             UpdateCry(TimeSpan.FromHours(1), ref lastcryupdate);

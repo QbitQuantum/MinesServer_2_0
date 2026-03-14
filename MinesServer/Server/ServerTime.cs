@@ -12,6 +12,7 @@ namespace MinesServer.Server
 
         // Таймеры (последнее время выполнения)
         private DateTime _lastChunksUpdate = DateTime.UtcNow;
+        private DateTime _lastWorldUpdate = DateTime.UtcNow;
         private DateTime _lastPlayersUpdate = DateTime.UtcNow;
         private DateTime _lastProgUpdate = DateTime.UtcNow;
         private DateTime _lastOrdersUpdate = DateTime.UtcNow;
@@ -43,8 +44,14 @@ namespace MinesServer.Server
                 if ((now - _lastChunksUpdate).TotalSeconds >= 1)
                 {
                     World.ChunkUpdate();
-                    World.Update();
                     _lastChunksUpdate = now;
+                }
+
+                // === Обновление мира (не чанков) — раз 50 миллисекунд ===
+                if ((now - _lastChunksUpdate).TotalMilliseconds >= 50)
+                {
+                    World.Update();
+                    _lastWorldUpdate = now;
                 }
 
                 // === Обновление игроков — 10 раз в секунду ===
