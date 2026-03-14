@@ -26,13 +26,13 @@ namespace MinesServer.GameShit.Buildings
         public abstract Window? GUIWin(Player p);
         public virtual void Build()
         {
-            World.AddPack(x, y, this);
+            World.AddPack(this);
         }
         protected abstract void ClearBuilding();
         public abstract void Destroy(Player p);
         public virtual void Update()
         {
-            World.UpdatePack(x, y, this);
+            World.UpdatePack(this);
         }
     }
 }

@@ -125,7 +125,7 @@ namespace MinesServer.GameShit.Buildings
         public override void Destroy(Player p)
         {
             ClearBuilding();
-            World.RemovePack(x, y);
+            World.RemovePack(this);
             if (charge > 0)
             {
                 var temp = new long[] { 0, 0, 0, (long)charge, 0, 0 };

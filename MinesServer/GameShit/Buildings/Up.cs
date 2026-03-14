@@ -477,7 +477,7 @@ namespace MinesServer.GameShit.Buildings
         public override void Destroy(Player p)
         {
             ClearBuilding();
-            World.RemovePack(x, y);
+            World.RemovePack(this);
             using var db = new DataBase();
             db.ups.Remove(this);
             db.SaveChanges();

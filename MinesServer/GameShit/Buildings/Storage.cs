@@ -88,7 +88,7 @@ namespace MinesServer.GameShit.Buildings
         public override void Destroy(Player p)
         {
             ClearBuilding();
-            World.RemovePack(x, y);
+            World.RemovePack(this);
             if (crysinside.Sum() > 0)
             {
                 Box.BuildBox(x, y, crysinside, null);

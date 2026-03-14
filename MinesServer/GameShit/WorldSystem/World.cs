@@ -323,6 +323,7 @@ namespace MinesServer.GameShit.WorldSystem
                 W.shit[(x, y)]?.Cancel();
             ch.SetProp(x - ch.WorldX, y - ch.WorldY, packmesh);
         }
+
         public static bool PackPart(int x, int y)
         {
             if (!ValidCoord(x, y))
@@ -334,29 +335,29 @@ namespace MinesServer.GameShit.WorldSystem
             return ch.packsprop[x - ch.WorldX + (y - ch.WorldY) * 32];
         }
 
-        public static void AddPack(int x, int y, Pack p)
+        public static void AddPack(Pack pack)
         {
-            if (!ValidCoord(x, y))
+            if (!ValidCoord(pack.x, pack.y))
             {
                 return;
             }
-            var ch = W.GetChunk(x, y);
-            ch.SetPack(x - ch.WorldX, y - ch.WorldY, p);
+            var ch = W.GetChunk(pack.x, pack.y);
+            ch.SetPack(pack.x - ch.WorldX, pack.y - ch.WorldY, pack);
         }
 
-        public static void RemovePack(int x, int y)
+        public static void RemovePack(Pack pack)
         {
-            if (!ValidCoord(x, y))
+            if (!ValidCoord(pack.x, pack.y))
             {
                 return;
             }
-            var ch = W.GetChunk(x, y);
-            ch.RemovePack(x - ch.WorldX, y - ch.WorldY);
+            var ch = W.GetChunk(pack.x, pack.y);
+            ch.RemovePack(pack.x - ch.WorldX, pack.y - ch.WorldY);
         }
 
-        public static void UpdatePack(int x, int y, Pack pack)
+        public static void UpdatePack(Pack pack)
         {
-            W.GetChunk(x, y).ResendPack(pack);
+            W.GetChunk(pack.x, pack.y).ResendPack(pack);
         }
 
         public static byte GetCell(int x, int y)
