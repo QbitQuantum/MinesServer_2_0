@@ -525,6 +525,27 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return damage;
         }
 
+
+        /// <summary>
+        /// Возвращает коэффициент потребление пушки
+        /// </summary>
+        public float HandleInductionReceived()
+        {
+            LoadSkills();
+            float modifiedinductionMultiplier = 1f;
+
+            foreach (var skill in skills.Values.Where(s => s != null))
+            {
+                if (skill != null && skill.type == SkillType.Induction)
+                {
+                    // Увеличиваем потребление
+                    modifiedinductionMultiplier = (skill.Effect / 100);
+                    break;
+                }
+            }
+            return modifiedinductionMultiplier;
+        }
+
         public int slots { get; set; }
         [NotMapped]
         public Dictionary<int, Skill?> skills = new();

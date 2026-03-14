@@ -146,18 +146,9 @@ namespace MinesServer.GameShit.Buildings
 
                     float basecrys = 0.5f;
 
-                    if (player.skillslist?.skills != null && player.skillslist.skills.Count > 0)
+                    if (player.skillslist?.skills != null)
                     {
-                        float inductionMultiplier = 1f;
-                        foreach (var skill in player.skillslist.skills.Values)
-                        {
-                            if (skill == null || skill.type != SkillType.Induction)
-                                continue;
-
-                            if (skill.UseSkill(SkillEffectType.OnHurt, player))
-                                inductionMultiplier *= (skill.Effect / 100f);
-                        }
-
+                        float inductionMultiplier = player.skillslist.HandleInductionReceived();
                         if (inductionMultiplier != 1f)
                         {
                             basecrys *= inductionMultiplier;
