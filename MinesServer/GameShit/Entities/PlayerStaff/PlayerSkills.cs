@@ -461,8 +461,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     // Уменьшаем урон
                     int reduction = (int)(damage * (skill.Effect / 100));
                     modifiedDamage = Math.Max(0, modifiedDamage - reduction);
+                    break;
                 }
-                break;
             }
             return modifiedDamage;
         }
