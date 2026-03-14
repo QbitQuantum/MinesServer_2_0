@@ -151,14 +151,7 @@ namespace MinesServer.GameShit.Buildings
                         basecrys *= player.skillslist.HandleInductionReceived();
                     }
 
-                    if (charge - basecrys > 0)
-                    {
-                        charge -= basecrys;
-                    }
-                    else
-                    {
-                        charge = 0;
-                    }
+                    charge = MathF.Max(0, charge - basecrys);
                 }
             }
             World.W.GetChunk(x, y).ResendPack(this);
