@@ -148,11 +148,7 @@ namespace MinesServer.GameShit.Buildings
 
                     if (player.skillslist?.skills != null)
                     {
-                        float inductionMultiplier = player.skillslist.HandleInductionReceived();
-                        if (inductionMultiplier != 1f)
-                        {
-                            basecrys *= inductionMultiplier;
-                        }
+                        basecrys *= player.skillslist.HandleInductionReceived();
                     }
 
                     if (charge - basecrys > 0)
