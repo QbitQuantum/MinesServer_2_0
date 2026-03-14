@@ -158,7 +158,6 @@ namespace MinesServer.GameShit.Sys_Craft
 
             db.SaveChanges();
             p.win?.CurrentTab.Open(FilledPage(p, c));
-            World.W.GetChunk(c.x, c.y).ResendPack(c);
             p.SendInventory();
         }
 
@@ -183,7 +182,6 @@ namespace MinesServer.GameShit.Sys_Craft
             db.SaveChanges();
 
             p.SendInventory();
-            World.W.GetChunk(c.x, c.y).ResendPack(c);
             p.win = c.GUIWin(p);
         }
 
@@ -307,8 +305,6 @@ namespace MinesServer.GameShit.Sys_Craft
             db.SaveChanges();
 
             p.SendInventory();
-            World.W.GetChunk(c.x, c.y).ResendPack(c);
-
             // Обновляем интерфейс
             if (c.currentcraft != null)
             {
