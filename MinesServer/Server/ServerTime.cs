@@ -49,7 +49,7 @@ namespace MinesServer.Server
                 }
 
                 // === Обновление мира (не чанков) — раз 50 миллисекунд ===
-                if ((now - _lastChunksUpdate).TotalMilliseconds >= 50)
+                if ((now - _lastWorldUpdate).TotalMilliseconds >= 50)
                 {
                     World.Update();
                     _lastWorldUpdate = now;
