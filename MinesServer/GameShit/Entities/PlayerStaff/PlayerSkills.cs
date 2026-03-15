@@ -470,7 +470,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// <summary>
         /// Получает множитель добычи от навыков
         /// </summary>
-        public float GetMiningMultiplier(Player player, ref float cb)
+        public float GetMiningMultiplier(ref float cb)
         {
             LoadSkills();
 

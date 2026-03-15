@@ -125,7 +125,7 @@ public static class ResourceExtractionService
             hitdmg = 1f;
 
             // Получаем множитель добычи через навыки владельца
-            float multiplier = skillOwner.skillslist.GetMiningMultiplier(skillOwner, ref cb);
+            float multiplier = skillOwner.skillslist.GetMiningMultiplier(ref cb);
 
             // Передаём множитель в Mine
             Mine(actor, ref cb, basket, cell, x, y, multiplier);
