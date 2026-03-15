@@ -23,6 +23,9 @@ namespace MinesServer.GameShit.Buildings
         private const int chunkRadius = (attackRadius + Chunk.ChunkWidth - 1) / Chunk.ChunkWidth;
         public const int attackRadiusSq = attackRadius * attackRadius;
 
+        private static readonly TimeSpan AttackInterval = TimeSpan.FromSeconds(1);
+        private DateTime lastAttackTime = ServerTime.Now;
+
         public override int PackId => 26;
         public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid, 1000, 10000)
         {
@@ -114,8 +117,13 @@ namespace MinesServer.GameShit.Buildings
                 }]
             };
         }
-        public override void Update()
+
+        private void UpdateAttackPlayer()
         {
+            // Проверяем, прошла ли секунда с последнего выстрела
+            if (ServerTime.Now - lastAttackTime < AttackInterval)
+                return;
+
             var chunksInRange = World.W.GetChunksInRange(x, y, chunkRadius);
             List<Player> playersInRange = new List<Player>();
 
@@ -150,9 +158,16 @@ namespace MinesServer.GameShit.Buildings
                         basecrys *= player.skillslist.HandleInductionReceived();
                     }
 
-                    charge = MathF.Max(0, charge - basecrys);
+                    charge = (int)MathF.Max(0, charge - basecrys);
                 }
+
+                lastAttackTime = ServerTime.Now;
             }
+        }
+
+        public override void Update()
+        {
+            UpdateAttackPlayer();
             base.Update();
         }
     }
