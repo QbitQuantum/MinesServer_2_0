@@ -123,7 +123,10 @@ namespace MinesServer.Server
                 .Include(p => p.resp)
                 .FirstOrDefault();
         }
+        // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
+        // Либо инкапсулировать полностью
         public static List<Player> activeplayers = new();
+        public static List<BotSpot> botspotplayer = new();
         public static void Load()
         {
             using var db = new DataBase();

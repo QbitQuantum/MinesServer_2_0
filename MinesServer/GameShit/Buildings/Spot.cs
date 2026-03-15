@@ -61,12 +61,6 @@ namespace MinesServer.GameShit.Buildings
             db.SaveChanges();
         }
 
-        public override void Update()
-        {
-            entity?.Update();
-            base.Update();
-        }
-
         /// <summary>
         /// Ensures the spot has a bot entity; creates and restores it from DB if needed.
         /// </summary>
@@ -144,6 +138,7 @@ namespace MinesServer.GameShit.Buildings
             EnsureEntity(p);
             if (entity == null || selected == null)
                 return; // Нет выбранной программы
+            DataBase.botspotplayer.Add(entity);
             entity.programsData.Run(selected);
         }
         private void StopProgram(Player p)
@@ -157,6 +152,7 @@ namespace MinesServer.GameShit.Buildings
                 entity.programsData.Run();
             }
             entity.Death();
+            DataBase.botspotplayer.Remove(entity);
         }
 
         private const string TabPrograms = "SpotProgs";

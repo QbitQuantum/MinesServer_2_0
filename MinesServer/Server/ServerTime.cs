@@ -14,7 +14,8 @@ namespace MinesServer.Server
         private DateTime _lastChunksUpdate = DateTime.UtcNow;
         private DateTime _lastWorldUpdate = DateTime.UtcNow;
         private DateTime _lastPlayersUpdate = DateTime.UtcNow;
-        private DateTime _lastProgUpdate = DateTime.UtcNow;
+        private DateTime _lastProgPlayerUpdate = DateTime.UtcNow;
+        private DateTime _lastProgBotSpotUpdate = DateTime.UtcNow;
         private DateTime _lastOrdersUpdate = DateTime.UtcNow;
         private DateTime _lastActionsUpdate = DateTime.UtcNow;
         private DateTime _lastCommitWorld = DateTime.UtcNow;
@@ -65,7 +66,7 @@ namespace MinesServer.Server
                 }
 
                 // === Программаторы — 10 раз в секунду ===
-                if ((now - _lastProgUpdate).TotalMilliseconds >= 100)
+                if ((now - _lastProgPlayerUpdate).TotalMilliseconds >= 100)
                 {
                     var players = DataBase.activeplayers;
                     for (int i = 0; i < players.Count; i++)
@@ -75,7 +76,20 @@ namespace MinesServer.Server
                             players[i].ProgrammatorUpdate();
                         }
                     }
-                    _lastProgUpdate = now;
+                    _lastProgPlayerUpdate = now;
+                }
+
+                if ((now - _lastProgBotSpotUpdate).TotalMilliseconds >= 100)
+                {
+                    var botspot = DataBase.botspotplayer;
+                    for (int i = 0; i < botspot.Count; i++)
+                    {
+                        if (botspot[i]?.programsData.ProgRunning == true)
+                        {
+                            botspot[i].Update();
+                        }
+                    }
+                    _lastProgBotSpotUpdate = now;
                 }
 
                 // === Заказы — раз в 5 секунд ===
