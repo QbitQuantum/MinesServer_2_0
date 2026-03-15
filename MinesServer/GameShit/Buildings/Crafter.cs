@@ -102,12 +102,7 @@ namespace MinesServer.GameShit.Buildings
             }
         }
         #endregion
-        public override void Update()
-        {
-            if (currentcraft?.progress >= 100 && !ready)
-                ready = true;
-            base.Update();
-        }
+
         public override Window? GUIWin(Player p)
         {
             // Only the owner (or clan owner in future) can manage this crafter

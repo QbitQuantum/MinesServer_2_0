@@ -154,7 +154,6 @@ namespace MinesServer.GameShit.Sys_Craft
             db.crafts.Attach(c);
 
             c.currentcraft = new CraftEntry(r.id, num, DateTime.Now + (TimeSpan.FromSeconds(r.time) * num));
-            c.ready = false;
 
             db.SaveChanges();
             p.win?.CurrentTab.Open(FilledPage(p, c));
@@ -177,7 +176,6 @@ namespace MinesServer.GameShit.Sys_Craft
             p.inventory[recipe.result.id] += c.currentcraft.num * recipe.result.num;
             db.craftentries.Remove(c.currentcraft);
             c.currentcraft = null;
-            c.ready = false;
 
             db.SaveChanges();
 
@@ -293,7 +291,6 @@ namespace MinesServer.GameShit.Sys_Craft
             {
                 db.craftentries.Remove(c.currentcraft);
                 c.currentcraft = null;
-                c.ready = false;
             }
             else
             {
