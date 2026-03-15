@@ -248,7 +248,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча зеленых кристаллов",
                 Description = "Увеличивает добычу зеленых кристаллов",
-                LevelingHint = "Копать кристаллы",
+                LevelingHint = "Добывать зеленые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 998)
@@ -275,7 +275,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча синих кристаллов",
                 Description = "Увеличивает добычу синих кристаллов",
-                LevelingHint = "Копать кристаллы",
+                LevelingHint = "Добывать синие кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -307,7 +307,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча",
                 Description = "Увеличивает добычу синих и зеленых кристаллов",
-                LevelingHint = "Копать кристаллы",
+                LevelingHint = "Добывать синие и зеленые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 176)
@@ -334,7 +334,7 @@ namespace MinesServer.Enums
             {
                 Name = "Копание",
                 Description = "Позволяет быстрее разрушать кристаллы и разную породу",
-                LevelingHint = "Копать породу",
+                LevelingHint = "Разрушать породу и кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -372,7 +372,7 @@ namespace MinesServer.Enums
             {
                 Name = "Защита",
                 Description = "Увеличивает прочность робота",
-                LevelingHint = "Получать урон любого вида (от пушек, ударами, С-190)",
+                LevelingHint = "Получать урон любого вида",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -513,7 +513,7 @@ namespace MinesServer.Enums
             {
                 Name = "Упаковка синих",
                 Description = "Синие кристаллы занимают меньше места",
-                LevelingHint = "Копать синие кристаллы с перегрузом выше 50%",
+                LevelingHint = "Добывать синие кристаллы с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -540,7 +540,7 @@ namespace MinesServer.Enums
             {
                 Name = "Упаковка голубых",
                 Description = "Голубые кристаллы занимают меньше места",
-                LevelingHint = "Копать голубые кристаллы с перегрузом выше 50%",
+                LevelingHint = "Добывать голубые кристаллы с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -567,7 +567,7 @@ namespace MinesServer.Enums
             {
                 Name = "Упаковка зеленых",
                 Description = "Зеленые кристаллы занимают меньше места",
-                LevelingHint = "Копать зеленые кристаллы с перегрузом выше 50%",
+                LevelingHint = "Добывать зеленые кристаллы с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -594,7 +594,7 @@ namespace MinesServer.Enums
             {
                 Name = "Упаковка красных",
                 Description = "Красные кристаллы занимают меньше места",
-                LevelingHint = "Копать красные кристаллы с перегрузом выше 50%",
+                LevelingHint = "Добывать красные кристаллы с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -621,7 +621,7 @@ namespace MinesServer.Enums
             {
                 Name = "Упаковка фиолетовых",
                 Description = "Фиолетовые кристаллы занимают меньше места",
-                LevelingHint = "Копать фиолетовые кристаллы с перегрузом выше 50%",
+                LevelingHint = "Добывать фиолетовые кристаллы с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -648,7 +648,7 @@ namespace MinesServer.Enums
             {
                 Name = "Упаковка белых",
                 Description = "Белые кристаллы занимают меньше места",
-                LevelingHint = "Копать белые кристаллы с перегрузом выше 50%",
+                LevelingHint = "Добывать белые кристаллы с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -675,7 +675,7 @@ namespace MinesServer.Enums
             [SkillType.AntiGun] = new SkillInfo
             {
                 Name = "Защита от пушек",
-                Description = "Защита от пушек",
+                Description = "Уменьшает входящий урон от пушек",
                 LevelingHint = "Получать урон от пушки",
                 PriceFunc = (lvl) =>
                 {
@@ -702,8 +702,8 @@ namespace MinesServer.Enums
             [SkillType.Repair] = new SkillInfo
             {
                 Name = "Ремонт",
-                Description = "Позволяет чинить робота",
-                LevelingHint = "Чинить робота",
+                Description = "Восстанавливает прочность робота",
+                LevelingHint = "Чинить робота [V]",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 2000)
@@ -761,8 +761,8 @@ namespace MinesServer.Enums
             [SkillType.AntiSlime] = new SkillInfo
             {
                 Name = "Защита от слизи",
-                Description = "Снижает влияние слизи",
-                LevelingHint = "Копать разные виды слизи",
+                Description = "Снижает входящий урон от копание слизи",
+                LevelingHint = "Добывать разные виды слизи",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1112)
@@ -788,8 +788,8 @@ namespace MinesServer.Enums
             [SkillType.AntiBlock] = new SkillInfo
             {
                 Name = "Анти-блок",
-                Description = "Помогает быстрее копать квадроблоки",
-                LevelingHint = "Ломать квадроблоки",
+                Description = "Помогает быстрее Добывать квадроблоки",
+                LevelingHint = "Разрушать квадроблоки",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -816,7 +816,7 @@ namespace MinesServer.Enums
             {
                 Name = "Смежное извлечение",
                 Description = "Позволяет извлекать зеленые крсталлы из синих и наоборот",
-                LevelingHint = "Извлекать ресурсы рядом с собой",
+                LevelingHint = "Добывать зеленые и синие кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 150)
@@ -843,7 +843,7 @@ namespace MinesServer.Enums
             {
                 Name = "Геология",
                 Description = "Увеличивает количество переносимых пород/кристаллов",
-                LevelingHint = "Переность породы/кристаллы",
+                LevelingHint = "Переносить породы/кристаллы/слизь [G]",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 74)
@@ -875,7 +875,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча красных",
                 Description = "Увеличивает добычу красных кристаллов",
-                LevelingHint = "Копать красные кристаллы",
+                LevelingHint = "Добывать красные кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -902,7 +902,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча голубых",
                 Description = "Увеличивает добычу голубых кристаллов",
-                LevelingHint = "Копать голубые кристаллы",
+                LevelingHint = "Добывать голубые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -929,7 +929,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча фиолетовых",
                 Description = "Увеличивает добычу фиолетовых кристаллов",
-                LevelingHint = "Копать фиолетовые кристаллы",
+                LevelingHint = "Добывать фиолетовые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -956,7 +956,7 @@ namespace MinesServer.Enums
             {
                 Name = "Добыча белых",
                 Description = "Увеличивает добычу белых кристаллов",
-                LevelingHint = "Копать белые кристаллы",
+                LevelingHint = "Добывать белые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -983,7 +983,7 @@ namespace MinesServer.Enums
             {
                 Name = "Извлечение",
                 Description = "Позволяет добывать дополнительные зеленые и синие кристаллы",
-                LevelingHint = "Копать зеленые и синие кристаллы",
+                LevelingHint = "Добывать зеленые и синие кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1010,7 +1010,7 @@ namespace MinesServer.Enums
             {
                 Name = "Кристаллография",
                 Description = "Увеличивает скорость добычи кристаллов",
-                LevelingHint = "Работать с кристаллами",
+                LevelingHint = "Разрушать кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 74)
@@ -1037,7 +1037,7 @@ namespace MinesServer.Enums
             {
                 Name = "Деконструкция",
                 Description = "Ускоряет разрушение блоков",
-                LevelingHint = "Разбирать конструкции",
+                LevelingHint = "Разрушать блоки различного цвета",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1145,7 +1145,7 @@ namespace MinesServer.Enums
             {
                 Name = "Гиперкомпрессия",
                 Description = "Увеличиваем вместимость кристаллов",
-                LevelingHint = "Ходить с перегрузом выше 50%",
+                LevelingHint = "Передвигаться с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 501)
@@ -1172,7 +1172,7 @@ namespace MinesServer.Enums
             {
                 Name = "Сортировка",
                 Description = "Позволяет извлекать дополнительные красные/фиолетовые/белые кристаллы",
-                LevelingHint = "Копать красные/фиолетовые/белые кристаллы",
+                LevelingHint = "Добывать красные/фиолетовые/белые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 151)
@@ -1258,7 +1258,7 @@ namespace MinesServer.Enums
             {
                 Name = "Компрессия",
                 Description = "Увеличиваем вместимость кристаллов",
-                LevelingHint = "Ходить с перегрузом выше 50%",
+                LevelingHint = "Передвигаться с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 501)
@@ -1317,7 +1317,7 @@ namespace MinesServer.Enums
             {
                 Name = "Промывание",
                 Description = "Позволяет добывать кристаллы из песка",
-                LevelingHint = "Копать песок",
+                LevelingHint = "Разрушать песок различного цвета",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1343,8 +1343,8 @@ namespace MinesServer.Enums
             [SkillType.Fracturing] = new SkillInfo
             {
                 Name = "Дробление",
-                Description = "Улучшает дробление валунов",
-                LevelingHint = "Копать валуны",
+                Description = "Ускоряет разрушение валунов",
+                LevelingHint = "Разрушать валуны",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1371,7 +1371,7 @@ namespace MinesServer.Enums
             {
                 Name = "Наноупаковка",
                 Description = "Увеличиваем вместимость кристаллов",
-                LevelingHint = "Ходить с перегрузом выше 50%",
+                LevelingHint = "Передвигаться с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 250)
@@ -1484,7 +1484,7 @@ namespace MinesServer.Enums
             {
                 Name = "Обнаружение",
                 Description = "Позволяет добывать кристаллы c пород",
-                LevelingHint = "Копать породы",
+                LevelingHint = "Разрушать породу",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1537,7 +1537,7 @@ namespace MinesServer.Enums
                 Description = "Применение алгоритмов эффективности к процессу обучения.\n" +
                 "Каждое действие, приносящее опыт, пересматривается с целью \n" +
                 "снижения ресурсных затрат на последующее совершенствование навыков.",
-                LevelingHint = "Выполнять различные действия",
+                LevelingHint = "Прокачивать навыки",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 200)
@@ -1581,7 +1581,7 @@ namespace MinesServer.Enums
                 Name = "Экспертная добыча",
                 Description = "Профессиональное добыча из кристаллических структур.\n" +
                 "Значительно увеличивает выход ценных пород при добыче, позволяя эффективнее использовать кристаллы.",
-                LevelingHint = "Копать кристаллы",
+                LevelingHint = "Добывать кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1500)
@@ -1669,7 +1669,7 @@ namespace MinesServer.Enums
                 Name = "Ультра-добыча белых",
                 Description = "Мгновенно разрушает кристаллическу оболочку кристалла,\n" +
                 "позволяя ускорить добычу вырожденных кристаллов.",
-                LevelingHint = "Копать белые кристаллы",
+                LevelingHint = "Добывать белые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 984)
@@ -1691,7 +1691,7 @@ namespace MinesServer.Enums
                 Name = "Тотальное разрушение",
                 Description = "Применение тактики контролируемого обрушения.\n" +
                 "Значительно повышает эффективность воздействия на скальные породы.",
-                LevelingHint = "Разрушения породы",
+                LevelingHint = "Разрушать породы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 175)
@@ -1713,7 +1713,7 @@ namespace MinesServer.Enums
                 Name = "Ювелирная добыча фиолетовых",
                 Description = "Тонкая настройка инструментов для работы с фиолетовыми кристаллами.\n" +
                 "Минимизирует потери при добыче, кратно увеличивая выход ресурса с одного кристалла",
-                LevelingHint = "Копать фиолетовые кристаллы",
+                LevelingHint = "Добывать фиолетовые кристаллы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1736,7 +1736,7 @@ namespace MinesServer.Enums
                 Description = "Освоение специфики вязких сред.\n" +
                 "Позволяет эффективно фильтровать и извлекать кристаллические\n" +
                 "включения из осадочных пород и слизистых отложений.",
-                LevelingHint = "Добывать слизь",
+                LevelingHint = "Разрушать слизь",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1758,7 +1758,7 @@ namespace MinesServer.Enums
                 Name = "Глубинная добыча",
                 Description = "Адаптация к экстремальному давлению и составу коренных пород.\n" +
                 "Открывает возможность извлечения кристаллов из глубинных слоев пород скал",
-                LevelingHint = "Копать глубинные породы",
+                LevelingHint = "Разрушать глубинные породы",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1780,7 +1780,7 @@ namespace MinesServer.Enums
                 Name = "Глюонная упаковка",
                 Description = "Позволяет упаковывать кристаллы в инвентаре с большей плотностью,\n" +
                 "эффективно увеличивая свободный объем при переноске перегруженного контейнера",
-                LevelingHint = "Ходить с перегрузом выше 50%",
+                LevelingHint = "Передвигаться с перегрузом выше 50%",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
