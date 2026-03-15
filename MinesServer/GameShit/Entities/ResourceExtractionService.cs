@@ -22,7 +22,8 @@ public static class ResourceExtractionService
     public static void PerformDig(
         PEntity actor,
         Player skillOwner,
-        ref float cb,
+        ref float mainCb,           // CB для основных кристаллов (MineGeneral)
+        ref CrystalCBStorage allCb,  // CB для всех типов кристаллов
         Basket basket)
     {
         var cord = actor.GetDirCord();
@@ -80,8 +81,8 @@ public static class ResourceExtractionService
             CrystalType crystalType = ParseCryType(cellType);
 
             // Добываем основные кристаллы через MineGeneral
-            float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier(ref cb, SkillType.MineGeneral);
-            Mine(actor, ref cb, basket, cellType, x, y, mainMultiplier, crystalType);
+            float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier(ref mainCb, SkillType.MineGeneral);
+            Mine(actor, ref mainCb, basket, cellType, x, y, mainMultiplier, crystalType);
 
             // Проверяем наличие навыков для дополнительной добычи
             bool hasAdjacentExtraction = skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction);
@@ -100,8 +101,10 @@ public static class ResourceExtractionService
                 if (additionalType.HasValue)
                 {
                     float adjacentMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.AdjacentExtraction);
-                    float tempCb = 0; // Отдельный CB для дополнительной добычи
-                    Mine(actor, ref tempCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
+                    // Используем общее хранилище CB для этого типа кристаллов
+                    float typeCb = allCb.Get(additionalType.Value);
+                    Mine(actor, ref typeCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
+                    allCb.Set(additionalType.Value, typeCb);
 
                     // Начисляем опыт
                     skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AdjacentExtraction, 1f);
@@ -123,8 +126,10 @@ public static class ResourceExtractionService
                 if (conversionChain.TryGetValue(crystalType, out CrystalType convertedType))
                 {
                     float sortMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.Sort);
-                    float tempCb = 0; // Отдельный CB для дополнительной добычи
-                    Mine(actor, ref tempCb, basket, cellType, x, y, sortMultiplier, convertedType);
+                    // Используем общее хранилище CB для этого типа кристаллов
+                    float typeCb = allCb.Get(convertedType);
+                    Mine(actor, ref typeCb, basket, cellType, x, y, sortMultiplier, convertedType);
+                    allCb.Set(convertedType, typeCb);
 
                     // Начисляем опыт
                     skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Sort, 1f);
@@ -197,24 +202,36 @@ public static class ResourceExtractionService
         float multiplier,
         CrystalType forcedType)
     {
+        bool isAdditional = forcedType != ParseCryType(cell);
+
         // Применяем множитель в зависимости от типа кристалла
-        multiplier *= cell switch
+        if (!isAdditional)
         {
-            CellType.XGreen => 4,
-            CellType.XBlue => 3,
-            CellType.XRed => 2,
-            CellType.XViolet => 2,
-            CellType.XCyan => 2,
-            _ => 1
-        };
+            // Это основной кристалл - умножаем на тип ячейки
+            multiplier *= cell switch
+            {
+                CellType.XGreen => 4,
+                CellType.XBlue => 3,
+                CellType.XRed => 2,
+                CellType.XViolet => 2,
+                CellType.XCyan => 2,
+                _ => 1
+            };
+        }
 
-        cb -= (float)Math.Truncate(cb);
-        long odob = (long)Math.Truncate(multiplier);
-        cb += multiplier - odob;
+        // Добавляем накопленный CB к множителю
+        float totalWithCb = multiplier + cb;
 
-        basket.AddCrys(forcedType, odob);
-        World.AddDob(forcedType, odob);
+        // Определяем количество целых кристаллов
+        long odob = (long)Math.Truncate(totalWithCb);
 
+        // Обновляем CB - оставляем только дробную часть
+        cb = totalWithCb - odob;
+
+        if (odob <= 0)
+            return;
+
+        // Отправляем пакет с добычей
         int sendType = forcedType switch
         {
             CrystalType.Blue => 3,
@@ -222,6 +239,21 @@ public static class ResourceExtractionService
             CrystalType.Violet => 2,
             _ => (int)forcedType
         };
+
+        CrystalType AddBoxCryType = forcedType switch
+        {
+            CrystalType.Green => CrystalType.Red,
+            CrystalType.Blue => CrystalType.Green,
+            CrystalType.Red => CrystalType.Blue,
+            CrystalType.Violet => CrystalType.White,
+            CrystalType.White => CrystalType.Violet,
+            CrystalType.Cyan => CrystalType.Cyan,
+            _ => forcedType
+        };
+        // Добавляем кристаллы в корзину
+        basket.AddCrys(AddBoxCryType, odob);
+        // Добавляем в мировую статистику
+        World.AddDob(AddBoxCryType, odob);
 
         actor.SendDFToBots(
             2,

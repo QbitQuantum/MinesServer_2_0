@@ -35,6 +35,7 @@ public class BotSpot : PEntity
     public Player? owner { get; set; }
     public override Basket crys { get; set; }
 
+    public CrystalCBStorage CrystalCB = new();
     private float cb; // Для дробной части добычи
 
     private void Translate()
@@ -68,8 +69,14 @@ public class BotSpot : PEntity
         if (owner is null)
             return;
 
+        // TODO: Пофиксить. Проблема может возникать из-за серрилизации из бд
+        if (CrystalCB == null)
+        {
+            CrystalCB = new CrystalCBStorage();
+            Console.WriteLine("CrystalCB был null в Bz(), создан новый");
+        }
         // Просто вызываем сервис, опыт начисляется внутри через owner.skillslist
-        ResourceExtractionService.PerformDig(this, owner, ref cb, crys);
+        ResourceExtractionService.PerformDig(this, owner, ref cb, ref CrystalCB, crys);
     }
 
     public override void Death()

@@ -63,6 +63,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
         [NotMapped] public int tail => HasActiveProgram ? 1 : 0;
 
+        public CrystalCBStorage CrystalCB = new();
         public string name { get; set; } = string.Empty;
         public string hash { get; set; } = string.Empty;
         public string passwd { get; set; } = string.Empty;
@@ -519,7 +520,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Bz()
         {
-            ResourceExtractionService.PerformDig(this, this, ref cb, crys);
+            // TODO: Пофиксить. Проблема может возникать из-за серрилизации из бд
+            if (CrystalCB == null)
+            {
+                CrystalCB = new CrystalCBStorage();
+                Console.WriteLine("CrystalCB был null в Bz(), создан новый");
+            }
+            ResourceExtractionService.PerformDig(this, this, ref cb, ref CrystalCB, crys);
         }
 
         public void BBox(long[]? c)
