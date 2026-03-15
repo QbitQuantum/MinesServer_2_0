@@ -468,16 +468,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         /// <summary>
-        /// Получает множитель добычи от навыков
+        /// Получает множитель добычи от конкретного навыка навыков
         /// </summary>
-        public float GetMiningMultiplier(ref float cb)
+        public float GetMiningMultiplier(ref float cb, SkillType skillType)
         {
             LoadSkills();
 
             float multiplier = 1 + (float)Math.Truncate(cb);
 
             // TODO: Может стоять ExpertMining
-            var miningSkill = skills.Values.FirstOrDefault(s => s?.type == SkillType.MineGeneral);
+            var miningSkill = skills.Values.FirstOrDefault(s => s?.type == skillType);
             if (miningSkill != null)
             {
                 multiplier += miningSkill.Effect;
@@ -489,6 +489,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             cb += multiplier - floorMult;
 
             return floorMult;
+        }
+
+        public bool HasSkill(SkillType skillType)
+        {
+            LoadSkills();
+            return skills.Values.Any(s => s?.type == skillType);
+        }
+
+        public float GetSkillEffect(SkillType skillType)
+        {
+            LoadSkills();
+            var skill = skills.Values.FirstOrDefault(s => s?.type == skillType);
+            return skill?.Effect ?? 0f;
         }
 
         /// <summary>

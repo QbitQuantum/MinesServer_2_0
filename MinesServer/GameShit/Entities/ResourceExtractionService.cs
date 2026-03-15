@@ -19,55 +19,6 @@ public static class ResourceExtractionService
             _ => CrystalType.Unknown
         };
     }
-
-    private static void Mine(
-        PEntity actor,
-        ref float cb,
-        Basket basket,
-        byte cell,
-        int x,
-        int y,
-        float multiplier)
-    {
-
-        // Применяем множитель в зависимости от типа кристалла
-        multiplier *= (CellType)cell switch
-        {
-            CellType.XGreen => 4,
-            CellType.XBlue => 3,
-            CellType.XRed => 2,
-            CellType.XViolet => 2,
-            CellType.XCyan => 2,
-            _ => 1
-        };
-
-        cb -= (float)Math.Truncate(cb);
-        long odob = (long)Math.Truncate(multiplier);
-        var type = ParseCryType((CellType)cell);
-        cb += multiplier - odob;
-
-        basket.AddCrys(type, odob);
-        World.AddDob(type, odob);
-
-        int sendType =
-            type == CrystalType.Green ? 3 :
-            type == CrystalType.Red ? 1 :
-            type == CrystalType.Blue ? 2 :
-            (int)type;
-
-        actor.SendDFToBots(
-            2,
-            x,
-            y,
-            actor.id,
-            (int)(odob < 255 ? odob : 255),
-            sendType);
-    }
-
-    /// <summary>
-    /// Performs a dig / mining action in front of the actor, including damage,
-    /// crystal extraction, and skill experience.
-    /// </summary>
     public static void PerformDig(
         PEntity actor,
         Player skillOwner,
@@ -86,6 +37,8 @@ public static class ResourceExtractionService
         var cell = World.GetCell(x, y);
         var prop = World.GetProp(cell);
 
+        CellType cellType = (CellType)cell;
+
         if (prop.damage > 0)
         {
             actor.Hurt(prop.damage);
@@ -96,7 +49,7 @@ public static class ResourceExtractionService
             return;
         }
 
-        if (cell == 90)
+        if (cellType == CellType.Box)
         {
             if (actor is Player player)
             {
@@ -111,7 +64,7 @@ public static class ResourceExtractionService
             return;
         }
 
-        if (cell == (byte)CellType.MilitaryBlock)
+        if (cellType == CellType.MilitaryBlock)
         {
             World.DamageCell(x, y, 1);
             return;
@@ -124,18 +77,88 @@ public static class ResourceExtractionService
         {
             hitdmg = 1f;
 
-            // Получаем множитель добычи через навыки владельца
-            float multiplier = skillOwner.skillslist.GetMiningMultiplier(ref cb);
+            CrystalType crystalType = ParseCryType(cellType);
 
-            // Передаём множитель в Mine
-            Mine(actor, ref cb, basket, cell, x, y, multiplier);
+            // Добываем основные кристаллы через MineGeneral
+            float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier(ref cb, SkillType.MineGeneral);
+            Mine(actor, ref cb, basket, cellType, x, y, mainMultiplier, crystalType);
 
-            // Начисляем опыт за добычу кристаллов
+            // Проверяем наличие навыков для дополнительной добычи
+            bool hasAdjacentExtraction = skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction);
+            bool hasSort = skillOwner.skillslist.HasSkill(SkillType.Sort);
+
+            // Смежное извлечение (зеленые <-> синие)
+            if (hasAdjacentExtraction)
+            {
+                CrystalType? additionalType = null;
+
+                if (crystalType == CrystalType.Green)
+                    additionalType = CrystalType.Blue;
+                else if (crystalType == CrystalType.Blue)
+                    additionalType = CrystalType.Green;
+
+                if (additionalType.HasValue)
+                {
+                    float adjacentMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.AdjacentExtraction);
+                    float tempCb = 0; // Отдельный CB для дополнительной добычи
+                    Mine(actor, ref tempCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
+
+                    // Начисляем опыт
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AdjacentExtraction, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Extraction, 1f);
+                }
+            }
+
+            // Сортировка (красные -> фиолетовые -> голубые -> белые -> красные)
+            if (hasSort)
+            {
+                var conversionChain = new Dictionary<CrystalType, CrystalType>
+                {
+                    { CrystalType.Red, CrystalType.Violet },
+                    { CrystalType.Violet, CrystalType.Cyan },
+                    { CrystalType.Cyan, CrystalType.White },
+                    { CrystalType.White, CrystalType.Red }
+                };
+
+                if (conversionChain.TryGetValue(crystalType, out CrystalType convertedType))
+                {
+                    float sortMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.Sort);
+                    float tempCb = 0; // Отдельный CB для дополнительной добычи
+                    Mine(actor, ref tempCb, basket, cellType, x, y, sortMultiplier, convertedType);
+
+                    // Начисляем опыт
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Sort, 1f);
+                }
+            }
+
+            // Начисляем опыт за основные кристаллы
+            switch (crystalType)
+            {
+                case CrystalType.Green:
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineGreen, 1f);
+                    break;
+                case CrystalType.Blue:
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineBlue, 1f);
+                    break;
+                case CrystalType.Red:
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineRed, 1f);
+                    break;
+                case CrystalType.Violet:
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineViolet, 1f);
+                    break;
+                case CrystalType.White:
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineWhite, 1f);
+                    break;
+                case CrystalType.Cyan:
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineCyan, 1f);
+                    break;
+            }
+
+            // Начисляем общий опыт за добычу
             skillOwner.skillslist.HandleMiningExperience(skillOwner, 1);
 
             // Начисляем опыт за удар по кристаллу
             skillOwner.skillslist.HandleDiggingExperience(skillOwner, 1);
-
         }
         else
         {
@@ -162,6 +185,51 @@ public static class ResourceExtractionService
                 skillOwner.skillslist.HandleBoulderMoveExperience(skillOwner);
             }
         }
+    }
+
+    private static void Mine(
+        PEntity actor,
+        ref float cb,
+        Basket basket,
+        CellType cell,
+        int x,
+        int y,
+        float multiplier,
+        CrystalType forcedType)
+    {
+        // Применяем множитель в зависимости от типа кристалла
+        multiplier *= cell switch
+        {
+            CellType.XGreen => 4,
+            CellType.XBlue => 3,
+            CellType.XRed => 2,
+            CellType.XViolet => 2,
+            CellType.XCyan => 2,
+            _ => 1
+        };
+
+        cb -= (float)Math.Truncate(cb);
+        long odob = (long)Math.Truncate(multiplier);
+        cb += multiplier - odob;
+
+        basket.AddCrys(forcedType, odob);
+        World.AddDob(forcedType, odob);
+
+        int sendType = forcedType switch
+        {
+            CrystalType.Blue => 3,
+            CrystalType.Red => 1,
+            CrystalType.Violet => 2,
+            _ => (int)forcedType
+        };
+
+        actor.SendDFToBots(
+            2,
+            x,
+            y,
+            actor.id,
+            (int)(odob < 255 ? odob : 255),
+            sendType);
     }
 
     public static bool PerformRepair(
