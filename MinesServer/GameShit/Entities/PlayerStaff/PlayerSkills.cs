@@ -18,14 +18,23 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             SkillType skillType,
             int level,
             float currentExp,
-            float maxExp)
+            float maxExp,
+            float discountEffect = 0,
+            float upgradeEffect = 0)
         {
             var info = skillType.GetInfo();
             return
-                $"{info?.Name ?? skillType.ToString()}. Уровень:{level}\n" +
-                $"Опыт {currentExp}/{maxExp}\n" +
+                $"<color=white>{info?.Name ?? skillType.ToString()}</color>. Уровень:<color=white>{level}</color>\n" +
+                $"Опыт {currentExp}/{maxExp} " +
+                (upgradeEffect > 0
+                    ? $"<color=yellow>[Экспертное обучение x{upgradeEffect/100:F1}]</color>\n"
+                    : $"<color=red>[Экспертное обучение отсутствует]</color>\n") +
                 $"Как качать: {info?.LevelingHint ?? "Неизвестно"}\n" +
-                $"Стоимость: {skillType.GetPrice(level)}\n" +
+                skillType.GetDisplayInfo(skillType.GetInfo().EffectFunc(level)) + "\n" +
+                $"Стоимость: {skillType.GetPrice(level)} " +
+                (discountEffect > 0
+                    ? $"<color=yellow>[Оптимизация стоимости {discountEffect:F1}%]</color>\n"
+                    : $"<color=red>[Оптимизация отсутствует]</color>\n") +
                 $"ОПП: {skillType.GetOpp(level)}\n";
         }
     }

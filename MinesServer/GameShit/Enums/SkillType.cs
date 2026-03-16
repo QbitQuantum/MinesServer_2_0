@@ -227,11 +227,13 @@ namespace MinesServer.Enums
         public Func<int, float> EffectFunc { get; set; }
         public Func<int, float> ExpFunc { get; set; }
         public Func<int, float> DurabilityFunc { get; set; }
+        public Func<float, string> EffectDisplayFunc { get; set; }
         public List<SkillRequirement> Requirements { get; set; }
 
         // Вспомогательные методы для получения значений на текущем уровне
         public long GetPrice(int level) => PriceFunc?.Invoke(level) ?? 0;
         public int GetOpp(int level) => OppFunc?.Invoke(level) ?? 0;
+        public string GetDisplayInfo(float value) => EffectDisplayFunc?.Invoke(value) ?? "";
     }
 
     public class SkillRequirement
@@ -249,6 +251,7 @@ namespace MinesServer.Enums
                 Name = "Добыча зеленых кристаллов",
                 Description = "Увеличивает добычу зеленых кристаллов",
                 LevelingHint = "Добывать зеленые кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 998)
@@ -276,6 +279,7 @@ namespace MinesServer.Enums
                 Name = "Добыча синих кристаллов",
                 Description = "Увеличивает добычу синих кристаллов",
                 LevelingHint = "Добывать синие кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -308,6 +312,7 @@ namespace MinesServer.Enums
                 Name = "Добыча",
                 Description = "Увеличивает добычу синих и зеленых кристаллов",
                 LevelingHint = "Добывать синие и зеленые кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 176)
@@ -335,6 +340,7 @@ namespace MinesServer.Enums
                 Name = "Копание",
                 Description = "Позволяет быстрее разрушать кристаллы и разную породу",
                 LevelingHint = "Разрушать породу и кристаллы",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения: <color=yellow>{effect:F0}%</color> от базовой",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -354,6 +360,7 @@ namespace MinesServer.Enums
                 Name = "Передвижение",
                 Description = "Увеличивает передвижение робота",
                 LevelingHint = "Передвигаться",
+                EffectDisplayFunc = (effect) => $"Скорость передвижения: <color=yellow>{effect:F1} м/с</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 500)
@@ -373,6 +380,7 @@ namespace MinesServer.Enums
                 Name = "Защита",
                 Description = "Увеличивает прочность робота",
                 LevelingHint = "Получать урон любого вида",
+                EffectDisplayFunc = (effect) => $"Прочность: <color=yellow>{effect:F0}</color> ед.",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -388,19 +396,19 @@ namespace MinesServer.Enums
                 Requirements = new List<SkillRequirement>
                 {
                     new SkillRequirement
-                    { 
-                        RequiredSkill = SkillType.Digging, 
-                        RequiredLevel = 4 
+                    {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 4
                     }
                 }
             },
 
-            // Стройка
             [SkillType.BuildGreen] = new SkillInfo
             {
-                Name = "Стройка",
+                Name = "Стройка зеленых блоков",
                 Description = "Позволяет строить зеленые постройки",
                 LevelingHint = "Устанавливать зеленые блоки",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки блока: <color=green>{effect:F1} зеленых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -415,18 +423,19 @@ namespace MinesServer.Enums
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
                 {
-                    new SkillRequirement { 
-                        RequiredSkill = SkillType.Digging, 
-                        RequiredLevel = 7 
+                    new SkillRequirement {
+                        RequiredSkill = SkillType.Digging,
+                        RequiredLevel = 7
                     }
                 }
             },
 
             [SkillType.BuildYellow] = new SkillInfo
             {
-                Name = "Стройка желтых",
+                Name = "Стройка желтых блоков",
                 Description = "Позволяет строить желтые постройки",
                 LevelingHint = "Устанавливать желтые блоки",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки блока: <color=yellow>{effect:F1} фиолетовых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -451,9 +460,10 @@ namespace MinesServer.Enums
 
             [SkillType.BuildRed] = new SkillInfo
             {
-                Name = "Стройка красных",
+                Name = "Стройка красных блоков",
                 Description = "Позволяет строить красные постройки",
                 LevelingHint = "Устанавливать красные блоки",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки блока: <color=red>{effect:F1} красных кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -463,7 +473,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
-                EffectFunc = (lvl) => 1f,              
+                EffectFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(41.657 * lvl - 31.657) : (int)(10 * lvl + 31625),
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 Requirements = new List<SkillRequirement>
@@ -481,12 +491,12 @@ namespace MinesServer.Enums
                 }
             },
 
-            // Упаковка
             [SkillType.Packing] = new SkillInfo
             {
                 Name = "Вместимость",
                 Description = "В хранилище влезает больше ресурсов",
                 LevelingHint = "Передвигаться с грузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Вместимость хранилища: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 501)
@@ -496,7 +506,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1 ? 50f : 50f * lvl,               
+                EffectFunc = (lvl) => lvl <= 1 ? 50f : 50f * lvl,
                 ExpFunc = (lvl) => lvl <= 1001 ? (int)(39.99 * lvl - 29.99) : 40000,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -514,6 +524,7 @@ namespace MinesServer.Enums
                 Name = "Упаковка синих",
                 Description = "Синие кристаллы занимают меньше места",
                 LevelingHint = "Добывать синие кристаллы с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Эффективность упаковки: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -523,7 +534,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.976f * lvl + 83.524f : 0.875f * lvl + 3185f,               
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.976f * lvl + 83.524f : 0.875f * lvl + 3185f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(51.151 * lvl - 1.151) : (int)(10 * lvl + 41150),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -541,6 +552,7 @@ namespace MinesServer.Enums
                 Name = "Упаковка голубых",
                 Description = "Голубые кристаллы занимают меньше места",
                 LevelingHint = "Добывать голубые кристаллы с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Эффективность упаковки: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -550,7 +562,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 2.272f * lvl + 47.728f : 0.5f * lvl + 1820f,               
+                EffectFunc = (lvl) => lvl <= 1000 ? 2.272f * lvl + 47.728f : 0.5f * lvl + 1820f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(51.151 * lvl - 1.151) : (int)(10 * lvl + 41150),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -568,6 +580,7 @@ namespace MinesServer.Enums
                 Name = "Упаковка зеленых",
                 Description = "Зеленые кристаллы занимают меньше места",
                 LevelingHint = "Добывать зеленые кристаллы с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Эффективность упаковки: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -577,7 +590,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,               
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(51.151 * lvl - 1.151) : (int)(10 * lvl + 41150),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -595,6 +608,7 @@ namespace MinesServer.Enums
                 Name = "Упаковка красных",
                 Description = "Красные кристаллы занимают меньше места",
                 LevelingHint = "Добывать красные кристаллы с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Эффективность упаковки: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -604,7 +618,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,              
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(51.151 * lvl - 1.151) : (int)(10 * lvl + 41150),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -622,6 +636,7 @@ namespace MinesServer.Enums
                 Name = "Упаковка фиолетовых",
                 Description = "Фиолетовые кристаллы занимают меньше места",
                 LevelingHint = "Добывать фиолетовые кристаллы с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Эффективность упаковки: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -631,7 +646,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,               
+                EffectFunc = (lvl) => lvl <= 1000 ? 3.408f * lvl + 71.592f : 0.75f * lvl + 2730f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(51.151 * lvl - 1.151) : (int)(10 * lvl + 41150),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -649,6 +664,7 @@ namespace MinesServer.Enums
                 Name = "Упаковка белых",
                 Description = "Белые кристаллы занимают меньше места",
                 LevelingHint = "Добывать белые кристаллы с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Эффективность упаковки: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -658,7 +674,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnPackCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 2.84f * lvl + 59.66f : 0.625f * lvl + 2275f,                
+                EffectFunc = (lvl) => lvl <= 1000 ? 2.84f * lvl + 59.66f : 0.625f * lvl + 2275f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(51.151 * lvl - 1.151) : (int)(10 * lvl + 41150),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -668,15 +684,15 @@ namespace MinesServer.Enums
                         RequiredSkill = SkillType.Packing,
                         RequiredLevel = 9
                     }
-                }   
+                }
             },
 
-            // Боевые навыки
             [SkillType.AntiGun] = new SkillInfo
             {
                 Name = "Защита от пушек",
                 Description = "Уменьшает входящий урон от пушек",
                 LevelingHint = "Получать урон от пушки",
+                EffectDisplayFunc = (effect) => $"Снижение урона: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -686,7 +702,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHurt,
-                EffectFunc = (lvl) => lvl <= 520 ? 0.1753f * lvl + 0.825f : 92f,               
+                EffectFunc = (lvl) => lvl <= 520 ? 0.1753f * lvl + 0.825f : 92f,
                 ExpFunc = (lvl) => lvl <= 521 ? (int)(143.46 * lvl - 93.46) : 74650,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -704,6 +720,7 @@ namespace MinesServer.Enums
                 Name = "Ремонт",
                 Description = "Восстанавливает прочность робота",
                 LevelingHint = "Чинить робота [V]",
+                EffectDisplayFunc = (effect) => $"Восстановление: <color=red>{effect:F2}</color> ед./кристалл",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 2000)
@@ -713,7 +730,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHealth,
-                EffectFunc = (lvl) => lvl <= 2000 ? 0.00825f * lvl + 0.992f : 0.0025f * lvl + 12.5f,               
+                EffectFunc = (lvl) => lvl <= 2000 ? 0.00825f * lvl + 0.992f : 0.0025f * lvl + 12.5f,
                 ExpFunc = (lvl) => lvl <= 2000 ? (int)(9.9975 * lvl + 5.0025) : 20000,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -731,6 +748,7 @@ namespace MinesServer.Enums
                 Name = "Передвижение по дорогам",
                 Description = "По дорогам робот бегает быстрее",
                 LevelingHint = "Передвигаться по дорогам",
+                EffectDisplayFunc = (effect) => $"Бонус скорости: <color=yellow>+{effect:F2}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -740,7 +758,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnMove,
-                EffectFunc = (lvl) => lvl <= 1000 ? 0.000933f * lvl + 0.303f : 0.00015f * lvl + 1.087f,                
+                EffectFunc = (lvl) => lvl <= 1000 ? 0.000933f * lvl + 0.303f : 0.00015f * lvl + 1.087f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(77.653 * lvl - 27.653) : (int)(25 * lvl + 52625),
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -763,6 +781,7 @@ namespace MinesServer.Enums
                 Name = "Защита от слизи",
                 Description = "Снижает входящий урон от копание слизи",
                 LevelingHint = "Добывать разные виды слизи",
+                EffectDisplayFunc = (effect) => $"Снижение урона: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1112)
@@ -772,7 +791,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnHurt,
-                EffectFunc = (lvl) => lvl <= 167 ? 0.59f * lvl + 0.41f : 99f,          
+                EffectFunc = (lvl) => lvl <= 167 ? 0.59f * lvl + 0.41f : 99f,
                 ExpFunc = (lvl) => lvl <= 1113 ? (int)(35.962 * lvl - 25.962) : 40000,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -790,6 +809,7 @@ namespace MinesServer.Enums
                 Name = "Анти-блок",
                 Description = "Помогает быстрее Добывать квадроблоки",
                 LevelingHint = "Разрушать квадроблоки",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -799,7 +819,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDig,
-                EffectFunc = (lvl) => lvl <= 183 ? 0.533f * lvl + 1.467f : 99f,              
+                EffectFunc = (lvl) => lvl <= 183 ? 0.533f * lvl + 1.467f : 99f,
                 ExpFunc = (lvl) => lvl <= 183 ? (int)(0.533 * lvl + 1.467) : 99,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -817,6 +837,7 @@ namespace MinesServer.Enums
                 Name = "Смежное извлечение",
                 Description = "Позволяет извлекать зеленые крсталлы из синих и наоборот",
                 LevelingHint = "Добывать зеленые и синие кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>{effect:F2}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 150)
@@ -826,7 +847,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
-                EffectFunc = (lvl) => lvl <= 1000 ? 0.00951f * lvl + 0.49f : 0.0025f * lvl + 7.5f,                
+                EffectFunc = (lvl) => lvl <= 1000 ? 0.00951f * lvl + 0.49f : 0.0025f * lvl + 7.5f,
                 ExpFunc = (lvl) => lvl <= 70 ? (int)(1153.62 * lvl - 753.62) : 80000,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -844,6 +865,7 @@ namespace MinesServer.Enums
                 Name = "Геология",
                 Description = "Увеличивает количество переносимых пород/кристаллов",
                 LevelingHint = "Переносить породы/кристаллы/слизь [G]",
+                EffectDisplayFunc = (effect) => $"Вместимость: <color=yellow>{effect:F0}</color> ед.",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 74)
@@ -853,7 +875,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnExp,
-                EffectFunc = (lvl) => lvl <= 1 ? 1f : lvl,          
+                EffectFunc = (lvl) => lvl <= 1 ? 1f : lvl,
                 ExpFunc = (lvl) => lvl <= 74 ? (int)(164.11 * lvl - 144.11) : 12000,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -876,6 +898,7 @@ namespace MinesServer.Enums
                 Name = "Добыча красных",
                 Description = "Увеличивает добычу красных кристаллов",
                 LevelingHint = "Добывать красные кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -885,7 +908,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
-                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,            
+                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,
                 ExpFunc = (lvl) => lvl <= 1001 ? (int)(69.45 * lvl - 19.45) : 69500,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -903,6 +926,7 @@ namespace MinesServer.Enums
                 Name = "Добыча голубых",
                 Description = "Увеличивает добычу голубых кристаллов",
                 LevelingHint = "Добывать голубые кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -930,6 +954,7 @@ namespace MinesServer.Enums
                 Name = "Добыча фиолетовых",
                 Description = "Увеличивает добычу фиолетовых кристаллов",
                 LevelingHint = "Добывать фиолетовые кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -939,7 +964,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnDigCrys,
-                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,           
+                EffectFunc = (lvl) => lvl <= 1001 ? 0.0179f * lvl + 0.182f : 0.013f * lvl + 5.1f,
                 ExpFunc = (lvl) => lvl <= 1001 ? (int)(69.45 * lvl - 19.45) : 69500,
                 DurabilityFunc = (lvl) => lvl,
                 Requirements = new List<SkillRequirement>
@@ -957,6 +982,7 @@ namespace MinesServer.Enums
                 Name = "Добыча белых",
                 Description = "Увеличивает добычу белых кристаллов",
                 LevelingHint = "Добывать белые кристаллы",
+                EffectDisplayFunc = (effect) => $"Количество дополнительных кристаллов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -984,6 +1010,7 @@ namespace MinesServer.Enums
                 Name = "Извлечение",
                 Description = "Позволяет добывать дополнительные зеленые и синие кристаллы",
                 LevelingHint = "Добывать зеленые и синие кристаллы",
+                EffectDisplayFunc = (effect) => $"Шанс извлечения: <color=yellow>{effect:F2}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1011,6 +1038,7 @@ namespace MinesServer.Enums
                 Name = "Кристаллография",
                 Description = "Увеличивает скорость добычи кристаллов",
                 LevelingHint = "Разрушать кристаллы",
+                EffectDisplayFunc = (effect) => $"Скорость добычи: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 74)
@@ -1038,6 +1066,7 @@ namespace MinesServer.Enums
                 Name = "Деконструкция",
                 Description = "Ускоряет разрушение блоков",
                 LevelingHint = "Разрушать блоки различного цвета",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1065,6 +1094,7 @@ namespace MinesServer.Enums
                 Name = "Разрушение",
                 Description = "Увеличивает эффективность разрушения пород",
                 LevelingHint = "Разрушать объекты",
+                EffectDisplayFunc = (effect) => $"Эффективность: <color=yellow>{effect:F0}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 89)
@@ -1092,6 +1122,7 @@ namespace MinesServer.Enums
                 Name = "Аннигиляция",
                 Description = "Увеличивает скорость разрушение лавы",
                 LevelingHint = "Разрушать лаву",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения лавы: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 61)
@@ -1119,6 +1150,7 @@ namespace MinesServer.Enums
                 Name = "Деактивация",
                 Description = "Увеличивает скорость разрушение слизи",
                 LevelingHint = "Деактивировать объекты",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения слизи: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1146,6 +1178,7 @@ namespace MinesServer.Enums
                 Name = "Гиперкомпрессия",
                 Description = "Увеличиваем вместимость кристаллов",
                 LevelingHint = "Передвигаться с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Вместимость: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 501)
@@ -1173,6 +1206,7 @@ namespace MinesServer.Enums
                 Name = "Сортировка",
                 Description = "Позволяет извлекать дополнительные красные/фиолетовые/белые кристаллы",
                 LevelingHint = "Добывать красные/фиолетовые/белые кристаллы",
+                EffectDisplayFunc = (effect) => $"Шанс извлечения: <color=yellow>{effect:F2}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 151)
@@ -1200,6 +1234,7 @@ namespace MinesServer.Enums
                 Name = "Турбо-охлаждение",
                 Description = "Увеличивает глубину перемещения",
                 LevelingHint = "Спускаться на глубину",
+                EffectDisplayFunc = (effect) => $"Макс. глубина: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1)
@@ -1232,6 +1267,7 @@ namespace MinesServer.Enums
                 Name = "Размагничивание",
                 Description = "Увеличивает скорость разрушение песка",
                 LevelingHint = "Разрушать песок",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения песка: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1259,6 +1295,7 @@ namespace MinesServer.Enums
                 Name = "Компрессия",
                 Description = "Увеличиваем вместимость кристаллов",
                 LevelingHint = "Передвигаться с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Вместимость: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 501)
@@ -1286,6 +1323,7 @@ namespace MinesServer.Enums
                 Name = "Охлаждение",
                 Description = "Увеличивает глубину перемещения",
                 LevelingHint = "Спускаться на глубину",
+                EffectDisplayFunc = (effect) => $"Макс. глубина: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1)
@@ -1318,6 +1356,7 @@ namespace MinesServer.Enums
                 Name = "Промывание",
                 Description = "Позволяет добывать кристаллы из песка",
                 LevelingHint = "Разрушать песок различного цвета",
+                EffectDisplayFunc = (effect) => $"Дополнительные кристаллы: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1345,6 +1384,7 @@ namespace MinesServer.Enums
                 Name = "Дробление",
                 Description = "Ускоряет разрушение валунов",
                 LevelingHint = "Разрушать валуны",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения валунов: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1372,6 +1412,7 @@ namespace MinesServer.Enums
                 Name = "Наноупаковка",
                 Description = "Увеличиваем вместимость кристаллов",
                 LevelingHint = "Передвигаться с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Вместимость: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 250)
@@ -1399,6 +1440,7 @@ namespace MinesServer.Enums
                 Name = "Стройка опор",
                 Description = "Позволяет строить опоры",
                 LevelingHint = "Строить опорные конструкции",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки опоры: <color=green>{effect:F1} зеленых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 250)
@@ -1426,6 +1468,7 @@ namespace MinesServer.Enums
                 Name = "Стройка дорог",
                 Description = "Позволяет строить дороги",
                 LevelingHint = "Строить дороги",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки дороги: <color=green>{effect:F1} зеленых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1453,6 +1496,7 @@ namespace MinesServer.Enums
                 Name = "Стройка квадроблоков",
                 Description = "Позволяет строить квадроблоки",
                 LevelingHint = "Строить квадроблоки",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки квадроблока: <color=yellow>{effect:F1} белых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 74)
@@ -1485,6 +1529,7 @@ namespace MinesServer.Enums
                 Name = "Обнаружение",
                 Description = "Позволяет добывать кристаллы c пород",
                 LevelingHint = "Разрушать породу",
+                EffectDisplayFunc = (effect) => $"Дополнительные кристаллы: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1515,6 +1560,7 @@ namespace MinesServer.Enums
                 "пропорционально уровню умения.\n" +
                 "Чем выше уровень, тем быстрее истощаются заряд пушки.",
                 LevelingHint = "Получать урон от пушки",
+                EffectDisplayFunc = (effect) => $"Увеличение расхода: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 74)
@@ -1538,6 +1584,7 @@ namespace MinesServer.Enums
                 "Каждое действие, приносящее опыт, пересматривается с целью \n" +
                 "снижения ресурсных затрат на последующее совершенствование навыков.",
                 LevelingHint = "Прокачивать навыки",
+                EffectDisplayFunc = (effect) => $"Скидка на прокачку: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 200)
@@ -1560,6 +1607,7 @@ namespace MinesServer.Enums
                 Description = "Позволяет извлекать больше опыта из развития навыков,\n" +
                 "ускоряя общий прогресс прокачки.",
                 LevelingHint = "Прокачивать навыки",
+                EffectDisplayFunc = (effect) => $"Бонус опыта: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1270)
@@ -1582,6 +1630,7 @@ namespace MinesServer.Enums
                 Description = "Профессиональное добыча из кристаллических структур.\n" +
                 "Значительно увеличивает выход ценных пород при добыче, позволяя эффективнее использовать кристаллы.",
                 LevelingHint = "Добывать кристаллы",
+                EffectDisplayFunc = (effect) => $"Бонус к добыче: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1500)
@@ -1604,6 +1653,7 @@ namespace MinesServer.Enums
                 Description = "Объеденяет архитектурныие навыки возведения построек, \n" +
                 "уменьшая количества занимаемых слотов для отдельного навыка.",
                 LevelingHint = "Строить зеленые/желтые/красные блоки",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки блока: <color=yellow>{effect:F1} серо-буро-малиновых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -1626,6 +1676,7 @@ namespace MinesServer.Enums
                 Description = "Доступ к закрытым разделам оборонной тактики.\n" +
                 "Открывает возможность возведения военных блоков для укрепления территории.",
                 LevelingHint = "Строить боевые блоки",
+                EffectDisplayFunc = (effect) => $"Затраты на строительство постройки блока: <color=cyan>{effect:F1} голубых кристаллов</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -1635,7 +1686,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
-                EffectFunc = (lvl) => lvl <= 1000 ? -0.801f * lvl + 1000.801f : 200f, 
+                EffectFunc = (lvl) => lvl <= 1000 ? -0.801f * lvl + 1000.801f : 200f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(32.768 * lvl - 17.768) : 32750,
                 DurabilityFunc = (lvl) => { if (lvl <= 667) { return (float)(0.375375375375375 * lvl + (-0.375375375375375)); } else { return 250; } },
                 IsExpertSkill = true,
@@ -1648,6 +1699,7 @@ namespace MinesServer.Enums
                 Description = "Освоение несущих конструкций и модульного проектирования.\n" +
                 "Дает возможность возводить опорные элементы, дорожные покрытия и квадроблоки.",
                 LevelingHint = "Строить опоры/дорогу и квадроблоки",
+                EffectDisplayFunc = (effect) => "Доступны: <color=gray>опоры</color>, <color=white>дороги</color>, <color=purple>квадроблоки</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1001)
@@ -1657,7 +1709,7 @@ namespace MinesServer.Enums
                 },
                 OppFunc = (lvl) => lvl * 68,
                 EffectType = SkillEffectType.OnBld,
-                EffectFunc = (lvl) => 1f, 
+                EffectFunc = (lvl) => 1f,
                 ExpFunc = (lvl) => lvl <= 1000 ? (int)(208.283 * lvl - 158.283) : (int)(50 * lvl + 158125),
                 DurabilityFunc = (lvl) => { if (lvl <= 1) { return 1; } else { return lvl; } },
                 IsExpertSkill = true,
@@ -1670,6 +1722,7 @@ namespace MinesServer.Enums
                 Description = "Мгновенно разрушает кристаллическу оболочку кристалла,\n" +
                 "позволяя ускорить добычу вырожденных кристаллов.",
                 LevelingHint = "Добывать белые кристаллы",
+                EffectDisplayFunc = (effect) => $"Шанс добычи полного кристалла за 1 удар: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 984)
@@ -1692,6 +1745,7 @@ namespace MinesServer.Enums
                 Description = "Применение тактики контролируемого обрушения.\n" +
                 "Значительно повышает эффективность воздействия на скальные породы.",
                 LevelingHint = "Разрушать породы",
+                EffectDisplayFunc = (effect) => $"Эффективность разрушения: <color=yellow>{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 175)
@@ -1714,6 +1768,7 @@ namespace MinesServer.Enums
                 Description = "Тонкая настройка инструментов для работы с фиолетовыми кристаллами.\n" +
                 "Минимизирует потери при добыче, кратно увеличивая выход ресурса с одного кристалла",
                 LevelingHint = "Добывать фиолетовые кристаллы",
+                EffectDisplayFunc = (effect) => $"Шанс на ювелирную добычу: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1737,6 +1792,7 @@ namespace MinesServer.Enums
                 "Позволяет эффективно фильтровать и извлекать кристаллические\n" +
                 "включения из осадочных пород и слизистых отложений.",
                 LevelingHint = "Разрушать слизь",
+                EffectDisplayFunc = (effect) => $"Дополнительные кристаллы: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1759,6 +1815,7 @@ namespace MinesServer.Enums
                 Description = "Адаптация к экстремальному давлению и составу коренных пород.\n" +
                 "Открывает возможность извлечения кристаллов из глубинных слоев пород скал",
                 LevelingHint = "Разрушать глубинные породы",
+                EffectDisplayFunc = (effect) => $"Дополнительные кристаллы: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 1000)
@@ -1781,6 +1838,7 @@ namespace MinesServer.Enums
                 Description = "Позволяет упаковывать кристаллы в инвентаре с большей плотностью,\n" +
                 "эффективно увеличивая свободный объем при переноске перегруженного контейнера",
                 LevelingHint = "Передвигаться с перегрузом выше 50%",
+                EffectDisplayFunc = (effect) => $"Вместимость: <color=yellow>{effect:F0}</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 100)
@@ -1795,7 +1853,7 @@ namespace MinesServer.Enums
                 DurabilityFunc = (lvl) => lvl,
                 IsExpertSkill = true,
                 BasePriceOPP = 5000
-            } 
+            }
         };
 
         public static SkillInfo GetInfo(this SkillType skill)
@@ -1839,7 +1897,10 @@ namespace MinesServer.Enums
         {
             return _skillInfos.TryGetValue(skill, out var info) ? info.BasePriceOPP : 0;
         }
-
+        public static string GetDisplayInfo(this SkillType skill, float value)
+        {
+            return _skillInfos.TryGetValue(skill, out var info) ? info.GetDisplayInfo(value) : "";
+        }
         public static (string Name, string Description, string LevelingHint) GetFullInfo(this SkillType skill)
         {
             var info = skill.GetInfo();

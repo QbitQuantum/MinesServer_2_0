@@ -168,7 +168,7 @@ namespace MinesServer.GameShit.Buildings
                 var (canLearn, conflictWith, conflictType) = SkillConflicts.CanLearn(skilltype, currentSkills);
 
                 // Создаем описание навыка
-                string description = playerSkill != null ? playerSkill.Description : SkillTypeExtensions.GetDescription(skilltype);
+                string description = playerSkill != null ? playerSkill.GetDescription(p) : SkillTypeExtensions.GetDescription(skilltype);
 
                 // Если есть конфликт - добавляем сообщение о конфликте в описание и не показываем кнопку установки
                 if (!canLearn && conflictWith.HasValue)
@@ -224,7 +224,7 @@ namespace MinesServer.GameShit.Buildings
                     SelectedSlot = p.skillslist.selectedslot,
                     SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
                     OnInstall = skillfromslot == null ? oninstall : null,
-                    Text = skillfromslot?.Description,
+                    Text = skillfromslot?.GetDescription(p),
                     Button = skillfromslot != null && skillfromslot.isUpReady() && p.money > skillfromslot.Cost ?
                         new MButton("Прокачать", "upgrade", (args) =>
                         {

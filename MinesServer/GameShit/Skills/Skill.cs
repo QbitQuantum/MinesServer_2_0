@@ -98,6 +98,40 @@ namespace MinesServer.GameShit.Skills
             return type.GetInfo()?.EffectType ?? SkillEffectType.OnExp;
         }
 
+        public string GetDescription(Player p)
+        {
+            float upgradeEffect = 0f;
+            float discountEffect = 0f;
+
+            if (p?.skillslist?.skills != null)
+            {
+                // Находим навык Upgrade
+                var upgradeSkill = p.skillslist.skills.Values
+                    .FirstOrDefault(s => s?.type == SkillType.Upgrade && type != SkillType.Discount);
+                if (upgradeSkill != null)
+                {
+                    upgradeEffect = upgradeSkill.Effect;
+                }
+
+                // Находим навык Discount
+                var discountSkill = p.skillslist.skills.Values
+                    .FirstOrDefault(s => s?.type == SkillType.Discount && type != SkillType.Upgrade);
+                if (discountSkill != null)
+                {
+                    discountEffect = discountSkill.Effect;
+                }
+            }
+
+            return TemplateDescription.Description(
+                type,
+                lvl,
+                exp,
+                Expiriense,
+                upgradeEffect,
+                discountEffect
+            );
+        }
+
         public float Expiriense
         {
             get
@@ -111,13 +145,8 @@ namespace MinesServer.GameShit.Skills
         {
             get
             {
-                // Используем новый TemplateDescription, который принимает SkillType
-                return TemplateDescription.Description(
-                    type,
-                    lvl,
-                    exp,
-                    Expiriense
-                );
+                var info = type.GetInfo();
+                return info?.Description;
             }
         }
 
