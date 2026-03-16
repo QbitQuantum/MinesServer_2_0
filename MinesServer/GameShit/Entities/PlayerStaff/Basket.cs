@@ -144,11 +144,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         public BasketPacket BPacket => new BasketPacket(
-            this[CrystalType.Red],
             this[CrystalType.Green],
             this[CrystalType.Blue],
-            this[CrystalType.White],
+            this[CrystalType.Red],
             this[CrystalType.Violet],
+            this[CrystalType.White],
             this[CrystalType.Cyan],
             Buildcap()
         );

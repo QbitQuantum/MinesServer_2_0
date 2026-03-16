@@ -240,20 +240,10 @@ public static class ResourceExtractionService
             _ => (int)forcedType
         };
 
-        CrystalType AddBoxCryType = forcedType switch
-        {
-            CrystalType.Green => CrystalType.Red,
-            CrystalType.Blue => CrystalType.Green,
-            CrystalType.Red => CrystalType.Blue,
-            CrystalType.Violet => CrystalType.White,
-            CrystalType.White => CrystalType.Violet,
-            CrystalType.Cyan => CrystalType.Cyan,
-            _ => forcedType
-        };
         // Добавляем кристаллы в корзину
-        basket.AddCrys(AddBoxCryType, odob);
+        basket.AddCrys(forcedType, odob);
         // Добавляем в мировую статистику
-        World.AddDob(AddBoxCryType, odob);
+        World.AddDob(forcedType, odob);
 
         actor.SendDFToBots(
             2,
