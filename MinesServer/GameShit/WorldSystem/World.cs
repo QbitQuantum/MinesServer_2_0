@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.IO.Pipes;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
@@ -19,13 +20,13 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class World
     {
-        private readonly Chunk[,] chunks;
         public string name { get; private set; }
         public WorldLayer<byte> road;
         public WorldLayer<byte> cells;
         public WorldLayer<float> durability;
         public static World W;
-
+        private readonly Chunk[] chunks;
+        
         // ширина мира в клетках
         public const int CellsWidth = Chunk.ChunksW * Chunk.ChunkWidth;
         // высота мира в клетках
@@ -41,7 +42,13 @@ namespace MinesServer.GameShit.WorldSystem
             W = this;
             this.name = name;
             gen = new Gen(CellsWidth, CellsHeight);
-            chunks = Chunk.CreateAllChunks();
+            chunks = new Chunk[Chunk.ChunksW * Chunk.ChunksH];
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                int x = i % Chunk.ChunksW;
+                int y = i / Chunk.ChunksW;
+                chunks[i] = new Chunk((x, y));
+            }
 
             // TODO: проблема в том, что cells/road/durability создают файл, и если вынести то сломается проверка на File.Exists($"{name}.mapb")
             if (!File.Exists($"{name}.mapb"))
@@ -616,14 +623,17 @@ namespace MinesServer.GameShit.WorldSystem
 
         public long[] summary = new long[6];
 
-        public Chunk GetPosChunk(int Chunk, int ChunkY)
-        {
-            return chunks[Chunk, ChunkY];
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Chunk GetChunk(int x, int y)
         {
-            var pos = Chunk.GetChunkPosByCoords(x, y);
-            return GetPosChunk(pos.x, pos.y);
+            (int chunkX, int chunkY) = Chunk.GetChunkPosByCoords(x, y);
+            return GetPosChunk(chunkX, chunkY);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Chunk GetPosChunk(int chunkX, int chunkY)
+        {
+            return chunks[chunkX + chunkY * Chunk.ChunksW];
         }
         public IEnumerable<(int x, int y)> GetVisibleChunksPos(int x, int y, int radius = 2)
         {

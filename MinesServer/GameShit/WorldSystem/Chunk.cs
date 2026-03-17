@@ -34,7 +34,7 @@ namespace MinesServer.GameShit.WorldSystem
         private const int ALIVE_UPDATE_MS = 5000;
         private const int SAND_UPDATE_MS = 400;
         private const int NOT_VISIBLE_TIMEOUT_MINUTES = 5;
-
+        private const int CHUNK_SHIFT = 5;
         public ConcurrentDictionary<int, Player> bots { get; } = new();
         public (int x, int y) pos { get; }
         public bool[] packsprop { get; private set; }
@@ -46,27 +46,10 @@ namespace MinesServer.GameShit.WorldSystem
         private DateTime notvisibleupd = ServerTime.Now;
         public bool updlasttick = false;
 
-        private Chunk((int x, int y) pos)
+        public Chunk((int x, int y) pos)
         {
             this.pos = pos;
         }
-
-        // Статический метод для создания всех чанков мира
-        public static Chunk[,] CreateAllChunks()
-        {
-            var chunks = new Chunk[ChunksW, ChunksH];
-
-            for (int x = 0; x < ChunksW; x++)
-            {
-                for (int y = 0; y < ChunksH; y++)
-                {
-                    chunks[x, y] = new Chunk((x, y));
-                }
-            }
-
-            return chunks;
-        }
-
         public int WorldX => pos.x * ChunkWidth;
         public int WorldY => pos.y * ChunkHeight;
 
@@ -413,8 +396,9 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         #endregion
-        private static int GetChunkPosCoordsX(int x) => (int)Math.Floor((float)x / ChunkWidth);
-        private static int GetChunkPosCoordsY(int y) => (int)Math.Floor((float)y / ChunkHeight);
+        // Быстрое деление через сдвиг
+        private static int GetChunkPosCoordsX(int x) => x >> CHUNK_SHIFT;
+        private static int GetChunkPosCoordsY(int y) => y >> CHUNK_SHIFT;
         public static (int x, int y) GetChunkPosByCoords(int x, int y) => (GetChunkPosCoordsX(x), GetChunkPosCoordsY(y));
     }
 }
