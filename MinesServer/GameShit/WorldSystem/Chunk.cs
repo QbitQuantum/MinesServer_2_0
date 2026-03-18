@@ -395,6 +395,15 @@ namespace MinesServer.GameShit.WorldSystem
                 cells);
         }
 
+        /// <summary>
+        /// Создаём пакеты для удаления всех паков в чанке
+        /// </summary>
+        public IEnumerable<IHubPacket> PackEmptyPacket()
+        {
+            foreach (var pack in packs.Values)
+                yield return new HBPacksPacket(PACKPOS(pack.x, pack.y), []);
+        }
+
         #endregion
         // Быстрое деление через сдвиг
         private static int GetChunkPosCoordsX(int x) => x >> CHUNK_SHIFT;

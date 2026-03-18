@@ -705,19 +705,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdateVisibility()
         {
-            var currentChunks = GetCurrentVisibleChunks();
+            var currentChunks = World.W.GetVisibleChunksPos(x, y, 1).ToList();
             var chunksToAdd = GetNewChunks(currentChunks);
             var chunksToRemove = GetObsoleteChunks(currentChunks);
 
-            SendChunksAdded(chunksToAdd);
-            SendChunksRemoved(chunksToRemove);
+            SendPackets(World.W.GetChunksPacketsAdded(chunksToAdd));
+            SendPackets(World.W.GetChunksPacketsRemoved(chunksToRemove));
 
             UpdateTrackedChunks(chunksToAdd, chunksToRemove);
-        }
-
-        private List<(int x, int y)> GetCurrentVisibleChunks()
-        {
-            return World.W.GetVisibleChunksPos(x, y, 1).ToList();
         }
 
         private List<(int x, int y)> GetNewChunks(List<(int x, int y)> currentChunks)
@@ -729,58 +724,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             return alreadyvisible.Where(chunk => !currentChunks.Contains(chunk)).ToList();
         }
-
-        private void SendChunksAdded(List<(int x, int y)> chunksToAdd)
-        {
-            if (!chunksToAdd.Any())
-                return;
-
-            var packets = new List<IHubPacket>();
-
-            foreach (var chunk in chunksToAdd)
-            {
-                packets.AddRange(GetChunkPackets(chunk.x, chunk.y));
-            }
-
-            SendPackets(packets);
-        }
-
-        private void SendChunksRemoved(List<(int x, int y)> chunksToRemove)
-        {
-            if (!chunksToRemove.Any())
-                return;
-
-            var packets = new List<IHubPacket>();
-
-            foreach (var (chunkX, chunkY) in chunksToRemove)
-            {
-                packets.AddRange(GetPackRemovalPackets(
-                    World.W.GetPosChunk(chunkX, chunkY)));
-            }
-
-            SendPackets(packets);
-        }
-
-        private IEnumerable<IHubPacket> GetChunkPackets(int chunkX, int chunkY)
-        {
-            var packets = new List<IHubPacket>();
-            var chunk = World.W.GetPosChunk(chunkX, chunkY);
-
-            // Отправляем карту чанка
-            packets.Add(chunk.MapPacket());
-
-            // Отправляем паки чанка
-            packets.AddRange(chunk.pPakcs());
-
-            return packets;
-        }
-
-        private IEnumerable<IHubPacket> GetPackRemovalPackets(Chunk chunk)
-        {
-            return chunk.packs.Values.Select(pack =>
-                (IHubPacket)new HBPacksPacket(chunk.PACKPOS(pack.x, pack.y), Array.Empty<HBPack>()));
-        }
-
         private void SendPackets(IEnumerable<IHubPacket> packets)
         {
             var packetArray = packets.ToArray();

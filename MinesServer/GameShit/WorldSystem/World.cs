@@ -685,5 +685,45 @@ namespace MinesServer.GameShit.WorldSystem
 
             player.connection?.SendB(new HBPacket(mapPackets.ToArray()));
         }
+
+        public IEnumerable<IHubPacket> GetChunksPacketsAdded(List<(int x, int y)> chunksToAdd)
+        {
+            var packets = new List<IHubPacket>();
+
+            foreach (var (chunkX, chunkY) in chunksToAdd)
+            {
+                packets.AddRange(GetChunkPackets(chunkX, chunkY));
+            }
+            return packets;
+        }
+
+        public IEnumerable<IHubPacket> GetChunksPacketsRemoved(List<(int x, int y)> chunksToRemove)
+        {
+            if (chunksToRemove.Count == 0)
+                yield break;
+
+            foreach (var (chunkX, chunkY) in chunksToRemove)
+            {
+                var chunk = GetPosChunk(chunkX, chunkY);
+                foreach (var packet in chunk.PackEmptyPacket())
+                {
+                    yield return packet;
+                }
+            }
+        }
+
+        public IEnumerable<IHubPacket> GetChunkPackets(int chunkX, int chunkY)
+        {
+            var packets = new List<IHubPacket>();
+            var chunk = GetPosChunk(chunkX, chunkY);
+
+            // Отправляем карту чанка
+            packets.Add(chunk.MapPacket());
+
+            // Отправляем паки чанка
+            packets.AddRange(chunk.pPakcs());
+
+            return packets;
+        }
     }
 }
