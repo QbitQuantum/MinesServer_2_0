@@ -349,7 +349,7 @@ namespace MinesServer.GameShit.WorldSystem
                 return;
             }
             var ch = W.GetChunk(pack.x, pack.y);
-            ch.SetPack(pack.x - ch.WorldX, pack.y - ch.WorldY, pack);
+            ch.AddPack(pack);
         }
 
         public static void RemovePack(Pack pack)
@@ -359,7 +359,7 @@ namespace MinesServer.GameShit.WorldSystem
                 return;
             }
             var ch = W.GetChunk(pack.x, pack.y);
-            ch.RemovePack(pack.x - ch.WorldX, pack.y - ch.WorldY);
+            ch.RemovePack(pack);
         }
 
         public static void UpdatePack(Pack pack)

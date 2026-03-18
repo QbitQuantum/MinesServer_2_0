@@ -362,19 +362,24 @@ namespace MinesServer.GameShit.WorldSystem
             return packs.TryGetValue(key, out var pack) ? pack : null;
         }
 
-        public void SetPack(int x, int y, Pack p)
+        public void AddPack(Pack p)
         {
+            int x = p.x - WorldX;
+            int y = p.y - WorldY;
             int key = x + y * ChunkWidth;
             packs[key] = p;
-            SendPack((char)p.type, WorldX + x, WorldY + y, p.cid, p.off);
+
+            SendPack((char)p.type, p.x, p.y, p.cid, p.off);
         }
 
-        public void RemovePack(int x, int y)
+        public void RemovePack(Pack p)
         {
+            int x = p.x - WorldX;
+            int y = p.y - WorldY;
             int key = x + y * ChunkWidth;
             if (packs.Remove(key))
             {
-                ClearPack(WorldX + x, WorldY + y);
+                ClearPack(p.x, p.y);
             }
         }
 
