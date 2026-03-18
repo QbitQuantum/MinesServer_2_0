@@ -57,13 +57,20 @@ namespace MinesServer.GameShit.Programmator
                     else
                         name = array2[i];
                 }
+
+                // Обработка NextRow до добавления команды
+                if (atype == ActionType.NextRow)
+                {
+                    containsnextrow = true;
+                    // Сбрасываем счетчик строки
+                    index = 0;
+                    continue; // Пропускаем добавление команды
+                }
+
+                // Добавляем команду в текущую функцию
                 switch (atype)
                 {
                     // Управление потоком
-                    case ActionType.NextRow:
-                        containsnextrow = true;
-                        break;
-
                     case ActionType.CreateFunction:
                         functions.Add(name, new PFunction());
                         currentFunc = name;
@@ -240,20 +247,28 @@ namespace MinesServer.GameShit.Programmator
                     default:
                         if (atype != ActionType.None)
                         {
-                            // Здесь будет видно, какие ID не определены
                             Console.WriteLine($"Unknown action ID: {Convert.ToInt16(array[i + 4])}");
                             functions[currentFunc] += new PAction(atype);
                         }
                         break;
                 }
-                if (index > 0 && index % 15 == 0)
-                {
-                    if (functions[currentFunc].actions.Count > 0 && functions[currentFunc].actions.Last().type is not ActionType.GoTo && !containsnextrow)
-                        functions[currentFunc].actions.Add(new PAction(ActionType.GoTo, ""));
-                    index = 0;
-                    containsnextrow = false;
-                }
+
                 index++;
+
+                // Проверяем, нужно ли обработать конец строки
+                if (index >= 15 && !containsnextrow)
+                {
+                    // Если достигнут лимит строки и нет явного NextRow,
+                    // не вставляем автоматический GoTo, а просто сбрасываем счетчик
+                    index = 0;
+                }
+
+                // Если был NextRow, сбрасываем флаг после обработки строки
+                if (containsnextrow && index >= 15)
+                {
+                    containsnextrow = false;
+                    index = 0;
+                }
             }
             return functions;
         }
