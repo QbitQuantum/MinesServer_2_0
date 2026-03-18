@@ -207,19 +207,19 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void SendPack(char type, int x, int y, int cid, int off)
         {
+            if (type == (char)PackType.None)
+                return;
+
+            // Кэшируем пакет, так как он одинаков для всех получателей
+            var packet = new HBPacket([
+                new HBPacksPacket(PACKPOS(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])
+            ]);
+
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
                 {
-                    ClearPack(x, y);
-                    if (type != (char)PackType.None)
-                    {
-                        var player = DataBase.GetPlayer(id.Key);
-                        player?.connection?.SendB(new HBPacket([
-                            new HBPacksPacket(PACKPOS(x, y),
-                            [new HBPack(type, x, y, (byte)cid, (byte)off)])
-                        ]));
-                    }
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
                 }
             }
         }
@@ -238,10 +238,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void ResendPack(Pack p)
         {
-            if (p.type != PackType.None)
-            {
-                SendPack((char)p.type, p.x, p.y, p.cid, p.off);
-            }
+            SendPack((char)p.type, p.x, p.y, p.cid, p.off);
         }
 
         #endregion
@@ -369,11 +366,7 @@ namespace MinesServer.GameShit.WorldSystem
         {
             int key = x + y * ChunkWidth;
             packs[key] = p;
-
-            if (p.type != PackType.None)
-            {
-                SendPack((char)p.type, WorldX + x, WorldY + y, p.cid, p.off);
-            }
+            SendPack((char)p.type, WorldX + x, WorldY + y, p.cid, p.off);
         }
 
         public void RemovePack(int x, int y)
