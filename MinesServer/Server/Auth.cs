@@ -84,7 +84,7 @@ namespace MinesServer.Server
             if (player == null)
             {
                 initiator.SendU(new BotInfoPacket("pidor", 0, 0, -1));
-                initiator.SendU(new HBPacket([new HBMapPacket(0, 0, 32, 32, World.W.GetChunk(0,0).cells)]));
+                initiator.SendU(new HBPacket([World.W.GetChunk(0, 0).MapPacket()]));
                 authwin = def;
                 initiator.SendWin(authwin.ToString());
                 return;
