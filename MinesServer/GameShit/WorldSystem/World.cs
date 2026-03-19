@@ -50,6 +50,8 @@ namespace MinesServer.GameShit.WorldSystem
                 chunks[i] = new Chunk((x, y));
             }
 
+            InitializeChunkNeighbors();
+
             // TODO: проблема в том, что cells/road/durability создают файл, и если вынести то сломается проверка на File.Exists($"{name}.mapb")
             if (!File.Exists($"{name}.mapb"))
             {
@@ -83,6 +85,18 @@ namespace MinesServer.GameShit.WorldSystem
             CommitWorld();
             MServer.started = true;
         }
+
+        /// <summary>
+        /// Инициализация соседей для всех чанков
+        /// </summary>
+        private void InitializeChunkNeighbors()
+        {
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                chunks[i].InitializeNeighbors(this);
+            }
+        }
+
         public static void CommitWorld()
         {
             W.cells.Commit();

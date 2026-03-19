@@ -705,7 +705,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdateVisibility()
         {
-            var currentChunks = World.W.GetVisibleChunksPos(x, y, 1).ToList();
+            var currentChunks = World.W.GetVisibleChunksPos(x, y).ToList();
             var chunksToAdd = GetNewChunks(currentChunks);
             var chunksToRemove = GetObsoleteChunks(currentChunks);
 

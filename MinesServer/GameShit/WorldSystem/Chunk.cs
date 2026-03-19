@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
@@ -35,6 +36,19 @@ namespace MinesServer.GameShit.WorldSystem
         private const int SAND_UPDATE_MS = 400;
         private const int NOT_VISIBLE_TIMEOUT_MINUTES = 5;
         private const int CHUNK_SHIFT = 5;
+
+        // Храним ссылку на мир для доступа к другим чанкам
+        private World? _world;
+
+        // Кэшированные соседи
+        private Chunk?[] _cachedNeighbors = null!;
+        private (int x, int y)[] _cachedNeighborCoords = null!;
+        private readonly Dictionary<(int dx, int dy), Chunk?> _neighborDict = new();
+
+        // Константы для индексации
+        private const int NEIGHBOR_SIZE = VIEW_RADIUS * 2 + 1; // 5
+        private const int NEIGHBOR_TOTAL = NEIGHBOR_SIZE * NEIGHBOR_SIZE; // 25
+
         public ConcurrentDictionary<int, Player> bots { get; } = new();
         public (int x, int y) pos { get; }
         public bool[] packsprop { get; private set; }
@@ -46,10 +60,6 @@ namespace MinesServer.GameShit.WorldSystem
         private DateTime notvisibleupd = ServerTime.Now;
         public bool updlasttick = false;
 
-        public Chunk((int x, int y) pos)
-        {
-            this.pos = pos;
-        }
         public int WorldX => pos.x * ChunkWidth;
         public int WorldY => pos.y * ChunkHeight;
 
@@ -66,105 +76,110 @@ namespace MinesServer.GameShit.WorldSystem
             set => World.SetCell(WorldX + x, WorldY + y, value);
         }
 
-        #region Чанк менеджмент
 
-        public void Update()
+        public Chunk((int x, int y) pos)
         {
-            var now = ServerTime.Now;
-
-            if (shouldbeloaded)
-            {
-                CheckBots();
-                updlasttick = false;
-                UpdateCells();
-                return;
-            }
-
-            if (now - notvisibleupd > TimeSpan.FromMinutes(NOT_VISIBLE_TIMEOUT_MINUTES))
-            {
-                UpdateNotVisible();
-                notvisibleupd = now;
-            }
-
-            Dispose();
+            this.pos = pos;
         }
 
-        private void CheckBots()
+        public void InitializeNeighbors(World world)
         {
-            var botsToRemove = bots.Values
-                .Where(bot => {
-                    var chunkPos = GetChunkPosByCoords(bot.x, bot.y);
-                    return chunkPos.x != pos.x || chunkPos.y != pos.y ||
-                           !DataBase.activeplayers.Contains(bot);
-                })
-                .Select(bot => bot.id)
-                .ToList();
+            _world = world;
+            _cachedNeighbors = new Chunk?[NEIGHBOR_TOTAL];
+            _cachedNeighborCoords = new (int x, int y)[NEIGHBOR_TOTAL];
+            _neighborDict.Clear();
 
-            foreach (var botId in botsToRemove)
-                bots.TryRemove(botId, out _);
-        }
-
-        private void UpdateCells()
-        {
-            var now = ServerTime.Now;
-
-            if (now - lastupdalive > TimeSpan.FromMilliseconds(ALIVE_UPDATE_MS))
+            int index = 0;
+            for (int dy = -VIEW_RADIUS; dy <= VIEW_RADIUS; dy++)
             {
-                UpdateAlive();
-                lastupdalive = now;
-            }
+                for (int dx = -VIEW_RADIUS; dx <= VIEW_RADIUS; dx++)
+                {
+                    int x = pos.x + dx;
+                    int y = pos.y + dy;
 
-            if (now - sandandb > TimeSpan.FromMilliseconds(SAND_UPDATE_MS))
-            {
-                UpdateSandBoulders();
-                sandandb = now;
+                    var coord = (x, y);
+                    _cachedNeighborCoords[index] = coord;
+
+                    if (World.ValidChunk(x, y))
+                    {
+                        var chunk = _world.GetPosChunk(x, y);
+                        _cachedNeighbors[index] = chunk;
+                        _neighborDict[(dx, dy)] = chunk;
+                    }
+                    else
+                    {
+                        _cachedNeighbors[index] = null;
+                        _neighborDict[(dx, dy)] = null;
+                    }
+
+                    index++;
+                }
             }
         }
-
-        private bool ShouldBeLoadedBots()
-        {
-            return GetNeighboringChunks().Any(ch => ch.bots.Count > 0);
-        }
-
-        public void AddBot(Player player)
-        {
-            if (!bots.ContainsKey(player.id))
-                bots[player.id] = player;
-        }
-
-        public void Dispose()
-        {
-            World.W.cells.Unload(pos.x, pos.y);
-        }
-
-        #endregion
 
         #region Обход соседних чанков
 
+        // Получаем всех соседей
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<Chunk> GetNeighboringChunks(int radius = VIEW_RADIUS)
+        {
+            if (radius == VIEW_RADIUS && _cachedNeighbors != null)
+            {
+                // Возвращаем только существующие чанки
+                for (int i = 0; i < _cachedNeighbors.Length; i++)
+                {
+                    if (_cachedNeighbors[i] != null)
+                        yield return _cachedNeighbors[i]!;
+                }
+                yield break;
+            }
+
+            // Для остальных радиусов
+            foreach (var chunk in GetNeighboringChunksSlow(radius))
+                yield return chunk;
+        }
+
+        // Приватные методы для остальных радиусов
+        private IEnumerable<Chunk> GetNeighboringChunksSlow(int radius)
+        {
+            if (_world == null) yield break;
+
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                for (int dx = -radius; dx <= radius; dx++)
+                {
+                    // Пропускаем центр? 
+                    // if (dx == 0 && dy == 0) continue;
+
+                    int x = pos.x + dx;
+                    int y = pos.y + dy;
+
+                    if (World.ValidChunk(x, y))
+                        yield return _world.GetPosChunk(x, y);
+                }
+            }
+        }
+
+        private IEnumerable<(int x, int y)> GetNeighboringChunkCoordinatesSlow(int radius)
         {
             for (int dy = -radius; dy <= radius; dy++)
             {
                 for (int dx = -radius; dx <= radius; dx++)
                 {
-                    int x = pos.x + dx;
-                    int y = pos.y + dy;
-
-                    if (World.ValidChunk(x, y))
-                        yield return World.W.GetPosChunk(x, y);
+                    yield return (pos.x + dx, pos.y + dy);
                 }
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<(int x, int y)> GetNeighboringChunkCoordinates(int radius = VIEW_RADIUS)
         {
-            foreach (var chunk in GetNeighboringChunks(radius))
-                yield return (chunk.pos.x, chunk.pos.y);
+            if (radius == VIEW_RADIUS && _cachedNeighborCoords != null)
+            {
+                return _cachedNeighborCoords; 
+            }
+            return GetNeighboringChunkCoordinatesSlow(radius);
         }
-
-        // Для обратной совместимости
-        [Obsolete("Use GetNeighboringChunks() instead")]
-        private IEnumerable<Chunk> vChunksAround() => GetNeighboringChunks();
 
         #endregion
 
@@ -308,6 +323,79 @@ namespace MinesServer.GameShit.WorldSystem
                 if (World.isAlive(worldX, worldY) && Physics.Alive(worldX, worldY))
                     updlasttick = true;
             }
+        }
+
+        #endregion
+
+        #region Чанк менеджмент
+
+        public void Update()
+        {
+            var now = ServerTime.Now;
+
+            if (shouldbeloaded)
+            {
+                CheckBots();
+                updlasttick = false;
+                UpdateCells();
+                return;
+            }
+
+            if (now - notvisibleupd > TimeSpan.FromMinutes(NOT_VISIBLE_TIMEOUT_MINUTES))
+            {
+                UpdateNotVisible();
+                notvisibleupd = now;
+            }
+
+            Dispose();
+        }
+
+        private void CheckBots()
+        {
+            var botsToRemove = bots.Values
+                .Where(bot => {
+                    var chunkPos = GetChunkPosByCoords(bot.x, bot.y);
+                    return chunkPos.x != pos.x || chunkPos.y != pos.y ||
+                           !DataBase.activeplayers.Contains(bot);
+                })
+                .Select(bot => bot.id)
+                .ToList();
+
+            foreach (var botId in botsToRemove)
+                bots.TryRemove(botId, out _);
+        }
+
+        private void UpdateCells()
+        {
+            var now = ServerTime.Now;
+
+            if (now - lastupdalive > TimeSpan.FromMilliseconds(ALIVE_UPDATE_MS))
+            {
+                UpdateAlive();
+                lastupdalive = now;
+            }
+
+            if (now - sandandb > TimeSpan.FromMilliseconds(SAND_UPDATE_MS))
+            {
+                UpdateSandBoulders();
+                sandandb = now;
+            }
+        }
+
+        private bool ShouldBeLoadedBots()
+        {
+            return GetNeighboringChunks().Any(ch => ch.bots.Count > 0);
+        }
+
+        public void AddBot(Player player)
+        {
+            if (!bots.ContainsKey(player.id))
+                bots[player.id] = player;
+        }
+
+        public void Dispose()
+        {
+            World.W.cells.Unload(pos.x, pos.y);
         }
 
         #endregion
