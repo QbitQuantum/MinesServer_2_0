@@ -356,8 +356,10 @@ namespace MinesServer.GameShit.WorldSystem
                 .ToArray();
         }
 
-        public Pack? GetPack(int x, int y)
+        public Pack? GetPack(int xx, int yy)
         {
+            int x = xx - WorldX;
+            int y = yy - WorldY;
             int key = x + y * ChunkWidth;
             return packs.TryGetValue(key, out var pack) ? pack : null;
         }

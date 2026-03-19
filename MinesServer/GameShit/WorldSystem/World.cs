@@ -345,26 +345,27 @@ namespace MinesServer.GameShit.WorldSystem
         public static void AddPack(Pack pack)
         {
             if (!ValidCoord(pack.x, pack.y))
-            {
                 return;
-            }
-            var ch = W.GetChunk(pack.x, pack.y);
-            ch.AddPack(pack);
+            W.GetChunk(pack.x, pack.y).AddPack(pack);
         }
 
         public static void RemovePack(Pack pack)
         {
             if (!ValidCoord(pack.x, pack.y))
-            {
                 return;
-            }
-            var ch = W.GetChunk(pack.x, pack.y);
-            ch.RemovePack(pack);
+            W.GetChunk(pack.x, pack.y).RemovePack(pack);
         }
 
         public static void UpdatePack(Pack pack)
         {
             W.GetChunk(pack.x, pack.y).ResendPack(pack);
+        }
+
+        public static Pack? GetPack(int x, int y)
+        {
+            if (!ValidCoord(x, y))
+                return null;
+            return W.GetChunk(x, y).GetPack(x, y);
         }
 
         public static byte GetCell(int x, int y)
@@ -399,8 +400,9 @@ namespace MinesServer.GameShit.WorldSystem
                 p = null;
                 return true;
             }
-            var ch = W.GetChunk(x, y);
-            p = ch.GetPack(x - ch.WorldX, y - ch.WorldY)!;
+
+            p = GetPack(x, y)!;
+
             if (p == null)
             {
                 return false;
