@@ -385,6 +385,12 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
+        public bool PackPart(int x, int y)
+        {
+            LoadPackProps();
+            return packsprop[x - WorldX + (y - WorldY) * ChunkWidth];
+        }
+
         public HBMapPacket MapPacket()
         {
             return new HBMapPacket(

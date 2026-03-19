@@ -334,12 +334,8 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool PackPart(int x, int y)
         {
             if (!ValidCoord(x, y))
-            {
                 return false;
-            }
-            var ch = W.GetChunk(x, y);
-            ch.LoadPackProps();
-            return ch.packsprop[x - ch.WorldX + (y - ch.WorldY) * 32];
+            return W.GetChunk(x, y).PackPart(x, y);
         }
 
         public static void AddPack(Pack pack)
