@@ -25,6 +25,10 @@ public abstract class PackCharge : PackDamage
         {
             case DamageTypePacks.Raz:
                 charge = Math.Max(0, charge - 100);
+                // TODO: Наверное стоит убрать
+                // Потому что игровой цикл вызывает потоянный апдейт пака
+                if (charge == 0)
+                    Update();
                 break;
             default:
                 base.Damage(i, DamageType);

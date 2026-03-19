@@ -217,11 +217,6 @@ namespace MinesServer.GameShit.Consumables
                                     damagable.Destroy(player);
                                 else
                                     damagable.Damage(10, DamageTypePacks.Raz);
-
-                                // TODO: Наверное стоит убрать
-                                // Потому что игровой цикл вызывает потоянный апдейт пака
-                                if (damagable.charge == 0)
-                                    pack.Update();
                             }
                         }
                     }
