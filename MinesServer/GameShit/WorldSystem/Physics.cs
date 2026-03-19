@@ -88,7 +88,7 @@ namespace MinesServer.GameShit.WorldSystem
                 CellType.AliveBlue => AliveBlue(x, y, mod),
                 CellType.AliveRed => AliveRed(x, y, mod),
                 CellType.AliveCyan => AliveCyan(x, y, mod),
-                CellType.AliveBlack => AliveNigger(x, y, mod),
+                CellType.AliveBlack => AliveBlack(x, y, mod),
                 CellType.AliveWhite => AliveWhite(x, y, mod),
                 _ => false
             };
@@ -131,7 +131,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return true;
         }
-        public static bool AliveNigger(int x, int y, int mod)
+        public static bool AliveBlack(int x, int y, int mod)
         {
             var c = 0;
             for (int ax = -1; ax <= 1; ax++)
