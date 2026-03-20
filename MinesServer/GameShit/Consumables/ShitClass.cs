@@ -228,10 +228,10 @@ namespace MinesServer.GameShit.Consumables
 
             return true;
         }
-        public static bool Geopack(int type,Player p)
+        public static bool Geopack(int type, Player player)
         {
-            var d = p.GetDirCord();
-            int x = d.x, y = d.y;
+            var (x, y) = player.GetDirCord();
+
             if (type == 10 /* Передано событие использование геопака */) {
                 // Проверяем на пустоты клетки перед игроком
                 if (World.TrueEmpty(x, y))
@@ -248,10 +248,15 @@ namespace MinesServer.GameShit.Consumables
                     CellType.HypnoRock => 34,
                     CellType.BlackRock => 42,
                     CellType.RedRock => 43,
-                    CellType.AliveRainbow => 46
+                    CellType.AliveRainbow => 46,
+                    _ => -1
                 };
+                if (id == -1)
+                    return false;
+
                 World.Destroy(x, y);
-                p.inventory[id]++;
+
+                player.inventory[id]++;
                 return true;
             }
             else // Передаем живки
