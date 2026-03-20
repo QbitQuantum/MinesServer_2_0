@@ -402,11 +402,13 @@ namespace MinesServer.GameShit.WorldSystem
 
         #region Pack менеджмент
 
-        public void SetProp(int x, int y, bool packmesh = false)
+        public void SetProp(int xx, int yy, bool packmesh = false)
         {
+            int x = xx - WorldX;
+            int y = yy - WorldY;
             LoadPackProps();
             packsprop[x + y * ChunkWidth] = packmesh;
-            SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
+            SendCellToBots(xx, yy, this[x, y]);
         }
 
         public void LoadPackProps()

@@ -254,16 +254,23 @@ namespace MinesServer.GameShit.WorldSystem
             Console.Write($"\r{cells}/{TotalVolume}");
             Console.WriteLine("");
         }
-        public static Cell GetProp(byte type) => CellsSerializer.cells[type];
 
         public static bool IsEmpty(int x, int y)
             => ValidCoord(x, y) && GetProp(x, y).isEmpty && !PackPart(x, y);
 
         public static bool TrueEmpty(int x, int y) => IsEmpty(x, y) && GetCell(x, y) is not (36 or 37 or 0 or 39);
 
+        // TODO: Сделать приватным
+        public static Cell GetProp(byte type) => CellsSerializer.cells[type];
         public static Cell GetProp(int x, int y)
         {
-            return ValidCoord(x,y) ? GetProp(GetCell(x, y)) : GetProp(0);
+            return ValidCoord(x, y) ? GetProp(GetCell(x, y)) : GetProp(0);
+        }
+
+        public static void SetProp(int x, int y, bool packmesh) {
+            // Проверку на ValidCoord не делаем, так как вызывается в одном месте
+            // И уже используется проверка
+            W.GetChunk(x, y).SetProp(x, y, packmesh);
         }
 
         public static bool CanBuildAt(int x, int y, int cid)
@@ -329,7 +336,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 return;
             }
-            var ch = W.GetChunk(x, y);
+            
             if (GetProp(cell).isEmpty)
             {
                 W.cells[x, y] = 0;
@@ -342,7 +349,8 @@ namespace MinesServer.GameShit.WorldSystem
             }
             if (W.shit.ContainsKey((x, y)))
                 W.shit[(x, y)]?.Cancel();
-            ch.SetProp(x - ch.WorldX, y - ch.WorldY, packmesh);
+
+            SetProp(x, y, packmesh);
         }
 
         public static bool PackPart(int x, int y)
