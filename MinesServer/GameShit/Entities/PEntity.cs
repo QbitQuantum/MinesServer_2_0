@@ -82,20 +82,8 @@ namespace MinesServer.GameShit.Entities
         }
         public virtual bool HasGun()
         {
-            var coord = GetDirCord();
-            var ch = World.W.GetChunk(coord.x, coord.y);
-            int SearchCoord = (coord.x - ch.WorldX + ((coord.y - 2 - ch.WorldY) * 32));
-
-            if (ch.packs.TryGetValue(SearchCoord, out var pack))
-            {
-                if (pack == null)
-                    return false;
-                if (pack is Gun)
-                    return true;
-            }
-
-            return false;
-
+            var pack = World.GetPack(x, y);
+            return pack == null && pack is Gun;
         }
         public abstract bool Heal();
         public abstract void Hurt(int num, DamageTypePlayer type = DamageTypePlayer.Pure);
