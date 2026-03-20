@@ -72,7 +72,7 @@ namespace MinesServer.GameShit.WorldSystem
             var mod = 1;
             foreach (var dir in baseddirs)
             {
-                if (World.GetCell(x + dir.Item1, y + dir.Item2) == 119)
+                if (World.GetCell(x + dir.x, y + dir.y) == 119)
                 {
                     mod += 2;
                 }
@@ -93,14 +93,14 @@ namespace MinesServer.GameShit.WorldSystem
                 _ => false
             };
         }
-        private static (int, int)[] baseddirs = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+        private static (int x, int y)[] baseddirs = [(1, 0), (0, 1), (-1, 0), (0, -1)];
         public static bool AliveBlue(int x, int y, int mod)
         {
-            foreach (var i in baseddirs)
+            foreach (var dir in baseddirs)
             {
-                if (r.Next(1, 101) < 20 && World.W.GetPlayersFromPos(x + i.Item1, y + i.Item2).Count == 0 && World.IsEmpty(x + i.Item1, y + i.Item2))
+                if (r.Next(1, 101) < 20 && World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 && World.IsEmpty(x + dir.x, y + dir.y))
                 {
-                    World.MoveCell(x, y, i.Item1, i.Item2);
+                    World.MoveCell(x, y, dir.x, dir.y);
                     World.SetCell(x, y, 109);
                     World.SetDurability(x, y, 20 * mod);
                     return true;
@@ -154,18 +154,18 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 foreach (var i in baseddirs)
                 {
-                    var cell = World.GetCell(x + i.Item1, y + i.Item2);
-                    if (cell == (byte)CellType.AliveBlack && World.IsEmpty(x + -i.Item1, y + -i.Item2) && World.W.GetPlayersFromPos(x + -i.Item1, y + -i.Item2).Count == 0)
+                    var cell = World.GetCell(x + i.x, y + i.y);
+                    if (cell == (byte)CellType.AliveBlack && World.IsEmpty(x + -i.x, y + -i.y) && World.W.GetPlayersFromPos(x + -i.x, y + -i.Item2).Count == 0)
                     {
                         if (r.Next(1, 101) > 50)
                         {
-                            World.SetCell(x + -i.Item1, y + -i.Item2, (byte)CellType.Red);
-                            World.SetDurability(x + i.Item1, y + i.Item2, 3 * mod);
+                            World.SetCell(x + -i.x, y + -i.y, (byte)CellType.Red);
+                            World.SetDurability(x + i.x, y + i.y, 3 * mod);
                         }
                         else
                         {
-                            World.SetCell(x + -i.Item1, y + -i.Item2, (byte)CellType.Cyan);
-                            World.SetDurability(x + i.Item1, y + i.Item2, 2 * mod);
+                            World.SetCell(x + -i.x, y + -i.y, (byte)CellType.Cyan);
+                            World.SetDurability(x + i.x, y + i.y, 2 * mod);
                         }
                         return true;
                     }
@@ -178,10 +178,10 @@ namespace MinesServer.GameShit.WorldSystem
             var c = 0;
             foreach (var i in baseddirs)
             {
-                if (World.IsEmpty(x + i.Item1, y + i.Item2) && World.W.GetPlayersFromPos(x + i.Item1, y + i.Item2).Count == 0)
+                if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
                 {
-                    World.SetCell(x + i.Item1, y + i.Item2, (byte)CellType.Cyan);
-                    World.SetDurability(x + i.Item1, y + i.Item2, 2 * mod);
+                    World.SetCell(x + i.x, y + i.y, (byte)CellType.Cyan);
+                    World.SetDurability(x + i.x, y + i.y, 2 * mod);
                     c++;
                 }
             }
@@ -194,15 +194,15 @@ namespace MinesServer.GameShit.WorldSystem
             var c = 0;
             foreach (var dir in baseddirs)
             {
-                if (World.IsEmpty(x + dir.Item1, y + dir.Item2) && 
-                    World.W.GetPlayersFromPos(x + dir.Item1, y + dir.Item2).Count == 0 
-                    && !World.isAlive(x + -dir.Item1, y + -dir.Item2) 
-                    && !World.GetProp(x + -dir.Item1, y + -dir.Item2).isEmpty 
-                    && World.GetProp(x + -dir.Item1, y + -dir.Item2).is_diggable 
-                    && World.GetProp(x + -dir.Item1, y + -dir.Item2).is_destructible)
+                if (World.IsEmpty(x + dir.x, y + dir.y) && 
+                    World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 
+                    && !World.isAlive(x + -dir.x, y + -dir.y) 
+                    && !World.GetProp(x + -dir.x, y + -dir.y).isEmpty 
+                    && World.GetProp(x + -dir.x, y + -dir.y).is_diggable 
+                    && World.GetProp(x + -dir.x, y + -dir.y).is_destructible)
                 {
-                    World.SetCell(x + dir.Item1, y + dir.Item2, World.GetCell(x + -dir.Item1, y + -dir.Item2));
-                    World.SetDurability(x + dir.Item1, y + dir.Item2, World.GetProp(x + dir.Item1, y + dir.Item2).durability * mod);
+                    World.SetCell(x + dir.x, y + dir.y, World.GetCell(x + -dir.x, y + -dir.y));
+                    World.SetDurability(x + dir.x, y + dir.y, World.GetProp(x + dir.x, y + dir.y).durability * mod);
                     c++;
                 }
             }
@@ -230,10 +230,10 @@ namespace MinesServer.GameShit.WorldSystem
             }
             foreach (var i in baseddirs)
             {
-                if (World.IsEmpty(x + i.Item1, y + i.Item2) && World.W.GetPlayersFromPos(x + i.Item1, y + i.Item2).Count == 0)
+                if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
                 {
-                    World.SetCell(x + i.Item1, y + i.Item2, (byte)CellType.Red);
-                    World.SetDurability(x + i.Item1, y + i.Item2, 3 * mod);
+                    World.SetCell(x + i.x, y + i.y, (byte)CellType.Red);
+                    World.SetDurability(x + i.x, y + i.y, 3 * mod);
                     c++;
                 }
             }
@@ -261,10 +261,10 @@ namespace MinesServer.GameShit.WorldSystem
             }
             foreach (var i in baseddirs)
             {
-                if (World.IsEmpty(x + i.Item1, y + i.Item2) && World.W.GetPlayersFromPos(x + i.Item1, y + i.Item2).Count == 0)
+                if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
                 {
-                    World.SetCell(x + i.Item1, y + i.Item2, (byte)CellType.Violet);
-                    World.SetDurability(x + i.Item1, y + i.Item2, 2 * mod);
+                    World.SetCell(x + i.x, y + i.y, (byte)CellType.Violet);
+                    World.SetDurability(x + i.x, y + i.y, 2 * mod);
                     c++;
                 }
             }
