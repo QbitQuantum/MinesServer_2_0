@@ -27,7 +27,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))
                         {
-                            new Teleport(coord.x, coord.y - 2, p.id).Build();
+                            new Teleport(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -40,7 +40,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 6, -2, 3, coord.x, coord.y, p))
                         {
-                            new Resp(coord.x, coord.y - 2, p.id).Build();
+                            new Resp(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -53,7 +53,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(1, 1, 1, 1, coord.x, coord.y, p))
                         {
-                            new Spot(coord.x, coord.y - 2, p.id).Build();
+                            new Spot(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -66,7 +66,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 2, -3, 4, coord.x, coord.y, p))
                         {
-                            new Up(coord.x, coord.y - 2, p.id).Build();
+                            new Up(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -79,7 +79,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-3, 3, -3, 3, coord.x, coord.y, p))
                         {
-                            new Market(coord.x, coord.y - 2, p.id).Build();
+                            new Market(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -92,7 +92,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(1, 1, 1, 1, coord.x, coord.y, p))
                         {
-                            new NC(coord.x, coord.y - 2, p.id).Build();
+                            new NC(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -146,7 +146,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         Console.WriteLine(coord);
                         if (World.W.CanBuildPack(-2, 2, -2, 2, coord.x, coord.y, p))
                         {
-                            new Crafter(coord.x, coord.y - 2, p.id).Build();
+                            new Crafter(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;
@@ -173,7 +173,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var c = World.AccessGun(coord.x,coord.y,p.cid);
                         if (p.clan != null && c.access && c.anygun)
                         {
-                            var Gate = new Gate(coord.x,coord.y - 2, p.cid);
+                            var Gate = new Gate(coord.x,coord.y, p.cid);
                             Gate.Build();
                             using var db = new DataBase();
                             db.gates.Add(Gate);
@@ -189,7 +189,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         var coord = p.GetDirCord(true);
                         var ch = World.W.GetChunk(coord.x,coord.y);
-                        int SearchCoord = (coord.x - ch.WorldX + ((coord.y - 2 - ch.WorldY) * 32));
+                        int SearchCoord = (coord.x - ch.WorldX + ((coord.y - ch.WorldY) * 32));
                         if (ch.packs.TryGetValue(SearchCoord, out var pack))
                         {
                             if (pack == null)
@@ -213,7 +213,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         var coord = p.GetDirCord(true);
                         if (World.W.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))
                         {
-                            new Storage(coord.x, coord.y - 2, p.id).Build();
+                            new Storage(coord.x, coord.y, p.id).Build();
                             return true;
                         }
                         return false;

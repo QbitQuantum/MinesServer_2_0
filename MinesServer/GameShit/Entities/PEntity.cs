@@ -118,8 +118,8 @@ namespace MinesServer.GameShit.Entities
             var y = (this.y + (dir == 0 ? 1 : dir == 2 ? -1 : 0));
             if (pack)
             {
-                x = (this.x + (dir == 3 ? 2 : dir == 1 ? -2 : 0));
-                y = (this.y + (dir == 0 ? 2 : dir == 2 ? -2 : 0));
+                x = (this.x + (dir == 3 ? 3 : dir == 1 ? -3 : 0));
+                y = (this.y + (dir == 0 ? 3 : dir == 2 ? -3 : 0));
             }
             return (x, y);
         }
