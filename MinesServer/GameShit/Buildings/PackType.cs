@@ -21,5 +21,6 @@
         BlackCircle = 'I',
         Mayak = 'Z',
         Clans = 'c',
+        Bomb = 'B',
     }
 }

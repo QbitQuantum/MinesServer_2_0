@@ -89,16 +89,16 @@ namespace MinesServer.GameShit.Consumables
         }
         public static bool Boom(Player player)
         {
-            var d = player.GetDirCord();
-            int x = d.x, y = d.y;
+            var (x, y) = player.GetDirCord();
+
             if (!World.AccessGun(x, y, player.cid).access) return false;
-            var ch = World.W.GetChunk(x, y);
-            ch.SendPack('B', x, y, 0, 0);
+            
+            var boom = new Bomb(player.id, x, y, BombType.PlasmaBomb);
+            boom.Build();
 
             // Запланировать взрыв через 1 секунду
             World.ScheduleAction(TimeSpan.FromSeconds(1), () =>
             {
-                // Всё выполняется в основном игровом потоке!
                 for (int dx = -4; dx <= 4; dx++)
                 {
                     for (int dy = -4; dy <= 4; dy++)
@@ -134,18 +134,18 @@ namespace MinesServer.GameShit.Consumables
                         }
                     }
                 }
-                ch.SendDirectedFx(1, x, y, 3, 0, 0);
-                ch.ClearPack(x, y);
+                boom.Destroy(player);
+                World.W.SendDirectedFx(1, x, y, 3, 0, 0);
             });
             return true;
         }
         public static bool Prot(Player player)
         {
-            var d = player.GetDirCord();
-            int x = d.x, y = d.y;
+            var (x, y) = player.GetDirCord();
+
             if (!World.AccessGun(x, y, player.cid).access) return false;
-            var ch = World.W.GetChunk(x, y);
-            ch.SendPack('B', x, y, 0, 1);
+            var boom = new Bomb(player.id, x, y, BombType.ProtonBomb);
+            boom.Build();
 
             World.ScheduleAction(TimeSpan.FromSeconds(2), () =>
             {
@@ -176,17 +176,17 @@ namespace MinesServer.GameShit.Consumables
                         }
                     }
                 }
-                ch.SendDirectedFx(1, x, y, 1, 0, 1);
-                ch.ClearPack(x, y);
+                boom.Destroy(player);
+                World.W.SendDirectedFx(1, x, y, 1, 0, 1);
             });
             return true;
         }
         public static bool Raz(Player player)
         {
-            var d = player.GetDirCord();
-            int x = d.x, y = d.y;
-            var ch = World.W.GetChunk(x, y);
-            ch.SendPack('B', x, y, 0, 2);
+            var (x, y) = player.GetDirCord();
+
+            var boom = new Bomb(player.id, x, y, BombType.DischargeBomb);
+            boom.Build();
 
             World.ScheduleAction(TimeSpan.FromSeconds(5), () =>
             {
@@ -221,11 +221,9 @@ namespace MinesServer.GameShit.Consumables
                         }
                     }
                 }
-
                 db.SaveChanges(); // сохраняем изменения
-
-                ch.SendDirectedFx(1, x, y, 9, 0, 2);
-                ch.ClearPack(x, y);
+                boom.Destroy(player);
+                World.W.SendDirectedFx(1, x, y, 9, 0, 2);
             });
 
             return true;
