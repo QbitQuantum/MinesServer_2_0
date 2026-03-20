@@ -421,9 +421,11 @@ namespace MinesServer.GameShit.WorldSystem
                 p.Build();
         }
 
-        public void DestroyCell(int x, int y, DestroyCellType t)
+        public void DestroyCell(int xx, int yy)
         {
-            SendCellToBots(WorldX + x, WorldY + y, this[x, y]);
+            int x = xx - WorldX;
+            int y = yy - WorldY;
+            SendCellToBots(xx, yy, this[x, y]);
         }
 
         public int PACKPOS(int x, int y) => x + y * ChunksW;

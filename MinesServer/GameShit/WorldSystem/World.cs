@@ -186,13 +186,18 @@ namespace MinesServer.GameShit.WorldSystem
             SetDurability(x, y, d - dmg);
             return false;
         }
+
+        private static void DestroyCell(int x, int y)
+        {
+            W.GetChunk(x, y).DestroyCell(x, y);
+        }
+
         public static void Destroy(int x, int y, DestroyCellType t = DestroyCellType.Cell)
         {
             if (!ValidCoord(x, y))
             {
                 return;
             }
-            var ch = W.GetChunk(x, y);
             switch (t)
             {
                 case DestroyCellType.Cell:
@@ -216,7 +221,7 @@ namespace MinesServer.GameShit.WorldSystem
                     }
                     break;
             }
-            ch.DestroyCell(x - ch.WorldX, y - ch.WorldY, t);
+            DestroyCell(x, y);
         }
         public static float GetDurability(int x, int y)
         {
