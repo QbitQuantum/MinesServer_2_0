@@ -187,23 +187,24 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     (int)Item.Disassembler,
                     (p) =>
                     {
-                        var coord = p.GetDirCord(true);
-                        var ch = World.W.GetChunk(coord.x,coord.y);
-                        int SearchCoord = (coord.x - ch.WorldX + ((coord.y - ch.WorldY) * 32));
-                        if (ch.packs.TryGetValue(SearchCoord, out var pack))
-                        {
-                            if (pack == null)
-                                return false;
-                            if (p.id == pack.ownerid || p.cid == pack.cid)
-                            {
-                                Player? player = p.id == pack.ownerid ?
-                                    p : DataBase.GetPlayer(pack.ownerid);
-                                if (player != null)
-                                    pack.Destroy(player);
-                                return true;
-                            }
-                        }
-                        return false;
+                        var (x, y) = p.GetDirCord(true);
+                        var pack = World.GetPack(x, y);
+
+                        if (pack == null)
+                            return false;
+
+                        if (p.id != pack.ownerid && p.cid != pack.cid)
+                            return false;
+
+                        Player? player = p.id == pack.ownerid ?
+                                p : DataBase.GetPlayer(pack.ownerid);
+
+                        if (player == null)
+                            return false;
+
+                        pack.Destroy(player);
+
+                        return true;
                     }
                 },
                 {
