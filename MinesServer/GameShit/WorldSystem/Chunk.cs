@@ -60,8 +60,8 @@ namespace MinesServer.GameShit.WorldSystem
         private DateTime notvisibleupd = ServerTime.Now;
         public bool updlasttick = false;
 
-        public int WorldX => pos.x * ChunkWidth;
-        public int WorldY => pos.y * ChunkHeight;
+        private int WorldX => pos.x * ChunkWidth;
+        private int WorldY => pos.y * ChunkHeight;
 
         private bool shouldbeloaded => ShouldBeLoadedBots() || ContainsAlive || updlasttick;
 
