@@ -306,19 +306,18 @@ namespace MinesServer.GameShit.WorldSystem
 
         private void UpdateAlive()
         {
-            var cellsToUpdate = new List<(int x, int y, byte cell)>();
+            var cellsToUpdate = new List<(int x, int y)>();
 
             for (int y = 0; y < ChunkWidth; y++)
             {
                 for (int x = 0; x < ChunkHeight; x++)
                 {
-                    byte cell = this[x, y];
                     if (World.isAlive(x, y))
-                        cellsToUpdate.Add((WorldX + x, WorldY + y, cell));
+                        cellsToUpdate.Add((WorldX + x, WorldY + y));
                 }
             }
 
-            foreach (var (worldX, worldY, cell) in cellsToUpdate)
+            foreach (var (worldX, worldY) in cellsToUpdate)
             {
                 if (World.isAlive(worldX, worldY) && Physics.Alive(worldX, worldY))
                     updlasttick = true;
