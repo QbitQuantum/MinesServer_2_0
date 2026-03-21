@@ -221,7 +221,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     }
                 },
                 {
-                    (int)Item.Hypnoskal,
+                    (int)Item.GeopackHypnoskal,
                     (p) => ShitClass.Geopack(34,p)
                 },
                 {

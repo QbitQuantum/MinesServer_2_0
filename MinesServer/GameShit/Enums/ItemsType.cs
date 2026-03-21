@@ -37,7 +37,7 @@ namespace MinesServer.Enums
         LevelUpgradeX3 = 31,
         FreeUpgrade = 32,
         DiggingSpeedX4 = 33,
-        Hypnoskal = 34,
+        GeopackHypnoskal = 34,
         Polymer = 35,
         NanoBot = 36,
         Accumulator = 37,
@@ -94,7 +94,7 @@ namespace MinesServer.Enums
             [Item.LevelUpgradeX3] = "Прокачка уровня x3",
             [Item.FreeUpgrade] = "Бесплатная прокачка",
             [Item.DiggingSpeedX4] = "Ускорение копания x4",
-            [Item.Hypnoskal] = "Гипноскал",
+            [Item.GeopackHypnoskal] = "Геопак с гипноскалом",
             [Item.Polymer] = "Полимер",
             [Item.NanoBot] = "Нано-бот",
             [Item.Accumulator] = "Аккумулятор",
@@ -140,7 +140,7 @@ namespace MinesServer.Enums
                 item == Item.GeopackBlackSkal ||
                 item == Item.GeopackRedSkal ||
                 item == Item.GeopackRainbow ||
-                item == Item.Hypnoskal;
+                item == Item.GeopackHypnoskal;
         }
 
         /// <summary>
