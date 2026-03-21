@@ -691,9 +691,9 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
-        public void SendDirectedFx(int fx, int x, int y, int dir, int bid = 0, int color = 0)
+        public void SendDirectedFx(int fx, int x, int y, int dir, int color = 0)
         {
-            GetChunk(x, y).SendDirectedFx(fx, x, y, dir, bid, color);
+            GetChunk(x, y).SendDirectedFx(fx, x, y, dir, color);
         }
 
         public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)

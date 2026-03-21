@@ -135,7 +135,7 @@ namespace MinesServer.GameShit.Consumables
                     }
                 }
                 boom.Destroy(player);
-                World.W.SendDirectedFx(1, x, y, 3, 0, 0);
+                World.W.SendDirectedFx(1, x, y, 3, 0);
             });
             return true;
         }
@@ -177,7 +177,7 @@ namespace MinesServer.GameShit.Consumables
                     }
                 }
                 boom.Destroy(player);
-                World.W.SendDirectedFx(1, x, y, 1, 0, 1);
+                World.W.SendDirectedFx(1, x, y, 1, 1);
             });
             return true;
         }
@@ -223,7 +223,7 @@ namespace MinesServer.GameShit.Consumables
                 }
                 db.SaveChanges(); // сохраняем изменения
                 boom.Destroy(player);
-                World.W.SendDirectedFx(1, x, y, 9, 0, 2);
+                World.W.SendDirectedFx(1, x, y, 9, 2);
             });
 
             return true;
