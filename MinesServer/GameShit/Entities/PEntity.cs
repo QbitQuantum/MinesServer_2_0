@@ -95,10 +95,7 @@ namespace MinesServer.GameShit.Entities
         {
             // TODO
         }
-        public virtual void SpecialAction(ActionType Type)
-        {
-            // TODO
-        }
+        public virtual void SpecialAction(ActionType Action) { }
         public virtual void InverseDirection(ActionType Action)
         {
             switch (Action)

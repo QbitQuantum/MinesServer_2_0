@@ -835,5 +835,53 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         #endregion
+
+        public override void SpecialAction(ActionType Action)
+        {
+            switch (Action)
+            {
+                case ActionType.BOOM:
+                    inventory.selected = (int)Item.PlasmaBomb;
+                    inventory.Use(this);
+                    break;
+                case ActionType.DISCHARGE:
+                    inventory.selected = (int)Item.DefenseCharge;
+                    inventory.Use(this);
+                    break;
+                case ActionType.PROTON:
+                    inventory.selected = (int)Item.ProtonBomb;
+                    inventory.Use(this);
+                    break;
+                case ActionType.VB:
+                    Build("V");
+                    break;
+                case ActionType.Geopack:
+                    inventory.selected = (int)Item.Geopack;
+                    inventory.Use(this);
+                    break;
+                case ActionType.ZZ:
+                    inventory.selected = (int)Item.DefenseCharge;
+                    inventory.Use(this);
+                    break;
+                case ActionType.C190:
+                    inventory.selected = (int)Item.C190;
+                    inventory.Use(this);
+                    break;
+                case ActionType.Up:
+                    // TODO: Прокачка всех скилов
+                    break;
+                case ActionType.Craft:
+                // TODO: Создание крафтов
+                case ActionType.Nano:
+                    inventory.selected = (int)Item.NanoBot;
+                    inventory.Use(this);
+                    break;
+                case ActionType.Rembot:
+                    inventory.selected = (int)Item.RepairBot;
+                    inventory.Use(this);
+                    break;
+                default: break;
+            }
+        }
     }
 }

@@ -244,6 +244,30 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     (int)Item.GeopackRainbow,
                     (p) => ShitClass.Geopack(46,p)
                 },
+                {
+                    (int)Item.DefenseCharge,
+                    (p) =>
+                    {
+                        // TODO: Реализовать
+                        return false;
+                    }
+                },
+                {
+                    (int)Item.NanoBot,
+                    (p) =>
+                    {
+                        // TODO: Реализовать
+                        return false;
+                    }
+                },
+                {
+                    (int)Item.RepairBot,
+                    (p) =>
+                    {
+                        // TODO: Реализовать
+                        return false;
+                    }
+                },
             };
         }
         public int this[int index]
