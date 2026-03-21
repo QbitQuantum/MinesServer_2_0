@@ -301,7 +301,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             var selectedItem = ItemTypeExt.GetItemById(selected);
 
-            if (DateTime.Now - time >= TimeSpan.FromMilliseconds(400))
+            if (DateTime.Now - time >= TimeSpan.FromMilliseconds(400) || p.programsData.ProgRunning)
             {
                 if (typeditems.ContainsKey(selected) && !World.ContainsPack(x, y, out var pack)
                     && (World.GetProp(x, y).can_place_over || selectedItem.CanBePlacedAnywhere())
