@@ -64,6 +64,21 @@ namespace MinesServer.GameShit.Entities
                 World.SetDurability(x, y, World.isCry(x, y) ? 0 : Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(cplaceable).durability);
             }
         }
+        private void InverseDirection(DirectionType Direction)
+        {
+            switch (Direction)
+            {
+                case DirectionType.Down:
+                    dir = (int)DirectionType.Up; break;
+                case DirectionType.Left:
+                    dir = (int)DirectionType.Right; break;
+                case DirectionType.Up:
+                    dir = (int)DirectionType.Down; break;
+                case DirectionType.Right:
+                    dir = (int)DirectionType.Left; break;
+                default: break;
+            }
+        }
         public virtual void Beep()
         {
             // TODO
@@ -72,9 +87,20 @@ namespace MinesServer.GameShit.Entities
         {
             // TODO
         }
-        public virtual void InverseDirection(ActionType Type)
+        public virtual void InverseDirection(ActionType Action)
         {
-            // TODO
+            switch (Action)
+            {
+                case ActionType.InvDirDown:
+                    InverseDirection(DirectionType.Down); break;
+                case ActionType.InvDirLeft:
+                    InverseDirection(DirectionType.Left); break;
+                case ActionType.InvDirUp:
+                    InverseDirection(DirectionType.Up); break;
+                case ActionType.InvDirRight:
+                    InverseDirection(DirectionType.Right); break;
+                default: break;
+            }
         }
         public virtual void RestartProgram()
         {
