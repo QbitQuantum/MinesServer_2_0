@@ -848,13 +848,5 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         #endregion
-
-        #region Helpers
-
-        private (int x, int y) GetDirCord()
-        {
-            return base.GetDirCord();
-        }
-        #endregion
     }
 }
