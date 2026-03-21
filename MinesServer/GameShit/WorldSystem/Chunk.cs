@@ -51,7 +51,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         public ConcurrentDictionary<int, Player> bots { get; } = new();
         public (int x, int y) pos { get; }
-        public bool[] packsprop { get; private set; }
+        private bool[] packsprop { get; set; }
         public Dictionary<int, Pack> packs { get; } = new();
 
         private bool ContainsAlive = false;
