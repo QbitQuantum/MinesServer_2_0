@@ -185,7 +185,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         #region Отправка сообщений
 
-        public void SendDirectedFx(int fx, int x, int y, int dir, int bid = 0, int color = 0)
+        public void SendDirectedFx(int fx, int x, int y, int dir, int color = 0)
         {
             foreach (var chunk in GetNeighboringChunks())
             {
