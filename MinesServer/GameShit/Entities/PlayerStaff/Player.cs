@@ -332,17 +332,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return false;
         }
 
-        private void UpdateDirection(int x, int y, DirectionType Direction = DirectionType.Unknown)
-        {
-            if (Direction == DirectionType.Unknown || this.x != x || this.y != y)
-                dir =
-                    this.x > x ? (int)DirectionType.Left :
-                    this.x < x ? (int)DirectionType.Right :
-                    this.y > y ? (int)DirectionType.Up : (int)DirectionType.Down;
-            else
-                dir = (int)Direction;
-        }
-
         private bool IsGateBlocking(int x, int y)
         {
             return World.ContainsPack(x, y, out var pack) &&

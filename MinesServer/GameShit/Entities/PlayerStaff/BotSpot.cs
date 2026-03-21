@@ -122,17 +122,6 @@ public class BotSpot : PEntity
         }
     }
 
-    private void UpdateDirection(int x, int y, DirectionType Direction)
-    {
-        if (Direction == DirectionType.Unknown || this.x != x || this.y != y)
-            dir =
-                this.x > x ? (int)DirectionType.Left :
-                this.x < x ? (int)DirectionType.Right :
-                this.y > y ? (int)DirectionType.Up : (int)DirectionType.Down;
-        else
-            dir = (int)Direction;
-    }
-
     public override bool Move(int x, int y, DirectionType Direction = DirectionType.Unknown)
     {
         if (!World.ValidCoord(x, y))
