@@ -654,7 +654,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.PROTON:
                 case ActionType.VB:
                 case ActionType.Geopack:
-                case ActionType.ZM:
+                case ActionType.ZZ:
                 case ActionType.C190:
                 case ActionType.Poly:
                 case ActionType.Up:

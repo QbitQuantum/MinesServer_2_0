@@ -215,7 +215,7 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.PROTON:
                     case ActionType.VB:
                     case ActionType.Geopack:
-                    case ActionType.ZM:
+                    case ActionType.ZZ:
                     case ActionType.C190:
                     case ActionType.Poly:
                     case ActionType.Up:
@@ -369,7 +369,7 @@ namespace MinesServer.GameShit.Programmator
                 165 => ActionType.VB,                      // ACTION_WB
                 166 => ActionType.RunOnRespawn,
                 167 => ActionType.Geopack,                  // ACTION_GEOPACK
-                168 => ActionType.ZM,                       // ACTION_ZM
+                168 => ActionType.ZZ,                       // ACTION_ZZ
                 169 => ActionType.C190,                     // ACTION_C190
                 170 => ActionType.Poly,                      // ACTION_POLY
                 171 => ActionType.Up,                        // ACTION_UP
