@@ -210,9 +210,9 @@ namespace MinesServer.GameShit.Programmator
                         break;
 
                     // Специальные действия
-                    case ActionType.B1:
-                    case ActionType.B2:
-                    case ActionType.B3:
+                    case ActionType.BOOM:
+                    case ActionType.DISCHARGE:
+                    case ActionType.PROTON:
                     case ActionType.VB:
                     case ActionType.Geopack:
                     case ActionType.ZM:
@@ -363,9 +363,9 @@ namespace MinesServer.GameShit.Programmator
                 159 => ActionType.DisableAutoDig,
                 160 => ActionType.EnableAgression,
                 161 => ActionType.DisableAgression,
-                162 => ActionType.B1,                      // ACTION_B1
-                163 => ActionType.B2,                      // ACTION_B2
-                164 => ActionType.B3,                      // ACTION_B3
+                162 => ActionType.BOOM,                    // ACTION_BOOM
+                163 => ActionType.DISCHARGE,               // ACTION_DISCHARGE
+                164 => ActionType.PROTON,                  // ACTION_PROTON
                 165 => ActionType.VB,                      // ACTION_WB
                 166 => ActionType.RunOnRespawn,
                 167 => ActionType.Geopack,                  // ACTION_GEOPACK

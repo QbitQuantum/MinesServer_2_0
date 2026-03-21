@@ -649,9 +649,9 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 // === Специальные команды ===
-                case ActionType.B1:
-                case ActionType.B2:
-                case ActionType.B3:
+                case ActionType.BOOM:
+                case ActionType.DISCHARGE:
+                case ActionType.PROTON:
                 case ActionType.VB:
                 case ActionType.Geopack:
                 case ActionType.ZM:
