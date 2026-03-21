@@ -127,5 +127,18 @@ namespace MinesServer.Enums
         {
             return GetName(GetItemById(i));
         }
+        public static bool CanBePlacedAnywhere(this Item item)
+        {
+            // Геопаки (базовые цвета)
+            if (item >= Item.Geopack && item <= Item.GeopackCyan)
+                return true;
+
+            // Специальные предметы
+            return item == Item.C190 ||
+                   item == Item.Hypnoskal ||
+                   item == Item.GeopackBlackSkal ||
+                   item == Item.GeopackRedSkal ||
+                   item == Item.GeopackRainbow;
+        }
     }
 }

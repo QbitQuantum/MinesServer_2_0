@@ -273,16 +273,21 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public DateTime time = DateTime.Now;
         public void Use(Player p)
         {
+            var (x, y) = p.GetDirCord();
+
+            var selectedItem = ItemTypeExt.GetItemById(selected);
+
             if (DateTime.Now - time >= TimeSpan.FromMilliseconds(400))
             {
-                if (typeditems.ContainsKey(selected) && !World.ContainsPack(p.GetDirCord().x, p.GetDirCord().y, out var pack)
-                    && (World.GetProp(p.GetDirCord().x, p.GetDirCord().y).can_place_over
-                    || selected is 40 or (>=10and<17) or 34 or 42 or 43 or 46) && this[selected] > 0)
+                if (typeditems.ContainsKey(selected) && !World.ContainsPack(x, y, out var pack)
+                    && (World.GetProp(x, y).can_place_over || selectedItem.CanBePlacedAnywhere())
+                    && this[selected] > 0)
                 {
                     if (typeditems[selected](p))
                     {
                         this[selected]--;
-                        if (this[selected] == 0)miniq.Remove(selected);
+                        if (this[selected] == 0)
+                            miniq.Remove(selected);
                         p.SendInventory();
                     }
                 }
