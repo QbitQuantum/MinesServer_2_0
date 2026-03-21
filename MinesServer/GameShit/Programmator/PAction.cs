@@ -231,38 +231,38 @@ namespace MinesServer.GameShit.Programmator
                 // === Вращение ===
                 case ActionType.RotateDown:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 0);
+                    p.Move(p.x, p.y, DirectionType.Down);
                     break;
 
                 case ActionType.RotateUp:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 2);
+                    p.Move(p.x, p.y, DirectionType.Up);
                     break;
 
                 case ActionType.RotateLeft:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 1);
+                    p.Move(p.x, p.y, DirectionType.Left);
                     break;
 
                 case ActionType.RotateRight:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 3);
+                    p.Move(p.x, p.y, DirectionType.Right);
                     break;
 
                 case ActionType.RotateLeftRelative:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, (p.dir + 3) % 4);
+                    p.Move(p.x, p.y, DirectionTypeExt.ToDirection((p.dir + 3) % 4));
                     break;
 
                 case ActionType.RotateRightRelative:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, (p.dir + 1) % 4);
+                    p.Move(p.x, p.y, DirectionTypeExt.ToDirection((p.dir + 1) % 4));
                     break;
 
                 case ActionType.RotateRandom:
                     delay = p.ServerPause;
                     var rand = new Random(Guid.NewGuid().GetHashCode());
-                    p.Move(p.x, p.y, rand.Next(4));
+                    p.Move(p.x, p.y, DirectionTypeExt.ToDirection(rand.Next(4)));
                     break;
 
                 // === Действия ===
@@ -331,7 +331,7 @@ namespace MinesServer.GameShit.Programmator
                                 return true;
                             }
 
-                            p.Move(p.x, p.y, kv.Key);
+                            p.Move(p.x, p.y, DirectionTypeExt.ToDirection(kv.Key));
                             delay = p.ServerPause;
                             return true;
                         }

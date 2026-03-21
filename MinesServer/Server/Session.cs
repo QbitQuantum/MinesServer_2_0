@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit;
 using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network;
@@ -211,7 +212,7 @@ namespace MinesServer.Server
             player.inventory.Choose(incl.selection.Value, player);
         }
         private void DigHandler(TYPacket parent, XdigPacket packet) => player?.TryAct(() => {
-            player.Move(player.x, player.y, packet.Direction);
+            player.Move(player.x, player.y, DirectionTypeExt.ToDirection(packet.Direction));
             player.Bz();
         }, 200);
 
@@ -219,7 +220,7 @@ namespace MinesServer.Server
         private void BuildHandler(TYPacket parent, XbldPacket packet) => player?.TryAct(() => player.Build(packet.BlockType), 200);
         
         private void AutoDiggHandler(TYPacket parent, TADGPacket packet) => SendU(new AutoDiggPacket(player.autoDig = !player.autoDig));
-        private void MoveHandler(TYPacket parent, XmovPacket packet) => player?.TryAct(() => player.Move((int)parent.X, (int)parent.Y, packet.Direction), player.ServerPause);
+        private void MoveHandler(TYPacket parent, XmovPacket packet) => player?.TryAct(() => player.Move((int)parent.X, (int)parent.Y, DirectionTypeExt.ToDirection( packet.Direction)), player.ServerPause);
         
         private void WhoisHandler(TYPacket parent, WhoiPacket packet) => SendU(new NickListPacket(packet.BotIds.ToDictionary(x => x, x => DataBase.GetPlayer(x)?.name)));
         private void LocalChatHandler(TYPacket parent, LoclPacket packet)

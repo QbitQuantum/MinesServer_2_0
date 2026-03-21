@@ -297,7 +297,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region Movement
 
-        public override bool Move(int x, int y, int dir = -1)
+        public override bool Move(int x, int y, DirectionType Direction = DirectionType.Unknown)
         {
             if (!World.ValidCoord(x, y) || (win != null && HasActiveProgram))
             {
@@ -305,7 +305,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return false;
             }
 
-            UpdateDirection(x, y, ref dir);
+            UpdateDirection(x, y, Direction);
 
             if (IsGateBlocking(x, y))
             {
@@ -319,7 +319,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return HandleObstacle();
             }
 
-            UpdatePosition(x, y, dir);
+            UpdatePosition(x, y);
 
             if (World.ContainsPack(x, y, out var pack) &&
                 (pack.cid == cid || pack.cid == 0) &&
@@ -332,17 +332,15 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return false;
         }
 
-        private void UpdateDirection(int x, int y, ref int dir)
+        private void UpdateDirection(int x, int y, DirectionType Direction = DirectionType.Unknown)
         {
-            if (dir > 9)
-                dir -= 10;
-
-            if (dir == -1 || this.x != x || this.y != y)
-            {
-                dir = this.x > x ? 1 : this.x < x ? 3 : this.y > y ? 2 : 0;
-            }
-
-            this.dir = dir;
+            if (Direction == DirectionType.Unknown || this.x != x || this.y != y)
+                dir =
+                    this.x > x ? (int)DirectionType.Left :
+                    this.x < x ? (int)DirectionType.Right :
+                    this.y > y ? (int)DirectionType.Up : (int)DirectionType.Down;
+            else
+                dir = (int)Direction;
         }
 
         private bool IsGateBlocking(int x, int y)
@@ -364,7 +362,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return false;
         }
 
-        private void UpdatePosition(int x, int y, int dir)
+        private void UpdatePosition(int x, int y)
         {
             if (Vector2.Distance(new Vector2(this.x, this.y), new Vector2(x, y)) < 1.2f)
                 skillslist.HandleExperience(this, SkillType.Movement, 1);
