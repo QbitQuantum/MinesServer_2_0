@@ -199,12 +199,12 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void SendFx(int x, int y, int fx)
         {
+            var packet = new HBPacket([new HBFXPacket(x, y, fx)]);
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(
-                        new HBPacket([new HBFXPacket(x, y, fx)]));
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
                 }
             }
         }
@@ -241,12 +241,12 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void ClearPack(int x, int y)
         {
+            var packet = new HBPacket([new HBPacksPacket(PACKPOS(x, y), [])]);
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(
-                        new HBPacket([new HBPacksPacket(PACKPOS(x, y), [])]));
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
                 }
             }
         }
