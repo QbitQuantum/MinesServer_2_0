@@ -220,7 +220,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
-        public void SendPack(char type, int x, int y, int cid, int off)
+        private void SendPack(char type, int x, int y, int cid, int off)
         {
             if (type == (char)PackType.None)
                 return;
