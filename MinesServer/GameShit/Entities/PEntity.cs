@@ -90,7 +90,7 @@ namespace MinesServer.GameShit.Entities
         public abstract bool Heal();
         public abstract void Hurt(int num, DamageTypePlayer type = DamageTypePlayer.Pure);
         public abstract void Death();
-        public abstract bool Move(int x, int y, int dir = -1,bool prog = false);
+        public abstract bool Move(int x, int y, int dir = -1);
         public abstract void Update();
         public long GetBox(int x, int y)
         {
