@@ -127,18 +127,28 @@ namespace MinesServer.Enums
         {
             return GetName(GetItemById(i));
         }
+
+        /// <summary>
+        /// Проверяет, является ли предмет геопаком любого типа
+        /// </summary>
+        public static bool IsGeopack(this Item item)
+        {
+            return
+                // Базовые цветные геопаки (ID: 10-16)
+                (item >= Item.Geopack && item <= Item.GeopackCyan) ||
+                // Специальные геопаки
+                item == Item.GeopackBlackSkal ||
+                item == Item.GeopackRedSkal ||
+                item == Item.GeopackRainbow ||
+                item == Item.Hypnoskal;
+        }
+
+        /// <summary>
+        /// Проверяет, можно ли разместить предмет в любом месте (игнорируя can_place_over)
+        /// </summary>
         public static bool CanBePlacedAnywhere(this Item item)
         {
-            // Геопаки (базовые цвета)
-            if (item >= Item.Geopack && item <= Item.GeopackCyan)
-                return true;
-
-            // Специальные предметы
-            return item == Item.C190 ||
-                   item == Item.Hypnoskal ||
-                   item == Item.GeopackBlackSkal ||
-                   item == Item.GeopackRedSkal ||
-                   item == Item.GeopackRainbow;
+            return IsGeopack(item) || item == Item.C190;
         }
     }
 }
