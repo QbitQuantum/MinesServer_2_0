@@ -299,7 +299,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override bool Move(int x, int y, DirectionType Direction = DirectionType.Unknown)
         {
-            if (!World.ValidCoord(x, y) || (win != null && HasActiveProgram))
+            if (!World.ValidCoord(x, y) || win != null || HasActiveProgram)
             {
                 tp(this.x, this.y);
                 return false;
