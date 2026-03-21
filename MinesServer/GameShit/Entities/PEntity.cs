@@ -80,13 +80,8 @@ namespace MinesServer.GameShit.Entities
         {
             // TODO
         }
-        public virtual bool HasGun()
-        {
-            var pack = World.GetPack(x, y);
-            return pack == null && pack is Gun;
-        }
-        public virtual bool HasGun() => World.GetPack(x, y) is Gun;
 
+        public virtual bool HasGun() => World.GetPack(x, y) is Gun;
         public abstract bool Heal();
         public abstract void Hurt(int num, DamageTypePlayer type = DamageTypePlayer.Pure);
         public abstract void Death();
