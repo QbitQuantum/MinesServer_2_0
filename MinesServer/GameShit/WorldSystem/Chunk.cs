@@ -227,7 +227,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             // Кэшируем пакет, так как он одинаков для всех получателей
             var packet = new HBPacket([
-                new HBPacksPacket(PACKPOS(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])
+                new HBPacksPacket(GetPackKey(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])
             ]);
 
             foreach (var chunk in GetNeighboringChunks())
@@ -241,7 +241,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void ClearPack(int x, int y)
         {
-            var packet = new HBPacket([new HBPacksPacket(PACKPOS(x, y), [])]);
+            var packet = new HBPacket([new HBPacksPacket(GetPackKey(x, y), [])]);
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
@@ -427,7 +427,7 @@ namespace MinesServer.GameShit.WorldSystem
             SendCellToBots(xx, yy, this[x, y]);
         }
 
-        public int PACKPOS(int x, int y) => x + y * ChunksW;
+        private static int GetPackKey(int x, int y) => x + y * ChunksW;
 
         public IHubPacket[] pPakcs()
         {
@@ -435,7 +435,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             foreach (var p in packs.Values.Where(p => p.type != PackType.None))
             {
-                int pos = PACKPOS(p.x, p.y);
+                int pos = GetPackKey(p.x, p.y);
                 if (!packGroups.ContainsKey(pos))
                     packGroups[pos] = new List<HBPack>();
 
@@ -498,7 +498,7 @@ namespace MinesServer.GameShit.WorldSystem
         public IEnumerable<IHubPacket> PackEmptyPacket()
         {
             foreach (var pack in packs.Values)
-                yield return new HBPacksPacket(PACKPOS(pack.x, pack.y), []);
+                yield return new HBPacksPacket(GetPackKey(pack.x, pack.y), []);
         }
 
         #endregion
