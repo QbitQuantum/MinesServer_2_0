@@ -18,9 +18,9 @@ namespace MinesServer.GameShit.Enums
         {
             return dir switch
             {
-                0 => DirectionType.Up,
+                0 => DirectionType.Down,
                 1 => DirectionType.Left,
-                2 => DirectionType.Down,
+                2 => DirectionType.Up,
                 3 => DirectionType.Right,
                 _ => DirectionType.Unknown
             };
