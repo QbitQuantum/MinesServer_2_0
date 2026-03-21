@@ -297,9 +297,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region Movement
 
-        public override bool Move(int x, int y, int dir = -1, bool prog = false)
+        public override bool Move(int x, int y, int dir = -1)
         {
-            if (!World.ValidCoord(x, y) || (win != null && !prog))
+            if (!World.ValidCoord(x, y) || (win != null && HasActiveProgram))
             {
                 tp(this.x, this.y);
                 return false;
@@ -323,7 +323,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             if (World.ContainsPack(x, y, out var pack) &&
                 (pack.cid == cid || pack.cid == 0) &&
-                !prog)
+                !HasActiveProgram)
             {
                 win = pack.GUIWin(this);
                 SendWindow();

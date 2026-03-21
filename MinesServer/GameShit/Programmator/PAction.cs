@@ -199,70 +199,70 @@ namespace MinesServer.GameShit.Programmator
                 // === Движение ===
                 case ActionType.MoveDown:
                     delay = p.ServerPause;
-                    if (p.Move(p.x, p.y + 1, prog: true))
+                    if (p.Move(p.x, p.y + 1))
                         delay += 200;
                     break;
 
                 case ActionType.MoveUp:
                     delay = p.ServerPause;
-                    if (p.Move(p.x, p.y - 1, prog: true))
+                    if (p.Move(p.x, p.y - 1))
                         delay += 200;
                     break;
 
                 case ActionType.MoveRight:
                     delay = p.ServerPause;
-                    if (p.Move(p.x + 1, p.y, prog: true))
+                    if (p.Move(p.x + 1, p.y))
                         delay += 200;
                     break;
 
                 case ActionType.MoveLeft:
                     delay = p.ServerPause;
-                    if (p.Move(p.x - 1, p.y, prog: true))
+                    if (p.Move(p.x - 1, p.y))
                         delay += 200;
                     break;
 
                 case ActionType.MoveForward:
                     delay = p.ServerPause;
                     var forward = p.GetDirCord();
-                    if (p.Move(forward.x, forward.y, prog: true))
+                    if (p.Move(forward.x, forward.y))
                         delay += 200;
                     break;
 
                 // === Вращение ===
                 case ActionType.RotateDown:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 0, true);
+                    p.Move(p.x, p.y, 0);
                     break;
 
                 case ActionType.RotateUp:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 2, true);
+                    p.Move(p.x, p.y, 2);
                     break;
 
                 case ActionType.RotateLeft:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 1, true);
+                    p.Move(p.x, p.y, 1);
                     break;
 
                 case ActionType.RotateRight:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, 3, true);
+                    p.Move(p.x, p.y, 3);
                     break;
 
                 case ActionType.RotateLeftRelative:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, (p.dir + 3) % 4, true);
+                    p.Move(p.x, p.y, (p.dir + 3) % 4);
                     break;
 
                 case ActionType.RotateRightRelative:
                     delay = p.ServerPause;
-                    p.Move(p.x, p.y, (p.dir + 1) % 4, true);
+                    p.Move(p.x, p.y, (p.dir + 1) % 4);
                     break;
 
                 case ActionType.RotateRandom:
                     delay = p.ServerPause;
                     var rand = new Random(Guid.NewGuid().GetHashCode());
-                    p.Move(p.x, p.y, rand.Next(4), true);
+                    p.Move(p.x, p.y, rand.Next(4));
                     break;
 
                 // === Действия ===

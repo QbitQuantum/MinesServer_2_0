@@ -122,7 +122,7 @@ public class BotSpot : PEntity
         }
     }
 
-    public override bool Move(int x, int y, int dir = -1, bool prog = false)
+    public override bool Move(int x, int y, int dir = -1)
     {
         if (!World.ValidCoord(x, y))
             return false;
