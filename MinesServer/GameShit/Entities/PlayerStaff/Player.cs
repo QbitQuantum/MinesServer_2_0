@@ -845,7 +845,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     inventory.Use(this);
                     break;
                 case ActionType.DISCHARGE:
-                    inventory.selected = (int)Item.DefenseCharge;
+                    inventory.selected = (int)Item.DischargeBomb;
                     inventory.Use(this);
                     break;
                 case ActionType.PROTON:
