@@ -316,7 +316,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var cell = World.GetCell(x, y);
             if (!World.GetProp(cell).isEmpty)
             {
-                return HandleObstacle(dir);
+                return HandleObstacle();
             }
 
             UpdatePosition(x, y, dir);
@@ -352,7 +352,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                    pack.cid != cid;
         }
 
-        private bool HandleObstacle(int dir)
+        private bool HandleObstacle()
         {
             if (autoDig)
             {
