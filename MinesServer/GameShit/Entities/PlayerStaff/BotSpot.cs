@@ -127,9 +127,6 @@ public class BotSpot : PEntity
         if (!World.ValidCoord(x, y))
             return false;
 
-        if (dir > 9)
-            dir -= 10;
-
         if (dir == -1 || this.x != x || this.y != y)
             this.dir = this.x > x ? 1 : this.x < x ? 3 : this.y > y ? 2 : 0;
         else
