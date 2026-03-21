@@ -354,7 +354,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private bool HandleObstacle(int dir)
         {
-            if (dir == -1 && autoDig)
+            if (autoDig)
             {
                 Bz();
                 return true;
