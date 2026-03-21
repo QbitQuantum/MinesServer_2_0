@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Up : PackDamage
+    public sealed class Up : PackDamage
     {
         #region fields
         public override int PackId => 2;

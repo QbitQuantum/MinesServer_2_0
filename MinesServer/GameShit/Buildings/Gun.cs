@@ -13,7 +13,7 @@ using System.Numerics;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Gun : PackCharge
+    public sealed class Gun : PackCharge
     {
         #region fields
         public override PackType type => PackType.Gun;

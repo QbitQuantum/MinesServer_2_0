@@ -9,7 +9,7 @@ namespace MinesServer.GameShit.Buildings
 {
     // TODO: Установка чувствуется тяжелой
     // Понять почему
-    public class Bomb : Pack
+    public sealed class Bomb : Pack
     {
         #region fields
         private readonly BombType Bombtype = BombType.PlasmaBomb;

@@ -13,7 +13,7 @@ namespace MinesServer.GameShit.Buildings
     /// <summary>
     /// Crafter building. Stores a single timed crafting job and exposes a clean crafting UI.
     /// </summary>
-    public class Crafter : PackDamage
+    public sealed class Crafter : PackDamage
     {
         private const int CrafterPackId = 24;
         // EF Core requires a parameterless constructor

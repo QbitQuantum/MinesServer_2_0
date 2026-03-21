@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Gate : Pack
+    public sealed class Gate : Pack
     {
         public override PackType type => PackType.None;
         public override int PackId => 27;

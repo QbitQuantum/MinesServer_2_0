@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Spot : PackDamage
+    public sealed class Spot : PackDamage
     {
         public override PackType type => PackType.Spot;
         #region Shit

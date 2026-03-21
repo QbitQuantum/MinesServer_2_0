@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 namespace MinesServer.GameShit.Buildings
 {
-    public class Resp : PackCharge
+    public sealed class Resp : PackCharge
     {
         #region fields
         public override PackType type => PackType.Resp;

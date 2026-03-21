@@ -81,7 +81,7 @@ namespace MinesServer.GameShit.Buildings
             return elements;
         }
     }
-    public class Teleport : PackCharge
+    public sealed class Teleport : PackCharge
     {
         public override PackType type => PackType.Teleport;
         public int cost { get; set; }

@@ -12,7 +12,7 @@ using MinesServer.Server;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class NC : Pack
+    public sealed class NC : Pack
     {
         #region fields
         public override PackType type => PackType.NC;

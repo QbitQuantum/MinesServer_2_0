@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.Buildings
 {
-    public class Storage : PackDamage
+    public sealed class Storage : PackDamage
     {
         public long this[int index]
         {
