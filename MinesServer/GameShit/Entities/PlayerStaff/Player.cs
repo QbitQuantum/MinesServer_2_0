@@ -383,7 +383,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdatePosition(int x, int y)
         {
-            if (Vector2.Distance(new Vector2(this.x, this.y), new Vector2(x, y)) < 1.2f)
+            if (Vector2.Distance(new Vector2(this.x, this.y), new Vector2(x, y)) >= 1f)
                 skillslist.HandleExperience(this, SkillType.Movement, 1);
 
             this.x = x;
