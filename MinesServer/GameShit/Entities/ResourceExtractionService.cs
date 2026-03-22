@@ -282,4 +282,45 @@ public static class ResourceExtractionService
         }
         return true;
     }
+
+    public static void PerformGeo(
+        PEntity actor,
+        Player skillOwner)
+    {
+        if (actor == null || skillOwner == null)
+            return;
+
+        var Geology = skillOwner.skillslist.skills.Values.FirstOrDefault(s => s.type == SkillType.Geology);
+        
+        if (Geology == default)
+            return;
+
+        var (x, y) = actor.GetDirCord();
+
+        if (!World.ValidCoord(x, y)) return;
+
+        var access = World.AccessGun(x, y, actor.cid).access;
+        if (!access) return;
+
+        var cell = World.GetCell(x, y);
+
+        if (World.IsCollectable(x, y) && actor.geo.Count < Geology.Effect)
+        {
+            actor.geo.Push(cell);
+            World.Destroy(x, y);
+        }
+        else if (actor.geo.Count > 0 && World.IsBlockedForPlacement(x, y) && !World.PackPart(x, y))
+        {
+            var placeable = actor.geo.Pop();
+            World.SetCell(x, y, placeable);
+
+            // Выносим проверку крио-блока и случайную прочность
+            int durability = World.isCry(x, y) ? 0 :
+                            (Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(placeable).durability);
+            World.SetDurability(x, y, durability);
+            
+        }
+        skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Geology, 1f);
+        skillOwner.SendGeo();
+    }
 }

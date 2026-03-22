@@ -1,4 +1,13 @@
-﻿using MinesServer.GameShit.Generator;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using MinesServer.Enums;
+using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.SysCraft;
 using MinesServer.GameShit.WorldSystem;
@@ -7,14 +16,6 @@ using MinesServer.Network.GUI;
 using MinesServer.Network.Movement;
 using MinesServer.Network.Programmator;
 using MinesServer.Server;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
@@ -23,9 +24,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
     {
         public static void SendGeo(this Player p)
         {
-            if (p.geo.Count > 0)
+            var SkillGeology = p.skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.Geology);
+            if (SkillGeology != default)
             {
-                p.connection?.SendU(new GeoPacket(World.GetProp(p.geo.Peek()).name));
+                var currentIndex = p.geo.Count;   // Текущая позиция (верхушка стека)
+                var currentValue = currentIndex > 0 ? World.GetProp(p.geo.Peek()).name : ""; // Текущий элемент
+                var maxCount = SkillGeology.Effect;       // Максимальное количество
+                p.connection?.SendU(new GeoPacket($"{currentIndex}/{maxCount} {currentValue}"));
                 return;
             }
             p.connection?.SendU(new GeoPacket(""));

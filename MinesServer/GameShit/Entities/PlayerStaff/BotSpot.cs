@@ -90,7 +90,13 @@ public class BotSpot : PEntity
         Translate();
     }
 
-    public override void Geo() => base.Geo();
+    public override void Geo()
+    {
+        if (owner == null)
+            return;
+
+        ResourceExtractionService.PerformGeo(this, owner);
+    }
 
     public override bool Heal()
     {

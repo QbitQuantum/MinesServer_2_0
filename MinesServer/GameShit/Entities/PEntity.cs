@@ -52,33 +52,7 @@ namespace MinesServer.GameShit.Entities
         }
         public abstract void Build(string type);
         public abstract void Bz();
-        public virtual void Geo()
-        {
-            var (x, y) = GetDirCord();
-
-            if (!World.ValidCoord(x, y)) return;
-
-            var access = World.AccessGun(x, y, cid).access;
-            if (!access) return;
-
-            var cell = World.GetCell(x, y);
-
-            if (World.IsCollectable(x, y))
-            {
-                geo.Push(cell);
-                World.Destroy(x, y);
-            }
-            else if (geo.Count > 0 && World.IsBlockedForPlacement(x, y) && !World.PackPart(x, y))
-            {
-                var placeable = geo.Pop();
-                World.SetCell(x, y, placeable);
-
-                // Выносим проверку крио-блока и случайную прочность
-                int durability = World.isCry(x, y) ? 0 :
-                                (Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(placeable).durability);
-                World.SetDurability(x, y, durability);
-            }
-        }
+        public virtual void Geo() { }
         private void InverseDirection(DirectionType Direction)
         {
             switch (Direction)

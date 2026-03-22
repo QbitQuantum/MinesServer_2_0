@@ -100,6 +100,36 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
         }
 
+        public string geology
+        {
+            get
+            {
+                if (geo == null || geo.Count == 0)
+                    return "[]";
+
+                // Сериализуем стек в JSON массив
+                return Newtonsoft.Json.JsonConvert.SerializeObject(geo.ToList());
+            }
+            set
+            {
+                if (value == null || string.IsNullOrEmpty(value) || value == "[]")
+                {
+                    geo = new Stack<byte>();
+                    return;
+                }
+
+                try
+                {
+                    // Десериализуем JSON обратно в список и создаем стек
+                    var list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<byte>>(value);
+                    geo = new Stack<byte>(list ?? new List<byte>());
+                }
+                catch
+                {
+                    geo = new Stack<byte>();
+                }
+            }
+        }
         public Resp? resp
         {
             get
@@ -540,6 +570,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         public void SetResp(Resp r) => resp = r;
+
+        public override void Geo()
+        {
+            ResourceExtractionService.PerformGeo(this, this);
+        }
 
         #endregion
 
