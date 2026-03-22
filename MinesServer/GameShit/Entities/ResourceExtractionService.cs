@@ -194,6 +194,19 @@ public static class ResourceExtractionService
                     skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Deactivation, 1f);
                     skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineSlime, 1f);
                 }
+
+                if (cellType.IsRock() || cellType.IsHeavyRock())
+                {
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Detection, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Destruction, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.TotalDestruction, 1f);
+
+                    if (cellType.IsHeavyRock())
+                    {
+                        skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineDeep, 1f);
+                    }
+                }
+
                 skillOwner.skillslist.HandleDestructionExperience(skillOwner);
             }
         }
