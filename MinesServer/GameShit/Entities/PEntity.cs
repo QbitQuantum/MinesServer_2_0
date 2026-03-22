@@ -99,7 +99,10 @@ namespace MinesServer.GameShit.Entities
         }
         public virtual void RestartProgram()
         {
-            // TODO
+            // Первый вызов останавливает программу
+            programsData.Run();
+            // Второй вызов запускает программу
+            programsData.Run();
         }
 
         public virtual bool HasGun() => World.GetPack(x, y) is Gun;
