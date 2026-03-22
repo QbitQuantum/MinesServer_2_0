@@ -88,7 +88,7 @@ namespace MinesServer.GameShit.Programmator
 
         private string? GotoDeath;
 
-        // Разделить методы на Run()/Stop()
+        // TODO: Разделить методы на Run()/Stop()
         public void Run()
         {
             if (ProgRunning || selected == null)
