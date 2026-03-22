@@ -85,11 +85,10 @@ namespace MinesServer.GameShit.WorldSystem
         public void InitializeNeighbors(World world)
         {
             _world = world;
-            _cachedNeighbors = new Chunk?[NEIGHBOR_TOTAL];
-            _cachedNeighborCoords = new (int x, int y)[NEIGHBOR_TOTAL];
-            _neighborDict.Clear();
 
-            int index = 0;
+            // Подсчитываем количество валидных соседей
+            var validNeighbors = new List<(int x, int y, Chunk? chunk)>();
+
             for (int dy = -VIEW_RADIUS; dy <= VIEW_RADIUS; dy++)
             {
                 for (int dx = -VIEW_RADIUS; dx <= VIEW_RADIUS; dx++)
@@ -97,23 +96,27 @@ namespace MinesServer.GameShit.WorldSystem
                     int x = pos.x + dx;
                     int y = pos.y + dy;
 
-                    var coord = (x, y);
-                    _cachedNeighborCoords[index] = coord;
-
                     if (World.ValidChunk(x, y))
                     {
                         var chunk = _world.GetPosChunk(x, y);
-                        _cachedNeighbors[index] = chunk;
+                        validNeighbors.Add((x, y, chunk));
                         _neighborDict[(dx, dy)] = chunk;
                     }
                     else
                     {
-                        _cachedNeighbors[index] = null;
                         _neighborDict[(dx, dy)] = null;
                     }
-
-                    index++;
                 }
+            }
+
+            // Сохраняем только валидные соседи
+            _cachedNeighbors = new Chunk[validNeighbors.Count];
+            _cachedNeighborCoords = new (int x, int y)[validNeighbors.Count];
+
+            for (int i = 0; i < validNeighbors.Count; i++)
+            {
+                _cachedNeighbors[i] = validNeighbors[i].chunk;
+                _cachedNeighborCoords[i] = (validNeighbors[i].x, validNeighbors[i].y);
             }
         }
 
