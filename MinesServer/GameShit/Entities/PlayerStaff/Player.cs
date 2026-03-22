@@ -85,17 +85,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public Settings settings { get; set; } = null!;
         public PlayerSkills skillslist { get; set; } = null!;
         public Queue<Line> console = new Queue<Line>();
-        public bool OnRoad => World.isRoad(x, y);
-        public override double ServerPause => (OnRoad ? (pause * 5) * 0.80 : pause * 5) * 1.4 / 1000;
+        public override double ServerPause => (World.isRoad(x, y) ? (pause * 5) * 0.80 : pause * 5) * 1.4 / 1000;
 
         public override int pause
         {
             get
             {
                 var moveSkill = skillslist.skills.Values.FirstOrDefault(s =>
-                    s != null &&
-                    s.UseSkill(SkillEffectType.OnMove, this) == true &&
-                    s.type == SkillType.Movement);
+                    s != null && s.type == SkillType.Movement);
                 return moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay;
             }
         }
@@ -385,6 +382,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (Vector2.Distance(new Vector2(this.x, this.y), new Vector2(x, y)) >= 1f)
                 skillslist.HandleExperience(this, SkillType.Movement, 1);
+            
+            if (World.isRoad(x, y))
+                skillslist.HandleExperience(this, SkillType.RoadMovement, 1);
 
             this.x = x;
             this.y = y;
