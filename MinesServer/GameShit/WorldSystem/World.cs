@@ -271,19 +271,13 @@ namespace MinesServer.GameShit.WorldSystem
             return ValidCoord(x, y) ? GetProp(GetCell(x, y)) : GetProp(0);
         }
 
-        public static void SetProp(int x, int y, bool packmesh) {
-            // Проверку на ValidCoord не делаем, так как вызывается в одном месте
-            // И уже используется проверка
-            W.GetChunk(x, y).SetProp(x, y, packmesh);
-        }
-
-        public static bool CanBuildAt(int x, int y, int cid)
-            => ValidCoord(x, y) && AccessGun(x, y, cid).access && !PackPart(x, y);
-
+        private static void SetProp(int x, int y, bool packmesh) => W.GetChunk(x, y).SetProp(x, y, packmesh);
         private static bool IsCollectable(Cell p) => p.isPickable && !p.isEmpty;
         private static bool IsForDigging(Cell p) => p.is_diggable && p.is_destructible;
         private static bool IsBlockedForPlacement(Cell p) => p.can_place_over && p.isEmpty;
 
+        public static bool CanBuildAt(int x, int y, int cid)
+            => ValidCoord(x, y) && AccessGun(x, y, cid).access && !PackPart(x, y);
         public static bool IsCollectable(int x, int y) => IsCollectable(GetProp(x, y));
         public static bool IsForDigging(int x, int y) => IsForDigging(GetProp(x, y));
         public static bool IsBlockedForPlacement(int x, int y) => IsBlockedForPlacement(GetProp(x, y));
