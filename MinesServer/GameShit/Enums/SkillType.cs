@@ -1120,8 +1120,8 @@ namespace MinesServer.Enums
             [SkillType.Annihilation] = new SkillInfo
             {
                 Name = "Аннигиляция",
-                Description = "Увеличивает скорость разрушение лавы",
-                LevelingHint = "Разрушать лаву",
+                Description = "Увеличивает скорость разрушение песка",
+                LevelingHint = "Разрушать песок",
                 EffectDisplayFunc = (effect) => $"Скорость разрушения лавы: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
