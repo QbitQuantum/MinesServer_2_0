@@ -1122,7 +1122,7 @@ namespace MinesServer.Enums
                 Name = "Аннигиляция",
                 Description = "Увеличивает скорость разрушение песка",
                 LevelingHint = "Разрушать песок",
-                EffectDisplayFunc = (effect) => $"Скорость разрушения лавы: <color=yellow>+{effect:F1}%</color>",
+                EffectDisplayFunc = (effect) => $"Скорость разрушения песка: <color=yellow>+{effect:F1}%</color>",
                 PriceFunc = (lvl) =>
                 {
                     if (lvl <= 61)
