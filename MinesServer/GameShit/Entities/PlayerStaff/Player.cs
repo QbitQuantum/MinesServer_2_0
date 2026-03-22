@@ -546,6 +546,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             ResourceExtractionService.PerformDig(this, this, ref cb, ref CrystalCB, crys);
         }
 
+        public override void Beep() 
+        {
+            pSenders.Beep(this);
+        }
+
         public void BBox(long[]? c)
         {
             var (x, y) = GetDirCord();

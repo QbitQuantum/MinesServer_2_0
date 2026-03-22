@@ -80,10 +80,7 @@ namespace MinesServer.GameShit.Entities
                 dir = (int)Direction;
         }
 
-        public virtual void Beep()
-        {
-            // TODO
-        }
+        public virtual void Beep() { }
         public virtual void SpecialAction(ActionType Action) { }
         public virtual void InverseDirection(ActionType Action)
         {
