@@ -175,7 +175,27 @@ public static class ResourceExtractionService
         {
             // Начисляем опыт за разрушение блока
             if (!IsCry)
+            {
+                if (cellType.IsBoulder())
+                {
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Fracturing, 1f);
+                }
+
+                if (cellType.IsSand())
+                {
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Annihilation, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.DeMagnetizing, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Washing, 1f);
+                }
+
+                if (cellType.IsAcid() || cellType.IsActiveAcid())
+                {
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AntiSlime, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Deactivation, 1f);
+                    skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineSlime, 1f);
+                }
                 skillOwner.skillslist.HandleDestructionExperience(skillOwner);
+            }
         }
 
         if (prop.isBoulder)
