@@ -391,6 +391,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public void HandleMiningExperience(Player player, float baseExp = 1f)
         {
+            // Вообще не должно, надо явно указывать при наличие одного из скиллов
+            // Но так один из них не будет установлен, то прокачается только один
+            // Как минимум я на это надеюсь :D
+            HandleExperience(player, SkillType.ExpertMining, baseExp);
             HandleExperience(player, SkillType.MineGeneral, baseExp);
         }
 
