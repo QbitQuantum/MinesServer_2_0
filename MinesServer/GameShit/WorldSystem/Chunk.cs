@@ -96,16 +96,12 @@ namespace MinesServer.GameShit.WorldSystem
                     int x = pos.x + dx;
                     int y = pos.y + dy;
 
-                    if (World.ValidChunk(x, y))
-                    {
-                        var chunk = _world.GetPosChunk(x, y);
-                        validNeighbors.Add((x, y, chunk));
-                        _neighborDict[(dx, dy)] = chunk;
-                    }
-                    else
-                    {
-                        _neighborDict[(dx, dy)] = null;
-                    }
+                    if (!World.ValidChunk(x, y))
+                        continue;
+
+                    var chunk = _world.GetPosChunk(x, y);
+                    validNeighbors.Add((x, y, chunk));
+                    _neighborDict[(dx, dy)] = chunk;
                 }
             }
 
