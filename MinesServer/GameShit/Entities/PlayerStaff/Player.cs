@@ -582,7 +582,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             win = null;
             SendWindow();
 
-            Health = MaxHealth;
+            ResetHp();
 
             if (!online && !programsData.RespawnOnProg)
             {

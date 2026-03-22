@@ -256,16 +256,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     (int)Item.NanoBot,
                     (p) =>
                     {
-                        // TODO: Реализовать
-                        return false;
+                        p.AddHp(50);
+                        p.SendDFToBots(5, 0, 0, p.id, 0);
+                        return true;
                     }
                 },
                 {
                     (int)Item.RepairBot,
                     (p) =>
                     {
-                        // TODO: Реализовать
-                        return false;
+                        p.ResetHp();
+                        p.SendDFToBots(5, 0, 0, p.id, 0);
+                        return true;
                     }
                 },
             };

@@ -273,7 +273,7 @@ public static class ResourceExtractionService
 
         heal.AddExp(skillOwner);
 
-        actor.Health = Math.Min(actor.Health + (int)heal.Effect, actor.MaxHealth);
+        actor.AddHp((int)heal.Effect);
 
         actor.SendDFToBots(5, 0, 0, actor.id, 0);
         if (actor is Player)

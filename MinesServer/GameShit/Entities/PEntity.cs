@@ -42,6 +42,14 @@ namespace MinesServer.GameShit.Entities
         public virtual double ServerPause { get; }
         public virtual int cid { get; set; }
         public int dir { get; set; }
+        public void AddHp(int Hp)
+        {
+            Health = Math.Min(Health + Hp, MaxHealth);
+        }
+        public void ResetHp()
+        {
+            Health = MaxHealth;
+        }
         public abstract void Build(string type);
         public abstract void Bz();
         public virtual void Geo()

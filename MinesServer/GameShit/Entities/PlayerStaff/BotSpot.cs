@@ -86,7 +86,7 @@ public class BotSpot : PEntity
             var (bx, by) = World.FindEmptyForBox(x, y);
             Box.BuildBox(bx, by, crys.cry, owner, true);
         }
-        Health = MaxHealth;
+        ResetHp();
         Translate();
     }
 
