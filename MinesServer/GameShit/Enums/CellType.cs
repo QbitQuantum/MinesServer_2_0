@@ -137,6 +137,62 @@
             };
         }
 
+        /// <summary>
+        /// Является ли ячейка валуном/камнем
+        /// </summary>
+        public static bool IsBoulder(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.Boulder1 or CellType.Boulder2 or CellType.Boulder3 or
+                CellType.BlackBoulder1 or CellType.BlackBoulder2 or CellType.BlackBoulder3 or
+                CellType.MetalBoulder1 or CellType.MetalBoulder2 or CellType.MetalBoulder3 => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Является ли ячейка песком
+        /// </summary>
+        public static bool IsSand(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.WhiteSand or CellType.DarkWhiteSand or
+                CellType.RustySand or CellType.DarkRustySand or
+                CellType.BlackSand or CellType.DarkBlackSand or
+                CellType.BlueSand or CellType.DarkBlueSand or
+                CellType.YellowSand or CellType.DarkYellowSand => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Является ли ячейка кислотой
+        /// </summary>
+        public static bool IsAcid(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.GrayAcid or CellType.PurpleAcid or
+                CellType.PassiveAcid or CellType.LivingActiveAcid or
+                CellType.CorrosiveActiveAcid => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Является ли ячейка активной кислотой (живой/коррозивной)
+        /// </summary>
+        public static bool IsActiveAcid(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.LivingActiveAcid or CellType.CorrosiveActiveAcid => true,
+                _ => false
+            };
+        }
+
         // Перегрузки для работы с byte, если нужна обратная совместимость
         public static bool IsBuildingBlock(byte cell) => ((CellType)cell).IsBuildingBlock();
         public static bool IsAlive(byte cell) => ((CellType)cell).IsAlive();
