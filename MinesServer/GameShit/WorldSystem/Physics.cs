@@ -198,8 +198,7 @@ namespace MinesServer.GameShit.WorldSystem
                     World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 
                     && !World.isAlive(x + -dir.x, y + -dir.y) 
                     && !World.GetProp(x + -dir.x, y + -dir.y).isEmpty 
-                    && World.GetProp(x + -dir.x, y + -dir.y).is_diggable 
-                    && World.GetProp(x + -dir.x, y + -dir.y).is_destructible)
+                    && World.IsForDigging(x + -dir.x, y + -dir.y))
                 {
                     World.SetCell(x + dir.x, y + dir.y, World.GetCell(x + -dir.x, y + -dir.y));
                     World.SetDurability(x + dir.x, y + dir.y, World.GetProp(x + dir.x, y + dir.y).durability * mod);

@@ -154,9 +154,8 @@ namespace MinesServer.GameShit.WorldSystem
                     if (!ValidCoord(targetX, targetY) ||
                         PackPart(targetX, targetY) ||
                         !AccessGun(x, y, player.cid).access ||
-                        ignoreplace && (!p.is_diggable || !p.is_destructible || GetCell(targetX, targetY) == 36) || 
-                        
-                        (!p.can_place_over || !p.isEmpty) && !ignoreplace)
+                        ignoreplace && (!IsForDigging(p) || GetCell(targetX, targetY) == 36) ||
+                        !ignoreplace && !IsBlockedForPlacement(p))
                     {
                         packets.Add(new HBFXPacket(targetX, targetY, 0));
                         h++;
@@ -279,21 +278,18 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         public static bool CanBuildAt(int x, int y, int cid)
-        {
-            return ValidCoord(x, y) &&
-                   AccessGun(x, y, cid).access &&
-                   !PackPart(x, y);
-        }
+            => ValidCoord(x, y) && AccessGun(x, y, cid).access && !PackPart(x, y);
 
+        private static bool IsCollectable(Cell p) => p.isPickable && !p.isEmpty;
+        private static bool IsForDigging(Cell p) => p.is_diggable && p.is_destructible;
+        private static bool IsBlockedForPlacement(Cell p) => p.can_place_over && p.isEmpty;
+
+        public static bool IsCollectable(int x, int y) => IsCollectable(GetProp(x, y));
+        public static bool IsForDigging(int x, int y) => IsForDigging(GetProp(x, y));
+        public static bool IsBlockedForPlacement(int x, int y) => IsBlockedForPlacement(GetProp(x, y));
+        
         public static bool CanDamageCell(int x, int y)
-        {
-            var Cell = GetProp(x, y);
-            return 
-                !isAlive(x, y) && 
-                !isBuildingBlock(x, y) &&
-                Cell.is_diggable &&
-                Cell.is_destructible;
-        }
+            => !isAlive(x, y) && !isBuildingBlock(x, y) && IsForDigging(x, y);
 
         public static (int x, int y) FindEmptyForBox(int x, int y)
         {

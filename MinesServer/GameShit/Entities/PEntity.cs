@@ -54,22 +54,29 @@ namespace MinesServer.GameShit.Entities
         public abstract void Bz();
         public virtual void Geo()
         {
-            int x = (int)GetDirCord().x, y = (int)GetDirCord().y;
-            if (!World.ValidCoord(x, y) || !World.AccessGun(x, y, cid).access)
-            {
-                return;
-            }
+            var (x, y) = GetDirCord();
+
+            if (!World.ValidCoord(x, y)) return;
+
+            var access = World.AccessGun(x, y, cid).access;
+            if (!access) return;
+
             var cell = World.GetCell(x, y);
-            if (World.GetProp(cell).isPickable && !World.GetProp(cell).isEmpty)
+
+            if (World.IsCollectable(x, y))
             {
                 geo.Push(cell);
                 World.Destroy(x, y);
             }
-            else if (World.GetProp(cell).isEmpty && World.GetProp(cell).can_place_over && geo.Count > 0 && !World.PackPart(x, y))
+            else if (geo.Count > 0 && World.IsBlockedForPlacement(x, y) && !World.PackPart(x, y))
             {
-                var cplaceable = geo.Pop();
-                World.SetCell(x, y, cplaceable);
-                World.SetDurability(x, y, World.isCry(x, y) ? 0 : Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(cplaceable).durability);
+                var placeable = geo.Pop();
+                World.SetCell(x, y, placeable);
+
+                // Выносим проверку крио-блока и случайную прочность
+                int durability = World.isCry(x, y) ? 0 :
+                                (Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(placeable).durability);
+                World.SetDurability(x, y, durability);
             }
         }
         private void InverseDirection(DirectionType Direction)
