@@ -73,7 +73,10 @@ namespace MinesServer.GameShit.Skills
             {
                 if (skill != null && skill.type == SkillType.Upgrade)
                 {
-                    expv *= skill.Effect;
+                    // TODO: Добавить функцию MultiExp
+                    // И по возможности кэшировать все значения функций
+                    // Чтобы постоянно не перебирать
+                    expv *= 1f + (skill.Effect / 100f);
                 }
             }
             exp += expv;

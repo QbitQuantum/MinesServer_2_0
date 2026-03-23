@@ -27,7 +27,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 $"<color=white>{info?.Name ?? skillType.ToString()}</color>. Уровень:<color=white>{level}</color>\n" +
                 $"Опыт {currentExp}/{maxExp} " +
                 (upgradeEffect > 0
-                    ? $"<color=yellow>[Экспертное обучение x{upgradeEffect/100:F1}]</color>\n"
+                    ? $"<color=yellow>[Экспертное обучение x{1 + (upgradeEffect / 100f):F1}]</color>\n"
                     : $"<color=red>[Экспертное обучение отсутствует]</color>\n") +
                 $"Как качать: {info?.LevelingHint ?? "Неизвестно"}\n" +
                 skillType.GetDisplayInfo(skillType.GetInfo().EffectFunc(level)) + "\n" +
