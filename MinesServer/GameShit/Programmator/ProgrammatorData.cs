@@ -269,6 +269,8 @@ namespace MinesServer.GameShit.Programmator
                             }
                             break;
 
+                        case ActionType.Last:
+                            break;
                         case ActionType.Stop:
                             Run();
                             ((Player)entity)?.ProgStatus();

@@ -683,20 +683,6 @@ namespace MinesServer.GameShit.Programmator
                     break;
                 */
 
-                // === Старт/Стоп ===
-                case ActionType.Start:
-                    p.programsData.ProgRunning = true;
-                    break;
-
-                case ActionType.Stop:
-                case ActionType.Last:
-                    p.programsData.ProgRunning = false;
-                    break;
-
-                case ActionType.Restart:
-                    p.RestartProgram();
-                    break;
-
                 // === Пропуск строки ===
                 case ActionType.NextRow:
                     break;
