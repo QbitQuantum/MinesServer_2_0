@@ -283,10 +283,6 @@ namespace MinesServer.Server
             SendAsync(span);
         }
 
-        public void SendCell(int x, int y, byte cell)
-        {
-            SendB(new HBPacket([new HBMapPacket(x, y, 1, 1, [cell])]));
-        }
         public void CloseWindow()
         {
             player.win = null;

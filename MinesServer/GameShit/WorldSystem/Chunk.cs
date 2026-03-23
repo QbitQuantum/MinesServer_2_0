@@ -212,11 +212,12 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void SendCellToBots(int x, int y, byte cell)
         {
+            var packet = new HBPacket([new HBMapPacket(x, y, 1, 1, [cell])]);
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendCell(x, y, cell);
+                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
                 }
             }
         }
