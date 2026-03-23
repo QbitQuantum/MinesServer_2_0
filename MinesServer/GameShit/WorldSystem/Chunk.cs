@@ -190,10 +190,9 @@ namespace MinesServer.GameShit.WorldSystem
         {
             foreach (var chunk in GetNeighboringChunks())
             {
-                foreach (var id in chunk.bots)
+                foreach (var kvp in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(
-                        new HBPacket([new HBDirectedFXPacket(id.Key, x, y, fx, dir, color)]));
+                    kvp.Value.connection?.SendB(new HBPacket([new HBDirectedFXPacket(kvp.Key, x, y, fx, dir, color)]));
                 }
             }
         }
