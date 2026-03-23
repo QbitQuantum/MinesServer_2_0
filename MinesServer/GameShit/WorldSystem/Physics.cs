@@ -4,6 +4,8 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public static class Physics
     {
+        private static readonly (int x, int y)[] _directions = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+
         public static Random r = new Random();
         public static bool Boulder(int x, int y)
         {
@@ -70,7 +72,7 @@ namespace MinesServer.GameShit.WorldSystem
         {
             var cell = World.GetCell(x, y);
             var mod = 1;
-            foreach (var dir in baseddirs)
+            foreach (var dir in _directions)
             {
                 if (World.GetCell(x + dir.x, y + dir.y) == 119)
                 {
@@ -93,10 +95,10 @@ namespace MinesServer.GameShit.WorldSystem
                 _ => false
             };
         }
-        private static (int x, int y)[] baseddirs = [(1, 0), (0, 1), (-1, 0), (0, -1)];
-        public static bool AliveBlue(int x, int y, int mod)
+
+        private static bool AliveBlue(int x, int y, int mod)
         {
-            foreach (var dir in baseddirs)
+            foreach (var dir in _directions)
             {
                 if (r.Next(1, 101) < 20 && World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 && World.IsEmpty(x + dir.x, y + dir.y))
                 {
@@ -108,7 +110,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return false;
         }
-        public static bool AliveWhite(int x, int y, int mod)
+        private static bool AliveWhite(int x, int y, int mod)
         {
             if (World.GetProp(x, y - 1).isSand)
             {
@@ -131,7 +133,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return true;
         }
-        public static bool AliveBlack(int x, int y, int mod)
+        private static bool AliveBlack(int x, int y, int mod)
         {
             var c = 0;
             for (int ax = -1; ax <= 1; ax++)
@@ -152,7 +154,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             if (c > 0)
             {
-                foreach (var i in baseddirs)
+                foreach (var i in _directions)
                 {
                     var cell = World.GetCell(x + i.x, y + i.y);
                     if (cell == (byte)CellType.AliveBlack && World.IsEmpty(x + -i.x, y + -i.y) && World.W.GetPlayersFromPos(x + -i.x, y + -i.Item2).Count == 0)
@@ -173,10 +175,10 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return false;
         }
-        public static bool AliveCyan(int x, int y, int mod)
+        private static bool AliveCyan(int x, int y, int mod)
         {
             var c = 0;
-            foreach (var i in baseddirs)
+            foreach (var i in _directions)
             {
                 if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
                 {
@@ -189,10 +191,10 @@ namespace MinesServer.GameShit.WorldSystem
                 return true;
             return false;
         }
-        public static bool AliveRainbow(int x, int y, int mod)
+        private static bool AliveRainbow(int x, int y, int mod)
         {
             var c = 0;
-            foreach (var dir in baseddirs)
+            foreach (var dir in _directions)
             {
                 if (World.IsEmpty(x + dir.x, y + dir.y) && 
                     World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 
@@ -209,7 +211,7 @@ namespace MinesServer.GameShit.WorldSystem
                 return true;
             return false;
         }
-        public static bool AliveRed(int x, int y, int mod)
+        private static bool AliveRed(int x, int y, int mod)
         {
             var c = 0;
             var chs = 0;
@@ -227,7 +229,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 return false;
             }
-            foreach (var i in baseddirs)
+            foreach (var i in _directions)
             {
                 if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
                 {
@@ -240,7 +242,7 @@ namespace MinesServer.GameShit.WorldSystem
                 return true;
             return false;
         }
-        public static bool AliveViol(int x, int y, int mod)
+        private static bool AliveViol(int x, int y, int mod)
         {
             var c = 0;
             var chs = 0;
@@ -258,7 +260,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 return false;
             }
-            foreach (var i in baseddirs)
+            foreach (var i in _directions)
             {
                 if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
                 {
