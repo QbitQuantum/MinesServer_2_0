@@ -271,10 +271,16 @@ namespace MinesServer.GameShit.Programmator
 
                         case ActionType.Stop:
                             Run();
+                            ((Player)entity)?.ProgStatus();
                             break;
 
                         case ActionType.Start:
                             startpoint = (cFunction, current.current);
+                            break;
+                        case ActionType.Restart:
+                            Run(); // Завершаем программу
+                            Run(); // Запускаем программу
+                            ((Player)entity)?.ProgStatus();
                             break;
 
                         case ActionType.Flip:
