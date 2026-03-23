@@ -90,7 +90,7 @@ namespace MinesServer.GameShit.Buildings
             },
             Buttons = []
         };
-        private bool TryPurchaseSlot(Player p, int nextSlot)
+        private static bool TryPurchaseSlot(Player p, int nextSlot)
         {
             using var db = new DataBase();
             db.Attach(p.skillslist);
