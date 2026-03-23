@@ -44,6 +44,8 @@ public static class ResourceExtractionService
             ProcessRegularDigging(skillOwner, cellType, x, y);
         }
 
+        skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Digging, 1f);
+
         // Физика валунов
         if (prop.isBoulder)
         {
@@ -279,8 +281,6 @@ public static class ResourceExtractionService
                 skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineDeep, 1f);
             }
         }
-
-        skillOwner.skillslist.HandleDestructionExperience(skillOwner);
     }
 
     private static void Mine(
