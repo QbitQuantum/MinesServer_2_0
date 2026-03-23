@@ -5,28 +5,37 @@ namespace MinesServer.GameShit.WorldSystem
     public static class Physics
     {
         private static readonly (int x, int y)[] _directions = [(1, 0), (0, 1), (-1, 0), (0, -1)];
+        public static readonly Random r = new();
 
-        public static Random r = new Random();
         public static bool Boulder(int x, int y)
         {
-            var v = World.TrueEmpty;
-            if (World.GetCell(x, y + 1) == (byte)CellType.Gate && v(x, y + 2))
+            var isEmpty = World.TrueEmpty;
+
+            // Проверка падения через ворота
+            if (World.GetCell(x, y + 1) == (byte)CellType.Gate && isEmpty(x, y + 2))
             {
                 World.MoveCell(x, y, 0, 2);
+                return true;
             }
-            else if (v(x, y + 1))
+
+            // Падение вниз
+            if (isEmpty(x, y + 1))
             {
                 World.MoveCell(x, y, 0, 1);
                 return true;
             }
-            if (World.GetProp(World.GetCell(x, y + 1)).isBoulder || World.GetProp(World.GetCell(x, y + 1)).isSand)
+
+            // Скатывание по бокам
+            var belowCell = World.GetCell(x, y + 1);
+            if (World.GetProp(belowCell).isBoulder || World.GetProp(belowCell).isSand)
             {
-                if (r.Next(1, 101) > 50 && v(x + 1, y + 1) && v(x + 1, y))
+                if (r.Next(1, 101) > 50 && isEmpty(x + 1, y + 1) && isEmpty(x + 1, y))
                 {
                     World.MoveCell(x, y, 1, 1);
                     return true;
                 }
-                else if (v(x - 1, y + 1) && v(x - 1, y))
+
+                if (isEmpty(x - 1, y + 1) && isEmpty(x - 1, y))
                 {
                     World.MoveCell(x, y, -1, 1);
                     return true;
@@ -36,31 +45,39 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static bool Sand(int x, int y)
         {
-            var v = World.TrueEmpty;
-            if (World.GetCell(x,y+1) == (byte)CellType.Gate && v(x, y + 2))
+            var isEmpty = World.TrueEmpty;
+
+            // Проверка падения через ворота
+            if (World.GetCell(x, y + 1) == (byte)CellType.Gate && isEmpty(x, y + 2))
             {
                 World.MoveCell(x, y, 0, 2);
+                return true;
             }
-            else if (v(x, y + 1))
+
+            // Падение вниз
+            if (isEmpty(x, y + 1))
             {
                 World.MoveCell(x, y, 0, 1);
                 return true;
             }
-            else if (World.GetProp(World.GetCell(x, y + 1)).isSand || World.GetProp(World.GetCell(x, y + 1)).isBoulder)
+
+            // Рассыпание по бокам
+            var belowCell = World.GetCell(x, y + 1);
+            if (World.GetProp(belowCell).isSand || World.GetProp(belowCell).isBoulder)
             {
-                if (v(x + 1, y + 1) && v(x - 1, y + 1))
+                if (isEmpty(x + 1, y + 1) && isEmpty(x - 1, y + 1))
                 {
-                    if (r.Next(1, 101) > 50)
-                        World.MoveCell(x, y, 1, 1);
-                    else
-                        World.MoveCell(x, y, -1, 1);
+                    World.MoveCell(x, y, r.Next(2) == 0 ? 1 : -1, 1);
+                    return true;
                 }
-                else if (v(x + 1, y + 1))
+
+                if (isEmpty(x + 1, y + 1))
                 {
                     World.MoveCell(x, y, 1, 1);
                     return true;
                 }
-                else if (v(x - 1, y + 1))
+
+                if (isEmpty(x - 1, y + 1))
                 {
                     World.MoveCell(x, y, -1, 1);
                     return true;
@@ -71,46 +88,50 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool Alive(int x, int y)
         {
             var cell = World.GetCell(x, y);
-            var mod = 1;
+            var modifier = 1;
+
+            // Подсчет соседних живых клеток (тип 119)
             foreach (var dir in _directions)
             {
                 if (World.GetCell(x + dir.x, y + dir.y) == 119)
                 {
-                    mod += 2;
+                    modifier += 2;
                 }
             }
-            if (mod > 1)
+
+            if (modifier > 1)
             {
-                mod -= 1;
+                modifier--;
             }
             return (CellType)cell switch
             {
-                CellType.AliveViol => AliveViol(x, y, mod),
-                CellType.AliveRainbow => AliveRainbow(x, y, mod),
-                CellType.AliveBlue => AliveBlue(x, y, mod),
-                CellType.AliveRed => AliveRed(x, y, mod),
-                CellType.AliveCyan => AliveCyan(x, y, mod),
-                CellType.AliveBlack => AliveBlack(x, y, mod),
-                CellType.AliveWhite => AliveWhite(x, y, mod),
+                CellType.AliveViol => AliveViol(x, y, modifier),
+                CellType.AliveRainbow => AliveRainbow(x, y, modifier),
+                CellType.AliveBlue => AliveBlue(x, y, modifier),
+                CellType.AliveRed => AliveRed(x, y, modifier),
+                CellType.AliveCyan => AliveCyan(x, y, modifier),
+                CellType.AliveBlack => AliveBlack(x, y, modifier),
+                CellType.AliveWhite => AliveWhite(x, y, modifier),
                 _ => false
             };
         }
 
-        private static bool AliveBlue(int x, int y, int mod)
+        private static bool AliveBlue(int x, int y, int modifier)
         {
             foreach (var dir in _directions)
             {
-                if (r.Next(1, 101) < 20 && World.IsEmptyForPlace(x + dir.x, y + dir.y))
+                if (r.Next(100) < 20 && World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
                     World.MoveCell(x, y, dir.x, dir.y);
                     World.SetCell(x, y, 109);
-                    World.SetDurability(x, y, 20 * mod);
+                    World.SetDurability(x, y, 20 * modifier);
                     return true;
                 }
             }
             return false;
         }
-        private static bool AliveWhite(int x, int y, int mod)
+
+        private static bool AliveWhite(int x, int y, int modifier)
         {
             if (World.GetProp(x, y - 1).isSand)
             {
@@ -121,157 +142,156 @@ namespace MinesServer.GameShit.WorldSystem
                         if (World.IsEmptyForPlace(x + wx, y + wy))
                         {
                             World.SetCell(x + wx, y + wy, (byte)CellType.White);
-                            World.SetDurability(x + wx, y + wy, 9 * mod);
+                            World.SetDurability(x + wx, y + wy, 9 * modifier);
                         }
                     }
                 }
-                if (r.Next(1, 101) < 20)
+
+                if (r.Next(100) < 20)
                 {
                     World.Destroy(x, y - 1);
                 }
-                return true;
             }
             return true;
         }
-        private static bool AliveBlack(int x, int y, int mod)
+
+        private static bool AliveBlack(int x, int y, int modifier)
         {
-            var c = 0;
+            int count = 0;
+
             for (int ax = -1; ax <= 1; ax++)
             {
                 for (int ay = -1; ay <= 1; ay++)
                 {
-                    var cell = World.GetCell(x + ax, y + ay);
-                    if (cell == (byte)CellType.AliveBlack)
+                    if (World.GetCell(x + ax, y + ay) == (byte)CellType.AliveBlack)
                     {
-                        c++;
+                        count++;
                     }
                 }
             }
-            if (c >= 6)
+
+            if (count >= 6)
             {
                 World.SetCell(x, y, 114);
                 return true;
             }
-            if (c > 0)
+
+            if (count > 0)
             {
-                foreach (var i in _directions)
+                foreach (var dir in _directions)
                 {
-                    var cell = World.GetCell(x + i.x, y + i.y);
-                    if (cell == (byte)CellType.AliveBlack && World.IsEmptyForPlace(x + -i.x, y + -i.y))
+                    if (World.GetCell(x + dir.x, y + dir.y) == (byte)CellType.AliveBlack &&
+                        World.IsEmptyForPlace(x - dir.x, y - dir.y))
                     {
-                        if (r.Next(1, 101) > 50)
-                        {
-                            World.SetCell(x + -i.x, y + -i.y, (byte)CellType.Red);
-                            World.SetDurability(x + i.x, y + i.y, 3 * mod);
-                        }
-                        else
-                        {
-                            World.SetCell(x + -i.x, y + -i.y, (byte)CellType.Cyan);
-                            World.SetDurability(x + i.x, y + i.y, 2 * mod);
-                        }
+                        World.SetCell(x - dir.x, y - dir.y,
+                            r.Next(2) == 0 ? (byte)CellType.Red : (byte)CellType.Cyan);
+                        World.SetDurability(x + dir.x, y + dir.y,
+                            r.Next(2) == 0 ? 3 * modifier : 2 * modifier);
                         return true;
                     }
                 }
             }
             return false;
         }
-        private static bool AliveCyan(int x, int y, int mod)
+
+        private static bool AliveCyan(int x, int y, int modifier)
         {
-            var c = 0;
-            foreach (var i in _directions)
-            {
-                if (World.IsEmptyForPlace(x + i.x, y + i.y))
-                {
-                    World.SetCell(x + i.x, y + i.y, (byte)CellType.Cyan);
-                    World.SetDurability(x + i.x, y + i.y, 2 * mod);
-                    c++;
-                }
-            }
-            if (c > 0)
-                return true;
-            return false;
-        }
-        private static bool AliveRainbow(int x, int y, int mod)
-        {
-            var c = 0;
+            bool moved = false;
+
             foreach (var dir in _directions)
             {
-                
-                if (World.IsEmptyForPlace(x + dir.x, y + dir.y)
-                    && !World.isAlive(x + -dir.x, y + -dir.y) 
-                    && !World.GetProp(x + -dir.x, y + -dir.y).isEmpty 
-                    && World.IsForDigging(x + -dir.x, y + -dir.y))
+                if (World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
-                    World.SetCell(x + dir.x, y + dir.y, World.GetCell(x + -dir.x, y + -dir.y));
-                    World.SetDurability(x + dir.x, y + dir.y, World.GetProp(x + dir.x, y + dir.y).durability * mod);
-                    c++;
+                    World.SetCell(x + dir.x, y + dir.y, (byte)CellType.Cyan);
+                    World.SetDurability(x + dir.x, y + dir.y, 2 * modifier);
+                    moved = true;
                 }
             }
-            if (c > 0)
-                return true;
-            return false;
+
+            return moved;
         }
-        private static bool AliveRed(int x, int y, int mod)
+
+        private static bool AliveRainbow(int x, int y, int modifier)
         {
-            var c = 0;
-            var chs = 0;
-            for (int cx = -1; cx <= 1; cx++)
+            bool moved = false;
+
+            foreach (var dir in _directions)
             {
-                for (int cy = -1; cy <= 1; cy++)
+                if (World.IsEmptyForPlace(x + dir.x, y + dir.y) &&
+                    !World.isAlive(x - dir.x, y - dir.y) &&
+                    !World.GetProp(x - dir.x, y - dir.y).isEmpty &&
+                    World.IsForDigging(x - dir.x, y - dir.y))
+                {
+                    World.SetCell(x + dir.x, y + dir.y, World.GetCell(x - dir.x, y - dir.y));
+                    World.SetDurability(x + dir.x, y + dir.y,
+                        World.GetProp(x + dir.x, y + dir.y).durability * modifier);
+                    moved = true;
+                }
+            }
+
+            return moved;
+        }
+
+        private static bool AliveRed(int x, int y, int modifier)
+        {
+            // Проверка наличия черной скалы рядом
+            bool hasBlackRock = false;
+            for (int cx = -1; cx <= 1 && !hasBlackRock; cx++)
+            {
+                for (int cy = -1; cy <= 1 && !hasBlackRock; cy++)
                 {
                     if (World.GetCell(x + cx, y + cy) == (byte)CellType.BlackRock)
                     {
-                        chs++;
+                        hasBlackRock = true;
                     }
                 }
             }
-            if (chs < 1)
+
+            if (!hasBlackRock) return false;
+
+            bool moved = false;
+            foreach (var dir in _directions)
             {
-                return false;
-            }
-            foreach (var i in _directions)
-            {
-                if (World.IsEmptyForPlace(x + i.x, y + i.y))
+                if (World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
-                    World.SetCell(x + i.x, y + i.y, (byte)CellType.Red);
-                    World.SetDurability(x + i.x, y + i.y, 3 * mod);
-                    c++;
+                    World.SetCell(x + dir.x, y + dir.y, (byte)CellType.Red);
+                    World.SetDurability(x + dir.x, y + dir.y, 3 * modifier);
+                    moved = true;
                 }
             }
-            if (c > 0)
-                return true;
-            return false;
+
+            return moved;
         }
-        private static bool AliveViol(int x, int y, int mod)
+
+        private static bool AliveViol(int x, int y, int modifier)
         {
-            var c = 0;
-            var chs = 0;
-            for (int cx = -1; cx <= 1; cx++)
+            // Проверка наличия черной скалы рядом
+            bool hasBlackRock = false;
+            for (int cx = -1; cx <= 1 && !hasBlackRock; cx++)
             {
-                for (int cy = -1; cy <= 1; cy++)
+                for (int cy = -1; cy <= 1 && !hasBlackRock; cy++)
                 {
                     if (World.GetCell(x + cx, y + cy) == (byte)CellType.BlackRock)
                     {
-                        chs++;
+                        hasBlackRock = true;
                     }
                 }
             }
-            if (chs < 1)
+
+            if (!hasBlackRock) return false;
+
+            bool moved = false;
+            foreach (var dir in _directions)
             {
-                return false;
-            }
-            foreach (var i in _directions)
-            {
-                if (World.IsEmptyForPlace(x + i.x, y + i.y))
+                if (World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
-                    World.SetCell(x + i.x, y + i.y, (byte)CellType.Violet);
-                    World.SetDurability(x + i.x, y + i.y, 2 * mod);
-                    c++;
+                    World.SetCell(x + dir.x, y + dir.y, (byte)CellType.Violet);
+                    World.SetDurability(x + dir.x, y + dir.y, 2 * modifier);
+                    moved = true;
                 }
             }
-            if (c > 0)
-                return true;
-            return false;
+
+            return moved;
         }
     }
 }
