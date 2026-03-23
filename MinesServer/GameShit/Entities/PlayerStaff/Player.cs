@@ -214,7 +214,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this.SendLvl();
             this.SendInventory();
             this.SendClan();
-            SendChat();
+            this.SendChat();
 
             settings.SendSettings(this);
             connection?.SendU(new ConfigPacket("oldprogramformat+"));
@@ -847,21 +847,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             return entries.ToArray();
         }
-
-        public void SendChat()
-        {
-            using var db = new DataBase();
-            currentchat ??= db.chats.FirstOrDefault(i => i.tag == "FED");
-
-            connection?.SendU(new CurrentChatPacket(currentchat.tag, currentchat.Name));
-
-            var msg = currentchat.GetMessages();
-            if (msg.Length > 0)
-            {
-                connection?.SendU(new ChatMessagesPacket("FED", currentchat.GetMessages()));
-            }
-        }
-
         #endregion
 
         public override void SpecialAction(ActionType Action)

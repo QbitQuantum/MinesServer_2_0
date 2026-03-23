@@ -12,6 +12,7 @@ using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.SysCraft;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.BotInfo;
+using MinesServer.Network.Chat;
 using MinesServer.Network.GUI;
 using MinesServer.Network.Movement;
 using MinesServer.Network.Programmator;
@@ -67,5 +68,23 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendLvl(this Player p) => p.connection?.SendU(new LevelPacket(p.skillslist.lvlsummary()));
         public static void SendOnline(this Player p) => p.connection?.SendU(new OnlinePacket(MServer.Instance!.online, 0));
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());
+        public static void SendChat(this Player p)
+        {
+            if (p.connection == null) return;
+
+            using var db = new DataBase();
+            p.currentchat ??= db.chats.FirstOrDefault(i => i.tag == "FED");
+
+            if (p.currentchat == null) return;
+
+            p.connection.SendU(new CurrentChatPacket(p.currentchat.tag, p.currentchat.Name));
+
+            var msg = p.currentchat.GetMessages();
+
+            if (msg.Length > 0)
+            {
+                p.connection.SendU(new ChatMessagesPacket("FED", p.currentchat.GetMessages()));
+            }
+        }
     }
 }
