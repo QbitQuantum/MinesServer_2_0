@@ -322,6 +322,8 @@ public static class ResourceExtractionService
         if (odob <= 0)
             return;
 
+        World.DamageCell(x, y, 1);
+
         // Отправляем пакет с добычей
         int sendType = forcedType switch
         {
