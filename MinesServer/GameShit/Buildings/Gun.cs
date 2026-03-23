@@ -23,6 +23,9 @@ namespace MinesServer.GameShit.Buildings
         private const int chunkRadius = (attackRadius + Chunk.ChunkWidth - 1) / Chunk.ChunkWidth;
         public const int attackRadiusSq = attackRadius * attackRadius;
 
+        private List<Chunk> cachedChunks;
+        private List<Player> playersInRangeBuffer = [];
+
         private static readonly TimeSpan AttackInterval = TimeSpan.FromSeconds(1);
         private DateTime lastAttackTime = ServerTime.Now;
 
@@ -33,9 +36,15 @@ namespace MinesServer.GameShit.Buildings
             charge = 1000;
         }
         private Gun() { }
+
         #region affectworld
+
+        private void CachedChunks()
+            => cachedChunks = World.W.GetChunksInRange(x, y, chunkRadius).ToList();
+
         public override void Build()
         {
+            CachedChunks();
             World.SetCell(x, y, 32, true);
             World.SetCell(x + 1, y, 35, true);
             World.SetCell(x - 1, y, 35, true);
@@ -124,29 +133,30 @@ namespace MinesServer.GameShit.Buildings
             if (ServerTime.Now - lastAttackTime < AttackInterval)
                 return;
 
-            var chunksInRange = World.W.GetChunksInRange(x, y, chunkRadius);
-            List<Player> playersInRange = new List<Player>();
+            playersInRangeBuffer.Clear();
 
-            foreach (var chunk in chunksInRange)
+            foreach (var chunk in cachedChunks)
             {
-                if (chunk.bots.Count == 0) continue;
+                if (chunk.bots.IsEmpty) continue;
 
-                foreach (var playerId in chunk.bots.Keys)
+                foreach (var kvp in chunk.bots)
                 {
-                    var player = DataBase.GetPlayer(playerId);
-                    if (player == null || player.cid == cid) continue;
+                    var player = kvp.Value;
 
-                    float dx = player.x - x;
-                    float dy = player.y - y;
-                    float sqrDistance = dx * dx + dy * dy;
+                    if (player.cid == cid)
+                        continue;
 
-                    if (sqrDistance <= attackRadiusSq)
-                        playersInRange.Add(player);
+                    int dx = player.x - x;
+                    int dy = player.y - y;
+
+                    if (dx * dx + dy * dy <= attackRadiusSq)
+                        playersInRangeBuffer.Add(player);
                 }
             }
-            if (playersInRange.Count != 0 && charge != 0)
+
+            if (playersInRangeBuffer.Count != 0 && charge != 0)
             {
-                foreach (var player in playersInRange)
+                foreach (var player in playersInRangeBuffer)
                 {
                     player.Hurt(60, DamageTypePlayer.Gun);
                     player.SendDFToBots(7, x, y, player.id, 1);
