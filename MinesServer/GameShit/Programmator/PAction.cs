@@ -102,20 +102,6 @@ namespace MinesServer.GameShit.Programmator
             );
         }
 
-        private static bool IsAcid(CellType type) => type switch
-        {
-            CellType.AcidRock or CellType.CorrosiveActiveAcid or CellType.GrayAcid or
-            CellType.LivingActiveAcid or CellType.PassiveAcid or CellType.PurpleAcid => true,
-            _ => false
-        };
-
-        private static bool IsMineral(CellType type) => type switch
-        {
-            CellType.Red or CellType.Green or CellType.Blue or
-            CellType.White or CellType.Violet => true,
-            _ => false
-        };
-
         private bool? CallWSAction(PEntity p)
         {
             switch (label.ToLower())
@@ -507,7 +493,7 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.IsAcid:
-                    Check(p, (x, y) => IsAcid((CellType)World.GetCell(x, y)));
+                    Check(p, (x, y) => ((CellType)World.GetCell(x, y)).IsAcid());
                     break;
                 case ActionType.IsRedRock:
                     Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedRock);
