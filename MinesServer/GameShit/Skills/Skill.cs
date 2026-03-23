@@ -104,7 +104,7 @@ namespace MinesServer.GameShit.Skills
             {
                 // Находим навык Upgrade
                 var upgradeSkill = p.skillslist.skills.Values
-                    .FirstOrDefault(s => s?.type == SkillType.Upgrade && type != SkillType.Discount);
+                    .FirstOrDefault(s => s?.type == SkillType.Upgrade && s.type != type);
                 if (upgradeSkill != null)
                 {
                     upgradeEffect = upgradeSkill.Effect;
@@ -112,7 +112,7 @@ namespace MinesServer.GameShit.Skills
 
                 // Находим навык Discount
                 var discountSkill = p.skillslist.skills.Values
-                    .FirstOrDefault(s => s?.type == SkillType.Discount && type != SkillType.Upgrade);
+                    .FirstOrDefault(s => s?.type == SkillType.Discount && s.type != type);
                 if (discountSkill != null)
                 {
                     discountEffect = discountSkill.Effect;
@@ -124,8 +124,8 @@ namespace MinesServer.GameShit.Skills
                 lvl,
                 exp,
                 Expiriense,
-                upgradeEffect,
-                discountEffect
+                discountEffect,
+                upgradeEffect
             );
         }
 
