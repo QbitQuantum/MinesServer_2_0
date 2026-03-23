@@ -51,10 +51,6 @@ namespace MinesServer.GameShit.WorldSystem
         private (int x, int y)[] _cachedNeighborCoords = null!;
         private readonly Dictionary<(int dx, int dy), Chunk?> _neighborDict = new();
 
-        // Константы для индексации
-        private const int NEIGHBOR_SIZE = VIEW_RADIUS * 2 + 1; // 5
-        private const int NEIGHBOR_TOTAL = NEIGHBOR_SIZE * NEIGHBOR_SIZE; // 25
-
         public ConcurrentDictionary<int, Player> bots { get; } = new();
         public (int x, int y) pos { get; }
         private bool[] packsprop { get; set; }
