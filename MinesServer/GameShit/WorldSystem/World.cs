@@ -282,6 +282,9 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool CanDamageCell(int x, int y)
             => !isAlive(x, y) && !isBuildingBlock(x, y) && IsForDigging(x, y);
 
+        public static bool IsEmptyForPlace(int x, int y) 
+            => IsEmpty(x, y) && W.GetPlayersFromPos(x, y).Count == 0;
+
         public static (int x, int y) FindEmptyForBox(int x, int y)
         {
             var dirs = new (int dx, int dy)[] { (0, 1), (1, 0), (-1, 0), (0, -1) };

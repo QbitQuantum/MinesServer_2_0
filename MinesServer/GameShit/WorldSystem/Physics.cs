@@ -100,7 +100,7 @@ namespace MinesServer.GameShit.WorldSystem
         {
             foreach (var dir in _directions)
             {
-                if (r.Next(1, 101) < 20 && World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 && World.IsEmpty(x + dir.x, y + dir.y))
+                if (r.Next(1, 101) < 20 && World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
                     World.MoveCell(x, y, dir.x, dir.y);
                     World.SetCell(x, y, 109);
@@ -118,7 +118,7 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     for (int wy = -1; wy <= 1; wy++)
                     {
-                        if (World.IsEmpty(x + wx, y + wy) && World.W.GetPlayersFromPos(x + wx, y + wy).Count == 0)
+                        if (World.IsEmptyForPlace(x + wx, y + wy))
                         {
                             World.SetCell(x + wx, y + wy, (byte)CellType.White);
                             World.SetDurability(x + wx, y + wy, 9 * mod);
@@ -157,7 +157,7 @@ namespace MinesServer.GameShit.WorldSystem
                 foreach (var i in _directions)
                 {
                     var cell = World.GetCell(x + i.x, y + i.y);
-                    if (cell == (byte)CellType.AliveBlack && World.IsEmpty(x + -i.x, y + -i.y) && World.W.GetPlayersFromPos(x + -i.x, y + -i.Item2).Count == 0)
+                    if (cell == (byte)CellType.AliveBlack && World.IsEmptyForPlace(x + -i.x, y + -i.y))
                     {
                         if (r.Next(1, 101) > 50)
                         {
@@ -180,7 +180,7 @@ namespace MinesServer.GameShit.WorldSystem
             var c = 0;
             foreach (var i in _directions)
             {
-                if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
+                if (World.IsEmptyForPlace(x + i.x, y + i.y))
                 {
                     World.SetCell(x + i.x, y + i.y, (byte)CellType.Cyan);
                     World.SetDurability(x + i.x, y + i.y, 2 * mod);
@@ -196,8 +196,8 @@ namespace MinesServer.GameShit.WorldSystem
             var c = 0;
             foreach (var dir in _directions)
             {
-                if (World.IsEmpty(x + dir.x, y + dir.y) && 
-                    World.W.GetPlayersFromPos(x + dir.x, y + dir.y).Count == 0 
+                
+                if (World.IsEmptyForPlace(x + dir.x, y + dir.y)
                     && !World.isAlive(x + -dir.x, y + -dir.y) 
                     && !World.GetProp(x + -dir.x, y + -dir.y).isEmpty 
                     && World.IsForDigging(x + -dir.x, y + -dir.y))
@@ -231,7 +231,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             foreach (var i in _directions)
             {
-                if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
+                if (World.IsEmptyForPlace(x + i.x, y + i.y))
                 {
                     World.SetCell(x + i.x, y + i.y, (byte)CellType.Red);
                     World.SetDurability(x + i.x, y + i.y, 3 * mod);
@@ -262,7 +262,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             foreach (var i in _directions)
             {
-                if (World.IsEmpty(x + i.x, y + i.y) && World.W.GetPlayersFromPos(x + i.x, y + i.y).Count == 0)
+                if (World.IsEmptyForPlace(x + i.x, y + i.y))
                 {
                     World.SetCell(x + i.x, y + i.y, (byte)CellType.Violet);
                     World.SetDurability(x + i.x, y + i.y, 2 * mod);
