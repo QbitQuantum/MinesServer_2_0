@@ -69,14 +69,11 @@ namespace MinesServer.GameShit.Skills
         {
             Dictionary<string, int> v = new();
             // Проверяем навык Upgrade для множителя опыта
-            foreach (var i in p.skillslist.skills.Values)
+            foreach (var skill in p.skillslist.skills.Values)
             {
-                if (i != null && UseSkill(SkillEffectType.OnExp, p))
+                if (skill != null && skill.type == SkillType.Upgrade)
                 {
-                    if (i.type == SkillType.Upgrade)
-                    {
-                        expv *= i.Effect;
-                    }
+                    expv *= skill.Effect;
                 }
             }
             exp += expv;
