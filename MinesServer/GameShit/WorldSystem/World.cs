@@ -266,10 +266,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         // TODO: Сделать приватным
         public static Cell GetProp(byte type) => CellsSerializer.cells[type];
-        public static Cell GetProp(int x, int y)
-        {
-            return ValidCoord(x, y) ? GetProp(GetCell(x, y)) : GetProp(0);
-        }
+        public static Cell GetProp(int x, int y) => ValidCoord(x, y) ? GetProp(GetCell(x, y)) : GetProp(0);
 
         private static void SetProp(int x, int y, bool packmesh) => W.GetChunk(x, y).SetProp(x, y, packmesh);
         private static bool IsCollectable(Cell p) => p.isPickable && !p.isEmpty;
