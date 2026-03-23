@@ -37,6 +37,12 @@ namespace MinesServer.GameShit.WorldSystem
         private const int NOT_VISIBLE_TIMEOUT_MINUTES = 5;
         private const int CHUNK_SHIFT = 5;
 
+        // Буферы с предварительным выделением памяти
+        private readonly List<(int x, int y, byte cell)> _cellsToUpdateBoulderSand = 
+            new(capacity: 256); // 32x32 / 4 = 256 клеток
+        private readonly List<(int x, int y)> _cellsToUpdateAlive = 
+            new(capacity: 256); // 32x32 / 4 = 256 клеток
+
         // Храним ссылку на мир для доступа к другим чанкам
         private World? _world;
 
@@ -279,7 +285,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         private void UpdateSandBoulders()
         {
-            var cellsToUpdate = new List<(int x, int y, byte cell)>();
+            _cellsToUpdateBoulderSand.Clear();
 
             for (int y = 0; y < ChunkWidth; y++)
             {
@@ -289,11 +295,11 @@ namespace MinesServer.GameShit.WorldSystem
                     var prop = World.GetProp(cell);
 
                     if (prop.isSand || prop.isBoulder)
-                        cellsToUpdate.Add((WorldX + x, WorldY + y, cell));
+                        _cellsToUpdateBoulderSand.Add((WorldX + x, WorldY + y, cell));
                 }
             }
 
-            foreach (var (worldX, worldY, cell) in cellsToUpdate)
+            foreach (var (worldX, worldY, cell) in _cellsToUpdateBoulderSand)
             {
                 var prop = World.GetProp(cell);
                 if (prop.isSand && Physics.Sand(worldX, worldY))
@@ -305,18 +311,18 @@ namespace MinesServer.GameShit.WorldSystem
 
         private void UpdateAlive()
         {
-            var cellsToUpdate = new List<(int x, int y)>();
+            _cellsToUpdateAlive.Clear();
 
             for (int y = 0; y < ChunkWidth; y++)
             {
                 for (int x = 0; x < ChunkHeight; x++)
                 {
                     if (World.isAlive(x, y))
-                        cellsToUpdate.Add((WorldX + x, WorldY + y));
+                        _cellsToUpdateAlive.Add((WorldX + x, WorldY + y));
                 }
             }
 
-            foreach (var (worldX, worldY) in cellsToUpdate)
+            foreach (var (worldX, worldY) in _cellsToUpdateAlive)
             {
                 if (World.isAlive(worldX, worldY) && Physics.Alive(worldX, worldY))
                     updlasttick = true;
