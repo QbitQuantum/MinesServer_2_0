@@ -353,7 +353,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 !HasActiveProgram)
             {
                 win = pack.GUIWin(this);
-                SendWindow();
+                this.SendWindow();
             }
 
             return false;
@@ -620,7 +620,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
 
             win = null;
-            SendWindow();
+            this.SendWindow();
 
             ResetHp();
 
@@ -663,7 +663,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void RunProgramm(Program p = null)
         {
             win = null;
-            SendWindow();
+            this.SendWindow();
 
             if (p == null)
                 programsData.Run();
@@ -773,18 +773,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region UI
 
-        public void SendWindow()
-        {
-            if (win != null)
-            {
-                connection?.SendU(new GUIPacket(win.ToString()));
-            }
-            else
-            {
-                connection?.SendU(new GuPacket());
-            }
-        }
-
         public void CallWinAction(string text)
         {
             if (win == null)
@@ -812,7 +800,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void OpenMyBuildings()
         {
             win = MyBuildings();
-            SendWindow();
+            this.SendWindow();
         }
 
         private Window MyBuildings()
