@@ -267,7 +267,7 @@ namespace MinesServer.Server
         }
         #endregion
         #region senders
-        public void SendWorldInfo() => SendU(new WorldInfoPacket(World.W.name, World.CellsWidth, World.CellsHeight, 123, "COCK", "http://pi.door/", "ok"));
+        public void SendWorldInfo() => SendU(World.WorldMapInfoPacket());
         public void SendWin(string win) => SendU(new GUIPacket(win));
         public void SendU(ITopLevelPacket data) => Send(new("U", data));
 

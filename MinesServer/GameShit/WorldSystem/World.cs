@@ -109,6 +109,12 @@ namespace MinesServer.GameShit.WorldSystem
             road.Delete();
             durability.Delete();
         }
+
+        public static WorldInfoPacket WorldMapInfoPacket()
+        {
+            return new WorldInfoPacket(W.name, CellsWidth, CellsHeight, 1, "DubugVersion", "http://localhost", "Update");
+        }
+
         private static readonly List<(DateTime TriggerTime, Action Action)> _delayedActions = new();
 
         public static void ScheduleAction(TimeSpan delay, Action action)

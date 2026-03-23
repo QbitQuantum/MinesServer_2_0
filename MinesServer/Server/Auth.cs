@@ -80,7 +80,7 @@ namespace MinesServer.Server
             {
                 player = DataBase.GetPlayer(p.user_id.Value)!;
             }
-            initiator.SendU(new WorldInfoPacket(World.W.name, World.CellsWidth, World.CellsHeight, 0, "COCK", "http://pi.door/", "ok"));
+            initiator.SendU(World.WorldMapInfoPacket());
             if (player == null)
             {
                 initiator.SendU(new BotInfoPacket("pidor", 0, 0, -1));
