@@ -277,7 +277,7 @@ namespace MinesServer.GameShit.Programmator
                             break;
 
                         case ActionType.Start:
-                            startpoint = (cFunction, current.current);
+                            //startpoint = (cFunction, current.current);
                             break;
                         case ActionType.Restart:
                             Run(); // Завершаем программу
