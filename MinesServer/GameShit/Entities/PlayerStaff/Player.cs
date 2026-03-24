@@ -388,7 +388,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             this.x = x;
             this.y = y;
-            SendMyMove();
+            BotsRender();
             CheckChunkChanged();
         }
 
@@ -571,7 +571,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void tp(int x, int y)
         {
             connection?.SendU(new TPPacket(x, y));
-            SendMyMove();
+            BotsRender();
         }
 
         public void SetResp(Resp r) => resp = r;
@@ -686,11 +686,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (connection == null) return;
 
             World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
-        }
-
-        public void SendMyMove()
-        {
-            BotsRender();
         }
 
         public void CheckChunkChanged(bool force = false)

@@ -167,7 +167,7 @@ namespace MinesServer.GameShit.ClanSystem
                 db.clans.Remove(this);
             }
             p.SendClan();
-            p.SendMyMove();
+            p.BotsRender();
             p.SendWindow();
             p.win = null;
             db.SaveChanges();
