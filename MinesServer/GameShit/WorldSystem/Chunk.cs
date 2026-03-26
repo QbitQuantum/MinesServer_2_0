@@ -192,7 +192,10 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 foreach (var kvp in chunk.bots)
                 {
-                    kvp.Value.connection?.SendB(new HBPacket([new HBDirectedFXPacket(kvp.Key, x, y, fx, dir, color)]));
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(new HBPacket([new HBDirectedFXPacket(kvp.Key, x, y, fx, dir, color)]));
                 }
             }
         }
@@ -202,9 +205,12 @@ namespace MinesServer.GameShit.WorldSystem
             var packet = new HBPacket([new HBFXPacket(x, y, fx)]);
             foreach (var chunk in GetNeighboringChunks())
             {
-                foreach (var id in chunk.bots)
+                foreach (var kvp in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
                 }
             }
         }
@@ -214,9 +220,12 @@ namespace MinesServer.GameShit.WorldSystem
             var packet = new HBPacket([new HBMapPacket(x, y, 1, 1, [World.GetCell(x, y)])]);
             foreach (var chunk in GetNeighboringChunks())
             {
-                foreach (var id in chunk.bots)
+                foreach (var kvp in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
                 }
             }
         }
@@ -233,9 +242,12 @@ namespace MinesServer.GameShit.WorldSystem
 
             foreach (var chunk in GetNeighboringChunks())
             {
-                foreach (var id in chunk.bots)
+                foreach (var kvp in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
                 }
             }
         }
@@ -245,9 +257,12 @@ namespace MinesServer.GameShit.WorldSystem
             var packet = new HBPacket([new HBPacksPacket(GetChunkId(x, y), [])]);
             foreach (var chunk in GetNeighboringChunks())
             {
-                foreach (var id in chunk.bots)
+                foreach (var kvp in chunk.bots)
                 {
-                    DataBase.GetPlayer(id.Key)?.connection?.SendB(packet);
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
                 }
             }
         }
