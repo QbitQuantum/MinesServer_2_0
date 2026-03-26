@@ -209,9 +209,9 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
-        public void SendCellToBots(int x, int y, byte cell)
+        public void SendCellToBots(int x, int y)
         {
-            var packet = new HBPacket([new HBMapPacket(x, y, 1, 1, [cell])]);
+            var packet = new HBPacket([new HBMapPacket(x, y, 1, 1, [World.GetCell(x, y)])]);
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
@@ -228,7 +228,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             // Кэшируем пакет, так как он одинаков для всех получателей
             var packet = new HBPacket([
-                new HBPacksPacket(GetPackKey(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])
+                new HBPacksPacket(GetChunkId(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])
             ]);
 
             foreach (var chunk in GetNeighboringChunks())
@@ -242,7 +242,7 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void ClearPack(int x, int y)
         {
-            var packet = new HBPacket([new HBPacksPacket(GetPackKey(x, y), [])]);
+            var packet = new HBPacket([new HBPacksPacket(GetChunkId(x, y), [])]);
             foreach (var chunk in GetNeighboringChunks())
             {
                 foreach (var id in chunk.bots)
@@ -402,13 +402,11 @@ namespace MinesServer.GameShit.WorldSystem
 
         #region Pack менеджмент
 
-        public void SetProp(int xx, int yy, bool packmesh = false)
+        public void SetProp(int x, int y, bool packmesh = false)
         {
-            int x = xx - WorldX;
-            int y = yy - WorldY;
             LoadPackProps();
-            packsprop[x + y * ChunkWidth] = packmesh;
-            SendCellToBots(xx, yy, this[x, y]);
+            packsprop[GetPackId(x, y)] = packmesh;
+            SendCellToBots(x, y);
         }
 
         public void LoadPackProps()
@@ -421,14 +419,19 @@ namespace MinesServer.GameShit.WorldSystem
                 p.Build();
         }
 
-        public void DestroyCell(int xx, int yy)
+        public void DestroyCell(int x, int y)
         {
-            int x = xx - WorldX;
-            int y = yy - WorldY;
-            SendCellToBots(xx, yy, this[x, y]);
+            SendCellToBots(x, y);
         }
 
-        private static int GetPackKey(int x, int y) => x + y * ChunksW;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetChunkId(int x, int y) => x + y * ChunksW;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetPackKey(int x, int y) => x + y * ChunkWidth;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int GetPackId(int x, int y) => GetPackKey(x - WorldX, y - WorldY);
 
         public IHubPacket[] pPakcs()
         {
@@ -436,7 +439,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             foreach (var p in packs.Values.Where(p => p.type != PackType.None))
             {
-                int pos = GetPackKey(p.x, p.y);
+                int pos = GetChunkId(p.x, p.y);
                 if (!packGroups.ContainsKey(pos))
                     packGroups[pos] = new List<HBPack>();
 
@@ -448,39 +451,29 @@ namespace MinesServer.GameShit.WorldSystem
                 .ToArray();
         }
 
-        public Pack? GetPack(int xx, int yy)
-        {
-            int x = xx - WorldX;
-            int y = yy - WorldY;
-            int key = x + y * ChunkWidth;
-            return packs.TryGetValue(key, out var pack) ? pack : null;
-        }
-
         public void AddPack(Pack p)
         {
-            int x = p.x - WorldX;
-            int y = p.y - WorldY;
-            int key = x + y * ChunkWidth;
-            packs[key] = p;
-
+            packs[GetPackId(p.x, p.y)] = p;
             SendPack((char)p.type, p.x, p.y, p.cid, p.off);
         }
 
         public void RemovePack(Pack p)
         {
-            int x = p.x - WorldX;
-            int y = p.y - WorldY;
-            int key = x + y * ChunkWidth;
-            if (packs.Remove(key))
-            {
+            if (packs.Remove(GetPackId(p.x, p.y)))
                 ClearPack(p.x, p.y);
-            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Pack? GetPack(int x, int y)
+        {
+            return packs.TryGetValue(GetPackId(x, y), 
+                out var pack) ? pack : null;
         }
 
         public bool PackPart(int x, int y)
         {
             LoadPackProps();
-            return packsprop[x - WorldX + (y - WorldY) * ChunkWidth];
+            return packsprop[GetPackId(x, y)];
         }
 
         public HBMapPacket MapPacket()
@@ -499,7 +492,7 @@ namespace MinesServer.GameShit.WorldSystem
         public IEnumerable<IHubPacket> PackEmptyPacket()
         {
             foreach (var pack in packs.Values)
-                yield return new HBPacksPacket(GetPackKey(pack.x, pack.y), []);
+                yield return new HBPacksPacket(GetChunkId(pack.x, pack.y), []);
         }
 
         #endregion
