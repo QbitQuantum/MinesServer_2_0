@@ -1,4 +1,8 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using System.Diagnostics;
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
+using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.WorldSystem;
@@ -8,223 +12,401 @@ using MinesServer.Network.BotInfo;
 using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
-using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
 
 
 namespace MinesServer.Server
 {
-    public class Auth(Session initiator)
+    public class Auth
     {
-        public Window authwin;
-        public bool complited = false;
-        public string nick = "";
-        public string passwd = "";
-        public void CallAction(string text)
+        private readonly Session _initiator;
+        private Player _tempPlayer;
+        private string _pendingNickname;
+
+        public Window AuthWindow { get; private set; }
+        public bool IsCompleted { get; private set; }
+        public string Nickname { get; private set; } = string.Empty;
+        public string Password { get; private set; } = string.Empty;
+
+        public Player temp
         {
-            if (text.StartsWith("exit"))
-            {
-                temp = null;
-                nick = "";
-                passwd = "";
-                authwin = def;
-                initiator.SendWin(authwin.ToString());
-                return;
-            }
-            authwin?.ProcessButton(text);
-            initiator.SendWin(authwin.ToString());
+            get => _tempPlayer;
+            set => _tempPlayer = value;
         }
-        public void NickNotA(Session initiator)
+
+        public Auth(Session initiator)
         {
-            authwin.CurrentTab.Replace(new Page
-            {
-                Text = "Пароль\nВведён не верный пароль. Попробуйте ещё раз.",
-                Input = new InputConfig
-                {
-                    IsConsole = true,
-                    Placeholder = " "
-                },
-                Buttons = [new("OK", "%I%", (args) => TryToAuthByPlayer(args.Input))]
-            });
+            _initiator = initiator ?? throw new ArgumentNullException(nameof(initiator));
+            AuthWindow = CreateDefaultWindow();
         }
-        private Window def => new Window()
+
+        public void ProcessAction(string text)
         {
-            Title = "ВХОД",
-            Tabs = [new Tab()
-                    {
-                        Label = "Ник",
-                        Action = "auth",
-                        InitialPage = new Page()
-                        {
-                            Text = "Авторизация",
-                            Buttons = [
-                                new MButton("Новый акк", "newakk", (args) => CreateNew()),
-                                new MButton("ok", $"nick:{ActionMacros.Input}", (args) => TryToFindByNick(args.Input!))
-                            ],
-                            Input = new InputConfig()
-                            {
-                                IsConsole = true,
-                                Placeholder = " "
-                            }
-                        }
-                    }],
-            ShowTabs = false
-        };
-        public void TryToAuth(AUPacket p, string sid)
-        {
-            Console.WriteLine("auth?");
-            int res;
-            Player player = null;
-            if (p.user_id.HasValue)
+            if (string.IsNullOrWhiteSpace(text))
+                return;
+
+            if (text.StartsWith("exit", StringComparison.OrdinalIgnoreCase))
             {
-                player = DataBase.GetPlayer(p.user_id.Value)!;
-            }
-            initiator.SendU(World.WorldMapInfoPacket());
-            if (player == null)
-            {
-                initiator.SendU(new BotInfoPacket("pidor", 0, 0, -1));
-                initiator.SendU(new HBPacket([World.W.GetChunk(0, 0).MapPacket()]));
-                authwin = def;
-                initiator.SendWin(authwin.ToString());
+                ResetAuthState();
+                SendCurrentWindow();
                 return;
             }
-            else if (player != null && CalculateMD5Hash(player.hash + sid) == p.token)
-            {
-                player.connection = null;
-                player.connection = initiator;
-                initiator.player = player;
-                initiator.SendU(new GuPacket());
-                player.Init();
-                return;
-            }
-            if (player == null)
-            {
-                return;
-            }
-            initiator.auth = null;
+
+            AuthWindow?.ProcessButton(text);
+            SendCurrentWindow();
         }
-        public void CreateNew()
+
+        public void TryToAuthenticate(AUPacket packet, string sessionId)
         {
-            temp = new Player();
-            authwin.CurrentTab.Open(new Page
+            Console.WriteLine("Attempting authentication...");
+
+            Player existingPlayer = null;
+            if (packet.user_id.HasValue)
+            {
+                existingPlayer = DataBase.GetPlayer(packet.user_id.Value);
+            }
+
+            SendWorldInfo();
+
+            if (existingPlayer == null)
+            {
+                HandleNewPlayer();
+                return;
+            }
+
+            if (existingPlayer != null && CalculateMD5Hash(existingPlayer.hash + sessionId) == packet.token) 
+            {
+                HandleSpecialPlayer(existingPlayer);
+                return;
+            }
+
+            if (existingPlayer != null)
+            {
+                CompleteAuthentication(existingPlayer);
+            }
+        }
+
+        private void HandleNewPlayer()
+        {
+            _initiator.SendU(new BotInfoPacket("pidor", 0, 0, -1));
+            _initiator.SendU(new HBPacket([World.W.GetChunk(0, 0).MapPacket()]));
+            AuthWindow = CreateDefaultWindow();
+            SendCurrentWindow();
+        }
+
+        private void HandleSpecialPlayer(Player player)
+        {
+            player.connection = null;
+            player.connection = _initiator;
+            _initiator.player = player;
+            _initiator.SendU(new GuPacket());
+            player.Init();
+            // Важно: помечаем аутентификацию как завершенную
+            IsCompleted = true;
+            _initiator.auth = null;
+        }
+
+        private void CompleteAuthentication(Player player)
+        {
+            _initiator.auth = null;
+        }
+
+        public void CreateNewAccount()
+        {
+            _tempPlayer = new Player();
+            var nicknamePage = new Page
             {
                 Title = "НОВЫЙ ИГРОК",
                 Text = "Ник",
                 Input = new InputConfig
                 {
                     IsConsole = true,
-                    Placeholder = " "
+                    Placeholder = "Введите никнейм"
                 },
-                Buttons = [new("OK", $"newnick:{ActionMacros.Input}", (args) => { using var db = new DataBase(); if (db.players.FirstOrDefault(i => i.name == args.Input) == null) { SetPasswdForNew(args.Input!); } else { initiator.SendU(new OKPacket("auth", "Ник занят")); CreateNew(); } })]
-            });
-            initiator.SendWin(authwin.ToString());
+                Buttons = [new MButton("OK", $"newnick:{ActionMacros.Input}", OnNicknameEntered)]
+            };
+
+            OpenPage(nicknamePage);
         }
 
-        private static bool NickNotAvl(string nick)
+        private void OnNicknameEntered(ActionArgs args)
+        {
+            var nickname = args.Input;
+
+            if (string.IsNullOrWhiteSpace(nickname))
+            {
+                ShowError("Никнейм не может быть пустым");
+                CreateNewAccount();
+                return;
+            }
+
+            if (IsNicknameTaken(nickname))
+            {
+                ShowError("Ник занят");
+                CreateNewAccount();
+                return;
+            }
+
+            _pendingNickname = nickname;
+            ShowPasswordPageForNewAccount();
+        }
+
+        private bool IsNicknameTaken(string nickname)
         {
             using var db = new DataBase();
-            try
-            {
-                Console.WriteLine(db.players.Count(p => p.name == nick));
-
-                return db.players.Count(p => p.name == nick) > 0;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return db.players.Any(p => p.name == nickname);
         }
 
-        private void SetPasswdForNew(string nick)
+        private void ShowPasswordPageForNewAccount()
         {
-            this.nick = nick;
-            authwin.CurrentTab.Open(new Page
+            var passwordPage = new Page
             {
                 Title = "НОВЫЙ ИГРОК",
                 Text = "Пароль",
                 Input = new InputConfig
                 {
                     IsConsole = true,
+                    Placeholder = "Введите пароль",
+                },
+                Buttons = [new MButton("OK", $"passwd:{ActionMacros.Input}", OnPasswordEnteredForNewAccount)]
+            };
+
+            OpenPage(passwordPage);
+        }
+
+        private void OnPasswordEnteredForNewAccount(ActionArgs args)
+        {
+            var password = args.Input;
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Пароль не может быть пустым");
+                ShowPasswordPageForNewAccount();
+                return;
+            }
+
+            CreatePlayerAccount(_pendingNickname, password);
+        }
+
+        private void CreatePlayerAccount(string nickname, string password)
+        {
+            using var db = new DataBase();
+
+            _tempPlayer.CreatePlayer();
+            _tempPlayer.name = nickname;
+            _tempPlayer.passwd = password;
+
+            db.players.Add(_tempPlayer);
+            db.skills.Attach(_tempPlayer.skillslist);
+            db.SaveChanges();
+
+            CompleteLoginAfterCreation();
+        }
+
+        private void CompleteLoginAfterCreation()
+        {
+            // Получаем данные игрока из БД
+            var createdPlayer = DataBase.GetPlayer(_tempPlayer.name);
+
+            if (createdPlayer == null)
+            {
+                ShowError("Ошибка создания аккаунта");
+                ResetAuthState();
+                return;
+            }
+
+            // Создаем соединение
+            createdPlayer.connection = _initiator;
+            _initiator.player = createdPlayer;
+
+            // Отправляем пакет аутентификации
+            _initiator.SendU(new AHPacket(createdPlayer.id, createdPlayer.hash));
+
+            // Помечаем аутентификацию как завершенную
+            IsCompleted = true;
+
+            // Очищаем ссылку на auth
+            _initiator.auth = null;
+
+            // Инициализируем игрока
+            createdPlayer.Init();
+
+            Console.WriteLine($"Account created and logged in: {createdPlayer.name}");
+        }
+
+        private void TryToFindByNickname(string nickname)
+        {
+            if (string.IsNullOrWhiteSpace(nickname))
+            {
+                ShowError("Введите никнейм");
+                SendCurrentWindow();
+                return;
+            }
+
+            var player = DataBase.GetPlayer(nickname);
+
+            if (player == null)
+            {
+                ShowError("Игрок не найден");
+                SendWorldInfo();
+                SendCurrentWindow();
+                return;
+            }
+
+            _tempPlayer = player;
+            Nickname = nickname;
+            ShowPasswordPageForExistingAccount();
+        }
+
+        private void ShowPasswordPageForExistingAccount()
+        {
+            var passwordPage = new Page
+            {
+                Text = "Пароль",
+                Input = new InputConfig
+                {
+                    IsConsole = true,
+                    Placeholder = "Введите пароль",
+                },
+                Buttons = [new MButton("OK", $"passwd:{ActionMacros.Input}", OnPasswordEnteredForExistingAccount)]
+            };
+
+            OpenPage(passwordPage);
+        }
+
+        private void OnPasswordEnteredForExistingAccount(ActionArgs args)
+        {
+            var password = args.Input;
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Введите пароль");
+                ShowPasswordPageForExistingAccount();
+                return;
+            }
+
+            ValidatePassword(password);
+        }
+
+        private void ValidatePassword(string password)
+        {
+            if (_tempPlayer.passwd == password)
+            {
+                CompleteLogin();
+                return;
+            }
+
+            ShowError("Не верный пароль");
+            ShowPasswordPageForExistingAccount();
+        }
+
+        private void CompleteLogin()
+        {
+            // Получаем данные игрока
+            var player = DataBase.GetPlayer(_tempPlayer.id);
+
+            if (player == null)
+            {
+                ShowError("Ошибка загрузки игрока");
+                ResetAuthState();
+                return;
+            }
+
+            IsCompleted = true;
+            player.connection = _initiator;
+            _initiator.player = player;
+            _initiator.SendU(new AHPacket(player.id, player.hash));
+
+            // Очищаем ссылку на auth
+            _initiator.auth = null;
+
+            player.Init();
+
+            Console.WriteLine($"Player logged in: {player.name}");
+        }
+
+        private void ShowError(string message)
+        {
+            var errorPage = new Page
+            {
+                Text = $"Ошибка\n{message}",
+                Input = new InputConfig
+                {
+                    IsConsole = true,
                     Placeholder = " "
                 },
-                Buttons = [new("OK", $"passwd:{ActionMacros.Input}", (args) => EndCreateAndInit(args.Input!))]
-            });
-            initiator.SendWin(authwin.ToString());
-        }
-        private void EndCreateAndInit(string passwd)
-        {
-            using var db = new DataBase();
-            temp.CreatePlayer();
-            db.players.Add(temp);
-            temp.passwd = passwd;
-            temp.name = nick;
-            db.skills.Attach(temp.skillslist);
-            db.SaveChanges();
-            initiator.SendU(new AHPacket(temp.id, temp.hash));
-            initiator.player = DataBase.GetPlayer(temp.name);
-            initiator.player.Death();
-            db.SaveChanges();
-            initiator.player = DataBase.GetPlayer(initiator.player.id);
-            initiator.player.connection = initiator;
-            initiator.player.Init();
-        }
-        private void TryToFindByNick(string name)
-        {
-            using var db = new DataBase();
-            Player player = DataBase.GetPlayer(name);
-            if (player != default(Player))
-            {
-                temp = player;
-                nick = name;
-                authwin.CurrentTab.Open(new Page
+                Buttons = [new MButton("OK", "%I%", args =>
                 {
-                    Text = "Пароль",
-                    Input = new InputConfig
+                    // После показа ошибки возвращаемся к начальному окну
+                    if (message.Contains("пароль") || message.Contains("Ник"))
                     {
-                        IsConsole = true,
-                        Placeholder = " "
-                    },
-                    Buttons = [new("OK", $"passwd:{ActionMacros.Input}", (args) => TryToAuthByPlayer(args.Input!))]
-                });
-                initiator.SendWin(authwin.ToString());
-                return;
+                        AuthWindow = CreateDefaultWindow();
+                        SendCurrentWindow();
+                    }
+                })]
+            };
 
-            }
-            initiator.SendU(new OKPacket("auth", "Игрок не найден"));
-            initiator.SendWorldInfo();
-            initiator.SendWin(authwin.ToString());
+            OpenPage(errorPage);
         }
-        private void TryToAuthByPlayer(string passwd)
+
+        private Window CreateDefaultWindow()
         {
-            if (temp.passwd == passwd)
+            return new Window
             {
-                complited = true;
-                initiator.player = DataBase.GetPlayer(temp.id);
-                initiator.player.connection = initiator;
-                initiator.SendU(new AHPacket(temp.id, temp.hash));
-                initiator.player.Init();
-                return;
-            }
-            initiator.SendU(new OKPacket("auth", "Не верный пароль"));
-            initiator.SendWin(authwin.ToString());
-
+                Title = "ВХОД",
+                Tabs = [new Tab
+                {
+                    Label = "Ник",
+                    Action = "auth",
+                    InitialPage = new Page
+                    {
+                        Text = "Авторизация",
+                        Buttons = [
+                            new MButton("Новый акк", "newakk", _ => CreateNewAccount()),
+                            new MButton("OK", $"nick:{ActionMacros.Input}", args => TryToFindByNickname(args.Input!))
+                        ],
+                        Input = new InputConfig
+                        {
+                            IsConsole = true,
+                            Placeholder = "Введите никнейм"
+                        }
+                    }
+                }],
+                ShowTabs = false
+            };
         }
-        public Player temp = null;
+
+        private void OpenPage(Page page)
+        {
+            AuthWindow.CurrentTab.Open(page);
+            SendCurrentWindow();
+        }
+
+        private void SendCurrentWindow()
+        {
+            _initiator.SendWin(AuthWindow.ToString());
+        }
+
+        private void SendWorldInfo()
+        {
+            _initiator.SendU(World.WorldMapInfoPacket());
+        }
+
+        private void ResetAuthState()
+        {
+            _tempPlayer = null;
+            _pendingNickname = null;
+            Nickname = string.Empty;
+            Password = string.Empty;
+            IsCompleted = false;
+            AuthWindow = CreateDefaultWindow();
+        }
+
         private static string CalculateMD5Hash(string input)
         {
-            HashAlgorithm hashAlgorithm = MD5.Create();
+            using var md5 = MD5.Create();
             var bytes = Encoding.ASCII.GetBytes(input);
-            var array = hashAlgorithm.ComputeHash(bytes);
-            var stringBuilder = new StringBuilder();
-            for (var i = 0; i < array.Length; i++)
-            {
-                stringBuilder.Append(array[i].ToString("x2"));
-            }
-
-            return stringBuilder.ToString();
+            var hash = md5.ComputeHash(bytes);
+            return Convert.ToHexString(hash).ToLower();
         }
     }
 }
-
-
