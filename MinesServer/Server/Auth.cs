@@ -219,13 +219,6 @@ namespace MinesServer.Server
 
         }
         public Player temp = null;
-        public static string GenerateSessionId()
-        {
-            var random = new Random();
-            const string chars = "abcdefghijklmnoprtsuxyz0123456789";
-            return new string(Enumerable.Repeat(chars, 5)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
         public static string CalculateMD5Hash(string input)
         {
             HashAlgorithm hashAlgorithm = MD5.Create();

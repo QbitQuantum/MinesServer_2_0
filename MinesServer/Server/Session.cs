@@ -29,14 +29,21 @@ namespace MinesServer.Server
         public Player? player;
         public Auth auth;
         public Session(TcpServer server) : base(server) { father = server as MServer; }
-        public string sid { get; set; }
+        private string sid { get; set; }
         #endregion
 
+        private static string GenerateSessionId()
+        {
+            var random = new Random();
+            const string chars = "abcdefghijklmnoprtsuxyz0123456789";
+            return new string(Enumerable.Repeat(chars, 5)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
 
         #region server handlers
         protected override void OnConnected()
         {
-            sid = Auth.GenerateSessionId();
+            sid = GenerateSessionId();
             Console.WriteLine($"Connected__\npoint:{Socket.RemoteEndPoint}");
             SendU(new StatusPacket("твоей жопе"));
             SendU(new AUPacket(sid));
