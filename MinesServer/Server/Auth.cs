@@ -219,7 +219,7 @@ namespace MinesServer.Server
 
         }
         public Player temp = null;
-        public static string CalculateMD5Hash(string input)
+        private static string CalculateMD5Hash(string input)
         {
             HashAlgorithm hashAlgorithm = MD5.Create();
             var bytes = Encoding.ASCII.GetBytes(input);
