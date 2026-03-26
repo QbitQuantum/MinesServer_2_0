@@ -281,7 +281,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 ShowTabs = true,
                 Title = "МАРКЕТ",
-                Tabs = [TabBuyCry(p), TabCellCry(p), TabProducts(p), TabAuction(p)]
+                Tabs = [TabCellCry(p), TabBuyCry(p), TabProducts(p), TabAuction(p)]
             };
         }
     }
