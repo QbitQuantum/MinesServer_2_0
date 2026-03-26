@@ -104,20 +104,6 @@ namespace MinesServer.Server
             }
             initiator.auth = null;
         }
-        public static bool NickNotAvl(string nick)
-        {
-            using var db = new DataBase();
-            try
-            {
-                Console.WriteLine(db.players.Count(p => p.name == nick));
-
-                return db.players.Count(p => p.name == nick) > 0;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         public void CreateNew()
         {
             temp = new Player();
@@ -134,7 +120,23 @@ namespace MinesServer.Server
             });
             initiator.SendWin(authwin.ToString());
         }
-        public void SetPasswdForNew(string nick)
+
+        private static bool NickNotAvl(string nick)
+        {
+            using var db = new DataBase();
+            try
+            {
+                Console.WriteLine(db.players.Count(p => p.name == nick));
+
+                return db.players.Count(p => p.name == nick) > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private void SetPasswdForNew(string nick)
         {
             this.nick = nick;
             authwin.CurrentTab.Open(new Page
@@ -150,7 +152,7 @@ namespace MinesServer.Server
             });
             initiator.SendWin(authwin.ToString());
         }
-        public void EndCreateAndInit(string passwd)
+        private void EndCreateAndInit(string passwd)
         {
             using var db = new DataBase();
             temp.CreatePlayer();
@@ -167,7 +169,7 @@ namespace MinesServer.Server
             initiator.player.connection = initiator;
             initiator.player.Init();
         }
-        public void TryToFindByNick(string name)
+        private void TryToFindByNick(string name)
         {
             using var db = new DataBase();
             Player player = DataBase.GetPlayer(name);
@@ -193,7 +195,7 @@ namespace MinesServer.Server
             initiator.SendWorldInfo();
             initiator.SendWin(authwin.ToString());
         }
-        public void TryToAuthByPlayer(string passwd)
+        private void TryToAuthByPlayer(string passwd)
         {
             if (temp.passwd == passwd)
             {
@@ -204,16 +206,6 @@ namespace MinesServer.Server
                 initiator.player.Init();
                 return;
             }
-            /*authwin.CurrentTab.Replace(new Page
-            {
-                Text = "Пароль\nВведён не верный пароль. Попробуйте ещё раз.",
-                Input = new InputConfig
-                {
-                    IsConsole = true,
-                    Placeholder = " "
-                },
-                Buttons = [new("OK", "%I%", (args) => TryToAuthByPlayer(args.Input, initiator))]
-            });*/
             initiator.SendU(new OKPacket("auth", "Не верный пароль"));
             initiator.SendWin(authwin.ToString());
 
