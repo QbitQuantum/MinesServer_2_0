@@ -88,7 +88,7 @@ namespace MinesServer.Server
         private void AU(AUPacket p)
         {
             auth = new Auth(this);
-            auth.TryToAuth(p, sid);
+            auth.TryToAuthenticate(p, sid);
         }
         private void TY(TYPacket packet)
         {
@@ -256,9 +256,9 @@ namespace MinesServer.Server
             {
                 return;
             }
-            if ((auth != null && !auth.complited))
+            if ((auth != null && !auth.IsCompleted))
             {
-                auth.CallAction(button);
+                auth.ProcessAction(button);
                 return;
             }
             father.time.AddAction(() =>
