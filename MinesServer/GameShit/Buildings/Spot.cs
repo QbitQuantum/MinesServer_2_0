@@ -66,18 +66,9 @@ namespace MinesServer.GameShit.Buildings
         /// </summary>
         public void EnsureEntity(Player owner)
         {
-            if (entity != null)
-                return;
             if (owner.id != ownerid)
                 return;
             entity = new BotSpot(x, y, owner);
-            try
-            {
-                var arr = JsonConvert.DeserializeObject<long[]>(basket ?? "[0,0,0,0,0,0]");
-                if (arr != null && arr.Length >= 6)
-                    entity.crys.BoxCrys(arr);
-            }
-            catch { /* ignore invalid basket */ }
         }
 
         private void GiveCrystals(long[]? sliders, Player p)
@@ -132,7 +123,6 @@ namespace MinesServer.GameShit.Buildings
         }
         private void StopProgram(Player p)
         {
-            EnsureEntity(p);
             if (entity == null)
                 return;
 
@@ -160,8 +150,6 @@ namespace MinesServer.GameShit.Buildings
         }
         private IPage ProgramsPage(Player p)
         {
-            EnsureEntity(p);
-
             using var db = new DataBase();
             var freshSpot = db.spots
                 .Include(s => s.selected)
@@ -249,8 +237,6 @@ namespace MinesServer.GameShit.Buildings
 
         private IPage CrystalsPage(Player p)
         {
-            EnsureEntity(p);
-
             using var db = new DataBase();
             var freshSpot = db.spots
                 .Include(s => s.selected)

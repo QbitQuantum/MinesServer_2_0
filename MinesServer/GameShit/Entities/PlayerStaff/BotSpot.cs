@@ -32,7 +32,7 @@ public class BotSpot : PEntity
         Health = 100;
 
         using var db = new DataBase();
-        db.botspots.Remove(this);
+        db.botspots.Add(this);
         db.SaveChanges();
     }
     public int tail => 1;
@@ -96,7 +96,7 @@ public class BotSpot : PEntity
         Translate();
 
         using var db = new DataBase();
-        db.botspots.Add(this);
+        db.botspots.Remove(this);
         db.SaveChanges();
     }
 
