@@ -115,15 +115,9 @@ namespace MinesServer.GameShit.Buildings
             if (prog == null || prog.owner?.id != p.id)
                 return;
 
-            var spot = db.spots.FirstOrDefault(s => s.id == this.id);
-
-            if (spot == null) return;
-
-            spot.selected = prog;
-
+            db.spots.Attach(this);
+            selected = prog;
             db.SaveChanges();
-
-            this.selected = prog;
 
             ReopenWindow(p, TabPrograms);
         }
