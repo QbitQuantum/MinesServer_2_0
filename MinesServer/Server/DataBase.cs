@@ -95,6 +95,33 @@ namespace MinesServer.Server
             db.SaveChanges();
             db.Dispose();
         }
+
+        public static int GetNextId()
+        {
+            using var db = new DataBase();
+            return GetNextUniqueId(db);
+        }
+
+        private static int GetNextUniqueId(DataBase db)
+        {
+            // Получаем все ID из таблицы игроков
+            var playerIds = db.players.Select(p => p.id).ToList();
+
+            // Получаем все ID из таблицы роботов
+            var robotIds = db.botspots.Select(r => r.id).ToList();
+
+            // Объединяем все существующие ID
+            var allExistingIds = playerIds.Concat(robotIds).ToList();
+
+            // Если нет ни одного ID, начинаем с 1
+            if (!allExistingIds.Any())
+                return 1;
+
+            // Находим максимальный ID и увеличиваем на 1
+            int maxId = allExistingIds.Max();
+            return maxId + 1;
+        }
+
         public static Player? GetPlayer(int id)
         {
             var player = activeplayers.FirstOrDefault(p => p.id == id);

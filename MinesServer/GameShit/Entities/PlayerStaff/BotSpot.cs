@@ -20,8 +20,8 @@ public class BotSpot : PEntity
     public BotSpot() { }
     public BotSpot(int x, int y, Player owner)
     {
-        id = -owner.id;
         _pdata = new(this);
+        id = DataBase.GetNextId();
         this.x = x;
         this.y = y;
         this.owner = owner;

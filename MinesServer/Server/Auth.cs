@@ -192,7 +192,7 @@ namespace MinesServer.Server
             using var db = new DataBase();
 
             _tempPlayer.CreatePlayer();
-            _tempPlayer.id = GeneratePlayerId();
+            _tempPlayer.id = DataBase.GetNextId();
             _tempPlayer.name = nickname;
             _tempPlayer.passwd = password;
 
@@ -408,13 +408,6 @@ namespace MinesServer.Server
             var bytes = Encoding.ASCII.GetBytes(input);
             var hash = md5.ComputeHash(bytes);
             return Convert.ToHexString(hash).ToLower();
-        }
-
-        private static int GeneratePlayerId()
-        {
-            using var db = new DataBase();
-            var maxId = db.players.Any() ? db.players.Max(p => p.id) : 0;
-            return maxId + 1;
         }
     }
 }
