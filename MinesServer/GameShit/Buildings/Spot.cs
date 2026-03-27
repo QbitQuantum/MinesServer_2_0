@@ -97,21 +97,16 @@ namespace MinesServer.GameShit.Buildings
             p.SendCrys();
             ReopenWindow(p, TabCrystals);
         }
+
         private void UninstallProgram(Player p)
         {
             using var db = new DataBase();
-
-            var spot = db.spots.FirstOrDefault(s => s.id == this.id);
-            if (spot == null) return;
-
-            spot.selected = null;
-
+            db.spots.Attach(this);
+            selected = null;
             db.SaveChanges();
-
-            this.selected = null;
-
             ReopenWindow(p, TabPrograms);
         }
+
         private void InstallProgram(int progId, Player p)
         {
             using var db = new DataBase();
