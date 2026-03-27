@@ -30,6 +30,10 @@ public class BotSpot : PEntity
         crys.Changed += Translate;
         MaxHealth = 100;
         Health = 100;
+
+        using var db = new DataBase();
+        db.botspots.Remove(this);
+        db.SaveChanges();
     }
     public int tail => 1;
     public int skin => 3;
@@ -90,6 +94,10 @@ public class BotSpot : PEntity
         }
         ResetHp();
         Translate();
+
+        using var db = new DataBase();
+        db.botspots.Add(this);
+        db.SaveChanges();
     }
 
     public override void Geo()
