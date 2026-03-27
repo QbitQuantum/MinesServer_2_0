@@ -17,6 +17,7 @@ using MinesServer.Server;
 
 public class BotSpot : PEntity
 {
+    public BotSpot() { }
     public BotSpot(int x, int y, Player owner)
     {
         id = -owner.id;
@@ -32,7 +33,7 @@ public class BotSpot : PEntity
     public int tail => 1;
     public int skin => 3;
     public override int cid => owner?.cid ?? 0;
-    public Player? owner { get; set; }
+    [NotMapped] public Player? owner { get; set; }
     public override Basket crys { get; set; }
 
     public CrystalCBStorage CrystalCB = new();

@@ -16,6 +16,7 @@ namespace MinesServer.Server
         #region player
         public DbSet<Program> progs { get; set; }
         public DbSet<Player> players { get; set; }
+        public DbSet<BotSpot> botspots { get; set; }
         public DbSet<Inventory> inventories { get; set; }
         public DbSet<Basket> baskets { get; set; }
         public DbSet<PlayerSkills> skills { get; set; }
@@ -56,6 +57,10 @@ namespace MinesServer.Server
 
             modelBuilder.Entity<Player>()
                 .Property(p => p.id)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<BotSpot>()
+                .Property(b => b.id)
                 .ValueGeneratedNever();
 
             modelBuilder.Entity<Clan>()
