@@ -53,6 +53,11 @@ namespace MinesServer.Server
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Player>()
+                .Property(p => p.id)
+                .ValueGeneratedNever();
+
             modelBuilder.Entity<Clan>()
                 .Navigation(c => c.members)
                 .AutoInclude();
