@@ -49,23 +49,14 @@ public class BotSpot : PEntity
         if (owner is null)
             return;
 
-        try
-        {
-            using var db = new DataBase();
-            var spot = db.spots.FirstOrDefault(s => s.ownerid == owner.id);
-            if (spot is null)
-                return;
+        using var db = new DataBase();
+        var spot = db.spots.FirstOrDefault(s => s.ownerid == owner.id);
+        if (spot is null)
+            return;
 
-            db.Attach(spot);
-            spot.botx = x;
-            spot.boty = y;
-            spot.basket = crys.serialazed ?? string.Empty;
-            db.SaveChanges();
-        }
-        catch
-        {
-            // ignore persistence issues for bot state
-        }
+        db.Attach(spot);
+        spot.basket = crys.serialazed ?? string.Empty;
+        db.SaveChanges();
     }
 
     public override void Build(string type) { } // Боты не строят
