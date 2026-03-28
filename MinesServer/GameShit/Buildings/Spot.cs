@@ -130,6 +130,7 @@ namespace MinesServer.GameShit.Buildings
 
         private const string TabPrograms = "SpotProgs";
         private const string TabCrystals = "SpotCrys";
+        private static readonly string[] DropValues = ["— нет —"];
 
         private void ReopenWindow(Player p, string tabAction)
         {
@@ -158,7 +159,7 @@ namespace MinesServer.GameShit.Buildings
                 .ToList();
 
             var progIds = progs.Select(x => x.id).ToList();
-            var dropValues = new[] { "— нет —" }.Concat(progs.Select(x => SafeDropDownLabel(x.name))).ToArray();
+            var dropValues = DropValues.Concat(progs.Select(x => SafeDropDownLabel(x.name))).ToArray();
 
             var currentIndex = 0;
             if (freshSpot.selected != null)
