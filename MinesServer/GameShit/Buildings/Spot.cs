@@ -140,13 +140,6 @@ namespace MinesServer.GameShit.Buildings
         private IPage ProgramsPage(Player p)
         {
             using var db = new DataBase();
-            var freshSpot = db.spots
-                .Include(s => s.selected)
-                .FirstOrDefault(s => s.id == this.id);
-            if (freshSpot == null) return null;
-
-            this.selected = freshSpot.selected;
-
             var progs = db.progs
                 .Include(pg => pg.owner)
                 .Where(pr => pr.owner != null && pr.owner.id == p.id)
@@ -156,9 +149,9 @@ namespace MinesServer.GameShit.Buildings
             var dropValues = DropValues.Concat(progs.Select(x => SafeDropDownLabel(x.name))).ToArray();
 
             var currentIndex = 0;
-            if (freshSpot.selected != null)
+            if (selected != null)
             {
-                var idx = progIds.IndexOf(freshSpot.selected.id);
+                var idx = progIds.IndexOf(selected.id);
                 currentIndex = idx >= 0 ? idx + 1 : 0;
             }
 
@@ -171,18 +164,18 @@ namespace MinesServer.GameShit.Buildings
                 RichListEntry.Text("hint", "<color=#7c88a6>Нажми SAVE чтобы применить выбор.</color>"),
             };
 
-            if (freshSpot.selected != null && !isRunning)
+            if (selected != null && !isRunning)
                 rich.Add(RichListEntry.Button("Запуск установленной", new MButton("LAUNCH", "spotlaunch", _ => LaunchProgram(p))));
             if (isRunning)
                 rich.Add(RichListEntry.Button("Остановка", new MButton("STOP", "spotstop", _ => StopProgram(p))));
 
             var programList = progs.Select(pr => new ListEntry(
-                pr.name + (freshSpot.selected?.id == pr.id ? " ✓" : ""),
-                new MButton(freshSpot.selected?.id == pr.id ? "Выбрано" : "Установить",
-                           freshSpot.selected?.id == pr.id ? "uninstallprog" : $"installprog:{pr.id}",
+                pr.name + (selected?.id == pr.id ? " ✓" : ""),
+                new MButton(selected?.id == pr.id ? "Выбрано" : "Установить",
+                           selected?.id == pr.id ? "uninstallprog" : $"installprog:{pr.id}",
                            _ =>
                            {
-                               if (freshSpot.selected?.id == pr.id) UninstallProgram(p);
+                               if (selected?.id == pr.id) UninstallProgram(p);
                                else InstallProgram(pr.id, p);
                            })
             )).ToArray();
@@ -191,7 +184,7 @@ namespace MinesServer.GameShit.Buildings
             {
                 Title = "Программы",
                 Card = new Card(CardImageType.Item, ((int)Item.SpotBot).ToString(),
-                    $"<color=white>Программы Spot</color>\n<color=#7c88a6>Выбрано:</color> <color=#d5ffe8>{(freshSpot.selected?.name ?? "—")}</color>"),
+                    $"<color=white>Программы Spot</color>\n<color=#7c88a6>Выбрано:</color> <color=#d5ffe8>{(selected?.name ?? "—")}</color>"),
                 RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
                 List = programList,
                 Buttons =
