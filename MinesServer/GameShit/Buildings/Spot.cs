@@ -30,8 +30,6 @@ namespace MinesServer.GameShit.Buildings
         #endregion
         public Program? selected { get; set; }
         public BotSpot? entity;
-        [NotMapped]
-        public string basket { get; set; } = string.Empty;
         private Spot() { }
         public Spot(int x, int y, int ownerid) : base(x, y, ownerid, 100)
         {

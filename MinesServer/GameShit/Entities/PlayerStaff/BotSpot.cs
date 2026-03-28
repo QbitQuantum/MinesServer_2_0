@@ -27,7 +27,6 @@ public class BotSpot : PEntity
         this.y = y;
         this.owner = owner;
         crys = new Basket(true);
-        crys.Changed += Translate;
         MaxHealth = 100;
         Health = 100;
 
@@ -43,21 +42,6 @@ public class BotSpot : PEntity
 
     public CrystalCBStorage CrystalCB = new();
     private float cb; // Для дробной части добычи
-
-    private void Translate()
-    {
-        if (owner is null)
-            return;
-
-        using var db = new DataBase();
-        var spot = db.spots.FirstOrDefault(s => s.ownerid == owner.id);
-        if (spot is null)
-            return;
-
-        db.Attach(spot);
-        spot.basket = crys.serialazed ?? string.Empty;
-        db.SaveChanges();
-    }
 
     public override void Build(string type) { } // Боты не строят
 
@@ -84,7 +68,6 @@ public class BotSpot : PEntity
             Box.BuildBox(bx, by, crys.cry, owner, true);
         }
         ResetHp();
-        Translate();
 
         using var db = new DataBase();
         db.botspots.Remove(this);
@@ -147,7 +130,6 @@ public class BotSpot : PEntity
         {
             owner.skillslist.HandleExperience(owner, SkillType.Movement, 1);
         }
-        Translate();
         return true;
     }
 
