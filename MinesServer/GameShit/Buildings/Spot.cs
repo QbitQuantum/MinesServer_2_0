@@ -119,13 +119,7 @@ namespace MinesServer.GameShit.Buildings
         {
             if (entity == null)
                 return;
-
-            if (entity.programsData.ProgRunning)
-            {
-                entity.programsData.Run();
-            }
             entity.Death();
-            DataBase.botspotplayer.Remove(entity);
         }
 
         private const string TabPrograms = "SpotProgs";

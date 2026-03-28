@@ -62,12 +62,17 @@ public class BotSpot : PEntity
 
     public override void Death()
     {
+        if (programsData.ProgRunning)
+            programsData.Run();
+
         if (crys.AllCry > 0 && owner is not null)
         {
             var (bx, by) = World.FindEmptyForBox(x, y);
             Box.BuildBox(bx, by, crys.cry, owner, true);
         }
         ResetHp();
+
+        DataBase.botspotplayer.Remove(this);
 
         using var db = new DataBase();
         db.botspots.Remove(this);
