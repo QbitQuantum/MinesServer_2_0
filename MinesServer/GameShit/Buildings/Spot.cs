@@ -231,13 +231,6 @@ namespace MinesServer.GameShit.Buildings
 
         private IPage CrystalsPage(Player p)
         {
-            using var db = new DataBase();
-            var freshSpot = db.spots
-                .Include(s => s.selected)
-                .FirstOrDefault(s => s.id == this.id);
-            if (freshSpot == null) return null;
-            this.selected = freshSpot.selected;
-
             var botCrys = entity?.crys?.cry ?? new long[6];
             var totalCrys = Enumerable.Range(0, 6).Select(i => p.crys.cry[i] + (i < botCrys.Length ? botCrys[i] : 0)).ToArray();
             var crysLines = totalCrys.Select((_, id) => new CrysLine("", 0, 0, totalCrys[id], id < botCrys.Length ? botCrys[id] : 0)).ToArray();
