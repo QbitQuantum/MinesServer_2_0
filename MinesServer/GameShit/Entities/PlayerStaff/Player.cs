@@ -624,15 +624,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             ResetHp();
 
-            if (!online && !programsData.RespawnOnProg)
-            {
-                using var db = new DataBase();
-                db.players.Attach(this);
-                db.SaveChanges();
-                DataBase.activeplayers.Remove(this);
-                return;
-            }
-
             resp?.OnRespawn(this);
             var (newX, newY) = resp.GetRandompoint();
             x = newX;
@@ -642,10 +633,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             CheckChunkChanged();
             this.SendHealth();
 
-            if (!HasActiveProgram)
-                return;
-
-            if (programsData.RespawnOnProg)
+            if (HasActiveProgram && programsData.RespawnOnProg)
             {
                 programsData.OnDeath();
             }
