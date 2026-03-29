@@ -640,8 +640,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             else
             {
                 RunProgramm(null);
-                connection?.SendU(new ProgrammatorPacket(false));
             }
+            this.ProgStatus();
         }
 
         #endregion
