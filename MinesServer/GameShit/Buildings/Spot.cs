@@ -114,12 +114,14 @@ namespace MinesServer.GameShit.Buildings
                 return; // Нет выбранной программы
             DataBase.botspotplayer.Add(entity);
             entity.programsData.Run(selected);
+            ReopenWindow(p, TabPrograms);
         }
         private void StopProgram(Player p)
         {
             if (entity == null)
                 return;
             entity.Death();
+            ReopenWindow(p, TabPrograms);
         }
 
         private const string TabPrograms = "SpotProgs";
@@ -205,10 +207,7 @@ namespace MinesServer.GameShit.Buildings
 
                         var progIndex = index - 1;
                         if (progIndex < 0 || progIndex >= progIds.Count)
-                        {
-                            ReopenWindow(p, TabPrograms);
                             return;
-                        }
 
                         InstallProgram(progIds[progIndex], p);
                     }),
