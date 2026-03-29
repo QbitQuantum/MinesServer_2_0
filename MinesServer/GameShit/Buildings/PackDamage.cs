@@ -84,7 +84,7 @@ namespace MinesServer.GameShit.Buildings
 
         protected void SendBrokenEffect()
         {
-            World.W.GetChunk(x, y).SendFx(x, y, 12);
+            World.W.SendFx(x, y, 12);
         }
     }
 }
