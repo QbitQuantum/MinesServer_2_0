@@ -20,7 +20,7 @@ namespace MinesServer.GameShit
                 {
                     p.x = x;
                     p.y = y;
-                    p.tp(x, y);
+                    p.teleport_tp(x, y);
                 }
             });
             commands.Add("fedresp", (p, arg) =>

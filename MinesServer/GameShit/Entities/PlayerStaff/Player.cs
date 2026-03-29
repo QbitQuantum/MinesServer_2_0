@@ -388,8 +388,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             this.x = x;
             this.y = y;
-            BotsRender();
-            CheckChunkChanged();
+            tp(x, y);
         }
 
         #endregion
@@ -570,8 +569,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void tp(int x, int y)
         {
+            connection?.SendU(new SmoothTPPacket(x, y));
+            BotsRender();
+            CheckChunkChanged();
+        }
+
+        public void teleport_tp(int x, int y)
+        {
             connection?.SendU(new TPPacket(x, y));
             BotsRender();
+            CheckChunkChanged();
         }
 
         public void SetResp(Resp r) => resp = r;
@@ -627,7 +634,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             y = newY;
 
             tp(x, y);
-            CheckChunkChanged();
 
             World.W.SendFx(x, y, 2);
             World.W.SendLeaveBot(id, x, y);
