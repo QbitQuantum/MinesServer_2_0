@@ -30,12 +30,15 @@ public class BotSpot : PEntity
         MaxHealth = 100;
         Health = 100;
 
+        name = owner?.name ?? "BotSpot #" + id;
         using var db = new DataBase();
         db.botspots.Add(this);
         db.SaveChanges();
     }
     public int tail => 1;
     public int skin => 3;
+    public string name { get; set; } = string.Empty;
+    public int owner_id { get; set; } = 0;
     public override int cid => owner?.cid ?? 0;
     [NotMapped] public Player? owner { get; set; }
     public override Basket crys { get; set; }

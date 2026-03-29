@@ -228,8 +228,10 @@ namespace MinesServer.Server
         
         private void AutoDiggHandler(TYPacket parent, TADGPacket packet) => SendU(new AutoDiggPacket(player.autoDig = !player.autoDig));
         private void MoveHandler(TYPacket parent, XmovPacket packet) => player?.TryAct(() => player.Move((int)parent.X, (int)parent.Y, DirectionTypeExt.ToDirection( packet.Direction)), player.ServerPause);
-        
-        private void WhoisHandler(TYPacket parent, WhoiPacket packet) => SendU(new NickListPacket(packet.BotIds.ToDictionary(x => x, x => DataBase.GetPlayer(x)?.name)));
+
+        private void WhoisHandler(TYPacket parent, WhoiPacket packet) => 
+            SendU(new NickListPacket(packet.BotIds.ToDictionary(x => x, x => DataBase.NickName(x))));
+
         private void LocalChatHandler(TYPacket parent, LoclPacket packet)
         {
             if (player != null && player.win == null && packet.Length > 0)

@@ -141,6 +141,41 @@ namespace MinesServer.Server
                 .Include(p => p.resp)
                 .FirstOrDefault();
         }
+
+        public static BotSpot? GetBotSpot(int id)
+        {
+            Console.WriteLine(id);
+            var botSpot = botspotplayer.FirstOrDefault(p => id == p.owner_id);
+            if (botSpot != null)
+                return botSpot;
+            using var db = new DataBase();
+            return db.botspots
+                .Where(i => id == i.id)
+                .FirstOrDefault();
+        }
+
+        public static string NickName(int id)
+        {
+            if (_nicklist.TryGetValue(id, out string? value))
+                return value;
+
+            var player = GetPlayer(id);
+            if (player != null)
+            {
+                _nicklist[id] = player.name;
+                return _nicklist[id];
+            }
+
+            var botspot = GetBotSpot(id);
+            if (botspot != null)
+            {
+                _nicklist[id] = botspot.name;
+                return _nicklist[id];
+            }
+            // Console.WriteLine("Aномалия игроков. Проверить");
+            return "Aномальный ID игрока. Проверить";
+        }
+
         public static Player? GetPlayer(string name)
         {
             var player = activeplayers.FirstOrDefault(p => p.name == name);
@@ -164,6 +199,7 @@ namespace MinesServer.Server
         // Либо инкапсулировать полностью
         public static List<Player> activeplayers = new();
         public static List<BotSpot> botspotplayer = new();
+        private static readonly Dictionary<int, string> _nicklist = new();
         public static void Load()
         {
             using var db = new DataBase();
