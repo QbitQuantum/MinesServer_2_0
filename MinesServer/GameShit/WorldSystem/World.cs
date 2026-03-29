@@ -11,6 +11,7 @@ using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.SysMarket;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
+using MinesServer.Network.HubEvents;
 using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.World;
@@ -705,6 +706,11 @@ namespace MinesServer.GameShit.WorldSystem
         public void SendLocalMsg(int id, int x, int y, string msg)
         {
             GetChunk(x, y).SendLocalMsg(id, x, y, msg);
+        }
+
+        public HBMapPacket MapPacket(int x, int y)
+        {
+            return GetChunk(x, y).MapPacket();
         }
 
         public static void SendWorldInfo(Player player)
