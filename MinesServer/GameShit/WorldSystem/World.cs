@@ -694,14 +694,9 @@ namespace MinesServer.GameShit.WorldSystem
 
         public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
         {
-            foreach (var chunk in GetVisibleChunks(x, y))
-            {
-                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
-                {
-                    player?.connection?.SendB(new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]));
-                }
-            }
+            GetChunk(x, y).SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
+
         public static void SendWorldInfo(Player player)
         {
             var mapPackets = new List<IHubPacket>();

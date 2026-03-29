@@ -7,6 +7,7 @@ using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.VulkSystem;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.HubEvents;
+using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.HubEvents.Packs;
 using MinesServer.Network.World;
@@ -196,6 +197,21 @@ namespace MinesServer.GameShit.WorldSystem
                     // Может заменить на DataBase.activeplayers.Contains?
                     var player = kvp.Value;
                     player.connection?.SendB(new HBPacket([new HBDirectedFXPacket(kvp.Key, x, y, fx, dir, color)]));
+                }
+            }
+        }
+
+        public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
+        {
+            var packet = new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]);
+            foreach (var chunk in GetNeighboringChunks())
+            {
+                foreach (var kvp in chunk.bots)
+                {
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
                 }
             }
         }
