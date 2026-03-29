@@ -708,6 +708,11 @@ namespace MinesServer.GameShit.WorldSystem
             GetChunk(x, y).SendLocalMsg(id, x, y, msg);
         }
 
+        public void SendLeaveBot(int id, int x, int y)
+        {
+            GetChunk(x, y).SendLeaveBot(id);
+        }
+
         public HBMapPacket MapPacket(int x, int y)
         {
             return GetChunk(x, y).MapPacket();

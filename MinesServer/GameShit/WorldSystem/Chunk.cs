@@ -231,6 +231,21 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
+        public void SendLeaveBot(int id)
+        {
+            var packet = new HBPacket([new HBLeavePacket(id)]);
+            foreach (var chunk in GetNeighboringChunks())
+            {
+                foreach (var kvp in chunk.bots)
+                {
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
+                }
+            }
+        }
+
         public void SendFx(int x, int y, int fx)
         {
             var packet = new HBPacket([new HBFXPacket(x, y, fx)]);
