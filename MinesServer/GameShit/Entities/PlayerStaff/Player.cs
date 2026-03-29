@@ -629,7 +629,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             tp(x, y);
             CheckChunkChanged();
 
-            World.W.GetChunk(x, y).SendFx(x, y, 2);
+            World.W.SendFx(x, y, 2);
             SendLeaveBot();
 
             if (HasActiveProgram && programsData.RespawnOnProg)
