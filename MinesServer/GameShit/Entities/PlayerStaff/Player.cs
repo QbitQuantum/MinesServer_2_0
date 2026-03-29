@@ -619,9 +619,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 Box.BuildBox(boxX, boxY, crys.cry, this, true);
             }
 
-            win = null;
-            this.SendWindow();
-
             ResetHp();
 
             resp?.OnRespawn(this);
@@ -631,8 +628,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             tp(x, y);
             CheckChunkChanged();
-            this.SendHealth();
-
+            
             if (HasActiveProgram && programsData.RespawnOnProg)
             {
                 programsData.OnDeath();
@@ -641,6 +637,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             {
                 RunProgramm(null);
             }
+
+            win = null;
+            this.SendWindow();
+            this.SendHealth();
             this.ProgStatus();
         }
 
