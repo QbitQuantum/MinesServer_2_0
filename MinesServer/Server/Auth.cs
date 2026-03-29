@@ -88,7 +88,7 @@ namespace MinesServer.Server
         private void HandleNewPlayer()
         {
             _initiator.SendU(new BotInfoPacket("Default", 0, 0, -1));
-            _initiator.SendU(new HBPacket([World.W.GetChunk(0, 0).MapPacket()]));
+            _initiator.SendU(new HBPacket([World.W.MapPacket(0, 0)]));
             AuthWindow = CreateDefaultWindow();
             SendCurrentWindow();
         }
