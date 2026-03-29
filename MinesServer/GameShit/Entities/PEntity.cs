@@ -153,6 +153,17 @@ namespace MinesServer.GameShit.Entities
                 }
             }
         }
+
+        public void SendLeaveBot()
+        {
+            foreach (var chunk in World.W.GetVisibleChunks(x, y))
+            {
+                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
+                {
+                    player?.connection?.SendB(new HBPacket([new HBLeavePacket(id)]));
+                }
+            }
+        }
         #endregion
     }
 }

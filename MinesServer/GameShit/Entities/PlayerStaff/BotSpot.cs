@@ -76,6 +76,9 @@ public class BotSpot : PEntity
         ResetHp();
 
         DataBase.botspotplayer.Remove(this);
+        
+        World.W.GetChunk(x, y).SendFx(x, y, 2);
+        SendLeaveBot();
 
         using var db = new DataBase();
         db.botspots.Remove(this);
