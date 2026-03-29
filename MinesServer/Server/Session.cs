@@ -246,7 +246,7 @@ namespace MinesServer.Server
                 }
                 else if (!string.IsNullOrWhiteSpace(packet.Message))
                 {
-                    this.player.SendLocalMsg(packet.Message);
+                    World.W.SendLocalMsg(player.id, player.x, player.y, packet.Message);
                 }
             }
 

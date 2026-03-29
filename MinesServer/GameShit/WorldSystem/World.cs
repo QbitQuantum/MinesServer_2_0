@@ -697,6 +697,11 @@ namespace MinesServer.GameShit.WorldSystem
             GetChunk(x, y).SendBotsInfo(id, x, y, dir, skin, cid, tail);
         }
 
+        public void SendLocalMsg(int id, int x, int y, string msg)
+        {
+            GetChunk(x, y).SendLocalMsg(id, x, y, msg);
+        }
+
         public static void SendWorldInfo(Player player)
         {
             var mapPackets = new List<IHubPacket>();
