@@ -142,15 +142,14 @@ namespace MinesServer.Server
                 .FirstOrDefault();
         }
 
-        public static BotSpot? GetBotSpot(int id)
+        public static BotSpot? GetBotSpot(int botSpotId)
         {
-            Console.WriteLine(id);
-            var botSpot = botspotplayer.FirstOrDefault(p => id == p.owner_id);
+            var botSpot = botspotplayer.FirstOrDefault(p => p.id == botSpotId);
             if (botSpot != null)
                 return botSpot;
             using var db = new DataBase();
             return db.botspots
-                .Where(i => id == i.id)
+                .Where(i => i.id == botSpotId)
                 .FirstOrDefault();
         }
 
