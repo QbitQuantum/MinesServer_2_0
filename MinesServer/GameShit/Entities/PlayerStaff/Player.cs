@@ -208,13 +208,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this.SendInventory();
             this.SendClan();
             this.SendChat();
-
-            settings.SendSettings(this);
-            connection?.SendU(new ConfigPacket("oldprogramformat+"));
-
-            if (programsData.selected != null)
-                this.UpdateProg(programsData.selected);
-
+            this.SendSettings();
+            this.SendConfig();
+            this.UpdateProg(programsData.selected);
             this.ProgStatus();
         }
 
