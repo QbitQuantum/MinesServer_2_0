@@ -15,11 +15,8 @@ namespace MinesServer.GameShit.WorldSystem
         public static Box? GetBox(int x, int y)
         {
             if (!World.ValidCoord(x, y))
-            {
                 return null;
-            }
-            using var db = new DataBase();
-            return db.boxes.FirstOrDefault(t => t.x == x && t.y == y);
+            return DataBase.GetBox(x, y);
         }
         public static void BuildBox(int x, int y, long[] cry, Player p, bool force = false)
         {

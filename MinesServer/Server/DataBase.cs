@@ -183,6 +183,15 @@ namespace MinesServer.Server
                 .Include(p => p.resp)
                 .FirstOrDefault();
         }
+
+        public static Box? GetBox(int x, int y)
+        {
+            using var db = new DataBase();
+            return db.boxes
+                .AsNoTracking()
+                .FirstOrDefault(t => t.x == x && t.y == y);
+        }
+
         // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
         // Либо инкапсулировать полностью
         public static List<Player> activeplayers = new();
