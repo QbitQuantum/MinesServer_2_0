@@ -14,37 +14,40 @@ namespace MinesServer.Server
     public sealed class DataBase : DbContext
     {
         #region player
-        public DbSet<Program> progs { get; set; }
-        public DbSet<Player> players { get; set; }
-        public DbSet<BotSpot> botspots { get; set; }
-        public DbSet<Inventory> inventories { get; set; }
-        public DbSet<Basket> baskets { get; set; }
-        public DbSet<PlayerSkills> skills { get; set; }
-        public DbSet<Settings> settings { get; set; }
+        public DbSet<Program> progs => Set<Program>();
+        public DbSet<Player> players => Set<Player>();
+        public DbSet<BotSpot> botspots => Set<BotSpot>();
+        public DbSet<Inventory> inventories => Set<Inventory>();
+        public DbSet<Basket> baskets => Set<Basket>();
+        public DbSet<PlayerSkills> skills => Set<PlayerSkills>();
+        public DbSet<Settings> settings => Set<Settings>();
         #endregion
+
         #region Utils
-        public DbSet<GLine> lines { get; set; }
-        public DbSet<Chat> chats { get; set; }
-        public DbSet<Box> boxes { get; set; }
-        public DbSet<Order> orders { get; set; }
-        public DbSet<Clan> clans { get; set; }
-        public DbSet<Request> reqs { get; set; }
-        public DbSet<Rank> ranks { get; set; }
-        public DbSet<CraftEntry> craftentries { get; set; }
+        public DbSet<GLine> lines => Set<GLine>();
+        public DbSet<Chat> chats => Set<Chat>();
+        public DbSet<Box> boxes => Set<Box>();
+        public DbSet<Order> orders => Set<Order>();
+        public DbSet<Clan> clans => Set<Clan>();
+        public DbSet<Request> reqs => Set<Request>();
+        public DbSet<Rank> ranks => Set<Rank>();
+        public DbSet<CraftEntry> craftentries => Set<CraftEntry>();
         #endregion
+
         #region packs
-        public DbSet<Spot> spots { get; set; }
-        public DbSet<Vulkan> vulkans { get; set; }
-        public DbSet<Resp> resps { get; set; }
-        public DbSet<Market> markets { get; set; }
-        public DbSet<Up> ups { get; set; }
-        public DbSet<Gun> guns { get; set; }
-        public DbSet<Storage> storages { get; set; }
-        public DbSet<Crafter> crafts { get; set; }
-        public DbSet<Teleport> teleports { get; set; }
-        public DbSet<Gate> gates { get; set; }
-        public DbSet<NC> ncs { get; set; }
+        public DbSet<Spot> spots => Set<Spot>();
+        public DbSet<Vulkan> vulkans => Set<Vulkan>();
+        public DbSet<Resp> resps => Set<Resp>();
+        public DbSet<Market> markets => Set<Market>();
+        public DbSet<Up> ups => Set<Up>();
+        public DbSet<Gun> guns => Set<Gun>();
+        public DbSet<Storage> storages => Set<Storage>();
+        public DbSet<Crafter> crafts => Set<Crafter>();
+        public DbSet<Teleport> teleports => Set<Teleport>();
+        public DbSet<Gate> gates => Set<Gate>();
+        public DbSet<NC> ncs => Set<NC>();
         #endregion
+
         public DataBase() : base() => Database.EnsureCreated();
         public void Delete() => Database.EnsureDeleted();
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
