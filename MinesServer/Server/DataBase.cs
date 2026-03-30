@@ -104,22 +104,9 @@ namespace MinesServer.Server
 
         private static int GetNextUniqueId(DataBase db)
         {
-            // Получаем все ID из таблицы игроков
-            var playerIds = db.players.Select(p => p.id).ToList();
-
-            // Получаем все ID из таблицы роботов
-            var robotIds = db.botspots.Select(r => r.id).ToList();
-
-            // Объединяем все существующие ID
-            var allExistingIds = playerIds.Concat(robotIds).ToList();
-
-            // Если нет ни одного ID, начинаем с 1
-            if (!allExistingIds.Any())
-                return 1;
-
-            // Находим максимальный ID и увеличиваем на 1
-            int maxId = allExistingIds.Max();
-            return maxId + 1;
+            var maxPlayerId = db.players.Max(p => (int?)p.id) ?? 0;
+            var maxBotId = db.botspots.Max(b => (int?)b.id) ?? 0;
+            return Math.Max(maxPlayerId, maxBotId) + 1;
         }
 
         public static Player? GetPlayer(int id)
