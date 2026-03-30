@@ -11,7 +11,7 @@ using MinesServer.GameShit.WorldSystem;
 
 namespace MinesServer.Server
 {
-    public class DataBase : DbContext
+    public sealed class DataBase : DbContext
     {
         #region player
         public DbSet<Program> progs { get; set; }
