@@ -177,7 +177,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             name = "";
             money = 1000;
             creds = 0;
-            hash = GenerateHash();
             passwd = "";
             Health = 100;
             MaxHealth = 100;
@@ -190,13 +189,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             clan = null;
             skin = 0;
         }
-        public string GenerateHash()
-        {
-            var random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, 12)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
+
         private int CalculateMaxHealth()
         {
             var healthSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.Health);

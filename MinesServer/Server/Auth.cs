@@ -195,6 +195,7 @@ namespace MinesServer.Server
             _tempPlayer.id = DataBase.GetNextId();
             _tempPlayer.name = nickname;
             _tempPlayer.passwd = password;
+            _tempPlayer.hash = GenerateHash();
 
             db.players.Add(_tempPlayer);
             db.skills.Attach(_tempPlayer.skillslist);
@@ -408,6 +409,14 @@ namespace MinesServer.Server
             var bytes = Encoding.ASCII.GetBytes(input);
             var hash = md5.ComputeHash(bytes);
             return Convert.ToHexString(hash).ToLower();
+        }
+
+        private static string GenerateHash()
+        {
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, 12)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }
