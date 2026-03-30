@@ -118,6 +118,7 @@ namespace MinesServer.Server
             }
             using var db = new DataBase();
             return db.players
+                .AsNoTracking()
                 .Where(i => i.id == id)
                 .Include(p => p.clanrank)
                 .Include(p => p.clan)
@@ -136,8 +137,8 @@ namespace MinesServer.Server
                 return botSpot;
             using var db = new DataBase();
             return db.botspots
-                .Where(i => i.id == botSpotId)
-                .FirstOrDefault();
+                .AsNoTracking()
+                .FirstOrDefault(i => i.id == botSpotId);
         }
 
         public static string NickName(int id)
@@ -171,6 +172,7 @@ namespace MinesServer.Server
             }
             using var db = new DataBase();
                 return db.players
+                .AsNoTracking()
                 .Where(i => i.name == name)
                 .Include(p => p.clanrank)
                 .Include(p => p.clan)
