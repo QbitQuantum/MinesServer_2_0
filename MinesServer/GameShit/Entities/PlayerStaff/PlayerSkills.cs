@@ -113,6 +113,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
         }
 
+        public Skill? GetSkill(SkillType Type)
+        {
+            return skills.Values.FirstOrDefault(s => s?.type == Type);
+        }
+
         public void LoadSkills()
         {
             if (skills.Count > 0 || string.IsNullOrEmpty(ser))
@@ -310,7 +315,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
                 foreach (var req in info.Requirements)
                 {
-                    var playerSkill = skills.Values.FirstOrDefault(s => s?.type == req.RequiredSkill);
+                    var playerSkill = GetSkill(req.RequiredSkill);
 
                     // Если требуемого навыка НЕТ У ИГРОКА - навык полностью недоступен
                     if (playerSkill == null)
@@ -381,7 +386,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             LoadSkills();
 
-            var skill = skills.Values.FirstOrDefault(s => s?.type == skillType);
+            var skill = GetSkill(skillType);
             skill?.AddExp(player, baseExp);
         }
 
@@ -490,7 +495,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             float multiplier = 1 + (float)Math.Truncate(cb);
 
             // TODO: Может стоять ExpertMining
-            var miningSkill = skills.Values.FirstOrDefault(s => s?.type == skillType);
+            var miningSkill = GetSkill(skillType);
             if (miningSkill != null)
             {
                 multiplier += miningSkill.Effect;
@@ -507,13 +512,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public bool HasSkill(SkillType skillType)
         {
             LoadSkills();
-            return skills.Values.Any(s => s?.type == skillType);
+            var skill = GetSkill(skillType);
+            return skill != null;
         }
 
         public float GetSkillEffect(SkillType skillType)
         {
             LoadSkills();
-            var skill = skills.Values.FirstOrDefault(s => s?.type == skillType);
+            var skill = GetSkill(skillType);
             return skill?.Effect ?? 0f;
         }
 
@@ -542,7 +548,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             float damage = baseDamage;
 
-            var diggingSkill = skills.Values.FirstOrDefault(s => s?.type == SkillType.Digging);
+            var diggingSkill = GetSkill(SkillType.Digging);
             if (diggingSkill != null)
             {
                 damage = baseDamage * (diggingSkill.Effect / 100f);
