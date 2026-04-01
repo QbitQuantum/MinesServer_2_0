@@ -65,7 +65,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void Beep(this Player p) => p.connection?.SendU(new BibikaPacket());
         public static void SendBotInfo(this Player p) => p.connection?.SendU(new BotInfoPacket(p.name, p.x, p.y, p.id));
         public static void SendLvl(this Player p) => p.connection?.SendU(new LevelPacket(p.skillslist.lvlsummary()));
-        public static void SendOnline(this Player p) => p.connection?.SendU(new OnlinePacket(MServer.Instance!.online, 0));
+        public static void SendOnline(this Player p) => p.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());
         public static void SendConfig(this Player p) => p.connection?.SendU(new ConfigPacket("oldprogramformat+"));
         public static void SendSettings(this Player p) => p.settings.SendSettings(p);

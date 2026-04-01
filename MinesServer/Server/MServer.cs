@@ -13,10 +13,6 @@ namespace MinesServer.Server
         public static bool started = false;
         CancellationTokenSource s = new();
 
-        public int online
-        {
-            get => DataBase.activeplayers.Count;
-        }
         public MServer(IPAddress address, int port) : base(address, port)
         {
             Instance = this;
