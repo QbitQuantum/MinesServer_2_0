@@ -119,7 +119,7 @@ namespace MinesServer.GameShit.Buildings
             }
             p.win = GUIWin(p);
         }
-        private IPage MainPage(Player p) => new Page(){
+        private Page MainPage(Player p) => new Page(){
                 Title = "Склад",
                 CrystalConfig = new CrystalConfig(
                     " ",
