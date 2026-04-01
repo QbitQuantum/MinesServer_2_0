@@ -62,7 +62,7 @@ namespace MinesServer
             commands.Add("fullnew", () =>
             {
                 server.Stop();
-                MServer.Instance?.time.Dispose();
+                server.time.Dispose();
                 World.W.DeleteWorld();
                 var db = new DataBase();
                 db.Delete();
@@ -72,7 +72,7 @@ namespace MinesServer
             commands.Add("newworld", () =>
             {
                 server.Stop();
-                MServer.Instance?.time.Dispose();
+                server.time.Dispose();
                 using var db = new DataBase();
                 DataBase.activeplayers = new List<Player>();
                 foreach (var i in db.players) i.resp = null;

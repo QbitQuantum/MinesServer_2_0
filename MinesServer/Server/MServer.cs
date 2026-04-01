@@ -9,13 +9,11 @@ namespace MinesServer.Server
     {
         public System.Timers.Timer timer;
         public ServerTime time { get; private set; }
-        public static MServer? Instance;
         public static bool started = false;
         CancellationTokenSource s = new();
 
         public MServer(IPAddress address, int port) : base(address, port)
         {
-            Instance = this;
             MConsole.InitCommands();
             GameShit.SysCraft.RDes.Init();
             OptionKeepAlive = true;
