@@ -116,7 +116,6 @@ namespace MinesServer
         {
             Console.WriteLine("WriteError caused error " + $"{ex}");
         }
-        public static int size = 1;
         public static MServer server { get; set; }
     }
 }
