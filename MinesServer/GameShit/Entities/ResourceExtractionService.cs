@@ -41,7 +41,7 @@ public static class ResourceExtractionService
         }
         else
         {
-            ProcessRegularDigging(skillOwner, cellType, x, y);
+            ProcessRegularDigging(skillOwner, cellType, x, y, basket);
         }
 
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Digging, 1f);
@@ -238,13 +238,140 @@ public static class ResourceExtractionService
         }
     }
 
-    private static void ProcessRegularDigging(Player skillOwner, CellType cellType, int x, int y)
+    private static void ProcessDetection(
+    Player skillOwner,
+    int x,
+    int y,
+    CellType cellType,
+    Basket basket)
+    {
+
+        // Проверяем, что копаем обычную породу (не кристаллы)
+        if (World.isCry(x, y))
+            return;
+
+        // Проверяем тип породы - только для легкой скалы и тяжелой скалы
+        if (!cellType.IsRock())
+            return;
+
+        var skill = cellType.IsLightRock() ? skillOwner.skillslist.GetSkill(SkillType.Detection) :
+            cellType.IsHeavyRock() ? skillOwner.skillslist.GetSkill(SkillType.MineDeep) : null;
+
+        if (skill == null)
+            return;
+
+        bool[] TypeCrys = new bool[CrystalTypeExt.CrysType.Length];
+
+        int multi = 1;
+        switch (cellType)
+        {
+            case CellType.Rock:
+                TypeCrys[(int)CrystalType.Green] = true;
+                multi *= 2; break;
+            case CellType.BlueRock:
+                TypeCrys[(int)CrystalType.Green] = true;
+                TypeCrys[(int)CrystalType.Blue] = true;
+                multi *= 3; break;
+            case CellType.GoldenRock:
+                TypeCrys[(int)CrystalType.Green] = true;
+                TypeCrys[(int)CrystalType.Blue] = true;
+                TypeCrys[(int)CrystalType.White] = true;
+                multi *= 4; break;
+            case CellType.GRock:
+                TypeCrys[(int)CrystalType.Green] = true;
+                TypeCrys[(int)CrystalType.Blue] = true;
+                TypeCrys[(int)CrystalType.White] = true;
+                TypeCrys[(int)CrystalType.Cyan] = true;
+                multi *= 5; break;
+            case CellType.Obsidian:
+            case CellType.Coralite:
+                TypeCrys[(int)CrystalType.Green] = true;
+                TypeCrys[(int)CrystalType.Blue] = true;
+                TypeCrys[(int)CrystalType.White] = true;
+                TypeCrys[(int)CrystalType.Cyan] = true;
+                TypeCrys[(int)CrystalType.Violet] = true;
+                multi *= 6; break;
+            case CellType.EtherealRock:
+            case CellType.Ultralit:
+                TypeCrys[(int)CrystalType.Green] = true;
+                TypeCrys[(int)CrystalType.Blue] = true;
+                TypeCrys[(int)CrystalType.White] = true;
+                TypeCrys[(int)CrystalType.Cyan] = true;
+                TypeCrys[(int)CrystalType.Violet] = true;
+                TypeCrys[(int)CrystalType.Red] = true;
+                multi *= 7; break;
+        }
+
+        // Считаем итоговое количество кристаллов: базовый эффект навыка * множитель породы
+        float totalEffect = skill.Effect * multi;
+
+        // Округляем до целого, но хотя бы 1 кристалл всегда даём
+        int totalCrystals = Math.Max(1, (int)Math.Round(totalEffect));
+
+        // Собираем список типов кристаллов, которые могут выпасть из этой породы
+        var availableCrystalTypes = new List<CrystalType>();
+        for (int i = 0; i < TypeCrys.Length; i++)
+        {
+            if (TypeCrys[i])
+                availableCrystalTypes.Add((CrystalType)i);
+        }
+
+        if (availableCrystalTypes.Count == 0)
+            return;
+
+        // Раскидываем totalCrystals по типам так, чтобы каждый тип получил хотя бы 1 кристалл
+        int remaining = totalCrystals;
+        var distribution = new Dictionary<CrystalType, int>();
+
+        // Идём по всем типам, кроме последнего
+        for (int i = 0; i < availableCrystalTypes.Count - 1; i++)
+        {
+            // Сколько максимум можем взять сейчас, оставляя остальным хотя бы по 1
+            int maxTake = remaining - (availableCrystalTypes.Count - i - 1);
+            // Берём случайное число от 1 до maxTake
+            int take = maxTake > 0 ? Physics.r.Next(1, maxTake + 1) : 1;
+            distribution[availableCrystalTypes[i]] = take;
+            remaining -= take;
+        }
+        // Последнему типу отдаём всё, что осталось
+        distribution[availableCrystalTypes[availableCrystalTypes.Count - 1]] = remaining;
+
+        foreach (var kvp in distribution)
+        {
+            CrystalType forcedType = kvp.Key;
+            int amount = kvp.Value;
+
+            int sendType = forcedType switch
+            {
+                CrystalType.Blue => 3,
+                CrystalType.Red => 1,
+                CrystalType.Violet => 2,
+                _ => (int)forcedType
+            };
+
+            // Добавляем кристаллы в корзину
+            basket.AddCrys(forcedType, amount);
+            // Добавляем в мировую статистику
+            World.AddDob(forcedType, amount);
+
+            skillOwner.SendDFToBots(
+                2,
+                x,
+                y,
+                skillOwner.id,
+                (int)(amount < 255 ? amount : 255),
+                sendType);
+        }
+    }
+
+    private static void ProcessRegularDigging(Player skillOwner, CellType cellType, int x, int y, Basket basket)
     {
         float hitdmg = 0.2f;
         hitdmg = skillOwner.skillslist.GetDiggingDamageMultiplier(hitdmg);
 
         if (World.DamageCell(x, y, hitdmg))
         {
+            ProcessDetection(skillOwner, x, y, cellType, basket);
             AwardDestructionExperience(skillOwner, cellType);
         }
     }
@@ -270,11 +397,15 @@ public static class ResourceExtractionService
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineSlime, 1f);
         }
 
-        if (cellType.IsRock() || cellType.IsHeavyRock())
+        if (cellType.IsRock())
         {
-            skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Detection, 1f);
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Destruction, 1f);
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.TotalDestruction, 1f);
+
+            if (cellType.IsLightRock())
+            {
+                skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Detection, 1f);
+            }
 
             if (cellType.IsHeavyRock())
             {
