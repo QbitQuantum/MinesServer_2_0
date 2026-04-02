@@ -394,7 +394,7 @@ public static class ResourceExtractionService
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Washing, 1f);
         }
 
-        if (cellType.IsAcid() || cellType.IsActiveAcid())
+        if (cellType.IsAcid())
         {
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AntiSlime, 1f);
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Deactivation, 1f);
