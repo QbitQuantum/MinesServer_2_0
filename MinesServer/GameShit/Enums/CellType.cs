@@ -194,17 +194,14 @@
         }
 
         /// <summary>
-        /// Является ли ячейка обычной породой/камнем
+        /// Является ли ячейка легкой породой
         /// </summary>
-        public static bool IsRock(this CellType cell)
+        public static bool IsLightRock(this CellType cell)
         {
             return cell switch
             {
-                CellType.Rock or CellType.BlackRock or CellType.RedRock or
-                CellType.AcidRock or CellType.HypnoRock or CellType.GoldenRock or
-                CellType.GRock or CellType.UnknownRock1 or CellType.UnknownRock2 or
-                CellType.Obsidian or CellType.Coralite or CellType.EtherealRock or
-                CellType.Ultralit => true,
+                CellType.Rock or CellType.BlueRock or 
+                CellType.GoldenRock or CellType.GreenRock => true,
                 _ => false
             };
         }
@@ -216,9 +213,18 @@
         {
             return cell switch
             {
-                CellType.BlueRock or CellType.GreenRock => true,
+                CellType.Obsidian or CellType.Coralite or
+                CellType.EtherealRock or CellType.Ultralit => true,
                 _ => false
             };
+        }
+
+        /// <summary>
+        /// Является ли ячейка породой
+        /// </summary>
+        public static bool IsRock(this CellType cell)
+        {
+            return cell.IsLightRock() || cell.IsHeavyRock();
         }
 
         // Перегрузки для работы с byte, если нужна обратная совместимость
