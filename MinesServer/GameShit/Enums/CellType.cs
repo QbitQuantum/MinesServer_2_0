@@ -79,7 +79,7 @@
         Cyan = 112,
         HeavyRock = 113,
         BlackRock = 114,
-        LivingBlackRock = 115,
+        AliveBlackRock = 115,
         AliveBlue = 116,
         RedRock = 117,
         AcidRock = 118,
@@ -108,7 +108,7 @@
             {
                 CellType.AliveBlue or CellType.AliveCyan or CellType.AliveRed or
                 CellType.AliveBlack or CellType.AliveViol or CellType.AliveWhite or
-                CellType.AliveRainbow => true,
+                CellType.AliveRainbow or CellType.AliveBlackRock => true,
                 _ => false
             };
         }
