@@ -201,7 +201,8 @@
             return cell switch
             {
                 CellType.Rock or CellType.BlueRock or 
-                CellType.GoldenRock or CellType.GreenRock => true,
+                CellType.GoldenRock or CellType.GreenRock or 
+                CellType.GRock => true,
                 _ => false
             };
         }
