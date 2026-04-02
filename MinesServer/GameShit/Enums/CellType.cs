@@ -36,7 +36,7 @@
         GrayAcid = 66,
         PurpleAcid = 67,
         Pearl = 68,
-        UnknownRock1 = 69,
+        BlueAcid = 69,
         LavaBoulder = 70,
         XGreen = 71,
         XBlue = 72,
@@ -175,7 +175,7 @@
         {
             return cell switch
             {
-                CellType.GrayAcid or CellType.PurpleAcid or
+                CellType.GrayAcid or CellType.PurpleAcid or CellType.PurpleAcid or
                 CellType.PassiveAcid or CellType.LivingActiveAcid or
                 CellType.CorrosiveActiveAcid => true,
                 _ => false
