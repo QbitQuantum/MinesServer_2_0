@@ -175,7 +175,7 @@
         {
             return cell switch
             {
-                CellType.GrayAcid or CellType.PurpleAcid or CellType.PurpleAcid or
+                CellType.GrayAcid or CellType.PurpleAcid or CellType.BlueAcid or
                 CellType.PassiveAcid or CellType.LivingActiveAcid or
                 CellType.CorrosiveActiveAcid => true,
                 _ => false
