@@ -177,7 +177,7 @@
             {
                 CellType.GrayAcid or CellType.PurpleAcid or CellType.BlueAcid or
                 CellType.PassiveAcid or CellType.LivingActiveAcid or
-                CellType.CorrosiveActiveAcid => true,
+                CellType.CorrosiveActiveAcid or CellType.Pearl => true,
                 _ => false
             };
         }
