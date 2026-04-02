@@ -37,11 +37,11 @@ public static class ResourceExtractionService
         // Добыча кристаллов или обычных блоков
         if (World.isCry(x, y))
         {
-            ProcessCrystalMining(skillOwner, x, y, cellType, basket, ref mainCb, ref allCb);
+            ProcessCrystalMining(actor, skillOwner, x, y, cellType, basket, ref mainCb, ref allCb);
         }
         else
         {
-            ProcessRegularDigging(skillOwner, cellType, x, y, basket);
+            ProcessRegularDigging(actor, skillOwner, cellType, x, y, basket);
         }
 
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Digging, 1f);
@@ -116,6 +116,7 @@ public static class ResourceExtractionService
 
     // (баланс, навыки, опыт)
     private static void ProcessCrystalMining(
+        PEntity actor,
         Player skillOwner,
         int x,
         int y,
@@ -128,18 +129,18 @@ public static class ResourceExtractionService
 
         // Основная добыча
         float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier(ref mainCb, SkillType.MineGeneral);
-        Mine(skillOwner, ref mainCb, basket, cellType, x, y, mainMultiplier, crystalType);
+        Mine(actor, skillOwner, ref mainCb, basket, cellType, x, y, mainMultiplier, crystalType);
 
         // Смежное извлечение (зеленые <-> синие)
         if (skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction))
         {
-            ProcessAdjacentExtraction(skillOwner, x, y, cellType, basket, crystalType, ref allCb);
+            ProcessAdjacentExtraction(actor, skillOwner, x, y, cellType, basket, crystalType, ref allCb);
         }
 
         // Сортировка (красные -> фиолетовые -> голубые -> белые -> красные)
         if (skillOwner.skillslist.HasSkill(SkillType.Sort))
         {
-            ProcessSorting(skillOwner, x, y, cellType, basket, crystalType, ref allCb);
+            ProcessSorting(actor, skillOwner, x, y, cellType, basket, crystalType, ref allCb);
         }
 
         // Начисление опыта за кристаллы
@@ -149,6 +150,7 @@ public static class ResourceExtractionService
     }
 
     private static void ProcessAdjacentExtraction(
+        PEntity actor,
         Player skillOwner,
         int x,
         int y,
@@ -168,7 +170,7 @@ public static class ResourceExtractionService
         {
             float adjacentMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.AdjacentExtraction);
             float typeCb = allCb.Get(additionalType.Value);
-            Mine(skillOwner, ref typeCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
+            Mine(actor, skillOwner, ref typeCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
             allCb.Set(additionalType.Value, typeCb);
 
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AdjacentExtraction, 1f);
@@ -177,6 +179,7 @@ public static class ResourceExtractionService
     }
 
     private static void ProcessSorting(
+        PEntity actor,
         Player skillOwner,
         int x,
         int y,
@@ -207,7 +210,7 @@ public static class ResourceExtractionService
 
         float sortMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.Sort);
         float typeCb = allCb.Get(convertedType);
-        Mine(skillOwner, ref typeCb, basket, cellType, x, y, sortMultiplier, convertedType);
+        Mine(actor, skillOwner, ref typeCb, basket, cellType, x, y, sortMultiplier, convertedType);
         allCb.Set(convertedType, typeCb);
 
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Sort, 1f);
@@ -239,6 +242,7 @@ public static class ResourceExtractionService
     }
 
     private static void ProcessDetection(
+    PEntity actor,
     Player skillOwner,
     int x,
     int y,
@@ -358,20 +362,20 @@ public static class ResourceExtractionService
                 2,
                 x,
                 y,
-                skillOwner.id,
+                actor.id,
                 (int)(amount < 255 ? amount : 255),
                 sendType);
         }
     }
 
-    private static void ProcessRegularDigging(Player skillOwner, CellType cellType, int x, int y, Basket basket)
+    private static void ProcessRegularDigging(PEntity actor, Player skillOwner, CellType cellType, int x, int y, Basket basket)
     {
         float hitdmg = 0.2f;
         hitdmg = skillOwner.skillslist.GetDiggingDamageMultiplier(hitdmg);
 
         if (World.DamageCell(x, y, hitdmg))
         {
-            ProcessDetection(skillOwner, x, y, cellType, basket);
+            ProcessDetection(actor, skillOwner, x, y, cellType, basket);
             AwardDestructionExperience(skillOwner, cellType);
         }
     }
@@ -416,6 +420,7 @@ public static class ResourceExtractionService
 
     private static void Mine(
         PEntity actor,
+        Player skillOwner,
         ref float cb,
         Basket basket,
         CellType cell,
@@ -473,7 +478,7 @@ public static class ResourceExtractionService
             2,
             x,
             y,
-            actor.id,
+            skillOwner.id,
             (int)(odob < 255 ? odob : 255),
             sendType);
     }
