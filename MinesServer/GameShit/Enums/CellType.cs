@@ -77,7 +77,7 @@
         Violet = 110,
         White = 111,
         Cyan = 112,
-        HeavyRock = 113,
+        BlueRock = 113,
         BlackRock = 114,
         AliveBlackRock = 115,
         AliveBlue = 116,
@@ -216,7 +216,7 @@
         {
             return cell switch
             {
-                CellType.HeavyRock or CellType.DeepRock => true,
+                CellType.BlueRock or CellType.DeepRock => true,
                 _ => false
             };
         }
