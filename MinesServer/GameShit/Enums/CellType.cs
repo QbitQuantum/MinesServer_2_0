@@ -85,7 +85,7 @@
         AcidRock = 118,
         HypnoRock = 119,
         GoldenRock = 120,
-        DeepRock = 121,
+        GreenRock = 121,
         GRock = 122
     }
     // Методы расширения для перечисления CellType
@@ -216,7 +216,7 @@
         {
             return cell switch
             {
-                CellType.BlueRock or CellType.DeepRock => true,
+                CellType.BlueRock or CellType.GreenRock => true,
                 _ => false
             };
         }
