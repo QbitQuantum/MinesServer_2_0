@@ -37,7 +37,7 @@
         PurpleAcid = 67,
         Pearl = 68,
         UnknownRock1 = 69,
-        UnknownRock2 = 70,
+        LavaBoulder = 70,
         XGreen = 71,
         XBlue = 72,
         XRed = 73,
@@ -146,7 +146,8 @@
             {
                 CellType.Boulder1 or CellType.Boulder2 or CellType.Boulder3 or
                 CellType.BlackBoulder1 or CellType.BlackBoulder2 or CellType.BlackBoulder3 or
-                CellType.MetalBoulder1 or CellType.MetalBoulder2 or CellType.MetalBoulder3 => true,
+                CellType.LavaBoulder or CellType.MetalBoulder2 or CellType.MetalBoulder3 or
+                CellType.LavaBoulder => true,
                 _ => false
             };
         }
