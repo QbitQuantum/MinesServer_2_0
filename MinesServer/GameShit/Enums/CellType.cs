@@ -43,10 +43,10 @@
         XRed = 73,
         XCyan = 74,
         XViolet = 75,
-        UnknownRock3 = 76,
-        UnknownRock4 = 77,
-        UnknownRock5 = 78,
-        UnknownRock6 = 79,
+        Obsidian = 76,
+        Coralite = 77,
+        EtherealRock = 78,
+        Ultralit = 79,
         MilitaryBlockFrame = 80,
         MilitaryBlock = 81,
         MilitaryBlockSand = 82,
@@ -203,8 +203,8 @@
                 CellType.Rock or CellType.BlackRock or CellType.RedRock or
                 CellType.AcidRock or CellType.HypnoRock or CellType.GoldenRock or
                 CellType.GRock or CellType.UnknownRock1 or CellType.UnknownRock2 or
-                CellType.UnknownRock3 or CellType.UnknownRock4 or CellType.UnknownRock5 or
-                CellType.UnknownRock6 => true,
+                CellType.Obsidian or CellType.Coralite or CellType.EtherealRock or
+                CellType.Ultralit => true,
                 _ => false
             };
         }
