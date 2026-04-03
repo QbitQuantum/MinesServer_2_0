@@ -241,6 +241,116 @@ public static class ResourceExtractionService
         }
     }
 
+    private static void ProcessSliming(
+    PEntity actor,
+    Player skillOwner,
+    int x,
+    int y,
+    CellType cellType,
+    Basket basket)
+    {
+
+        // Проверяем, что копаем слизь (не кристаллы)
+        if (World.isCry(x, y))
+            return;
+
+        // Проверяем тип слизи
+        if (!cellType.IsAcid())
+            return;
+
+        var skill = skillOwner.skillslist.GetSkill(SkillType.MineSlime);
+
+        if (skill == null)
+            return;
+
+        bool[] TypeCrys = new bool[5];
+
+        int multi = 1;
+
+        switch (cellType)
+        {
+            case CellType.Pearl:
+                TypeCrys[(int)CrystalType.Green] = true;
+                multi *= 1; break;
+            case CellType.PassiveAcid:
+            case CellType.LivingActiveAcid:
+            case CellType.CorrosiveActiveAcid:
+                TypeCrys[(int)CrystalType.White] = true;
+                multi *= 1; break;
+            case CellType.GrayAcid:
+                TypeCrys[(int)CrystalType.Violet] = true;
+                multi *= 2; break;
+            case CellType.PurpleAcid:
+                TypeCrys[(int)CrystalType.Violet] = true;
+                TypeCrys[(int)CrystalType.Red] = true;
+                multi *= 3; break;
+            case CellType.BlueAcid:
+                TypeCrys[(int)CrystalType.Blue] = true;
+                multi *= 4; break;
+        }
+
+        // Считаем итоговое количество кристаллов: базовый эффект навыка * множитель породы
+        float totalEffect = skill.Effect * multi;
+
+        // Округляем до целого, но хотя бы 1 кристалл всегда даём
+        int totalCrystals = Math.Max(1, (int)Math.Round(totalEffect));
+
+        // Собираем список типов кристаллов, которые могут выпасть из этой породы
+        var availableCrystalTypes = new List<CrystalType>();
+        for (int i = 0; i < TypeCrys.Length; i++)
+        {
+            if (TypeCrys[i])
+                availableCrystalTypes.Add((CrystalType)i);
+        }
+
+        if (availableCrystalTypes.Count == 0)
+            return;
+
+        // Раскидываем totalCrystals по типам так, чтобы каждый тип получил хотя бы 1 кристалл
+        int remaining = totalCrystals;
+        var distribution = new Dictionary<CrystalType, int>();
+
+        // Идём по всем типам, кроме последнего
+        for (int i = 0; i < availableCrystalTypes.Count - 1; i++)
+        {
+            // Сколько максимум можем взять сейчас, оставляя остальным хотя бы по 1
+            int maxTake = remaining - (availableCrystalTypes.Count - i - 1);
+            // Берём случайное число от 1 до maxTake
+            int take = maxTake > 0 ? Physics.r.Next(1, maxTake + 1) : 1;
+            distribution[availableCrystalTypes[i]] = take;
+            remaining -= take;
+        }
+        // Последнему типу отдаём всё, что осталось
+        distribution[availableCrystalTypes[availableCrystalTypes.Count - 1]] = remaining;
+
+        foreach (var kvp in distribution)
+        {
+            CrystalType forcedType = kvp.Key;
+            int amount = kvp.Value;
+
+            int sendType = forcedType switch
+            {
+                CrystalType.Blue => 3,
+                CrystalType.Red => 1,
+                CrystalType.Violet => 2,
+                _ => (int)forcedType
+            };
+
+            // Добавляем кристаллы в корзину
+            basket.AddCrys(forcedType, amount);
+            // Добавляем в мировую статистику
+            World.AddDob(forcedType, amount);
+
+            actor.SendDFToBots(
+                2,
+                x,
+                y,
+                actor.id,
+                (int)(amount < 255 ? amount : 255),
+                sendType);
+        }
+    }
+
     private static void ProcessDetection(
     PEntity actor,
     Player skillOwner,
@@ -376,6 +486,7 @@ public static class ResourceExtractionService
         if (World.DamageCell(x, y, hitdmg))
         {
             ProcessDetection(actor, skillOwner, x, y, cellType, basket);
+            ProcessSliming(actor, skillOwner, x, y, cellType, basket);
             AwardDestructionExperience(skillOwner, cellType);
         }
     }
