@@ -31,8 +31,8 @@
         DarkWhiteSand = 61,
         RustySand = 62,
         DarkRustySand = 63,
-        BlackSand = 64,
-        DarkBlackSand = 65,
+        GraySand = 64,
+        DarkGraySand = 65,
         GrayAcid = 66,
         PurpleAcid = 67,
         Pearl = 68,
@@ -161,7 +161,7 @@
             {
                 CellType.WhiteSand or CellType.DarkWhiteSand or
                 CellType.RustySand or CellType.DarkRustySand or
-                CellType.BlackSand or CellType.DarkBlackSand or
+                CellType.GraySand or CellType.DarkGraySand or
                 CellType.BlueSand or CellType.DarkBlueSand or
                 CellType.YellowSand or CellType.DarkYellowSand => true,
                 _ => false
