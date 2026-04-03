@@ -263,7 +263,7 @@ public static class ResourceExtractionService
         if (skill == null)
             return;
 
-        bool[] TypeCrys = new bool[5];
+        bool[] TypeCrys = new bool[CrystalTypeExt.CrysType.Length];
 
         int multi = 1;
 
