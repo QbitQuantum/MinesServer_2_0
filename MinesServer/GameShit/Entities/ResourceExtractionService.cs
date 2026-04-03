@@ -351,6 +351,130 @@ public static class ResourceExtractionService
         }
     }
 
+    private static void ProcessSanding(
+    PEntity actor,
+    Player skillOwner,
+    int x,
+    int y,
+    CellType cellType,
+    Basket basket)
+    {
+
+        // Проверяем, что копаем слизь (не кристаллы)
+        if (World.isCry(x, y))
+            return;
+
+        // Проверяем тип слизи
+        if (!cellType.IsSand())
+            return;
+
+        var skill = skillOwner.skillslist.GetSkill(SkillType.Washing);
+
+        if (skill == null)
+            return;
+
+        bool[] TypeCrys = new bool[CrystalTypeExt.CrysType.Length];
+
+        int multi = 1;
+
+        // TODO: Уменьшить коэфициенты, и сделать что-то вроде сортировки но на песке только для темных аналогов
+        switch (cellType)
+        {
+            case CellType.YellowSand:
+                TypeCrys[(int)CrystalType.Green] = true;
+                multi *= 1; break;
+            case CellType.DarkYellowSand:
+                TypeCrys[(int)CrystalType.Green] = true;
+                multi *= 2; break;
+            case CellType.BlueSand:
+                TypeCrys[(int)CrystalType.Blue] = true;
+                multi *= 3; break;
+            case CellType.DarkBlueSand:
+                TypeCrys[(int)CrystalType.Blue] = true;
+                multi *= 4; break;
+            case CellType.WhiteSand:
+                TypeCrys[(int)CrystalType.White] = true;
+                multi *= 5; break;
+            case CellType.DarkWhiteSand:
+                TypeCrys[(int)CrystalType.White] = true;
+                multi *= 6; break;
+            case CellType.RustySand:
+                TypeCrys[(int)CrystalType.Red] = true;
+                multi *= 7; break;
+            case CellType.DarkRustySand:
+                TypeCrys[(int)CrystalType.Red] = true;
+                multi *= 8; break;
+            case CellType.GraySand:
+                TypeCrys[(int)CrystalType.Cyan] = true;
+                multi *= 9; break;
+            case CellType.DarkGraySand:
+                TypeCrys[(int)CrystalType.Cyan] = true;
+                multi *= 10; break;
+        }
+        // Пока что убираем множитель
+        multi = 1;
+        // Считаем итоговое количество кристаллов: базовый эффект навыка * множитель породы
+        float totalEffect = skill.Effect * multi;
+
+        // Округляем до целого, но хотя бы 1 кристалл всегда даём
+        int totalCrystals = Math.Max(1, (int)Math.Round(totalEffect));
+
+        // Собираем список типов кристаллов, которые могут выпасть из этой породы
+        var availableCrystalTypes = new List<CrystalType>();
+        for (int i = 0; i < TypeCrys.Length; i++)
+        {
+            if (TypeCrys[i])
+                availableCrystalTypes.Add((CrystalType)i);
+        }
+
+        if (availableCrystalTypes.Count == 0)
+            return;
+
+        // Раскидываем totalCrystals по типам так, чтобы каждый тип получил хотя бы 1 кристалл
+        int remaining = totalCrystals;
+        var distribution = new Dictionary<CrystalType, int>();
+
+        // Идём по всем типам, кроме последнего
+        for (int i = 0; i < availableCrystalTypes.Count - 1; i++)
+        {
+            // Сколько максимум можем взять сейчас, оставляя остальным хотя бы по 1
+            int maxTake = remaining - (availableCrystalTypes.Count - i - 1);
+            // Берём случайное число от 1 до maxTake
+            int take = maxTake > 0 ? Physics.r.Next(1, maxTake + 1) : 1;
+            distribution[availableCrystalTypes[i]] = take;
+            remaining -= take;
+        }
+        // Последнему типу отдаём всё, что осталось
+        distribution[availableCrystalTypes[availableCrystalTypes.Count - 1]] = remaining;
+
+        foreach (var kvp in distribution)
+        {
+            CrystalType forcedType = kvp.Key;
+            int amount = kvp.Value;
+
+            int sendType = forcedType switch
+            {
+                CrystalType.Blue => 3,
+                CrystalType.Red => 1,
+                CrystalType.Violet => 2,
+                _ => (int)forcedType
+            };
+
+            // Добавляем кристаллы в корзину
+            basket.AddCrys(forcedType, amount);
+            // Добавляем в мировую статистику
+            World.AddDob(forcedType, amount);
+
+            actor.SendDFToBots(
+                2,
+                x,
+                y,
+                actor.id,
+                (int)(amount < 255 ? amount : 255),
+                sendType);
+        }
+    }
+
     private static void ProcessDetection(
     PEntity actor,
     Player skillOwner,
@@ -487,6 +611,7 @@ public static class ResourceExtractionService
         {
             ProcessDetection(actor, skillOwner, x, y, cellType, basket);
             ProcessSliming(actor, skillOwner, x, y, cellType, basket);
+            ProcessSanding(actor, skillOwner, x, y, cellType, basket);
             AwardDestructionExperience(skillOwner, cellType);
         }
     }
