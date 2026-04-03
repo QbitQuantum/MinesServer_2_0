@@ -468,7 +468,7 @@ public static class ResourceExtractionService
             // Добавляем в мировую статистику
             World.AddDob(forcedType, amount);
 
-            skillOwner.SendDFToBots(
+            actor.SendDFToBots(
                 2,
                 x,
                 y,
