@@ -180,15 +180,27 @@ namespace MinesServer.GameShit.WorldSystem
             return true;
         }
 
-        public static bool DamageCell(int x, int y, float dmg)
+        public static bool DamageCell(int x, int y, float value, Operator TypeOperator = Operator.Minus)
         {
             var d = GetDurability(x, y);
-            float newDurability = MathF.Max(0, d - dmg);
+            float newDurability = 0f;
+
+            switch (TypeOperator)
+            {
+                case Operator.Minus:
+                    newDurability = MathF.Max(0, d - value);
+                    break;
+                case Operator.Divide:
+                    newDurability = (value == 0) ? d : d / value;
+                    break;
+                case Operator.Percentage:
+                    newDurability = MathF.Max(0, d * (1 - (value / 100f)));
+                    break;
+            }
 
             SetDurability(x, y, newDurability);
 
-            bool destroyed = newDurability == 0;
-
+            bool destroyed = newDurability <= 0.001f;
             if (destroyed) Destroy(x, y);
 
             return destroyed;
