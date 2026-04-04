@@ -183,14 +183,15 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool DamageCell(int x, int y, float dmg)
         {
             var d = GetDurability(x, y);
-            if (d - dmg <= 0)
-            {
-                SetDurability(x, y, 0);
-                Destroy(x, y);
-                return true;
-            }
-            SetDurability(x, y, d - dmg);
-            return false;
+            float newDurability = MathF.Max(0, d - dmg);
+
+            SetDurability(x, y, newDurability);
+
+            bool destroyed = newDurability == 0;
+
+            if (destroyed) Destroy(x, y);
+
+            return destroyed;
         }
 
         private static void DestroyCell(int x, int y)
