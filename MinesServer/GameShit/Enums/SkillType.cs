@@ -215,9 +215,9 @@ namespace MinesServer.Enums
 
     public class SkillInfo
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string LevelingHint { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string LevelingHint { get; set; } = string.Empty;
         public int BasePriceOPP { get; set; }
         public int BasePriceMoney { get; set; }
         public bool IsExpertSkill { get; set; }
