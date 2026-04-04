@@ -778,12 +778,7 @@ public static class ResourceExtractionService
         {
             var placeable = actor.geo.Pop();
             World.SetCell(x, y, placeable);
-
-            // Выносим проверку крио-блока и случайную прочность
-            int durability = World.isCry(x, y) ? 0 :
-                            (Physics.r.Next(1, 101) > 99 ? 0 : World.GetProp(placeable).durability);
-            World.SetDurability(x, y, durability);
-            
+            World.DamageCell(x, y, 99, Operator.Percentage);
         }
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Geology, 1f);
         skillOwner.SendGeo();
