@@ -537,6 +537,9 @@ namespace MinesServer.GameShit.WorldSystem
 
         private static void UpdateCry(TimeSpan interval, ref DateTime lastUpdate)
         {
+            if (ServerTime.Now - lastUpdate < interval)
+                return;
+
             for (int i = 0; i < W.cryscostmod.Length; i++)
             {
                 var p = (W.summary[i] + W.summary.Sum()) / 100;
