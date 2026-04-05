@@ -11,49 +11,50 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Storage : PackDamage
     {
+        private long[] _crysinside = new long[6];
         public long this[int index]
         {
-            get => crysinside[index];
-            set => crysinside[index] = value;
+            get => _crysinside[index];
+            set => _crysinside[index] = value;
         }
         public override int PackId => 29;
         public override PackType type => PackType.Storage;
         #region crysshit
-        public long[] crysinside = new long[6];
+        
         public long ze
         {
-            get { return crysinside[0]; }
-            set { crysinside[0] = value; }
+            get { return this[0]; }
+            set { this[0] = value; }
         }
 
         public long cr
         {
-            get { return crysinside[1]; }
-            set { crysinside[1] = value; }
+            get { return this[1]; }
+            set { this[1] = value; }
         }
 
         public long si
         {
-            get { return crysinside[2]; }
-            set { crysinside[2] = value; }
+            get { return this[2]; }
+            set { this[2] = value; }
         }
 
         public long be
         {
-            get { return crysinside[3]; }
-            set { crysinside[3] = value; }
+            get { return this[3]; }
+            set { this[3] = value; }
         }
 
         public long fi
         {
-            get { return crysinside[4]; }
-            set { crysinside[4] = value; }
+            get { return this[4]; }
+            set { this[4] = value; }
         }
 
         public long go
         {
-            get { return crysinside[5]; }
-            set { crysinside[5] = value; }
+            get { return this[5]; }
+            set { this[5] = value; }
         }
         #endregion
         private Storage() { }
@@ -89,10 +90,10 @@ namespace MinesServer.GameShit.Buildings
         {
             ClearBuilding();
             World.RemovePack(this);
-            if (crysinside.Sum() > 0)
+            if (_crysinside.Sum() > 0)
             {
-                Box.BuildBox(x, y, crysinside, null);
-                crysinside = new long[6];
+                Box.BuildBox(x, y, _crysinside, null);
+                _crysinside = new long[6];
             }
             using var db = new DataBase();
             db.storages.Remove(this);
@@ -110,11 +111,11 @@ namespace MinesServer.GameShit.Buildings
                 return;
             for (int i = 0; i < 6; i++)
             {
-                var count = p.crys.cry[i] + crysinside[i];
+                var count = p.crys.cry[i] + this[i];
                 if (count - sliders[i] >= 0 && sliders[i] >= 0)
                 {
                     p.crys.cry[i] = count - sliders[i];
-                    crysinside[i] = sliders[i];
+                    this[i] = sliders[i];
                 }
             }
             p.win = GUIWin(p);
@@ -124,7 +125,7 @@ namespace MinesServer.GameShit.Buildings
                 CrystalConfig = new CrystalConfig(
                     " ",
                     " ",
-                    crysinside.Select((cry, id) => new CrysLine("", 0, 0, p.crys.cry[id] + cry, (int)(cry))).ToArray()
+                    _crysinside.Select((cry, id) => new CrysLine("", 0, 0, p.crys.cry[id] + cry, (int)(cry))).ToArray()
                     ),
                 Buttons = [
                     new MButton("transfer", $"transfer:{ActionMacros.CrystalSliders}", 
