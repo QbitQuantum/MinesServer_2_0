@@ -48,6 +48,7 @@ namespace MinesServer.Server
         public DbSet<NC> ncs => Set<NC>();
         public DbSet<Observatory> observatory => Set<Observatory>();
         public DbSet<Mayak> mayak => Set<Mayak>();
+        public DbSet<Jobs> jobs => Set<Jobs>();
         #endregion
 
         public DataBase() : base() => Database.EnsureCreated();
@@ -257,6 +258,10 @@ namespace MinesServer.Server
                     i.Build();
                 }
                 foreach (var i in db.mayak)
+                {
+                    i.Build();
+                }
+                foreach (var i in db.jobs)
                 {
                     i.Build();
                 }
