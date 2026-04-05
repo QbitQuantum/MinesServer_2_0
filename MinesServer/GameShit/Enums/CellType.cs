@@ -91,6 +91,15 @@
     // Методы расширения для перечисления CellType
     public static class CellTypeExtensions
     {
+        public static bool IsQuadBlock(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.QuadBlock => true,
+                _ => false
+            };
+        }
+
         public static bool IsBuildingBlock(this CellType cell)
         {
             return cell switch

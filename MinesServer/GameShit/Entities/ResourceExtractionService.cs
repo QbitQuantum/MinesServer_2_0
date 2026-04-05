@@ -652,6 +652,12 @@ public static class ResourceExtractionService
                 skillOwner.skillslist.HandleExperience(skillOwner, SkillType.MineDeep, 1f);
             }
         }
+        if (cellType.IsBuildingBlock())
+        {
+            skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Deconstruction, 1f);
+            if (cellType.IsQuadBlock())
+                skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AntiBlock, 1f);
+        }
     }
 
     private static void Mine(
