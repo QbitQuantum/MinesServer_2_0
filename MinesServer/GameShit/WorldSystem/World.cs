@@ -149,7 +149,6 @@ namespace MinesServer.GameShit.WorldSystem
         {
             if (player == null) return false;
 
-            var h = 0;
             List<IHubPacket> packets = new();
             for (int cx = left; cx <= right; cx++)
             {
@@ -165,16 +164,13 @@ namespace MinesServer.GameShit.WorldSystem
                         !ignoreplace && !IsBlockedForPlacement(p))
                     {
                         packets.Add(new HBFXPacket(targetX, targetY, 0));
-                        h++;
                     }
                 }
             }
-            if (h > 0)
+
+            if (packets.Count > 0)
             {
-                if (packets.Count > 0)
-                {
-                    player.connection?.SendB(new HBPacket(packets.ToArray()));
-                }
+                player.connection?.SendB(new HBPacket(packets.ToArray()));
                 return false;
             }
             return true;
