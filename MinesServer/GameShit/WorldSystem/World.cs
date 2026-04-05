@@ -145,7 +145,7 @@ namespace MinesServer.GameShit.WorldSystem
                 }
             }
         }
-        public bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
+        public static bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
         {
             if (player == null) return false;
 
