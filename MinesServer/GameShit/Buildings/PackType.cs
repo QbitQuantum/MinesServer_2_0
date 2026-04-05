@@ -15,7 +15,7 @@
         Levi = 'W',
         Jobs = 'J',
         Yards = 'Y', // Крестик с буквой N
-        Flag = 'D',
+        Observatory = 'D',
         NC = 'N',
         BoomShop = 'b',
         BlackCircle = 'I',
