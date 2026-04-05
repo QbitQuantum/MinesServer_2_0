@@ -196,6 +196,9 @@ namespace MinesServer.GameShit.WorldSystem
                 case Operator.Percentage:
                     newDurability = MathF.Max(0, d * (1 - (value / 100f)));
                     break;
+                case Operator.Unknown:
+                    newDurability = value;
+                    break;
             }
 
             SetDurability(x, y, newDurability);
