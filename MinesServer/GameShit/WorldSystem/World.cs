@@ -254,26 +254,6 @@ namespace MinesServer.GameShit.WorldSystem
             if (!ValidCoord(x, y)) return;
             W.durability[x, y] = d;
         }
-        public void CreateEmptyMap(byte cell)
-        {
-            int cells = 0;
-            var j = DateTime.Now;
-            for (int x = 0; x < CellsWidth; x++)
-            {
-                for (int y = 0; y < CellsHeight; y++)
-                {
-                    cells += 1;
-                    SetCell(x, y, cell);
-                }
-                if (DateTime.Now - j > TimeSpan.FromSeconds(2))
-                {
-                    Console.Write($"\r{cells}/{TotalVolume}");
-                    j = DateTime.Now;
-                }
-            }
-            Console.Write($"\r{cells}/{TotalVolume}");
-            Console.WriteLine("");
-        }
 
         public static bool IsEmpty(int x, int y)
             => ValidCoord(x, y) && GetProp(x, y).isEmpty && !PackPart(x, y);
