@@ -245,20 +245,13 @@ namespace MinesServer.GameShit.WorldSystem
             }
             DestroyCell(x, y);
         }
-        public static float GetDurability(int x, int y)
+
+        private static float GetDurability(int x, int y)
+            => ValidCoord(x, y) ? W.durability[x, y]!.Value : 0f;
+
+        private static void SetDurability(int x, int y, float d)
         {
-            if (!ValidCoord(x, y))
-            {
-                return 0f;
-            }
-            return W.durability[x, y]!.Value;
-        }
-        public static void SetDurability(int x, int y, float d)
-        {
-            if (!ValidCoord(x, y))
-            {
-                return;
-            }
+            if (!ValidCoord(x, y)) return;
             W.durability[x, y] = d;
         }
         public void CreateEmptyMap(byte cell)
@@ -344,7 +337,7 @@ namespace MinesServer.GameShit.WorldSystem
             var durability = GetDurability(x, y);
             Destroy(x, y, DestroyCellType.Cell);
             SetCell(x + plusx, y + plusy, cell);
-            SetDurability(x + plusx, y + plusy, durability);
+            DamageCell(x + plusx, y + plusy, durability, Operator.Unknown);
             W.GetChunk(x + plusx, y + plusy).updlasttick = true;
         }
         public static void SetCell(int x, int y, CellType type) => SetCell(x, y, (byte)type);

@@ -333,8 +333,7 @@ namespace MinesServer.GameShit.WorldSystem
 
                     if (World.isCry(worldX, worldY))
                     {
-                        int durability = (int)(World.GetDurability(worldX, worldY) + 1);
-                        World.SetDurability(worldX, worldY, durability);
+                        World.DamageCell(worldX, worldY, -1, Operator.Minus);
                     }
                 }
             }

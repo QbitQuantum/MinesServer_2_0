@@ -423,7 +423,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 if (crys.RemoveCrys(CrystalType.Green, (long)greenSkill.Cost))
                 {
                     World.SetCell(x, y, CellType.GreenBlock);
-                    World.SetDurability(x, y, (int)greenSkill.DurabilityEffect);
+                    World.DamageCell(x, y, (int)greenSkill.DurabilityEffect, Operator.Unknown);
                     return true;
                 }
             }
@@ -432,7 +432,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 if (crys.RemoveCrys(CrystalType.Violet, (long)yellowSkill.Cost))
                 {
                     World.SetCell(x, y, CellType.YellowBlock);
-                    World.SetDurability(x, y, World.GetDurability(x, y) + (int)yellowSkill.DurabilityEffect);
+                    World.DamageCell(x, y, -(int)yellowSkill.DurabilityEffect, Operator.Minus);
                     return true;
                 }
             }
@@ -441,7 +441,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 if (crys.RemoveCrys(CrystalType.Red, (long)redSkill.Cost))
                 {
                     World.SetCell(x, y, CellType.RedBlock);
-                    World.SetDurability(x, y, World.GetDurability(x, y) + (int)redSkill.DurabilityEffect);
+                    World.DamageCell(x, y, -(int)redSkill.DurabilityEffect, Operator.Minus);
                     return true;
                 }
             }
@@ -466,7 +466,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         if (World.GetCell(x, y) == (byte)CellType.MilitaryBlockFrame)
                         {
                             World.SetCell(x, y, CellType.MilitaryBlock);
-                            World.SetDurability(x, y, finalDurability);
+                            World.DamageCell(x, y, finalDurability, Operator.Unknown);
                         }
                     });
                     return true;

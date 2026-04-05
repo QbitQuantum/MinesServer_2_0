@@ -124,7 +124,7 @@ namespace MinesServer.GameShit.WorldSystem
                 {
                     World.MoveCell(x, y, dir.x, dir.y);
                     World.SetCell(x, y, 109);
-                    World.SetDurability(x, y, 20 * modifier);
+                    World.DamageCell(x, y, 20 * modifier, Operator.Unknown);
                     return true;
                 }
             }
@@ -142,7 +142,7 @@ namespace MinesServer.GameShit.WorldSystem
                         if (World.IsEmptyForPlace(x + wx, y + wy))
                         {
                             World.SetCell(x + wx, y + wy, (byte)CellType.White);
-                            World.SetDurability(x + wx, y + wy, 9 * modifier);
+                            World.DamageCell(x + wx, y + wy, 9 * modifier, Operator.Unknown);
                         }
                     }
                 }
@@ -185,8 +185,8 @@ namespace MinesServer.GameShit.WorldSystem
                     {
                         World.SetCell(x - dir.x, y - dir.y,
                             r.Next(2) == 0 ? (byte)CellType.Red : (byte)CellType.Cyan);
-                        World.SetDurability(x + dir.x, y + dir.y,
-                            r.Next(2) == 0 ? 3 * modifier : 2 * modifier);
+                        World.DamageCell(x + dir.x, y + dir.y,
+                            r.Next(2) == 0 ? 3 * modifier : 2 * modifier, Operator.Unknown);
                         return true;
                     }
                 }
@@ -203,7 +203,7 @@ namespace MinesServer.GameShit.WorldSystem
                 if (World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
                     World.SetCell(x + dir.x, y + dir.y, (byte)CellType.Cyan);
-                    World.SetDurability(x + dir.x, y + dir.y, 2 * modifier);
+                    World.DamageCell(x + dir.x, y + dir.y, 2 * modifier, Operator.Unknown);
                     moved = true;
                 }
             }
@@ -223,8 +223,8 @@ namespace MinesServer.GameShit.WorldSystem
                     World.IsForDigging(x - dir.x, y - dir.y))
                 {
                     World.SetCell(x + dir.x, y + dir.y, World.GetCell(x - dir.x, y - dir.y));
-                    World.SetDurability(x + dir.x, y + dir.y,
-                        World.GetProp(x + dir.x, y + dir.y).durability * modifier);
+                    World.DamageCell(x + dir.x, y + dir.y,
+                        World.GetProp(x + dir.x, y + dir.y).durability * modifier, Operator.Unknown);
                     moved = true;
                 }
             }
@@ -255,7 +255,7 @@ namespace MinesServer.GameShit.WorldSystem
                 if (World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
                     World.SetCell(x + dir.x, y + dir.y, (byte)CellType.Red);
-                    World.SetDurability(x + dir.x, y + dir.y, 3 * modifier);
+                    World.DamageCell(x + dir.x, y + dir.y, 3 * modifier, Operator.Unknown);
                     moved = true;
                 }
             }
@@ -286,7 +286,7 @@ namespace MinesServer.GameShit.WorldSystem
                 if (World.IsEmptyForPlace(x + dir.x, y + dir.y))
                 {
                     World.SetCell(x + dir.x, y + dir.y, (byte)CellType.Violet);
-                    World.SetDurability(x + dir.x, y + dir.y, 2 * modifier);
+                    World.DamageCell(x + dir.x, y + dir.y, 2 * modifier, Operator.Unknown);
                     moved = true;
                 }
             }
