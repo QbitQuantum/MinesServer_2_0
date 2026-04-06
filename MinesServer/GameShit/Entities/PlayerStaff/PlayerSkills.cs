@@ -143,6 +143,17 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return Skill;
         }
 
+        /// <summary>
+        /// Получает все типы навыки
+        /// </summary>
+        public List<SkillType> GetSkillTypes()
+        {
+            return skills.Values
+                    .Where(s => s != null)
+                    .Select(s => s.type)
+                    .ToList();
+        }
+
         public void LoadSkills()
         {
             if (skills.Count > 0 || string.IsNullOrEmpty(ser))

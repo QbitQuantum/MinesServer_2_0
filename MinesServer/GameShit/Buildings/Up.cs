@@ -157,10 +157,7 @@ namespace MinesServer.GameShit.Buildings
             var oninstall = (int slot, SkillType skilltype) =>
             {
                 // Получаем текущие навыки игрока для проверки конфликтов
-                var currentSkills = p.skillslist.skills.Values
-                    .Where(s => s != null)
-                    .Select(s => s.type)
-                    .ToList();
+                var currentSkills = p.skillslist.GetSkillTypes();
 
                 // Проверяем конфликты
                 var conflictWith = SkillConflicts.CanLearn(skilltype, currentSkills);
