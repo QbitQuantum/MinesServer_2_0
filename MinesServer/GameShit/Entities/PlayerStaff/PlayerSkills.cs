@@ -538,33 +538,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         /// <summary>
-        /// Обрабатывает получение опыта при разрушении блока (без кристаллов)
-        /// </summary>
-        public void HandleDestructionExperience(Player player)
-        {
-            HandleExperience(player, SkillEffectType.OnDig);
-        }
-
-        /// <summary>
-        /// Получает множитель урона при копании
-        /// </summary>
-        public float GetDiggingDamageMultiplier(float baseDamage)
-        {
-            LoadSkills();
-
-            float damage = baseDamage;
-
-            var diggingSkill = GetSkill(SkillType.Digging);
-            if (diggingSkill != null)
-            {
-                damage = baseDamage * (diggingSkill.Effect / 100f);
-            }
-
-            return damage;
-        }
-
-
-        /// <summary>
         /// Возвращает коэффициент потребление пушки
         /// </summary>
         public float HandleInductionReceived()
