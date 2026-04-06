@@ -156,8 +156,6 @@ namespace MinesServer.GameShit.Buildings
 
             var oninstall = (int slot, SkillType skilltype) =>
             {
-                var playerSkill = p.skillslist.GetSkill(skilltype);
-
                 // Получаем текущие навыки игрока для проверки конфликтов
                 var currentSkills = p.skillslist.skills.Values
                     .Where(s => s != null)
@@ -165,19 +163,22 @@ namespace MinesServer.GameShit.Buildings
                     .ToList();
 
                 // Проверяем конфликты
-                var (canLearn, conflictWith, conflictType) = SkillConflicts.CanLearn(skilltype, currentSkills);
+                var conflictWith = SkillConflicts.CanLearn(skilltype, currentSkills);
 
                 // Создаем описание навыка
-                string description = playerSkill != null ? playerSkill.GetDescription(p) : SkillTypeExtensions.GetDescription(skilltype);
+                string description = "";
 
                 // Если есть конфликт - добавляем сообщение о конфликте в описание и не показываем кнопку установки
-                if (!canLearn && conflictWith.HasValue)
+                if (conflictWith.HasValue)
                 {
                     description = $"НЕЛЬЗЯ УСТАНОВИТЬ ⚠️\n\n" +
                                  $"Навык \"{skilltype.GetName()}\" конфликтует с навыком \"{conflictWith?.GetName()}\".\n" +
-                                 $"Тип конфликта: {conflictType}\n\n" +
-                                 $"Для установки этого навыка необходимо сначала удалить конфликтующий навык.\n\n" +
-                                 $"---\n\n{description}";
+                                 $"Для установки этого навыка необходимо сначала удалить конфликтующий навык.\n\n";
+                }
+                else
+                {
+                    var playerSkill = p.skillslist.GetSkill(skilltype);
+                    description = playerSkill != null ? playerSkill.GetDescription(p) : SkillTypeExtensions.GetDescription(skilltype);
                 }
 
                 var installPage = basePage with
@@ -185,7 +186,7 @@ namespace MinesServer.GameShit.Buildings
                     SkillIcon = skilltype,
                     Text = description,
                     // Показываем кнопку установки только если нет конфликта
-                    Button = canLearn ? new MButton("Установить", "confirm", (args) =>
+                    Button = !conflictWith.HasValue ? new MButton("Установить", "confirm", (args) =>
                     {
                         if (p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot))
                         {

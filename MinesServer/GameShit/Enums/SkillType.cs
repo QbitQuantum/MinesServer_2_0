@@ -135,11 +135,6 @@ namespace MinesServer.Enums
         /// С кем конфликтует
         /// </summary>
         public SkillType ConflictsWith { get; set; }
-
-        /// <summary>
-        /// Тип конфликта (опционально, для пояснения)
-        /// </summary>
-        public string ConflictType { get; set; } = string.Empty;
     }
 
     public static class SkillConflicts
@@ -147,19 +142,19 @@ namespace MinesServer.Enums
         private static readonly List<SkillConflict> _conflicts = new()
         {
             // Разрушение
-            new SkillConflict { Skill = SkillType.TotalDestruction, ConflictsWith = SkillType.Destruction, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.TotalDestruction, ConflictsWith = SkillType.Destruction},
             
             // Стройка
-            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildGreen, ConflictType = "Заменяет" },
-            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildYellow, ConflictType = "Заменяет" },
-            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildRed, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildGreen},
+            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildYellow},
+            new SkillConflict { Skill = SkillType.BuildUniversal, ConflictsWith = SkillType.BuildRed},
 
-            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildStructure, ConflictType = "Заменяет" },
-            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildRoad, ConflictType = "Заменяет" },
-            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildQuadro, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildStructure},
+            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildRoad},
+            new SkillConflict { Skill = SkillType.Architecture, ConflictsWith = SkillType.BuildQuadro},
             
             // Добыча
-            new SkillConflict { Skill = SkillType.ExpertMining, ConflictsWith = SkillType.MineGeneral, ConflictType = "Заменяет" },
+            new SkillConflict { Skill = SkillType.ExpertMining, ConflictsWith = SkillType.MineGeneral},
 
         };
 
@@ -171,18 +166,6 @@ namespace MinesServer.Enums
             return _conflicts.Any(c =>
                 (c.Skill == skill1 && c.ConflictsWith == skill2) ||
                 (c.Skill == skill2 && c.ConflictsWith == skill1));
-        }
-
-        /// <summary>
-        /// Возвращает тип конфликта между навыками
-        /// </summary>
-        public static string GetConflictType(SkillType skill1, SkillType skill2)
-        {
-            var conflict = _conflicts.FirstOrDefault(c =>
-                (c.Skill == skill1 && c.ConflictsWith == skill2) ||
-                (c.Skill == skill2 && c.ConflictsWith == skill1));
-
-            return conflict?.ConflictType ?? string.Empty;
         }
 
         /// <summary>
@@ -198,7 +181,7 @@ namespace MinesServer.Enums
         /// <summary>
         /// Проверяет, можно ли изучить навык при текущих навыках
         /// </summary>
-        public static (bool CanLearn, SkillType? ConflictWith, string ConflictType) CanLearn(
+        public static SkillType? CanLearn(
             SkillType newSkill,
             IEnumerable<SkillType> currentSkills)
         {
@@ -206,10 +189,10 @@ namespace MinesServer.Enums
             {
                 if (HasConflict(newSkill, currentSkill))
                 {
-                    return (false, currentSkill, GetConflictType(newSkill, currentSkill));
+                    return currentSkill;
                 }
             }
-            return (true, null, null);
+            return null;
         }
     }
 
