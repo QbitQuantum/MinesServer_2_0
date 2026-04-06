@@ -334,16 +334,9 @@ namespace MinesServer.GameShit.Buildings
                         {
                             using var db = new DataBase();
                             db.players.Attach(p);
-                            db.skills.Attach(p.skillslist);
-
                             p.opp -= price;
-
                             // Добавляем умение в список купленных у игрока
-                            if (!p.skillslist.PurchasedExpertSkills.Contains(skillCode))
-                            {
-                                p.skillslist.PurchasedExpertSkills.Add(skillCode);
-                            }
-
+                            p.skillslist.AddExpertSkillPurchased(skillCode);
                             // Сохраняем изменения
                             p.skillslist.Save();
                             db.SaveChanges();

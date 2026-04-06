@@ -211,6 +211,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return PurchasedExpertSkills.Contains(skillCode);
         }
 
+        public void AddExpertSkillPurchased(string skillCode)
+        {
+            if (PurchasedExpertSkills.Contains(skillCode))
+                return;
+            PurchasedExpertSkills.Add(skillCode);
+        }
+
         public bool CanInstallSkill(string typeCode, int slot)
         {
             if (slot > slots || slot < 0)
