@@ -128,8 +128,14 @@ public static class ResourceExtractionService
         CrystalType crystalType = ParseCryType(cellType);
 
         // Основная добыча
-        float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier(ref mainCb, SkillType.MineGeneral);
-        Mine(actor, skillOwner, ref mainCb, basket, cellType, x, y, mainMultiplier, crystalType);
+        float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier();
+
+        float multiplier = 1 + (float)Math.Truncate(mainCb) + mainMultiplier;
+        float floorMult = (float)Math.Truncate(multiplier);
+        mainCb -= (float)Math.Truncate(mainCb);
+        mainCb += multiplier - floorMult;
+
+        Mine(actor, skillOwner, ref mainCb, basket, cellType, x, y, floorMult, crystalType);
 
         // Смежное извлечение (зеленые <-> синие)
         if (skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction))
