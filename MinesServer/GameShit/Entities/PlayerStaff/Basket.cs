@@ -75,12 +75,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (crys.Length != 6) throw new ArgumentException("Массив должен содержать 6 элементов", nameof(crys));
 
-            // Для обратной совместимости с массивами используем индексатор с приведением типов
-            this[CrystalType.Red] += crys[0];
-            this[CrystalType.Green] += crys[1];
-            this[CrystalType.Blue] += crys[2];
-            this[CrystalType.White] += crys[3];
-            this[CrystalType.Violet] += crys[4];
+            this[CrystalType.Green] += crys[0];
+            this[CrystalType.Blue] += crys[1];
+            this[CrystalType.Red] += crys[2];
+            this[CrystalType.Violet] += crys[3];
+            this[CrystalType.White] += crys[4];
             this[CrystalType.Cyan] += crys[5];
 
             Changed?.Invoke();
