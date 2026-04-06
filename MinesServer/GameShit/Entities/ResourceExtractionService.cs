@@ -110,7 +110,7 @@ public static class ResourceExtractionService
         if (World.GetProp(World.GetCell(x + plusx, y + plusy)).isEmpty)
         {
             World.MoveCell(x, y, plusx, plusy);
-            skillOwner.skillslist.HandleBoulderMoveExperience(skillOwner);
+            skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Digging, 10f);
         }
     }
 

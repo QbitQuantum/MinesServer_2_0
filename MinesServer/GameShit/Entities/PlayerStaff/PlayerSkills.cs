@@ -370,22 +370,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         /// <summary>
-        /// Обрабатывает получение опыта для навыков по типу эффекта
-        /// </summary>
-        public void HandleExperience(Player player, SkillEffectType effectType, float baseExp = 1f)
-        {
-            LoadSkills();
-
-            foreach (var skill in skills.Values.Where(s => s != null))
-            {
-                if (skill != null && skill.UseSkill(effectType, player))
-                {
-                    skill.AddExp(player, baseExp);
-                }
-            }
-        }
-
-        /// <summary>
         /// Обрабатывает получение опыта для конкретного типа навыка
         /// </summary>
         public void HandleExperience(Player player, SkillType skillType, float baseExp = 1f)
@@ -527,14 +511,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             LoadSkills();
             var skill = GetSkill(skillType);
             return skill?.Effect ?? 0f;
-        }
-
-        /// <summary>
-        /// Обрабатывает получение опыта при перемещении валуна
-        /// </summary>
-        public void HandleBoulderMoveExperience(Player player)
-        {
-            HandleExperience(player, SkillEffectType.OnDig, 10); // Больше опыта за перемещение
         }
 
         /// <summary>
