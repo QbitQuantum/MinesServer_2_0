@@ -462,16 +462,15 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             LoadSkills();
             int modifiedDamage = damage;
 
-            foreach (var skill in skills.Values.Where(s => s != null))
-            {
-                if (skill != null && skill.type == SkillType.AntiGun)
-                {
-                    // Уменьшаем урон
-                    int reduction = (int)(damage * (skill.Effect / 100));
-                    modifiedDamage = Math.Max(0, modifiedDamage - reduction);
-                    break;
-                }
-            }
+            var AntiGunSkill = GetSkill(SkillType.AntiGun);
+
+            if (AntiGunSkill == null)
+                return modifiedDamage;
+
+            // Уменьшаем урон
+            int reduction = (int)(damage * (AntiGunSkill.Effect / 100));
+            modifiedDamage = Math.Max(0, modifiedDamage - reduction);
+
             return modifiedDamage;
         }
 
@@ -521,15 +520,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             LoadSkills();
             float modifiedinductionMultiplier = 1f;
 
-            foreach (var skill in skills.Values.Where(s => s != null))
-            {
-                if (skill != null && skill.type == SkillType.Induction)
-                {
-                    // Увеличиваем потребление
-                    modifiedinductionMultiplier = (skill.Effect / 100);
-                    break;
-                }
-            }
+            var InductionSkill = GetSkill(SkillType.Induction);
+
+            if (InductionSkill != null)
+                modifiedinductionMultiplier = (InductionSkill.Effect / 100);
+
             return modifiedinductionMultiplier;
         }
 
