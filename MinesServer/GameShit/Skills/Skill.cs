@@ -5,6 +5,35 @@ using MinesServer.Network.GUI;
 
 namespace MinesServer.GameShit.Skills
 {
+    class TemplateDescription
+    {
+        /// <summary>
+        /// Унифицированный шаблон описания навыка, основанный на его идентификаторе.
+        /// </summary>
+        public static string Description(
+            SkillType skillType,
+            int level,
+            float currentExp,
+            float maxExp,
+            float discountEffect = 0,
+            float upgradeEffect = 0)
+        {
+            var info = skillType.GetInfo();
+            return
+                $"<color=white>{info?.Name ?? skillType.ToString()}</color>. Уровень:<color=white>{level}</color>\n" +
+                $"Опыт {currentExp}/{maxExp} " +
+                (upgradeEffect > 0
+                    ? $"<color=yellow>[Экспертное обучение x{1 + (upgradeEffect / 100f):F1}]</color>\n"
+                    : $"<color=red>[Экспертное обучение отсутствует]</color>\n") +
+                $"Как качать: {info?.LevelingHint ?? "Неизвестно"}\n" +
+                skillType.GetDisplayInfo(skillType.GetInfo().EffectFunc(level)) + "\n" +
+                $"Стоимость: {skillType.GetPrice(level)} " +
+                (discountEffect > 0
+                    ? $"<color=yellow>[Оптимизация стоимости {discountEffect:F1}%]</color>\n"
+                    : $"<color=red>[Оптимизация отсутствует]</color>\n") +
+                $"ОПП: {skillType.GetOpp(level)}\n";
+        }
+    }
     public class Skill
     {
         public Skill()
