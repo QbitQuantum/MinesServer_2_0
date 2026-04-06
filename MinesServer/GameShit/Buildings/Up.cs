@@ -156,7 +156,7 @@ namespace MinesServer.GameShit.Buildings
 
             var oninstall = (int slot, SkillType skilltype) =>
             {
-                var playerSkill = p.skillslist.skills.Values.FirstOrDefault(s => s?.type.GetCode() == skilltype.GetCode());
+                var playerSkill = p.skillslist.GetSkill(skilltype);
 
                 // Получаем текущие навыки игрока для проверки конфликтов
                 var currentSkills = p.skillslist.skills.Values
