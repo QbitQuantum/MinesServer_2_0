@@ -26,7 +26,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
     {
         public static void SendGeo(this Player p)
         {
-            var SkillGeology = p.skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.Geology);
+            var SkillGeology = p.skillslist.GetSkill(SkillType.Geology);
             if (SkillGeology != default)
             {
                 var currentIndex = p.geo.Count;   // Текущая позиция (верхушка стека)
