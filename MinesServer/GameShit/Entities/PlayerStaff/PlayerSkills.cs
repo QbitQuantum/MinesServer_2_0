@@ -566,7 +566,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         public int slots { get; set; }
-        [NotMapped]
-        public Dictionary<int, Skill?> skills = new();
+
+        [NotMapped] private readonly Dictionary<int, Skill?> skills = [];
     }
 }
