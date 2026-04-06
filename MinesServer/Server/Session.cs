@@ -295,7 +295,6 @@ namespace MinesServer.Server
         public void CloseWindow()
         {
             player.win = null;
-            player.skillslist.selectedslot = -1;
             SendU(new GuPacket());
         }
         #endregion
