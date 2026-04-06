@@ -143,7 +143,7 @@ namespace MinesServer.GameShit.Buildings
         private Tab TabSkillPage(Player p)
         {
             Action? admn = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null;
-            var onskill = (int arg) => { p.skillslist.selectedslot = arg; p.win = GUIWin(p); p.SendWindow(); };
+            void onskill(int arg) { p.skillslist.InstallSlot(arg); p.win = GUIWin(p); p.SendWindow(); }
 
             // Создаем базовый объект с общими свойствами
             var basePage = new UpPage
@@ -185,7 +185,7 @@ namespace MinesServer.GameShit.Buildings
                     // Показываем кнопку установки только если нет конфликта
                     Button = !conflictWith.HasValue ? new MButton("Установить", "confirm", (args) =>
                     {
-                        if (p.skillslist.InstallSkill(skilltype, p.skillslist.selectedslot))
+                        if (p.skillslist.InstallSkill(skilltype, p.skillslist.GetCurrentSlot()))
                         {
                             p.SendLvl();
                             p.win = GUIWin(p);
@@ -202,7 +202,7 @@ namespace MinesServer.GameShit.Buildings
 
             UpPage uppage;
 
-            if (p.skillslist.selectedslot == -1)
+            if (p.skillslist.GetCurrentSlot() == -1)
             {
                 uppage = basePage with
                 {
@@ -217,7 +217,7 @@ namespace MinesServer.GameShit.Buildings
                 // Случай: слот выбран
                 uppage = basePage with
                 {
-                    SelectedSlot = p.skillslist.selectedslot,
+                    SelectedSlot = p.skillslist.GetCurrentSlot(),
                     SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
                     OnInstall = skillfromslot == null ? oninstall : null,
                     Text = skillfromslot?.GetDescription(p),

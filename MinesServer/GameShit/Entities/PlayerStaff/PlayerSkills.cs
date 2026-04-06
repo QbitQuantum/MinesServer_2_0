@@ -22,8 +22,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
     public class PlayerSkills
     {
-        public int id { get; set; }
-
         private PlayerSkills() { }
 
         public PlayerSkills(bool initializeDefaultSkills)
@@ -44,6 +42,15 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             Save(); // Сохраняем после инициализации
         }
+        [NotMapped] private List<string> _purchasedExpertSkills;
+
+        [NotMapped] private readonly Dictionary<int, Skill?> skills = [];
+
+        [NotMapped] private int selectedslot = -1;
+
+        public int id { get; set; }
+
+        public int slots { get; set; }
 
         /// <summary>
         /// Сериализованное представление словаря слот -> (код навыка, уровень, опыт).
@@ -55,11 +62,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public string expertSkill { get; set; } = "[]";
 
-        [NotMapped]
-        private List<string> _purchasedExpertSkills;
-
-        [NotMapped]
-        public List<string> PurchasedExpertSkills
+        [NotMapped] public List<string> PurchasedExpertSkills
         {
             get
             {
@@ -83,6 +86,25 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
         }
 
+        /// <summary>
+        /// Устанавливает текущий слот
+        /// </summary>
+        public void InstallSlot(int SelectedSlot)
+        {
+            selectedslot = SelectedSlot;
+        }
+
+        /// <summary>
+        /// Возвращает текущий слот
+        /// </summary>
+        public int GetCurrentSlot()
+        {
+            return selectedslot;
+        }
+
+        /// <summary>
+        /// Возвращает навык по типу навыка
+        /// </summary>
         public Skill? GetSkill(SkillType Type)
         {
             return skills.Values.FirstOrDefault(s => s?.type == Type);
@@ -159,8 +181,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
         }
 
-        [NotMapped]
-        public int selectedslot = -1;
+        
 
         public bool DeleteSkill()
         {
@@ -518,9 +539,5 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             return modifiedinductionMultiplier;
         }
-
-        public int slots { get; set; }
-
-        [NotMapped] private readonly Dictionary<int, Skill?> skills = [];
     }
 }
