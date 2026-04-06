@@ -62,7 +62,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public string expertSkill { get; set; } = "[]";
 
-        [NotMapped] public List<string> PurchasedExpertSkills
+        [NotMapped] private List<string> PurchasedExpertSkills
         {
             get
             {
@@ -217,7 +217,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// <summary>
         /// Проверяет, куплен ли экспертный навык игроком
         /// </summary>
-        private bool IsExpertSkillPurchased(SkillType skillType)
+        public bool IsExpertSkillPurchased(SkillType skillType)
         {
             var info = skillType.GetInfo();
 
@@ -232,8 +232,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return PurchasedExpertSkills.Contains(skillCode);
         }
 
-        public void AddExpertSkillPurchased(string skillCode)
+        public void AddExpertSkillPurchased(SkillType skillType)
         {
+            string skillCode = skillType.GetCode();
+
             if (PurchasedExpertSkills.Contains(skillCode))
                 return;
             PurchasedExpertSkills.Add(skillCode);

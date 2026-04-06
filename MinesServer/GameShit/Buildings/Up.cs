@@ -296,11 +296,8 @@ namespace MinesServer.GameShit.Buildings
                 if (!info.IsExpertSkill)
                     continue;
 
-                // Получаем строковый код умения
-                string skillCode = skillType.GetCode();
-
                 // Проверяем, куплено ли это умение игроком
-                bool isPurchased = p.skillslist.PurchasedExpertSkills.Contains(skillCode);
+                bool isPurchased = p.skillslist.IsExpertSkillPurchased(skillType);
 
                 // Получаем цену для этого умения
                 int price = skillType.GetBasePriceOPP();
@@ -331,7 +328,7 @@ namespace MinesServer.GameShit.Buildings
                             db.players.Attach(p);
                             p.opp -= price;
                             // Добавляем умение в список купленных у игрока
-                            p.skillslist.AddExpertSkillPurchased(skillCode);
+                            p.skillslist.AddExpertSkillPurchased(skillType);
                             // Сохраняем изменения
                             p.skillslist.Save();
                             db.SaveChanges();
@@ -391,8 +388,7 @@ namespace MinesServer.GameShit.Buildings
                     continue;
 
                 // Получаем строковый код умения и проверяем, куплено ли оно
-                string skillCode = skillType.GetCode();
-                bool isPurchased = p.skillslist.PurchasedExpertSkills.Contains(skillCode);
+                bool isPurchased = p.skillslist.IsExpertSkillPurchased(skillType);
 
                 // Добавляем визуальное отличие для купленных умений
                 string skillName = info.Name;
