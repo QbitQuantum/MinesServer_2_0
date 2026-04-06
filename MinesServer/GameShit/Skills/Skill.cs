@@ -28,7 +28,8 @@ namespace MinesServer.GameShit.Skills
                 p.SendHealth();
                 p.skillslist.Save();
 
-                if (EffectType() == SkillEffectType.OnMove)
+                if (type == SkillType.Movement || 
+                    type == SkillType.RoadMovement)
                 {
                     p.SendSpeed();
                 }
@@ -58,18 +59,10 @@ namespace MinesServer.GameShit.Skills
             p.connection?.SendU(new SkillsPacket(v));
             p.skillslist.Save();
         }
-        public bool UseSkill(SkillEffectType e, Player p)
-        {
-            return e == EffectType();
-        }
 
         public bool isUpReady()
         {
             return exp >= Expiriense;
-        }
-        public SkillEffectType EffectType()
-        {
-            return type.GetInfo()?.EffectType ?? SkillEffectType.OnExp;
         }
 
         public string GetDescription(Player p)
