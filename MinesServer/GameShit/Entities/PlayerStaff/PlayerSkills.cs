@@ -35,8 +35,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 InstallSkill(SkillType.Digging, 1);
                 InstallSkill(SkillType.Movement, 2);
                 InstallSkill(SkillType.Health, 3);
+                slots = skills.Count;
             }
-            slots = skills.Count;
 
             // Инициализируем пустой список купленных экспертных скиллов
             _purchasedExpertSkills = new List<string>();
