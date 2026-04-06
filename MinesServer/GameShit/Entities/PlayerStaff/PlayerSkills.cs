@@ -117,6 +117,25 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             return skills.Values.FirstOrDefault(s => s?.type == Type);
         }
+
+        /// <summary>
+        /// Возвращает навык на указанном слоте
+        /// </summary>
+        private Skill? GetSkillAtSlot(int slot)
+        {
+            if (slot > -1 && skills.TryGetValue(slot, out Skill? value))
+                return value;
+            return null;
+        }
+
+        /// <summary>
+        /// Возвращает выбранный навык
+        /// </summary>
+        public Skill? GetSelectedSkill()
+        {
+            return GetSkillAtSlot(selectedslot);
+        }
+
         public Skill? GetDestructionRockSkill()
         {
             var Skill = GetSkill(SkillType.Destruction);

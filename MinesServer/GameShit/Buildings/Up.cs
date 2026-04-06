@@ -201,9 +201,7 @@ namespace MinesServer.GameShit.Buildings
                 p.SendWindow();
             };
 
-            var skillfromslot = p.skillslist.selectedslot > -1 ?
-                (p.skillslist.skills.ContainsKey(p.skillslist.selectedslot) ? p.skillslist.skills[p.skillslist.selectedslot] : null) :
-                null;
+            var skillfromslot = p.skillslist.GetSelectedSkill();
 
             UpPage uppage;
 
