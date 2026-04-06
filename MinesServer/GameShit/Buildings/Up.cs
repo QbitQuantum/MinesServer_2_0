@@ -185,7 +185,7 @@ namespace MinesServer.GameShit.Buildings
                     // Показываем кнопку установки только если нет конфликта
                     Button = !conflictWith.HasValue ? new MButton("Установить", "confirm", (args) =>
                     {
-                        if (p.skillslist.InstallSkill(skilltype.GetCode(), p.skillslist.selectedslot))
+                        if (p.skillslist.InstallSkill(skilltype, p.skillslist.selectedslot))
                         {
                             p.SendLvl();
                             p.win = GUIWin(p);

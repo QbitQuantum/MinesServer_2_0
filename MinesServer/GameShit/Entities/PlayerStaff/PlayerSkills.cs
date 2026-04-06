@@ -31,10 +31,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (initializeDefaultSkills)
             {
                 // Установка базовых навыков без Player
-                InstallSkill(SkillType.MineGeneral.GetCode(), 0);
-                InstallSkill(SkillType.Digging.GetCode(), 1);
-                InstallSkill(SkillType.Movement.GetCode(), 2);
-                InstallSkill(SkillType.Health.GetCode(), 3);
+                InstallSkill(SkillType.MineGeneral, 0);
+                InstallSkill(SkillType.Digging, 1);
+                InstallSkill(SkillType.Movement, 2);
+                InstallSkill(SkillType.Health, 3);
             }
             slots = skills.Count;
 
@@ -218,7 +218,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             PurchasedExpertSkills.Add(skillCode);
         }
 
-        public bool CanInstallSkill(string typeCode, int slot)
+        public bool CanInstallSkill(SkillType skillType, int slot)
         {
             if (slot > slots || slot < 0)
                 return false;
@@ -226,7 +226,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (skills.ContainsKey(slot) && skills[slot] != null)
                 return false;
 
-            var skillType = Mines3Enums.SkillFromCode(typeCode);
             if (skillType == SkillType.Unknown)
                 return false;
 
@@ -241,13 +240,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return MeetsRequirements(skillType);
         }
 
-        public bool InstallSkill(string typeCode, int slot)
+        public bool InstallSkill(SkillType skillType, int slot)
         {
-            if (!CanInstallSkill(typeCode, slot))
+            if (!CanInstallSkill(skillType, slot))
                 return false;
 
-            var skillType = Mines3Enums.SkillFromCode(typeCode);
-            
             skills[slot] = new Skill
             {
                 type = skillType,
