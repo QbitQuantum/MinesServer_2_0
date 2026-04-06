@@ -44,17 +44,15 @@ namespace MinesServer.GameShit.Skills
         public void AddExp(Player p, float expv = 1)
         {
             Dictionary<string, int> v = new();
-            // Проверяем навык Upgrade для множителя опыта
-            foreach (var skill in p.skillslist.skills.Values)
-            {
-                if (skill != null && skill.type == SkillType.Upgrade)
-                {
-                    // TODO: Добавить функцию MultiExp
-                    // И по возможности кэшировать все значения функций
-                    // Чтобы постоянно не перебирать
-                    expv *= 1f + (skill.Effect / 100f);
-                }
-            }
+
+            var SkillUpgrade = p.skillslist.GetSkill(SkillType.Upgrade);
+
+            // TODO: Добавить функцию MultiExp
+            // И по возможности кэшировать все значения функций
+            // Чтобы постоянно не перебирать
+            if (SkillUpgrade != null)
+                expv *= 1f + (SkillUpgrade.Effect / 100f);
+
             exp += expv;
             v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
             p.connection?.SendU(new SkillsPacket(v));
@@ -79,23 +77,21 @@ namespace MinesServer.GameShit.Skills
             float upgradeEffect = 0f;
             float discountEffect = 0f;
 
-            if (p?.skillslist?.skills != null)
+            if (p?.skillslist != null)
             {
                 // Находим навык Upgrade
-                var upgradeSkill = p.skillslist.skills.Values
-                    .FirstOrDefault(s => s?.type == SkillType.Upgrade && s.type != type);
-                if (upgradeSkill != null)
-                {
+                var SkillUpgrade = SkillType.Upgrade;
+                var upgradeSkill = p.skillslist.GetSkill(SkillUpgrade);
+                
+                if (upgradeSkill != null && upgradeSkill.type != SkillUpgrade)
                     upgradeEffect = upgradeSkill.Effect;
-                }
 
                 // Находим навык Discount
-                var discountSkill = p.skillslist.skills.Values
-                    .FirstOrDefault(s => s?.type == SkillType.Discount && s.type != type);
-                if (discountSkill != null)
-                {
+                var SkillDiscount = SkillType.Discount;
+                var discountSkill = p.skillslist.GetSkill(SkillDiscount);
+
+                if (discountSkill != null && discountSkill.type != SkillDiscount)
                     discountEffect = discountSkill.Effect;
-                }
             }
 
             return TemplateDescription.Description(

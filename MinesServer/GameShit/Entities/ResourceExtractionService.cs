@@ -756,7 +756,7 @@ public static class ResourceExtractionService
         if (actor.Health == actor.MaxHealth)
             return false;
 
-        var heal = skillOwner.skillslist.skills.Values.FirstOrDefault(s => s.type == SkillType.Repair);
+        var heal = skillOwner.skillslist.GetSkill(SkillType.Repair);
         if (heal == default)
             return false;
 
@@ -782,7 +782,7 @@ public static class ResourceExtractionService
         if (actor == null || skillOwner == null)
             return;
 
-        var Geology = skillOwner.skillslist.skills.Values.FirstOrDefault(s => s.type == SkillType.Geology);
+        var Geology = skillOwner.skillslist.GetSkill(SkillType.Geology);
         
         if (Geology == default)
             return;
