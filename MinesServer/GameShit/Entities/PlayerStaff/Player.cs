@@ -629,13 +629,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             World.W.SendLeaveBot(id, x, y);
 
             if (HasActiveProgram && programsData.RespawnOnProg)
-            {
                 programsData.OnDeath();
-            }
-            else
-            {
-                RunProgramm(null);
-            }
 
             win = null;
             this.SendWindow();
