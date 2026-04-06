@@ -604,10 +604,31 @@ public static class ResourceExtractionService
 
     private static void ProcessRegularDigging(PEntity actor, Player skillOwner, CellType cellType, int x, int y, Basket basket)
     {
-        float hitdmg = 0.2f;
-        hitdmg = skillOwner.skillslist.GetDiggingDamageMultiplier(hitdmg);
+        var skill = cellType switch
+        {
+            var t when t.IsRock() => skillOwner.skillslist.GetDestructionRockSkill(),
+            var t when t.IsAcid() => skillOwner.skillslist.GetSkill(SkillType.Deactivation),
+            var t when t.IsBoulder() => skillOwner.skillslist.GetSkill(SkillType.Fracturing),
+            var t when t.IsQuadBlock() => skillOwner.skillslist.GetSkill(SkillType.AntiBlock),
+            var t when t.IsLightSand() => skillOwner.skillslist.GetSkill(SkillType.Annihilation),
+            var t when t.IsLightBlock() => skillOwner.skillslist.GetSkill(SkillType.Deconstruction),
+            var t when t.IsMetalicSand() => skillOwner.skillslist.GetSkill(SkillType.DeMagnetizing),
+            _ => null
+        };
 
-        if (World.DamageCell(x, y, hitdmg))
+        (float valuePercentDamage, Operator skillPercentage) = skill != null ?
+            (skill.Effect, Operator.Percentage) : 
+            (0, Operator.Minus);
+
+        var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
+
+        (float valueDiggingSkillEffect, Operator skillMinus) = DiggingSkill != null ?
+            (DiggingSkill.Effect, Operator.Minus) :
+            (0, Operator.Minus);
+
+        if (valueDiggingSkillEffect != 0 &&
+            World.DamageCell(x, y, valuePercentDamage, skillPercentage) &&
+            World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus))
         {
             ProcessDetection(actor, skillOwner, x, y, cellType, basket);
             ProcessSliming(actor, skillOwner, x, y, cellType, basket);

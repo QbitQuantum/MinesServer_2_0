@@ -91,6 +91,9 @@
     // Методы расширения для перечисления CellType
     public static class CellTypeExtensions
     {
+        /// <summary>
+        /// Является ли квадро блоком
+        /// </summary>
         public static bool IsQuadBlock(this CellType cell)
         {
             return cell switch
@@ -100,16 +103,22 @@
             };
         }
 
-        public static bool IsBuildingBlock(this CellType cell)
+        /// <summary>
+        /// Является ли простым блоком
+        /// </summary>
+        public static bool IsLightBlock(this CellType cell)
         {
             return cell switch
             {
                 CellType.GreenBlock or CellType.YellowBlock or CellType.RedBlock or
                 CellType.MilitaryBlockFrame or CellType.MilitaryBlock or
-                CellType.Support or CellType.QuadBlock => true,
+                CellType.Support => true,
                 _ => false
             };
         }
+
+        public static bool IsBuildingBlock(this CellType cell)
+            => cell.IsLightBlock() || cell.IsQuadBlock();
 
         public static bool IsAlive(this CellType cell)
         {
@@ -162,19 +171,38 @@
         }
 
         /// <summary>
-        /// Является ли ячейка песком
+        /// Является ли ячейка обычным песком
         /// </summary>
-        public static bool IsSand(this CellType cell)
+        public static bool IsLightSand(this CellType cell)
         {
             return cell switch
             {
                 CellType.WhiteSand or CellType.DarkWhiteSand or
-                CellType.RustySand or CellType.DarkRustySand or
-                CellType.GraySand or CellType.DarkGraySand or
                 CellType.BlueSand or CellType.DarkBlueSand or
                 CellType.YellowSand or CellType.DarkYellowSand => true,
                 _ => false
             };
+        }
+
+        /// <summary>
+        /// Является ли ячейка металическим песком
+        /// </summary>
+        public static bool IsMetalicSand(this CellType cell)
+        {
+            return cell switch
+            {
+                CellType.RustySand or CellType.DarkRustySand or
+                CellType.GraySand or CellType.DarkGraySand => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Является ли ячейка песком
+        /// </summary>
+        public static bool IsSand(this CellType cell)
+        {
+            return cell.IsLightSand() || cell.IsMetalicSand();
         }
 
         /// <summary>

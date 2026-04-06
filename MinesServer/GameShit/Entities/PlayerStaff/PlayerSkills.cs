@@ -117,6 +117,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             return skills.Values.FirstOrDefault(s => s?.type == Type);
         }
+        public Skill? GetDestructionRockSkill()
+        {
+            var Skill = GetSkill(SkillType.Destruction);
+            Skill ??= GetSkill(SkillType.TotalDestruction);
+            return Skill;
+        }
 
         public void LoadSkills()
         {
