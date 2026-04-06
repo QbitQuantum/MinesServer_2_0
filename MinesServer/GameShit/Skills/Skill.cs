@@ -41,30 +41,6 @@ namespace MinesServer.GameShit.Skills
             }
         }
 
-        public bool Visible(Player p, out bool meet)
-        {
-            bool visible = true;
-            meet = true;
-
-            var reqs = GetReqs;
-            if (reqs is not null)
-            {
-                foreach (var req in reqs)
-                {
-                    var skill = p.skillslist.skills.FirstOrDefault(skill => skill.Value?.type == req.Key).Value;
-                    if (skill == default)
-                    {
-                        visible = false;
-                    }
-                    else if (skill.lvl < req.Value)  // Изменил условие: убрал -3, так как теперь требования явные
-                    {
-                        meet = false;
-                    }
-                }
-            }
-            return visible;
-        }
-
         public void AddExp(Player p, float expv = 1)
         {
             Dictionary<string, int> v = new();
