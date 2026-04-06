@@ -91,8 +91,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             get
             {
-                var moveSkill = skillslist.skills.Values.FirstOrDefault(s =>
-                    s != null && s.type == SkillType.Movement);
+                var moveSkill = skillslist.GetSkill(SkillType.Movement);
                 return moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay;
             }
         }
@@ -192,7 +191,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private int CalculateMaxHealth()
         {
-            var healthSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.Health);
+            var healthSkill = skillslist.GetSkill(SkillType.Health); 
             return 100 + (healthSkill != null ? (int)healthSkill.Effect : 0);
         }
 
@@ -415,9 +414,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var cellprop = World.GetProp(cell);
 
             // Проверяем наличие навыков
-            var greenSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildGreen);
-            var yellowSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildYellow);
-            var redSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildRed);
+            var greenSkill = skillslist.GetSkill(SkillType.BuildGreen);
+            var yellowSkill = skillslist.GetSkill(SkillType.BuildYellow);
+            var redSkill = skillslist.GetSkill(SkillType.BuildRed);
 
             if (greenSkill != null && (World.TrueEmpty(x, y) || cellprop.isSand))
             {
@@ -453,7 +452,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private bool BuildMilitary(int x, int y)
         {
             long cost = 0;
-            var warSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildWar);
+            var warSkill = skillslist.GetSkill(SkillType.BuildWar);
 
             if (warSkill != null)
             {
@@ -479,7 +478,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private bool BuildRoad(int x, int y)
         {
             long cost = 0;
-            var roadSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildRoad);
+            var roadSkill = skillslist.GetSkill(SkillType.BuildRoad);
 
             if (roadSkill != null)
             {
@@ -495,7 +494,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private bool BuildSupport(int x, int y)
         {
-            var structureSkill = skillslist.skills.Values.FirstOrDefault(s => s?.type == SkillType.BuildStructure);
+            var structureSkill = skillslist.GetSkill(SkillType.BuildStructure);
             var cellprop = World.GetProp(World.GetCell(x, y));
 
             if (structureSkill != null)
