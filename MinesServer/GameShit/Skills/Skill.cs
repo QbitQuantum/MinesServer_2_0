@@ -138,7 +138,7 @@ namespace MinesServer.GameShit.Skills
             get
             {
                 var info = type.GetInfo();
-                return info?.Description;
+                return info.Description;
             }
         }
 
