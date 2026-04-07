@@ -8,16 +8,17 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class Box : Entity
     {
-        [NotMapped]
-        public long[] bxcrys = new long[6];
+        [NotMapped] private readonly long[] bxcrys = new long[6];
+
         private Box() { }
-        private Box(bool n) { }
+
         public static Box? GetBox(int x, int y)
         {
             if (!World.ValidCoord(x, y))
                 return null;
             return DataBase.GetBox(x, y);
         }
+
         public static void BuildBox(int x, int y, long[] cry, Player? p, bool force = false)
         {
             var cell = World.GetCell(x, y);
@@ -25,7 +26,7 @@ namespace MinesServer.GameShit.WorldSystem
             {
                 return;
             }
-            var box = new Box(true);
+            var box = new Box();
             for (int i = 0; i < 6; i++)
             {
                 long remcry = cry[i];
@@ -50,7 +51,11 @@ namespace MinesServer.GameShit.WorldSystem
             }
             World.SetCell(x, y, 90);
         }
+
         public long AllCrys => bxcrys.Sum();
+
+        public long[] BoxCrys => bxcrys;
+
         public long this[CrystalType crystal]
         {
             get => bxcrys[(int)crystal];
