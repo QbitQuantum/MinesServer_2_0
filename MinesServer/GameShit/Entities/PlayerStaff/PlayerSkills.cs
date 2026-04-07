@@ -181,8 +181,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
         }
 
-        
-
         public bool DeleteSkill()
         {
             if (!skills.ContainsKey(selectedslot) || skills[selectedslot] == null)
