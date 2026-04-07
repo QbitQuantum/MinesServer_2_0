@@ -51,24 +51,23 @@ namespace MinesServer.Server
         }
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
-            if (Packet.TryDecode(buffer, out var result))
+            if (!Packet.TryDecode(buffer, out var result))
+                return;
+
+            try
             {
-                try
+                switch (result.data)
                 {
-                    switch (result.data)
-                    {
-                        case AUPacket au: AU(au); break;
-                        case TYPacket ty: father.time.AddAction(() => TY(ty), player); break;
-                        case PongPacket ping: Ping(ping); break;
-                        default:
-                            // Invalid packet
-                            break;
-                    }
+                    case AUPacket au: AU(au); break;
+                    case TYPacket ty: father.time.AddAction(() => TY(ty), player); break;
+                    case PongPacket ping: Ping(ping); break;
+                    // Invalid packet
+                    default: break;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"invalid packet from {player?.id} {ex}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"invalid packet from {player?.id} {ex}");
             }
         }
         protected override void OnDisconnected()
