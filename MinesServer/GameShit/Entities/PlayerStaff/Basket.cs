@@ -127,11 +127,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         CrystalConfig = new CrystalConfig("  останется", "будет в боксе",
                             [
-                                new CrysLine("", 0, 0, this[CrystalType.Red], 0),
                                 new CrysLine("", 0, 0, this[CrystalType.Green], 0),
                                 new CrysLine("", 0, 0, this[CrystalType.Blue], 0),
-                                new CrysLine("", 0, 0, this[CrystalType.White], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.Red], 0),
                                 new CrysLine("", 0, 0, this[CrystalType.Violet], 0),
+                                new CrysLine("", 0, 0, this[CrystalType.White], 0),
                                 new CrysLine("", 0, 0, this[CrystalType.Cyan], 0)
                             ]),
                         Text = "\nИспользуйте полосы прокрутки, чтобы выбрать сколько положить в бокс\",\r\n" +
