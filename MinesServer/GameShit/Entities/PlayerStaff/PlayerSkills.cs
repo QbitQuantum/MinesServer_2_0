@@ -383,12 +383,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public UpSkill[] GetSkills()
         {
-            List<UpSkill> ski = new();
             LoadSkills();
+
+            List<UpSkill> ski = [];
+            
             for (int i = 0; i < slots; i++)
             {
-                if (skills.ContainsKey(i) && skills[i] is not null)
-                    ski.Add(new UpSkill(i, skills[i].lvl, skills[i].isUpReady(), skills[i].type));
+                if (skills.TryGetValue(i, out Skill? value) && value is not null)
+                    ski.Add(new UpSkill(i, value.lvl, value.isUpReady(), value.type));
             }
             return ski.ToArray();
         }
