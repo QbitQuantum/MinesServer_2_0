@@ -46,28 +46,26 @@ namespace MinesServer.GameShit.Skills
 
         public void Up(Player p)
         {
-            if (isUpReady())
+            if (!isUpReady()) return;
+
+            Dictionary<string, int> v = new();
+            exp -= Expiriense;
+            lvl += 1;
+            v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
+            p.connection?.SendU(new SkillsPacket(v));
+            p.SendLvl();
+            p.skillslist.Save();
+
+            if (type == SkillType.Movement ||
+                type == SkillType.RoadMovement)
             {
-                Dictionary<string, int> v = new();
-                exp -= Expiriense;
-                lvl += 1;
-                v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
-                p.connection?.SendU(new SkillsPacket(v));
-                p.SendLvl();
+                p.SendSpeed();
+            }
+
+            if (type == SkillType.Health)
+            {
+                p.MaxHealth = (int)Effect;
                 p.SendHealth();
-                p.skillslist.Save();
-
-                if (type == SkillType.Movement || 
-                    type == SkillType.RoadMovement)
-                {
-                    p.SendSpeed();
-                }
-
-                if (type == SkillType.Health)
-                {
-                    p.MaxHealth = (int)Effect;
-                    p.SendHealth();
-                }
             }
         }
 
