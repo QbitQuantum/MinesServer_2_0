@@ -330,7 +330,6 @@ namespace MinesServer.GameShit.Buildings
                             // Добавляем умение в список купленных у игрока
                             p.skillslist.AddExpertSkillPurchased(skillType);
                             // Сохраняем изменения
-                            p.skillslist.Save();
                             db.SaveChanges();
 
                             // Обновляем страницу

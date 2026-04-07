@@ -235,10 +235,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void AddExpertSkillPurchased(SkillType skillType)
         {
             string skillCode = skillType.GetCode();
-
             if (PurchasedExpertSkills.Contains(skillCode))
                 return;
             PurchasedExpertSkills.Add(skillCode);
+            Save();
         }
 
         public bool CanInstallSkill(SkillType skillType, int slot)
