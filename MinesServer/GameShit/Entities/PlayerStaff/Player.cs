@@ -251,29 +251,29 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdateC190Stacks(DateTime now)
         {
-            if (now - lastc190hit > TimeSpan.FromMinutes(C190StackResetMinutes))
-            {
-                c190stacks = 1;
-                lastc190hit = now;
-            }
+            if (now - lastc190hit <= TimeSpan.FromMinutes(C190StackResetMinutes))
+                return;
+
+            c190stacks = 1;
+            lastc190hit = now;
         }
 
         private void HandleOffline(DateTime now)
         {
-            if (now - afkstarttime > TimeSpan.FromMinutes(AfkTimeoutMinutes))
-            {
-                DataBase.activeplayers.Remove(this);
-                Death();
-            }
+            if (now - afkstarttime <= TimeSpan.FromMinutes(AfkTimeoutMinutes))
+                return;
+
+            DataBase.activeplayers.Remove(this);
+            Death();
         }
 
         private void UpdateBots(DateTime now)
         {
-            if (now - lBotsUpdate > TimeSpan.FromSeconds(BotUpdateIntervalSeconds))
-            {
-                BotsRender();
-                lBotsUpdate = now;
-            }
+            if (now - lBotsUpdate <= TimeSpan.FromSeconds(BotUpdateIntervalSeconds))
+                return;
+
+            BotsRender();
+            lBotsUpdate = now;
         }
 
         private void HandleCurrentCell()
@@ -451,43 +451,42 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private bool BuildMilitary(int x, int y)
         {
-            long cost = 0;
             var warSkill = skillslist.GetSkill(SkillType.BuildWar);
 
-            if (warSkill != null)
+            if (warSkill == null)
+                return false;
+
+            long cost = (long)warSkill.Cost;
+
+            if (!crys.RemoveCrys(CrystalType.Cyan, cost) || !World.TrueEmpty(x, y))
+                return false;
+
+            World.SetCell(x, y, CellType.MilitaryBlockFrame);
+
+            _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>
             {
-                cost = (long)warSkill.Cost;
-                if (crys.RemoveCrys(CrystalType.Cyan, cost) && World.TrueEmpty(x, y))
-                {
-                    World.SetCell(x, y, CellType.MilitaryBlockFrame);
-                    var finalDurability = (int)warSkill.DurabilityEffect;
-                    _ = Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(_ =>
-                    {
-                        if (World.GetCell(x, y) == (byte)CellType.MilitaryBlockFrame)
-                        {
-                            World.SetCell(x, y, CellType.MilitaryBlock);
-                            World.DamageCell(x, y, finalDurability, Operator.Unknown);
-                        }
-                    });
-                    return true;
-                }
-            }
-            return false;
+                if (World.GetCell(x, y) != (byte)CellType.MilitaryBlockFrame)
+                    return;
+
+                World.SetCell(x, y, CellType.MilitaryBlock);
+                World.DamageCell(x, y, (int)warSkill.DurabilityEffect, Operator.Unknown);
+            });
+            return true;
         }
 
         private bool BuildRoad(int x, int y)
         {
-            long cost = 0;
             var roadSkill = skillslist.GetSkill(SkillType.BuildRoad);
 
-            if (roadSkill != null)
+            if (roadSkill == null)
+                return false;
+
+            long cost = (long)roadSkill.Cost;
+
+            if (crys.RemoveCrys(0, cost) && World.TrueEmpty(x, y))
             {
-                cost = (long)roadSkill.Cost;
-                if (crys.RemoveCrys(0, cost) && World.TrueEmpty(x, y))
-                {
-                    World.SetCell(x, y, CellType.Road);
-                    return true;
-                }
+                World.SetCell(x, y, CellType.Road);
+                return true;
             }
             return false;
         }
@@ -495,17 +494,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private bool BuildSupport(int x, int y)
         {
             var structureSkill = skillslist.GetSkill(SkillType.BuildStructure);
+
+            if (structureSkill == null)
+                return false;
+
             var cellprop = World.GetProp(World.GetCell(x, y));
 
-            if (structureSkill != null)
-            {
-                if (crys.RemoveCrys(CrystalType.Green, (long)structureSkill.Cost) && (World.TrueEmpty(x, y) || cellprop.isSand))
-                {
-                    World.SetCell(x, y, CellType.Support);
-                    return true;
-                }
-            }
-            return false;
+            if (!crys.RemoveCrys(CrystalType.Green, (long)structureSkill.Cost) || 
+                !World.TrueEmpty(x, y) && !cellprop.isSand)
+                return false;
+
+            World.SetCell(x, y, CellType.Support);
+
+            return true;
         }
         #endregion
 
@@ -516,11 +517,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (HasActiveProgram)
                 return;
 
-            if (Delay < DateTime.UtcNow)
-            {
-                a();
-                Delay = DateTime.UtcNow + TimeSpan.FromMilliseconds(delay);
-            }
+            if (Delay >= DateTime.UtcNow)
+                return;
+
+            a();
+            Delay = DateTime.UtcNow + TimeSpan.FromMilliseconds(delay);
         }
 
         public override void Bz()
