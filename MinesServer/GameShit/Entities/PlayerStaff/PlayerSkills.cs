@@ -37,12 +37,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
 
             // Инициализируем пустой список купленных экспертных скиллов
-            _purchasedExpertSkills = new List<string>();
+            _purchasedExpertSkills = new HashSet<string>();
             expertSkill = "[]";
 
             Save(); // Сохраняем после инициализации
         }
-        [NotMapped] private List<string> _purchasedExpertSkills;
+        [NotMapped] private HashSet<string> _purchasedExpertSkills;
 
         [NotMapped] private readonly Dictionary<int, Skill?> skills = [];
 
@@ -62,7 +62,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public string expertSkill { get; set; } = "[]";
 
-        [NotMapped] private List<string> PurchasedExpertSkills
+        [NotMapped] private HashSet<string> PurchasedExpertSkills
         {
             get
             {
@@ -70,11 +70,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 {
                     try
                     {
-                        _purchasedExpertSkills = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(expertSkill ?? "[]") ?? new List<string>();
+                        _purchasedExpertSkills = Newtonsoft.Json.JsonConvert.DeserializeObject<HashSet<string>>(expertSkill ?? "[]") ?? new HashSet<string>();
                     }
                     catch
                     {
-                        _purchasedExpertSkills = new List<string>();
+                        _purchasedExpertSkills = new HashSet<string>();
                     }
                 }
                 return _purchasedExpertSkills;
@@ -235,9 +235,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void AddExpertSkillPurchased(SkillType skillType)
         {
             string skillCode = skillType.GetCode();
-            if (PurchasedExpertSkills.Contains(skillCode))
+            if (!_purchasedExpertSkills.Add(skillCode))  // Add сам возвращает bool
                 return;
-            PurchasedExpertSkills.Add(skillCode);
             Save();
         }
 
