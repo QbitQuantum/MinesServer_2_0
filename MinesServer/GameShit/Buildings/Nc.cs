@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 using MinesServer.Enums;
 using MinesServer.GameShit.Entities.PlayerStaff;
@@ -14,10 +15,6 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class NC : Pack
     {
-        #region fields
-        public override PackType type => PackType.NC;
-        public override int PackId => 46;
-        #endregion;
         private NC() { }
         public NC(int ownerid, int x, int y) : base(ownerid, x, y)
         {
@@ -25,6 +22,16 @@ namespace MinesServer.GameShit.Buildings
             db.ncs.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.NC;
+        [NotMapped] public override int PackId => 46;
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+
+        #endregion;
+
         #region affectworld
         protected override void ClearBuilding()
         {

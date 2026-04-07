@@ -11,16 +11,28 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Storage : PackDamage
     {
+        private Storage() { }
+        public Storage(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
+        {
+            using var db = new DataBase();
+            db.storages.Add(this);
+            db.SaveChanges();
+        }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Storage;
+        [NotMapped] public override int PackId => 29;
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+
         private long[] _crysinside = new long[6];
         public long this[int index]
         {
             get => _crysinside[index];
             set => _crysinside[index] = value;
         }
-        public override int PackId => 29;
-        public override PackType type => PackType.Storage;
-        #region crysshit
-        
+
         public long ze
         {
             get { return this[0]; }
@@ -56,14 +68,9 @@ namespace MinesServer.GameShit.Buildings
             get { return this[5]; }
             set { this[5] = value; }
         }
+
         #endregion
-        private Storage() { }
-        public Storage(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
-        {
-            using var db = new DataBase();
-            db.storages.Add(this);
-            db.SaveChanges();
-        }
+
         #region affectworld
         protected override void ClearBuilding()
         {

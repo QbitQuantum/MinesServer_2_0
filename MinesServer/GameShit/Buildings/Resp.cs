@@ -13,13 +13,7 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Resp : PackCharge
     {
-        #region fields
-        public override PackType type => PackType.Resp;
-        public int cost { get; set; }
-        public long moneyinside { get; set; }
-        public override int PackId => 1;
-        #endregion
-        private Resp(){ }
+        private Resp() { }
         public Resp(int x, int y, int ownerid) : base(x, y, ownerid, 1000, 1000)
         {
             charge = 100;
@@ -27,6 +21,15 @@ namespace MinesServer.GameShit.Buildings
             db.resps.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Resp;
+        [NotMapped] public override int PackId => 1;
+        public int cost { get; set; }
+        public long moneyinside { get; set; }
+        
+        #endregion
 
         // TODO: Попытаться понять что это и убрать рекурсию
         public void OnRespawn(Player p)

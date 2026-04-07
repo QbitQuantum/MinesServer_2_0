@@ -11,15 +11,19 @@ namespace MinesServer.GameShit.VulkSystem
 {
     public class Vulkan : Pack
     {
-        #region shit
-        [NotMapped]
-        public override int cid { get; set; }
-        [NotMapped]
-        public override int ownerid { get; set; }
-        #endregion
-        public override PackType type => PackType.Vulkan;
-        private Vulkan() { }
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Vulkan;
+        [NotMapped] public override int PackId { get; set; }
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+        [NotMapped] public override int ownerid { get; set; }
         public DateTime starttime { get; set; }
+
+        #endregion
+
+        private Vulkan() { }
+        
         public Vulkan(int x,int y) : base(x,y,0)
         {
             starttime = ServerTime.Now;
@@ -27,10 +31,7 @@ namespace MinesServer.GameShit.VulkSystem
             db.vulkans.Add(this);
             db.SaveChanges();
         }
-        public override void Build()
-        {
-            base.Build();
-        }
+
         public override Window? GUIWin(Player p) => null;
 
         protected override void ClearBuilding()

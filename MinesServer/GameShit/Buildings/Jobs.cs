@@ -11,9 +11,6 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Jobs : Pack
     {
-        public override PackType type => PackType.Jobs;
-        [NotMapped]
-        public override int PackId => -1;
         private Jobs() { }
         public Jobs(int x, int y, int ownerid) : base(x, y, ownerid)
         {
@@ -21,6 +18,16 @@ namespace MinesServer.GameShit.Buildings
             db.jobs.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Jobs;
+        [NotMapped] public override int PackId { get; set; }
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+
+        #endregion
+
         #region affectworld
         protected override void ClearBuilding()
         {

@@ -15,12 +15,7 @@ namespace MinesServer.GameShit.Buildings
 {
     public class Market : PackDamage
     {
-        #region fields
-        public override PackType type => PackType.Market;
-        public long moneyinside { get; set; }
-        public override int PackId => 3;
-        #endregion;
-        private Market() {}
+        private Market() { }
         public Market(int ownerid, int x, int y) : base(ownerid, x, y, 1000)
         {
             using var db = new DataBase();
@@ -28,6 +23,17 @@ namespace MinesServer.GameShit.Buildings
             db.markets.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Market;
+        [NotMapped] public override int PackId => 3;
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+        public long moneyinside { get; set; }
+
+        #endregion;
+        
         #region affectworld
         protected override void ClearBuilding()
         {

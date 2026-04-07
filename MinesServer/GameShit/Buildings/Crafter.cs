@@ -15,44 +15,22 @@ namespace MinesServer.GameShit.Buildings
     /// </summary>
     public sealed class Crafter : PackDamage
     {
-        private const int CrafterPackId = 24;
-        // EF Core requires a parameterless constructor
-        private Crafter() { }
         public Crafter(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
             using var db = new DataBase();
             db.crafts.Add(this);
             db.SaveChanges();
         }
-        public override int PackId => CrafterPackId;
 
-        /// <summary>
-        /// True when the current crafting job has finished and is ready to claim.
-        /// </summary>
-        [NotMapped]
-        public bool ready { get; set; } = false;
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Craft;
+        [NotMapped] public override int PackId => 24;
+        [NotMapped] public override int off => currentcraft is null ? 0 : 1;
+
         public CraftEntry? currentcraft { get; set; }
-        /// <summary>
-        /// Encodes current visual state for the client.
-        /// Base value depends on recipe result id; +50 when the job is complete.
-        /// </summary>
-        [NotMapped]
-        public override int off
-        {
-            get
-            {
-                if (currentcraft is null)
-                    return 0;
-                var recipe = currentcraft.GetRecipie();
-                var offset = 1 + recipe.result.id;
 
-                if (currentcraft.progress >= 100)
-                    offset += 50;
-
-                return offset;
-            }
-        }
-        public override PackType type => PackType.Craft;
+        #endregion;
 
         #region affectworld
         public override void Build()
@@ -98,7 +76,7 @@ namespace MinesServer.GameShit.Buildings
             if (Physics.r.Next(1, 101) < 40)
             {
                 p.connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "Крафтер разобран. Часть деталей сохранена.")]));
-                p.inventory[CrafterPackId]++;
+                p.inventory[24]++;
             }
         }
         #endregion

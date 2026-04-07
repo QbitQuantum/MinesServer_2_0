@@ -22,14 +22,6 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Spot : PackDamage
     {
-        public override PackType type => PackType.Spot;
-        #region Shit
-        [NotMapped]
-        public override int cid { get; set; }
-        public override int PackId => 47;
-        #endregion
-        public Program? selected { get; set; }
-        public BotSpot? entity;
         private Spot() { }
         public Spot(int x, int y, int ownerid) : base(x, y, ownerid, 100)
         {
@@ -37,6 +29,20 @@ namespace MinesServer.GameShit.Buildings
             db.spots.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Spot;
+        [NotMapped] public override int PackId => 47;
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+
+        public Program? selected { get; set; }
+        public BotSpot? entity;
+
+        #endregion
+
+
         protected override void ClearBuilding()
         {
             World.SetCell(x, y, 32, true);

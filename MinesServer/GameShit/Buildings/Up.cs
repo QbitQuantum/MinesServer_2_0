@@ -14,57 +14,50 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Up : PackDamage
     {
-        #region fields
-        public override int PackId => 2;
-        public override PackType type => PackType.Up;
-        public long moneyinside { get; set; }
+        private Up() { }
 
-        public static readonly Dictionary<int, long> PriceSlots =
-            new()
-            {
-                { 1, 2_500_000 },
-                { 2, 5_000_000 },
-                { 3, 7_500_000 },
-                { 4, 10_000_000 },
-                { 5, 12_500_000 },
-                { 6, 15_000_000 },
-                { 7, 17_500_000 },
-                { 8, 20_000_000 },
-                { 9, 22_500_000 },
-                { 10, 25_000_000 },
-                { 11, 5 },
-                { 12, 10 },
-                { 13, 25 },
-                { 14, 50 },
-                { 15, 75 },
-                { 16, 100 },
-                { 17, 250 },
-                { 18, 500 },
-                { 19, 750 },
-                { 20, 1000 },
-                { 21, 1500 },
-                { 22, 2000 },
-                { 23, 2500 },
-                { 24, 3000 },
-                { 25, 3500 },
-                { 26, 4000 },
-                { 27, 4500 },
-                { 28, 5000 },
-                { 29, 5100 },
-                { 30, 5200 },
-                { 31, 5300 },
-                { 32, 5400 },
-                { 33, 5500 },
-                { 34, 5600 },
-            };
-        #endregion
         public Up(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
             using var db = new DataBase();
             db.ups.Add(this);
             db.SaveChanges();
         }
-        private Up() {  }
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Up;
+        [NotMapped] public override int PackId => 2;
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+        public long moneyinside { get; set; }
+
+        public static readonly Dictionary<int, long> PriceSlots = new()
+        {
+            { 1, 2_500_000 },
+            { 2, 5_000_000 },
+            { 3, 7_500_000 },
+            { 4, 10_000_000 },
+            { 5, 12_500_000 },
+            { 6, 15_000_000 },
+            { 7, 17_500_000 },
+            { 8, 20_000_000 },
+            { 9, 22_500_000 },
+            { 10, 25_000_000 },
+            { 11, 5 }, { 12, 10 },
+            { 13, 25 }, { 14, 50 },
+            { 15, 75 }, { 16, 100 },
+            { 17, 250 }, { 18, 500 },
+            { 19, 750 }, { 20, 1000 },
+            { 21, 1500 }, { 22, 2000 },
+            { 23, 2500 }, { 24, 3000 },
+            { 25, 3500 }, { 26, 4000 },
+            { 27, 4500 }, { 28, 5000 },
+            { 29, 5100 }, { 30, 5200 },
+            { 31, 5300 }, { 32, 5400 },
+            { 33, 5500 }, { 34, 5600 },
+        };
+
+        #endregion
+        
         private IPage AdminPage => new Page()
         {
             Title ="UP",

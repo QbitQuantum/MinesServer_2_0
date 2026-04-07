@@ -1,25 +1,34 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
-using MinesServer.GameShit.GUI;
-using MinesServer.GameShit.WorldSystem;
-using MinesServer.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.GUI;
+using MinesServer.GameShit.WorldSystem;
+using MinesServer.Server;
 
 namespace MinesServer.GameShit.Buildings
 {
     public sealed class Gate : Pack
     {
-        public override PackType type => PackType.None;
-        public override int PackId => 27;
         private Gate() { }
 
         public Gate(int x, int y, int cid) : base(x, y, 0)
         {
             this.x = x; this.y = y; this.cid = cid;
         }
+
+        #region fields
+
+        [NotMapped] public override int PackId => 27;
+        [NotMapped] public override PackType type => PackType.None;
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+
+        #endregion;
+
         public override void Build()
         {
             World.SetCell(x, y, 30);

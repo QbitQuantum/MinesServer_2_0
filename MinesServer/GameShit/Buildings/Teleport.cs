@@ -83,12 +83,7 @@ namespace MinesServer.GameShit.Buildings
     }
     public sealed class Teleport : PackCharge
     {
-        public override PackType type => PackType.Teleport;
-        public int cost { get; set; }
-        [NotMapped]
-        public override int off => charge > 0 ? 1 : 0;
-        public override int PackId => 0;
-        private Teleport() {}
+        private Teleport() { }
         public Teleport(int x, int y, int ownerid) : base(x, y, ownerid, 1000, 10000)
         {
             charge = 1000;
@@ -96,6 +91,16 @@ namespace MinesServer.GameShit.Buildings
             db.teleports.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Teleport;
+        [NotMapped] public override int PackId { get; set; }
+        public override int off => charge > 0 ? 1 : 0;
+        public int cost { get; set; }
+
+        #endregion
+
         #region affectworld
         protected override void ClearBuilding()
         {

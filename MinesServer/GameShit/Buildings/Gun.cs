@@ -1,4 +1,7 @@
-﻿using MinesServer.Enums;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
+using MinesServer.Enums;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
@@ -9,38 +12,43 @@ using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using System.Numerics;
 
 namespace MinesServer.GameShit.Buildings
 {
     public sealed class Gun : PackCharge
     {
-        #region fields
-        public override PackType type => PackType.Gun;
-        public override int off { get { return charge > 0 ? 1 : 0; } }
-        #endregion
-        private const int attackRadius = 20;
-        private const int chunkRadius = (attackRadius + Chunk.ChunkWidth - 1) / Chunk.ChunkWidth;
-        public const int attackRadiusSq = attackRadius * attackRadius;
+        private Gun() { }
 
-        private List<Chunk> cachedChunks;
-        private List<Player> playersInRangeBuffer = [];
-
-        private static readonly TimeSpan AttackInterval = TimeSpan.FromSeconds(1);
-        private DateTime lastAttackTime = ServerTime.Now;
-
-        public override int PackId => 26;
         public Gun(int x, int y, int ownerid, int cid) : base(x, y, ownerid, 1000, 10000)
         {
             this.cid = cid;
             charge = 1000;
         }
-        private Gun() { }
+
+        #region fields
+
+        private static readonly TimeSpan AttackInterval = TimeSpan.FromSeconds(1);
+
+        private const int attackRadius = 20;
+        private const int chunkRadius = (attackRadius + Chunk.ChunkWidth - 1) / Chunk.ChunkWidth;
+        public const int attackRadiusSq = attackRadius * attackRadius;
+
+        private readonly List<Chunk> cachedChunks = [];
+        private readonly List<Player> playersInRangeBuffer = [];
+
+        private DateTime lastAttackTime = ServerTime.Now;
+
+        [NotMapped] public override PackType type => PackType.Gun;
+        [NotMapped] public override int PackId => 26;
+
+        public override int off { get { return charge > 0 ? 1 : 0; } }
+
+        #endregion
 
         #region affectworld
 
         private void CachedChunks()
-            => cachedChunks = World.W.GetChunksInRange(x, y, chunkRadius).ToList();
+            => cachedChunks.AddRange(World.W.GetChunksInRange(x, y, chunkRadius));
 
         public override void Build()
         {

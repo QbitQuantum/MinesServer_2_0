@@ -11,9 +11,6 @@ namespace MinesServer.GameShit.Buildings
 {
     public sealed class Mayak : Pack
     {
-        public override PackType type => PackType.Mayak;
-        [NotMapped]
-        public override int PackId => -1;
         private Mayak() { }
         public Mayak(int x, int y, int ownerid) : base(x, y, ownerid)
         {
@@ -21,6 +18,16 @@ namespace MinesServer.GameShit.Buildings
             db.mayak.Add(this);
             db.SaveChanges();
         }
+
+        #region fields
+
+        [NotMapped] public override PackType type => PackType.Mayak;
+        [NotMapped] public override int PackId { get; set; }
+        [NotMapped] public override int cid { get; set; }
+        [NotMapped] public override int off { get; set; }
+
+        #endregion;
+
         #region affectworld
         protected override void ClearBuilding()
         {
