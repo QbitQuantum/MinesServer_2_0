@@ -211,13 +211,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this.SendConfig();
             this.UpdateProg(programsData.selected);
             this.ProgStatus();
+            this.SendCrys();
         }
 
         private void SubscribeToEvents()
         {
             if (crys.shouldsubscribe)
                 crys.Changed += this.SendCrys;
-            this.SendCrys();
         }
 
         public override void Update()
