@@ -9,15 +9,14 @@ namespace MinesServer.GameShit.Generator
     public class SectorFiller
     {
         public CellType[] typedmap;
-        public float[] map { get; private set; }
         private Random rand = new Random();
-        public string blyat;
+        public string info;
         private ImplicitFractal NotTypedNoise()
         {
             var type = (FractalType)rand.Next(0, 5);
             var basis = (BasisType)rand.Next(0, 4);
             var interpol = (InterpolationType)rand.Next(0, 4);
-            blyat = $"{type} {basis} {interpol}";
+            info = $"{type} {basis} {interpol}";
             return new ImplicitFractal(type, basis, interpol)
             {
                 Octaves = rand.Next(4, 20),
@@ -52,8 +51,8 @@ namespace MinesServer.GameShit.Generator
             double localoffsety = rand.NextDouble();
             foreach (var c in s.seccells)
             {
-                var x = c.pos.Item1 == 0 ? 100 : c.pos.Item1;
-                var y = c.pos.Item2 == 0 ? 100 : c.pos.Item2;
+                var x = c.pos.x == 0 ? 100 : c.pos.x;
+                var y = c.pos.y == 0 ? 100 : c.pos.y;
                 var widthx = (s.width) == 0 ? 100 : (s.width);
                 var heighty = (s.height) == 0 ? 100 : (s.height);
                 var v = (float)fr.Get((float)((float)x / (float)widthx), (float)((float)y / (float)heighty));
@@ -167,7 +166,7 @@ namespace MinesServer.GameShit.Generator
         }
         public static int alive(int x)
         {
-            return 40 + (((85 - 40) * (x - 50000)) / (5000 - 50000));
+            return 90 + x / 1000;
         }
     }
 

@@ -4,9 +4,13 @@ using MinesServer.GameShit.WorldSystem;
 
 namespace MinesServer.GameShit.Generator
 {
+    // TODO: Унести этот TODO в World.cs
+    // TODO: Забрать все логику генерации мира из World.cs
+    // И сделать все статически.
+    // И даже сам класс, потому что это сиглтон пофакту
+    // Будешь делать вид что будем "мокать" - получишь леща по шее
     public class Gen
     {
-        public System.Timers.Timer t;
         public List<(int, int)> spawns;
         public static Gen THIS;
         public Gen(int width, int height)
@@ -38,15 +42,13 @@ namespace MinesServer.GameShit.Generator
                     {
                         for (int chy = 0; chy < 32; chy++)
                         {
-                            var t = map[(x + chx) * height + (y + chy)].value == 2 ? (byte)CellType.BlackRock : map[(x + chx) * height + (y + chy)].value == 1 ? (byte)CellType.RedRock : (byte)0;
-                            if (t != 0)
-                            {
-                                World.SetCell((x + chx), (y + chy), t);
-                            }
-                            else
-                            {
-                                World.SetCell((x + chx), (y + chy), 32);
-                            }
+                            int index = (x + chx) * height + (y + chy);
+                            var m_value = map[index].value;
+                            var t = 
+                                m_value == 2 ? (byte)CellType.BlackRock : 
+                                m_value == 1 ? (byte)CellType.RedRock : 
+                                (byte)CellType.Empty;
+                            World.SetCell((x + chx), (y + chy), t);
                             rc++;
                         }
 
