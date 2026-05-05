@@ -44,8 +44,6 @@ public static class ResourceExtractionService
             ProcessRegularDigging(actor, skillOwner, cellType, x, y, basket);
         }
 
-        skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Digging, 1f);
-
         // Физика валунов
         if (prop.isBoulder)
         {
@@ -623,18 +621,19 @@ public static class ResourceExtractionService
         };
 
         (float valuePercentDamage, Operator skillPercentage) = skill != null ?
-            (skill.Effect, Operator.Percentage) : 
-            (0, Operator.Minus);
+            (skill.Effect, Operator.Percentage) : (0, Operator.Minus);
 
         var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
 
         (float valueDiggingSkillEffect, Operator skillMinus) = DiggingSkill != null ?
-            (DiggingSkill.Effect, Operator.Minus) :
-            (0, Operator.Minus);
+            (DiggingSkill.Effect, Operator.Minus) : (0, Operator.Minus);
 
-        if (valueDiggingSkillEffect != 0 &&
-            World.DamageCell(x, y, valuePercentDamage, skillPercentage) &&
-            World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus))
+        if (valueDiggingSkillEffect == 0) return;
+        // TODO: Если valuePercentDamage равен нулю, то лучше не вызывать [Микрооптимизация]
+        bool destroyed1 = World.DamageCell(x, y, valuePercentDamage, skillPercentage);
+        bool destroyed2 = World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus);
+
+        if (destroyed1 || destroyed2)
         {
             ProcessDetection(actor, skillOwner, x, y, cellType, basket);
             ProcessSliming(actor, skillOwner, x, y, cellType, basket);
@@ -685,6 +684,7 @@ public static class ResourceExtractionService
             if (cellType.IsQuadBlock())
                 skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AntiBlock, 1f);
         }
+        skillOwner.skillslist.HandleDiggingExperience(skillOwner, 1);
     }
 
     private static void Mine(
