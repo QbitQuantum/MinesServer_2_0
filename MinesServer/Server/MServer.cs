@@ -31,7 +31,7 @@ namespace MinesServer.Server
         }
         protected override TcpSession CreateSession()
         {
-            var s = new Session(this);
+            var s = new Session(this, time);
             return s;
         }
         protected override void OnError(SocketError error)

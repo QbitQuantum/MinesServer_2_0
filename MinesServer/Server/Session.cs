@@ -25,11 +25,15 @@ namespace MinesServer.Server
     {
         #region fields
 
-        MServer father;
         public Player? player;
-        public Auth auth;
-        public Session(TcpServer server) : base(server) { father = server as MServer; }
-        private string sid { get; set; }
+        public Auth? auth;
+        private readonly ServerTime _serverTime;
+
+        public Session(TcpServer server, ServerTime serverTime) : base(server)
+        {
+            _serverTime = serverTime;
+        }
+        private string sid { get; set; } = "";
         #endregion
 
         private static string GenerateSessionId()
@@ -59,7 +63,7 @@ namespace MinesServer.Server
                 switch (result.data)
                 {
                     case AUPacket au: AU(au); break;
-                    case TYPacket ty: father.time.AddAction(() => TY(ty), player); break;
+                    case TYPacket ty: _serverTime.AddAction(() => TY(ty), player); break;
                     case PongPacket ping: Ping(ping); break;
                     // Invalid packet
                     default: break;
@@ -262,7 +266,7 @@ namespace MinesServer.Server
                 auth.ProcessAction(button);
                 return;
             }
-            father.time.AddAction(() =>
+            _serverTime.AddAction(() =>
             {
                 if (button.ToString() is "exit" or "exit:0")
                 {
