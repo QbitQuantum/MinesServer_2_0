@@ -12,18 +12,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
     public class Basket
     {
         public int Id { get; set; }
-        public string? serialazed { get; set; }
+        public string serialazed { get; set; } = "[]";
 
-        public Basket(bool n)
-        {
-            _cry = new long[6];
-            serialazed = JsonConvert.SerializeObject(_cry);
-        }
+        private long[] _cry = new long[6];
 
-        public event Action Changed;
+        public Basket() { }
+
+        public event Action? Changed;
         public bool shouldsubscribe => Changed is null;
-
-        private Basket() { }
 
         public long this[CrystalType type]
         {
@@ -31,27 +27,22 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             set => cry[(int)type] = value;
         }
 
-        private long[]? _cry = null;
-
         [NotMapped]
         public long[] cry
         {
             get
             {
-                _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed ?? "[]") ?? new long[6];
+                _cry = JsonConvert.DeserializeObject<long[]>(serialazed) ?? new long[6];
                 return _cry;
             }
         }
 
         public void SaveToDatabase()
         {
-            if (_cry != null)
-            {
-                serialazed = JsonConvert.SerializeObject(_cry);
-                using var db = new DataBase();
-                db.baskets.Update(this);
-                db.SaveChanges();
-            }
+            serialazed = JsonConvert.SerializeObject(_cry);
+            using var db = new DataBase();
+            db.baskets.Update(this);
+            db.SaveChanges();
         }
 
         public void AddCrys(CrystalType type, long val)

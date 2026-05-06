@@ -11,48 +11,43 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Settings
     {
-        public Settings()
+        public string serialized { get; set; } = Newtonsoft.Json.JsonConvert.SerializeObject(new Dictionary<string, string>
         {
+            ["cc"] = "10",
+            ["snd"] = "0",
+            ["mus"] = "0",
+            ["isca"] = "0",
+            ["tsca"] = "0",
+            ["mous"] = "1",
+            ["pot"] = "0",
+            ["frc"] = "1",
+            ["ctrl"] = "1",
+            ["mof"] = "1"
+        });
 
-        }
-        public Settings(bool n)
-        {
-            var d = new Dictionary<string, string>();
-            d["cc"] = "10";
-            d["snd"] = "0";
-            d["mus"] = "0";
-            d["isca"] = "0";
-            d["tsca"] = "0";
-            d["mous"] = "1";
-            d["pot"] = "0";
-            d["frc"] = "1";
-            d["ctrl"] = "1";
-            d["mof"] = "1";
-            serialized = Newtonsoft.Json.JsonConvert.SerializeObject(d);
-        }
+        public Settings() { }
+
         public string this[string key]
         {
             get
             {
-                sett ??= Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(serialized);
+                sett ??= Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(serialized) ?? [];
                 return sett[key];
             }
             set
             {
                 using var db = new DataBase();
-                sett ??= Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(serialized);
+                sett ??= Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(serialized) ?? [];
                 sett[key] = value;
                 db.SaveChanges();
             }
         }
-        [Key]
-        public int id { get; set; }
-        public string serialized { get; set; }
-        [NotMapped]
-        private Dictionary<string, string> sett = null;
+        [Key] public int id { get; set; }
+        
+        [NotMapped] private Dictionary<string, string>? sett = null;
         public void SendSettings(Player p)
         {
-            sett ??= Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(serialized);
+            sett = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(serialized) ?? [];
             p.connection?.SendU(new SettingsPacket(sett));
         }
         public void Save(Player p, Dictionary<string, string> list)

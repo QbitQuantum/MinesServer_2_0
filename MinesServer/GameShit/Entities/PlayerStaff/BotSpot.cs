@@ -26,7 +26,7 @@ public class BotSpot : PEntity
         this.x = x;
         this.y = y;
         this.owner = owner;
-        crys = new Basket(true);
+        crys = new Basket();
         MaxHealth = 100;
         Health = 100;
 
