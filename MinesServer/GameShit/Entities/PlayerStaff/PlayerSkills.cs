@@ -54,7 +54,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             set
             {
                 _purchasedExpertSkills = value;
-                expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+                expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
             }
         }
 
