@@ -26,7 +26,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         [NotMapped] private HashSet<string> _purchasedExpertSkills = [];
 
-        [NotMapped] private readonly Dictionary<int, Skill?> skills = [];
+        [NotMapped] private readonly Dictionary<int, Skill> skills = [];
 
         [NotMapped] private int selectedslot = -1;
 
@@ -139,27 +139,20 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return;
 
             var raw = Newtonsoft.Json.JsonConvert
-                .DeserializeObject<Dictionary<int, PlayerSkillData?>>(ser)
-                ?? new Dictionary<int, PlayerSkillData?>();
+                .DeserializeObject<Dictionary<int, PlayerSkillData>>(ser) // Убрали ?
+                ?? [];
 
             foreach (var kvp in raw)
             {
-                var slot = kvp.Key;
                 var data = kvp.Value;
-
-                if (data is null || string.IsNullOrEmpty(data.Code))
-                {
-                    skills[slot] = null;
+                if (data == null || string.IsNullOrEmpty(data.Code))
                     continue;
-                }
 
                 var skillType = Mines3Enums.SkillFromCode(data.Code);
                 if (skillType == SkillType.Unknown)
-                {
                     continue;
-                }
 
-                skills[slot] = new Skill
+                skills[kvp.Key] = new Skill
                 {
                     type = skillType,
                     lvl = data.Level,
@@ -170,8 +163,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public bool DeleteSkill()
         {
-            if (!skills.ContainsKey(selectedslot) || skills[selectedslot] == null)
+            if (!skills.ContainsKey(selectedslot))
                 return false;
+
             skills.Remove(selectedslot);
             Save();
             return true;
@@ -268,20 +262,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             using var db = new DataBase();
             db.skills.Attach(this);
 
-            var raw = new Dictionary<int, PlayerSkillData?>(skills.Count);
+            var raw = new Dictionary<int, PlayerSkillData>(skills.Count);
 
             foreach (var kvp in skills)
             {
-                var slot = kvp.Key;
                 var skill = kvp.Value;
-
-                if (skill is null)
-                {
-                    raw[slot] = null;
-                    continue;
-                }
-
-                raw[slot] = new PlayerSkillData
+                raw[kvp.Key] = new PlayerSkillData
                 {
                     Code = skill.type.GetCode(),
                     Level = skill.lvl,
@@ -291,11 +277,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             ser = Newtonsoft.Json.JsonConvert.SerializeObject(raw, Newtonsoft.Json.Formatting.None);
 
-            // Сохраняем из поля _purchasedExpertSkills, а не создаем новый список
             if (_purchasedExpertSkills != null)
-            {
                 expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
-            }
 
             db.SaveChanges();
         }
