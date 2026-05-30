@@ -180,10 +180,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             Health = 100;
             MaxHealth = 100;
             inventory = new Inventory();
-            settings = new Settings();
-            crys = new Basket();
-            skillslist = new PlayerSkills();
-            skillslist.Initialize();
+            settings = new Settings(true);
+            crys = new Basket(true);
+            skillslist = new PlayerSkills(true); // Инициализация без передачи this
             x = 0; y = 0;
             dir = 0;
             clan = null;

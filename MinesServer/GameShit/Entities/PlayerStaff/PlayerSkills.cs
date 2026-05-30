@@ -22,9 +22,27 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
     public class PlayerSkills
     {
-        public PlayerSkills() { }
+        private PlayerSkills() { }
 
-        [NotMapped] private HashSet<string> _purchasedExpertSkills = [];
+        public PlayerSkills(bool initializeDefaultSkills)
+        {
+            if (initializeDefaultSkills)
+            {
+                // Установка базовых навыков без Player
+                InstallSkill(SkillType.MineGeneral, 0);
+                InstallSkill(SkillType.Digging, 1);
+                InstallSkill(SkillType.Movement, 2);
+                InstallSkill(SkillType.Health, 3);
+                slots = skills.Count;
+            }
+
+            // Инициализируем пустой список купленных экспертных скиллов
+            _purchasedExpertSkills = new HashSet<string>();
+            expertSkill = "[]";
+
+            Save(); // Сохраняем после инициализации
+        }
+        [NotMapped] private HashSet<string> _purchasedExpertSkills;
 
         [NotMapped] private readonly Dictionary<int, Skill> skills = [];
 
@@ -48,7 +66,17 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             get
             {
-                _purchasedExpertSkills = Newtonsoft.Json.JsonConvert.DeserializeObject<HashSet<string>>(expertSkill) ?? [];
+                if (_purchasedExpertSkills == null)
+                {
+                    try
+                    {
+                        _purchasedExpertSkills = Newtonsoft.Json.JsonConvert.DeserializeObject<HashSet<string>>(expertSkill ?? "[]") ?? new HashSet<string>();
+                    }
+                    catch
+                    {
+                        _purchasedExpertSkills = new HashSet<string>();
+                    }
+                }
                 return _purchasedExpertSkills;
             }
             set
@@ -57,21 +85,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
             }
         }
-
-        /// <summary>
-        /// Установка умений по умолчанию
-        /// </summary>
-        public void Initialize()
-        {
-            // Установка базовых навыков без Player
-            InstallSkill(SkillType.MineGeneral, 0);
-            InstallSkill(SkillType.Digging, 1);
-            InstallSkill(SkillType.Movement, 2);
-            InstallSkill(SkillType.Health, 3);
-            slots = skills.Count;
-            Save();
-        }
-
 
         /// <summary>
         /// Устанавливает текущий слот
