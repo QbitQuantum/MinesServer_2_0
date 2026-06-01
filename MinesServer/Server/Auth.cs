@@ -20,18 +20,9 @@ namespace MinesServer.Server
     {
         private readonly Session _initiator;
         private Player _tempPlayer;
-        private string _pendingNickname;
-
-        public Window AuthWindow { get; private set; }
+        private string _pendingNickname = "";
+        private Window AuthWindow { get; set; }
         public bool IsCompleted { get; private set; }
-        public string Nickname { get; private set; } = string.Empty;
-        public string Password { get; private set; } = string.Empty;
-
-        public Player temp
-        {
-            get => _tempPlayer;
-            set => _tempPlayer = value;
-        }
 
         public Auth(Session initiator)
         {
@@ -59,7 +50,7 @@ namespace MinesServer.Server
         {
             Console.WriteLine("Attempting authentication...");
 
-            Player existingPlayer = null;
+            Player? existingPlayer = null;
             if (packet.user_id.HasValue)
             {
                 existingPlayer = DataBase.GetPlayer(packet.user_id.Value);
@@ -79,10 +70,7 @@ namespace MinesServer.Server
                 return;
             }
 
-            if (existingPlayer != null)
-            {
-                CompleteAuthentication(existingPlayer);
-            }
+            _initiator.auth = null;
         }
 
         private void HandleNewPlayer()
@@ -102,11 +90,6 @@ namespace MinesServer.Server
             player.Init();
             // Важно: помечаем аутентификацию как завершенную
             IsCompleted = true;
-            _initiator.auth = null;
-        }
-
-        private void CompleteAuthentication(Player player)
-        {
             _initiator.auth = null;
         }
 
@@ -253,9 +236,7 @@ namespace MinesServer.Server
                 SendCurrentWindow();
                 return;
             }
-
             _tempPlayer = player;
-            Nickname = nickname;
             ShowPasswordPageForExistingAccount();
         }
 
@@ -336,7 +317,7 @@ namespace MinesServer.Server
                     IsConsole = true,
                     Placeholder = " "
                 },
-                Buttons = [new MButton("OK", "%I%", args =>
+                Buttons = [new MButton("OK", ActionMacros.Input, args =>
                 {
                     // После показа ошибки возвращаемся к начальному окну
                     if (message.Contains("пароль") || message.Contains("Ник"))
@@ -363,8 +344,8 @@ namespace MinesServer.Server
                     {
                         Text = "Авторизация",
                         Buttons = [
-                            new MButton("Новый акк", "newakk", _ => CreateNewAccount()),
-                            new MButton("OK", $"nick:{ActionMacros.Input}", args => TryToFindByNickname(args.Input!))
+                            new MButton("Новый аккаунт", "newakk", _ => CreateNewAccount()),
+                            new MButton("Авторизация", $"nick:{ActionMacros.Input}", args => TryToFindByNickname(args.Input!))
                         ],
                         Input = new InputConfig
                         {
@@ -390,15 +371,13 @@ namespace MinesServer.Server
 
         private void SendWorldInfo()
         {
-            _initiator.SendU(World.WorldMapInfoPacket());
+            _initiator.SendWorldInfo();
         }
 
         private void ResetAuthState()
         {
-            _tempPlayer = null;
-            _pendingNickname = null;
-            Nickname = string.Empty;
-            Password = string.Empty;
+            _tempPlayer = new Player();
+            _pendingNickname = "";
             IsCompleted = false;
             AuthWindow = CreateDefaultWindow();
         }
