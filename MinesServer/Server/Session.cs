@@ -28,7 +28,7 @@ namespace MinesServer.Server
         public Player? player;
         public Auth? auth;
         private readonly ServerTime _serverTime;
-        public bool complite = false;
+        private bool complite = false;
 
         public Session(TcpServer server, ServerTime serverTime) : base(server)
         {
@@ -306,6 +306,22 @@ namespace MinesServer.Server
             player.win = null;
             SendU(new GuPacket());
         }
+
+        public void CreateSession(Player? _auth_player)
+        {
+            if (_auth_player == null) return;
+
+            complite = true;
+            auth = null;
+            player = _auth_player;
+            player.connection = this;
+            // TODO: Сделать метод расширения для отправки пакета,
+            // так будет намного лучше
+            SendU(new AHPacket(player.id, player.hash));
+            player.Init();
+
+        }
+
         #endregion
     }
 }

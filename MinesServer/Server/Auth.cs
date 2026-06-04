@@ -81,14 +81,8 @@ namespace MinesServer.Server
 
         private void HandleSpecialPlayer(Player player)
         {
-            player.connection = null;
-            player.connection = _initiator;
-            _initiator.player = player;
-            _initiator.SendU(new GuPacket());
-            player.Init();
-            // Важно: помечаем аутентификацию как завершенную
-            _initiator.complite = true;
-            
+            // Создаем соединение
+            _initiator.CreateSession(player);
         }
 
         public void CreateNewAccount()
@@ -185,9 +179,9 @@ namespace MinesServer.Server
         private void CompleteLoginAfterCreation(string nickname)
         {
             // Получаем данные игрока из БД
-            var createdPlayer = DataBase.GetPlayer(nickname);
+            var player = DataBase.GetPlayer(nickname);
 
-            if (createdPlayer == null)
+            if (player == null)
             {
                 ShowError("Ошибка создания аккаунта");
                 ResetAuthState();
@@ -195,19 +189,8 @@ namespace MinesServer.Server
             }
 
             // Создаем соединение
-            createdPlayer.connection = _initiator;
-            _initiator.player = createdPlayer;
-
-            // Отправляем пакет аутентификации
-            _initiator.SendU(new AHPacket(createdPlayer.id, createdPlayer.hash));
-
-            // Помечаем аутентификацию как завершенную
-            _initiator.complite = true;
-
-            // Инициализируем игрока
-            createdPlayer.Init();
-
-            Console.WriteLine($"Account created and logged in: {createdPlayer.name}");
+            _initiator.CreateSession(player);
+            Console.WriteLine($"Account created and logged in: {player.name}");
         }
 
         private void TryToFindByNickname(string nickname)
@@ -287,13 +270,8 @@ namespace MinesServer.Server
                 return;
             }
 
-            _initiator.complite = true;
-            player.connection = _initiator;
-            _initiator.player = player;
-            _initiator.SendU(new AHPacket(player.id, player.hash));
-
-            player.Init();
-
+            // Создаем соединение
+            _initiator.CreateSession(player);
             Console.WriteLine($"Player logged in: {player.name}");
         }
 
