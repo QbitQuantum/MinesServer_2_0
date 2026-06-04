@@ -19,8 +19,9 @@ namespace MinesServer.Server
     public class Auth
     {
         private readonly Session _initiator;
-        private Player _tempPlayer;
+        private int _pendingId = -1;
         private string _pendingNickname = "";
+        private string _pendingPassword = "";
         private Window AuthWindow { get; set; }
 
         public Auth(Session initiator)
@@ -92,7 +93,6 @@ namespace MinesServer.Server
 
         public void CreateNewAccount()
         {
-            _tempPlayer = new Player();
             var nicknamePage = new Page
             {
                 Title = "НОВЫЙ ИГРОК",
@@ -119,7 +119,7 @@ namespace MinesServer.Server
                 return;
             }
 
-            if (IsNicknameTaken(nickname))
+            if (DataBase.PlayerExists(nickname))
             {
                 ShowError("Ник занят");
                 CreateNewAccount();
@@ -128,12 +128,6 @@ namespace MinesServer.Server
 
             _pendingNickname = nickname;
             ShowPasswordPageForNewAccount();
-        }
-
-        private bool IsNicknameTaken(string nickname)
-        {
-            using var db = new DataBase();
-            return db.players.Any(p => p.name == nickname);
         }
 
         private void ShowPasswordPageForNewAccount()
@@ -171,6 +165,8 @@ namespace MinesServer.Server
         {
             using var db = new DataBase();
 
+            var _tempPlayer = new Player();
+
             _tempPlayer.CreatePlayer();
             _tempPlayer.id = DataBase.GetNextId();
             _tempPlayer.name = nickname;
@@ -181,13 +177,15 @@ namespace MinesServer.Server
             db.skills.Attach(_tempPlayer.skillslist);
             db.SaveChanges();
 
-            CompleteLoginAfterCreation();
+            _tempPlayer = null;
+
+            CompleteLoginAfterCreation(nickname);
         }
 
-        private void CompleteLoginAfterCreation()
+        private void CompleteLoginAfterCreation(string nickname)
         {
             // Получаем данные игрока из БД
-            var createdPlayer = DataBase.GetPlayer(_tempPlayer.name);
+            var createdPlayer = DataBase.GetPlayer(nickname);
 
             if (createdPlayer == null)
             {
@@ -230,7 +228,8 @@ namespace MinesServer.Server
                 SendCurrentWindow();
                 return;
             }
-            _tempPlayer = player;
+            _pendingId = player.id;
+            _pendingPassword = player.passwd;
             ShowPasswordPageForExistingAccount();
         }
 
@@ -266,7 +265,7 @@ namespace MinesServer.Server
 
         private void ValidatePassword(string password)
         {
-            if (_tempPlayer.passwd == password)
+            if (_pendingPassword == password)
             {
                 CompleteLogin();
                 return;
@@ -279,7 +278,7 @@ namespace MinesServer.Server
         private void CompleteLogin()
         {
             // Получаем данные игрока
-            var player = DataBase.GetPlayer(_tempPlayer.id);
+            var player = DataBase.GetPlayer(_pendingId);
 
             if (player == null)
             {
@@ -367,8 +366,9 @@ namespace MinesServer.Server
 
         private void ResetAuthState()
         {
-            _tempPlayer = new Player();
+            _pendingId = -1;
             _pendingNickname = "";
+            _pendingPassword = "";
             AuthWindow = CreateDefaultWindow();
         }
 

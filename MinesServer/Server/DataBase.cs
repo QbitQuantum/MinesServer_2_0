@@ -187,6 +187,17 @@ namespace MinesServer.Server
                 .FirstOrDefault();
         }
 
+        public static bool PlayerExists(string name)
+        {
+            // Проверка в активных игроках
+            if (activeplayers.Any(p => p.name == name))
+                return true;
+
+            // Проверка в базе данных
+            using var db = new DataBase();
+            return db.players.Any(i => i.name == name);
+        }
+
         public static Box? GetBox(int x, int y)
         {
             using var db = new DataBase();
