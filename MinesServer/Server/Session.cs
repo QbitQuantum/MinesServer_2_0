@@ -28,6 +28,7 @@ namespace MinesServer.Server
         public Player? player;
         public Auth? auth;
         private readonly ServerTime _serverTime;
+        public bool complite = false;
 
         public Session(TcpServer server, ServerTime serverTime) : base(server)
         {
@@ -92,6 +93,11 @@ namespace MinesServer.Server
         {
             auth = new Auth(this);
             auth.TryToAuthenticate(p, sid);
+            if (complite)
+            {
+                auth = null;
+                CloseWindow();
+            }
         }
         private void TY(TYPacket packet)
         {
@@ -261,7 +267,7 @@ namespace MinesServer.Server
             {
                 return;
             }
-            if ((auth != null && !auth.IsCompleted))
+            if (auth != null)
             {
                 auth.ProcessAction(button);
                 return;

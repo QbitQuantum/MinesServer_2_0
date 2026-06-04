@@ -22,7 +22,6 @@ namespace MinesServer.Server
         private Player _tempPlayer;
         private string _pendingNickname = "";
         private Window AuthWindow { get; set; }
-        public bool IsCompleted { get; private set; }
 
         public Auth(Session initiator)
         {
@@ -69,8 +68,6 @@ namespace MinesServer.Server
                 HandleSpecialPlayer(existingPlayer);
                 return;
             }
-
-            _initiator.auth = null;
         }
 
         private void HandleNewPlayer()
@@ -89,8 +86,8 @@ namespace MinesServer.Server
             _initiator.SendU(new GuPacket());
             player.Init();
             // Важно: помечаем аутентификацию как завершенную
-            IsCompleted = true;
-            _initiator.auth = null;
+            _initiator.complite = true;
+            
         }
 
         public void CreateNewAccount()
@@ -207,10 +204,7 @@ namespace MinesServer.Server
             _initiator.SendU(new AHPacket(createdPlayer.id, createdPlayer.hash));
 
             // Помечаем аутентификацию как завершенную
-            IsCompleted = true;
-
-            // Очищаем ссылку на auth
-            _initiator.auth = null;
+            _initiator.complite = true;
 
             // Инициализируем игрока
             createdPlayer.Init();
@@ -294,13 +288,10 @@ namespace MinesServer.Server
                 return;
             }
 
-            IsCompleted = true;
+            _initiator.complite = true;
             player.connection = _initiator;
             _initiator.player = player;
             _initiator.SendU(new AHPacket(player.id, player.hash));
-
-            // Очищаем ссылку на auth
-            _initiator.auth = null;
 
             player.Init();
 
@@ -378,7 +369,6 @@ namespace MinesServer.Server
         {
             _tempPlayer = new Player();
             _pendingNickname = "";
-            IsCompleted = false;
             AuthWindow = CreateDefaultWindow();
         }
 
