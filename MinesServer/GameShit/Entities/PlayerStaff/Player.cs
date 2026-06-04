@@ -154,9 +154,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void Init()
         {
-            if (connection != null)
-                connection.auth = null;
-
             if (!DataBase.activeplayers.Contains(this))
                 DataBase.activeplayers.Add(this);
 
