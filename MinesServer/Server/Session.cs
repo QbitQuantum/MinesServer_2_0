@@ -141,24 +141,30 @@ namespace MinesServer.Server
                     break;
             }
         }
+
         private void Blds(TYPacket f, BldsPacket blds) => Task.Run(() => player?.OpenMyBuildings());
+
         private void Agr(TYPacket f,TAGRPacket agr)
         {
             //changeAgr
         }
+
         private void Taur(TYPacket f,TAURPacket t)
         {
 
         }
+
         private void Chin(TYPacket f,ChinPacket chin)
         {
            
         }
+
         private void Invn(TYPacket f,INVNPacket invn)
         {
             player.inventory.minv = !player.inventory.minv;
             player.SendInventory();
         }
+
         private void Chat(TYPacket f,ChatPacket chat)
         {
             if (Default.def.IsMatch(chat.message.Replace("\n", "")))
@@ -166,10 +172,12 @@ namespace MinesServer.Server
                 player?.currentchat?.AddMessage(player, chat.message.Replace("\n", ""));
             }
         }
+
         private void Pren(TYPacket f,PRENPacket pren)
         {
             StaticGUI.Rename(player, pren.Id);
         }
+
         private void Prst(TYPacket f, pRSTPacket prst)
         {
             var p = player.programsData.selected;
@@ -179,6 +187,7 @@ namespace MinesServer.Server
                 player.RunProgramm();
             player.ProgStatus();
         }
+
         private void Pdel(TYPacket f,PDELPacket pdel)
         {
             StaticGUI.DeleteProg(player, pdel.Id);
