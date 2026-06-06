@@ -40,6 +40,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Player : PEntity
     {
+        public Player() => Delay = DateTime.UtcNow;
+
         private const int BaseMoveDelay = 10000;
         private const int SyncIntervalSeconds = 10;
         private const int AfkTimeoutMinutes = 5;
@@ -47,13 +49,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private const int C190StackResetMinutes = 1;
 
         private (int X, int Y)? lastchunk;
+        private float cb;
+
         private DateTime lBotsUpdate = DateTime.UtcNow;
         private DateTime lastSync = DateTime.UtcNow;
-        private float cb;
+        
         private Resp? _resp;
-        private readonly List<(int X, int Y)> alreadyvisible = new();
+        private readonly List<(int X, int Y)> alreadyvisible = [];
 
-        public Player() => Delay = DateTime.UtcNow;
+        public int c190stacks = 1;
+
+        public DateTime lastc190hit = ServerTime.Now;
+        public DateTime Delay = ServerTime.Now;
+        public DateTime afkstarttime = ServerTime.Now;
 
         [NotMapped] public Session? connection { get; set; }
         [NotMapped] public Chat? currentchat { get; set; }
@@ -73,10 +81,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public long opp { get; set; }
         public bool autoDig { get; set; }
         public bool agression { get; set; }
-        public int c190stacks = 1;
-        public DateTime lastc190hit = ServerTime.Now;
-        public DateTime Delay = ServerTime.Now;
-        public DateTime afkstarttime = ServerTime.Now;
         public Clan? clan { get; set; }
         public Rank? clanrank { get; set; }
         public List<Program> programs { get; set; } = new();
