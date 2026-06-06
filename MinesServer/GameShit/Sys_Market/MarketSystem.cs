@@ -169,6 +169,7 @@ namespace MinesServer.GameShit.SysMarket
             n.Add(CanvasElement.TextField("<color=lime><size=15>x 700 000 010$</size></color>", originDY: 28));
             n.Add(CanvasElement.TextField("<color=lime><size=15>x 980 086 011$</size></color>", originDY: 28));
 
+            // TODO: Добавить событие, чтобы при нажатие на кнопку, именно выбранная кнопка была желтой
             n.Add(CanvasElement.Button(new MButton($"<color=yellow>[Продажа]</color>", "setsell"), originDX: 227, originDY: -38));
             n.Add(CanvasElement.Button(new MButton($"<color=white>Покупка</color>", "setbuy"), originDY: 28));
             n.Add(CanvasElement.TextField("Создание ордера:", originDX: -18, originDY: 16));
