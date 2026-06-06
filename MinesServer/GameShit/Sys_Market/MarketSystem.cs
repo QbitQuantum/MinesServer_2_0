@@ -2,6 +2,7 @@
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
+using MinesServer.GameShit.GUI.Horb.Canvas;
 using MinesServer.GameShit.GUI.Horb.List;
 using MinesServer.GameShit.SysCraft;
 using MinesServer.GameShit.WorldSystem;
@@ -147,12 +148,55 @@ namespace MinesServer.GameShit.SysMarket
 
             return items.ToArray();
         }
+
+        private static CanvasElement[] Canvass()
+        {
+            var n = new List<CanvasElement>();
+
+            n.Add(CanvasElement.TextField("<size=20><color=white> ПОКУПКА </color></size>", originDX: -220, originDY: 250));
+            n.Add(CanvasElement.Button(new MButton($"<color=yellow> Купить 1 </color>", "buy1"), originDX: 30, originDY: -85));
+            n.Add(CanvasElement.Button(new MButton($"<color=yellow> Купить 10</color>", "buy10"), originDY: 28));
+            n.Add(CanvasElement.Button(new MButton($"<color=#FF3333>----------</color>", "no100"), originDY: 28));
+            n.Add(CanvasElement.TextField("<color=#00FF00><size=15>x 94 000 000$</size></color>", originDX: 113, originDY: -64));
+            n.Add(CanvasElement.TextField("<color=#00FF00><size=15>x 943 535 350$</size></color>", originDY: 28));
+            n.Add(CanvasElement.TextField("<color=#FF3333><size=15>---------</size></color>", originDY: 28));
+
+            n.Add(CanvasElement.TextField("<size=20><color=white> ПРОДАЖА </color></size>", originDX: -143, originDY: -88));
+            n.Add(CanvasElement.Button(new MButton($"<color=#FF3333>----------</color>", "no1s"), originDX: 30, originDY: -85));
+            n.Add(CanvasElement.Button(new MButton($"<color=#FF3333>----------</color>", "no10s"), originDY: 28));
+            n.Add(CanvasElement.Button(new MButton($"<color=#FF3333>----------</color>", "no100s"), originDY: 28));
+            n.Add(CanvasElement.TextField("<color=lime><size=15>x 70 000 001$</size></color>", originDX: 113, originDY: -64));
+            n.Add(CanvasElement.TextField("<color=lime><size=15>x 700 000 010$</size></color>", originDY: 28));
+            n.Add(CanvasElement.TextField("<color=lime><size=15>x 980 086 011$</size></color>", originDY: 28));
+
+            n.Add(CanvasElement.Button(new MButton($"<color=yellow>[Продажа]</color>", "setsell"), originDX: 227, originDY: -38));
+            n.Add(CanvasElement.Button(new MButton($"<color=white>Покупка</color>", "setbuy"), originDY: 28));
+            n.Add(CanvasElement.TextField("Создание ордера:", originDX: -18, originDY: 16));
+
+            return n.ToArray();
+        }
+
         public static void OpenItemAuc(Player p, int item)
         {
             p.win?.CurrentTab.Open(new Page()
             {
                 Title = ItemTypeExt.PackName(item),
-                Buttons = [new MButton("Создать Ордер", "createorder", (args) => { OpenOrderCreation(p, item); p.SendWindow(); })],
+                Text = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+                Card = Card.Item((short)item, "Ордер на <color=yellow>" + ItemTypeExt.PackName(item) + "</color>\nВ инвентаре: <color=white>0</color>\n"),
+                Canvas = Canvass(),
+                Style = new Style()
+                {
+                    Canvas = new GridStyle()
+                    {
+                        Height = 0
+                    }
+                },
+                Buttons = [new MButton("<color=yellow>Создать ордер</color>", "neworder",
+                (args) =>
+                {
+                    OpenOrderCreation(p, item); 
+                    p.SendWindow();
+                })],
                 //List = GetItems(p, item)
             });
         }
