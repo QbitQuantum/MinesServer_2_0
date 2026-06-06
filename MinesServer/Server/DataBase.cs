@@ -206,6 +206,12 @@ namespace MinesServer.Server
                 .FirstOrDefault(t => t.x == x && t.y == y);
         }
 
+        public static IQueryable<Resp?> GetResp(int ownerid)
+        {
+            using var db = new DataBase();
+            return db.resps.Where(r => r.ownerid == ownerid);
+        }
+
         // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
         // Либо инкапсулировать полностью
         public static List<Player> activeplayers = new();

@@ -132,12 +132,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             {
                 if (_resp == null)
                 {
-                    using var db = new DataBase();
-                    db.Attach(this);
-                    var respawns = db.resps.Where(r => r.ownerid == 0).ToList();
-                    var randomRespawn = respawns[Random.Shared.Next(respawns.Count)];
-                    _resp = randomRespawn;
-                    db.SaveChanges();
+                    var respawns = DataBase.GetResp(0).ToList();
+                    resp = respawns[Random.Shared.Next(respawns.Count)];
                 }
                 return _resp;
             }
