@@ -25,16 +25,18 @@ namespace MinesServer.Server
     {
         #region fields
 
-        public Player? player;
-        public Auth? auth;
-        private readonly ServerTime _serverTime;
-        private bool complite = false;
-
         public Session(TcpServer server, ServerTime serverTime) : base(server)
         {
             _serverTime = serverTime;
         }
+
+        private readonly ServerTime _serverTime;
+        private bool complite = false;
         private string sid { get; set; } = "";
+        private DateTime lastpong = ServerTime.Now;
+        private int nextexpected;
+        public Player? player;
+        public Auth? auth;
         #endregion
 
         private static string GenerateSessionId()
@@ -46,6 +48,7 @@ namespace MinesServer.Server
         }
 
         #region server handlers
+
         protected override void OnConnected()
         {
             sid = GenerateSessionId();
@@ -54,6 +57,7 @@ namespace MinesServer.Server
             SendU(new AUPacket(sid));
             SendU(new PingPacket(0, 0, ""));
         }
+
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             if (!Packet.TryDecode(buffer, out var result))
@@ -75,6 +79,7 @@ namespace MinesServer.Server
                 Console.WriteLine($"invalid packet from {player?.id} {ex}");
             }
         }
+
         protected override void OnDisconnected()
         {
             if (player is null) return;
@@ -84,8 +89,6 @@ namespace MinesServer.Server
             Dispose();
         }
         #endregion
-
-
 
         #region handlers
 
@@ -99,6 +102,7 @@ namespace MinesServer.Server
                 CloseWindow();
             }
         }
+
         private void TY(TYPacket packet)
         {
             switch (packet.Data)
@@ -179,18 +183,24 @@ namespace MinesServer.Server
         {
             StaticGUI.DeleteProg(player, pdel.Id);
         }
+
         private void PROG(TYPacket f, PROGPacket p)
         {
             StaticGUI.StartedProg(player, p.prog);
             player?.ProgStatus();
         }
+
         private void Xhea(TYPacket f,XheaPacket heal) => player?.Heal();
+
         private void Pope(TYPacket f, PopePacket p)
         {
             StaticGUI.OpenGui(player);
         }
+
         private void Clan(TYPacket f, ClanPacket p) => player?.OpenClan();
+
         private void Res(TYPacket f, RESPPacket p) => player?.Death();
+
         private void ADMN(TYPacket f, ADMNPacket p)
         {
             if (player.win is not null)
@@ -200,13 +210,15 @@ namespace MinesServer.Server
                 player.win.ShowTabs = true;
             }
         }
+
         private void Sett(TYPacket f, SettPacket p) => player?.settings.SendSettingsGUI(player);
+
         private void Dpbx(TYPacket f, DPBXPacket p)
         {
             player.win = player.crys.OpenBoxGui(player);
             player.SendWindow();
         }
-        private DateTime lastpong = ServerTime.Now;
+        
         private void Ping(PongPacket p)
         {
             lastpong = ServerTime.Now;
@@ -219,23 +231,27 @@ namespace MinesServer.Server
             });
             nextexpected = p.CurrentTime + 201;
         }
-        private int nextexpected;
+
         private void Inus(TYPacket f, INUSPacket inus) => player?.inventory.Use(player);
+
         private void Incl(TYPacket f, INCLPacket incl)
         {
             if (!incl.selection.HasValue || player is null)
                 return;
             player.inventory.Choose(incl.selection.Value, player);
         }
+
         private void DigHandler(TYPacket parent, XdigPacket packet) => player?.TryAct(() => {
             player.Move(player.x, player.y, DirectionTypeExt.ToDirection(packet.Direction));
             player.Bz();
         }, 200);
 
         private void GeoHandler(TYPacket parent, XgeoPacket packet) => player?.TryAct(player.Geo , 200);
+
         private void BuildHandler(TYPacket parent, XbldPacket packet) => player?.TryAct(() => player.Build(packet.BlockType), 200);
         
         private void AutoDiggHandler(TYPacket parent, TADGPacket packet) => SendU(new AutoDiggPacket(player.autoDig = !player.autoDig));
+
         private void MoveHandler(TYPacket parent, XmovPacket packet) => player?.TryAct(() => player.Move((int)parent.X, (int)parent.Y, DirectionTypeExt.ToDirection( packet.Direction)), player.ServerPause);
 
         private void WhoisHandler(TYPacket parent, WhoiPacket packet) => 
@@ -260,6 +276,7 @@ namespace MinesServer.Server
             }
 
         }
+
         public void GUI(TYPacket p, GUI_Packet ty)
         {
             var button = ty.Button;
@@ -283,15 +300,21 @@ namespace MinesServer.Server
                 player.SendWindow();
             },player);
         }
+
         #endregion
+
         #region senders
+
         public void SendWorldInfo() => SendU(World.WorldMapInfoPacket());
+
         public void SendWin(string win) => SendU(new GUIPacket(win));
+
         public void SendU(ITopLevelPacket data) => Send(new("U", data));
 
         public void SendB(ITopLevelPacket data) => Send(new("B", data));
 
         public void SendJ(ITopLevelPacket data) => Send(new("J", data));
+
         public void Send(Packet p)
         {
             if (p == default) return;
