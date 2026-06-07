@@ -36,13 +36,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 ForceInstallSkill(SkillType.Health, 3, 1, 0);
             }
 
-            // Инициализируем пустой список купленных экспертных скиллов
-            _purchasedExpertSkills = new HashSet<string>();
-            expertSkill = "[]";
-
             Save(); // Сохраняем после инициализации
         }
-        [NotMapped] private HashSet<string> _purchasedExpertSkills;
+
+        [NotMapped] private HashSet<string> _purchasedExpertSkills = [];
 
         [NotMapped] private readonly Dictionary<int, Skill> skills = [];
 
@@ -61,30 +58,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// JSON поле для хранения купленных экспертных скиллов (храним строковые коды)
         /// </summary>
         public string expertSkill { get; set; } = "[]";
-
-        [NotMapped] private HashSet<string> PurchasedExpertSkills
-        {
-            get
-            {
-                if (_purchasedExpertSkills == null)
-                {
-                    try
-                    {
-                        _purchasedExpertSkills = Newtonsoft.Json.JsonConvert.DeserializeObject<HashSet<string>>(expertSkill ?? "[]") ?? new HashSet<string>();
-                    }
-                    catch
-                    {
-                        _purchasedExpertSkills = new HashSet<string>();
-                    }
-                }
-                return _purchasedExpertSkills;
-            }
-            set
-            {
-                _purchasedExpertSkills = value;
-                expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
-            }
-        }
 
         /// <summary>
         /// Устанавливает текущий слот
@@ -221,7 +194,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             string skillCode = skillType.GetCode();
 
             // Проверяем наличие кода навыка в списке купленных
-            return PurchasedExpertSkills.Contains(skillCode);
+            return _purchasedExpertSkills.Contains(skillCode);
         }
 
         public void AddExpertSkillPurchased(SkillType skillType)
@@ -293,8 +266,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             ser = Newtonsoft.Json.JsonConvert.SerializeObject(raw, Newtonsoft.Json.Formatting.None);
 
-            if (_purchasedExpertSkills != null)
-                expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
+            expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
 
             db.SaveChanges();
         }
