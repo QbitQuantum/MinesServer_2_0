@@ -1513,7 +1513,7 @@ namespace MinesServer.Enums
             }
         };
 
-        public static SkillInfo GetInfo(this SkillType skill)
+        public static SkillInfo? GetInfo(this SkillType skill)
         {
             return _skillInfos.TryGetValue(skill, out var info) ? info : null;
         }
