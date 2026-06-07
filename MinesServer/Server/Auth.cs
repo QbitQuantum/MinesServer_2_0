@@ -352,9 +352,8 @@ namespace MinesServer.Server
 
         private static string CalculateMD5Hash(string input)
         {
-            using var md5 = MD5.Create();
             var bytes = Encoding.ASCII.GetBytes(input);
-            var hash = md5.ComputeHash(bytes);
+            var hash = MD5.HashData(bytes);
             return Convert.ToHexString(hash).ToLower();
         }
 
