@@ -1525,7 +1525,7 @@ namespace MinesServer.Enums
 
         public static string GetDescription(this SkillType skill)
         {
-            return _skillInfos.TryGetValue(skill, out var info) ? info.Description : "Описание отсутствует";
+            return _skillInfos.TryGetValue(skill, out var info) ? $"<color=white>{info.Name}</color>" + "\n" + info.Description : "Описание отсутствует";
         }
 
         public static string GetLevelingHint(this SkillType skill)
