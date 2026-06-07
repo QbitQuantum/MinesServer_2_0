@@ -231,7 +231,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (!CanInstallSkill(skillType, slot))
                 return false;
-            ForceInstallSkill(skillType, slot, 0, 1);
+            ForceInstallSkill(skillType, slot, 1, 1);
             Save();
             return true;
         }
