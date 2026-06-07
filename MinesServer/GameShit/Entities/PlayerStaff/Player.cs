@@ -1,13 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Net.WebSockets;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.Marshalling;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics.Internal;
-using Microsoft.EntityFrameworkCore.Update.Internal;
 using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.ClanSystem;
@@ -18,23 +11,13 @@ using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.GUI.Horb.List;
 using MinesServer.GameShit.Programmator;
-using MinesServer.GameShit.Skills;
 using MinesServer.GameShit.WorldSystem;
-using MinesServer.Network;
-using MinesServer.Network.BotInfo;
-using MinesServer.Network.Chat;
-using MinesServer.Network.ConnectionStatus;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
-using MinesServer.Network.HubEvents.Bots;
-using MinesServer.Network.HubEvents.FX;
-using MinesServer.Network.HubEvents.Packs;
 using MinesServer.Network.Movement;
-using MinesServer.Network.Programmator;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using MinesServer.Server.Network;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {
