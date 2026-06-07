@@ -138,12 +138,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 if (skillType == SkillType.Unknown)
                     continue;
 
-                skills[kvp.Key] = new Skill
-                {
-                    type = skillType,
-                    lvl = data.Level,
-                    exp = data.Exp
-                };
+                ForceInstallSkill(skillType, kvp.Key, data.Level, data.Exp);
             }
         }
 
@@ -236,7 +231,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return true;
         }
 
-        public void ForceInstallSkill(SkillType skillType, int slot, int lvl, int exp)
+        public void ForceInstallSkill(SkillType skillType, int slot, int lvl, float exp)
         {
             skills[slot] = new Skill
             {
