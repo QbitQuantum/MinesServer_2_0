@@ -31,32 +31,31 @@ namespace MinesServer.GameShit.Buildings
         
         #endregion
 
-        // TODO: Попытаться понять что это и убрать рекурсию
         public void OnRespawn(Player p)
         {
+            if (ownerid == 0) return;
+
             using var db = new DataBase();
             db.Attach(this);
-            if (ownerid > 0)
+
+            bool ExistMoney = p.money > cost;
+            bool ExistCharge = charge > 0;
+
+            if (ExistMoney && ExistCharge)
             {
-                if (p.money > cost)
-                {
-                    p.money -= cost;
-                    moneyinside += cost;
-                }
-                else
-                {
-                    p.resp = null;
-                    p.resp.OnRespawn(p);
-                }
-                if (charge > 0) charge--;
-                else
-                {
-                    p.resp = null;
-                    p.resp.OnRespawn(p);
-                }
-                p.SendMoney();
-                base.Update();
+                p.money -= cost;
+                moneyinside += cost;
+                charge--;
             }
+            else
+            {
+                var respawns = DataBase.GetResp(0).ToList();
+                p.resp = respawns[Random.Shared.Next(respawns.Count)];
+            }
+
+            p.SendMoney();
+            base.Update();
+
             db.SaveChanges();
         }
         [NotMapped]
@@ -209,7 +208,7 @@ namespace MinesServer.GameShit.Buildings
                 Text = $"@@Респ - это место, где будет появляться ваш робот\nпосле уничтожения (HP = 0)\n\nЦена восстановления: <color=green>${cost}</color>\n\n<color=#f88>Привязать робота к респу?</color>",
                 Buttons = [new MButton("ПРИВЯЗАТЬ", "bind", (args) =>
                 {
-                    p.SetResp(this);
+                    p.resp = this;
                     p.win = GUIWin(p)!;
                 })]
             } : new Page()

@@ -54,7 +54,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private DateTime lBotsUpdate = DateTime.UtcNow;
         private DateTime lastSync = DateTime.UtcNow;
         
-        private Resp? _resp;
         private readonly List<(int X, int Y)> alreadyvisible = [];
 
         public int c190stacks = 1;
@@ -83,6 +82,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public bool agression { get; set; }
         public Clan? clan { get; set; }
         public Rank? clanrank { get; set; }
+        public Resp? resp { get; set; }
         public List<Program> programs { get; set; } = new();
         public override Basket crys { get; set; } = null!;
         public Inventory inventory { get; set; } = null!;
@@ -128,25 +128,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 {
                     geo = new Stack<byte>();
                 }
-            }
-        }
-        public Resp? resp
-        {
-            get
-            {
-                if (_resp == null)
-                {
-                    var respawns = DataBase.GetResp(0).ToList();
-                    resp = respawns[Random.Shared.Next(respawns.Count)];
-                }
-                return _resp;
-            }
-            set
-            {
-                using var db = new DataBase();
-                db.Attach(this);
-                _resp = value;
-                db.SaveChanges();
             }
         }
 
@@ -568,8 +549,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             BotsRender();
             CheckChunkChanged();
         }
-
-        public void SetResp(Resp r) => resp = r;
 
         public override void Geo()
         {
