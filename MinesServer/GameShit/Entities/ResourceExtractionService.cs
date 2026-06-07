@@ -123,6 +123,16 @@ public static class ResourceExtractionService
         ref float mainCb,
         ref CrystalCBStorage allCb)
     {
+        var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
+
+        (float valueDiggingSkillEffect, Operator skillMinus) = DiggingSkill != null ?
+            (DiggingSkill.Effect, Operator.Minus) : (0, Operator.Minus);
+
+        // TODO: Добавь логику бели и остальных умений на кристаллы
+        if (valueDiggingSkillEffect == 0) return;
+        bool destroyed2 = World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus);
+        if (destroyed2) return;
+
         CrystalType crystalType = ParseCryType(cellType);
 
         // Основная добыча
