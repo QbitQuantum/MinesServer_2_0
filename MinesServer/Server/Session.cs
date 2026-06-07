@@ -303,6 +303,7 @@ namespace MinesServer.Server
                 if (button.ToString() is "exit" or "exit:0")
                 {
                     CloseWindow();
+                    player.skillslist.InstallSlot(-1);
                     return;
                 }
                 player.CallWinAction(button);
