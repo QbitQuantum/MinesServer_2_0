@@ -28,12 +28,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (initializeDefaultSkills)
             {
+                slots = 4;
                 // Установка базовых навыков без Player
-                InstallSkill(SkillType.MineGeneral, 0);
-                InstallSkill(SkillType.Digging, 1);
-                InstallSkill(SkillType.Movement, 2);
-                InstallSkill(SkillType.Health, 3);
-                slots = skills.Count;
+                ForceInstallSkill(SkillType.MineGeneral, 0, 1, 0);
+                ForceInstallSkill(SkillType.Digging, 1, 1, 0);
+                ForceInstallSkill(SkillType.Movement, 2, 1, 0);
+                ForceInstallSkill(SkillType.Health, 3, 1, 0);
             }
 
             // Инициализируем пустой список купленных экспертных скиллов
@@ -258,16 +258,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (!CanInstallSkill(skillType, slot))
                 return false;
+            ForceInstallSkill(skillType, slot, 0, 1);
+            Save();
+            return true;
+        }
 
+        public void ForceInstallSkill(SkillType skillType, int slot, int lvl, int exp)
+        {
             skills[slot] = new Skill
             {
                 type = skillType,
-                lvl = 1,
-                exp = 0
+                lvl = lvl,
+                exp = exp
             };
-
-            Save();
-            return true;
         }
 
         public void Save()
