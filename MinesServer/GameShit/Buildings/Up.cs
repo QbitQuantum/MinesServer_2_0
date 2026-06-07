@@ -271,7 +271,6 @@ namespace MinesServer.GameShit.Buildings
             else
             {
                 return new Card(CardImageType.Skill, skilltype.GetCode(),
-                    skilltype.GetName() + "\n" +
                     skilltype.GetDescription() + "\n" +
                     InfoPlayerOpp);
             }
