@@ -47,11 +47,6 @@ namespace MinesServer.GameShit.Buildings
                 moneyinside += cost;
                 charge--;
             }
-            else
-            {
-                var respawns = DataBase.GetResp(0).ToList();
-                p.resp = respawns[Random.Shared.Next(respawns.Count)];
-            }
 
             p.SendMoney();
             base.Update();

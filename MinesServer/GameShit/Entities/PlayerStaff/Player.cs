@@ -578,8 +578,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             ResetHp();
 
+            if (resp == null)
+            {
+                var respawns = DataBase.GetResp(0);
+                resp = respawns[Random.Shared.Next(respawns.Count)];
+            }
+
             resp?.OnRespawn(this);
-            var (newX, newY) = resp.GetRandompoint();
+            var (newX, newY) = resp != null ? resp.GetRandompoint() : (0, 0);
             x = newX;
             y = newY;
 

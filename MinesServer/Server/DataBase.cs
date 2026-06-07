@@ -206,10 +206,10 @@ namespace MinesServer.Server
                 .FirstOrDefault(t => t.x == x && t.y == y);
         }
 
-        public static IQueryable<Resp?> GetResp(int ownerid)
+        public static List<Resp?> GetResp(int ownerid)
         {
             using var db = new DataBase();
-            return db.resps.Where(r => r.ownerid == ownerid);
+            return db.resps.Where(r => r.ownerid == ownerid).ToList();
         }
 
         // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
