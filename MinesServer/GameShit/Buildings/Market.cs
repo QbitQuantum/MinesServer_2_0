@@ -102,8 +102,21 @@ namespace MinesServer.GameShit.Buildings
                     Text = " ",
                     RichList = new RichListConfig()
                     {
-                        Entries = [RichListEntry.Text($"hp {m.hp}"),
-                            RichListEntry.Button($"прибыль {m.moneyinside}$", m.moneyinside == 0 ? new MButton() : new MButton("Получить", "getprofit", (args) => { using var db = new DataBase(); p.money += m.moneyinside; m.moneyinside = 0; p.SendMoney(); db.SaveChanges(); m.onadmn(p, m); p.SendWindow(); })),
+                        Entries = [
+                            RichListEntry.Text("hp", $"hp {m.hp}"),
+                            RichListEntry.Button($"прибыль {m.moneyinside}$", 
+                            m.moneyinside == 0 ? 
+                                new MButton() : 
+                                new MButton("Получить", "getprofit", (args) => 
+                                { 
+                                    using var db = new DataBase(); 
+                                    p.money += m.moneyinside; 
+                                    m.moneyinside = 0; 
+                                    p.SendMoney(); 
+                                    db.SaveChanges(); 
+                                    m.onadmn(p, m); 
+                                    p.SendWindow(); 
+                                })),
                         ]
                     },
                     Buttons = []
@@ -115,7 +128,7 @@ namespace MinesServer.GameShit.Buildings
 
         private Page SellPage(Player p, long money = -1)
         {
-            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
 
             var InitialPage = new Page()
             {
@@ -182,7 +195,7 @@ namespace MinesServer.GameShit.Buildings
 
         private Page BuyPage(Player p, long money = -1)
         {
-            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
 
             var InitialPage = new Page()
             {
@@ -238,7 +251,7 @@ namespace MinesServer.GameShit.Buildings
 
         private Tab TabBuyCry(Player p)
         {
-            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
             return new Tab()
             {
                 Label = "Покупка",
@@ -248,7 +261,7 @@ namespace MinesServer.GameShit.Buildings
         }
         private Tab TabProducts(Player p)
         {
-            Action adminaction = (p.id != ownerid ? null : () => onadmn(p, this));
+            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
             return new Tab()
             {
                 Label = "Товары",
