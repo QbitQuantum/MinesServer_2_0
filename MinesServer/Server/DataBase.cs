@@ -226,6 +226,13 @@ namespace MinesServer.Server
             return db.resps.Where(r => r.ownerid == ownerid).ToList();
         }
 
+        public static void DeleteProg(int id)
+        {
+            using var db = new DataBase();
+            db.progs.Remove(db.progs.FirstOrDefault(i => i.id == id)!);
+            db.SaveChanges();
+        }
+
         // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
         // Либо инкапсулировать полностью
         public static List<Player> activeplayers = new();

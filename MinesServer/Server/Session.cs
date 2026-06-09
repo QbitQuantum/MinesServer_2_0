@@ -4,7 +4,6 @@ using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GChat;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
-using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network;
 using MinesServer.Network.Auth;
@@ -269,36 +268,30 @@ namespace MinesServer.Server
 
         private void Pren(TYPacket f,PRENPacket pren)
         {
-            StaticGUI.Rename(player, pren.Id);
+            player.Rename(pren.Id);
         }
 
         private void Prst(TYPacket f, pRSTPacket prst)
         {
-            var p = player.programsData.selected;
-            if (p != null && !player.programsData.ProgRunning)
-                player.OpenProg(p);
-            if (player.programsData.ProgRunning)
-                player.RunProgramm();
-            player.ProgStatus();
-        }
-
-        private void Pdel(TYPacket f,PDELPacket pdel)
-        {
-            StaticGUI.DeleteProg(player, pdel.Id);
+            player.UpdateUIProgramm();
         }
 
         private void PROG(TYPacket f, PROGPacket p)
         {
-            StaticGUI.StartedProg(player, p.prog);
-            player?.ProgStatus();
+            player.StartedProg(p.prog);
         }
-
-        private void Xhea(TYPacket f,XheaPacket heal) => player?.Heal();
 
         private void Pope(TYPacket f, PopePacket p)
         {
-            StaticGUI.OpenGui(player);
+            player.OpenGuiProgramm();
         }
+
+        private void Pdel(TYPacket f, PDELPacket pdel)
+        {
+            DataBase.DeleteProg(pdel.Id);
+        }
+
+        private void Xhea(TYPacket f,XheaPacket heal) => player?.Heal();
 
         private void Clan(TYPacket f, ClanPacket p) => player?.OpenClan();
 

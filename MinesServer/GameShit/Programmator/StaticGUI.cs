@@ -102,12 +102,6 @@ namespace MinesServer.GameShit.Programmator
             });
             p.SendWindow();
         }
-        public static void DeleteProg(Player p,int id)
-        {
-            using var db = new DataBase();
-            db.progs.Remove(db.progs.FirstOrDefault(i => i.id == id)!);
-            db.SaveChanges();
-        }
         public static void OpenGui(Player p)
         {
             var l = LoadProgs(p);

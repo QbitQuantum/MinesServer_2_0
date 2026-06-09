@@ -607,7 +607,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region Program Management
 
-        public void RunProgramm(Program p = null)
+        public void RunProgramm(Program? p = null)
         {
             win = null;
             this.SendWindow();
@@ -622,6 +622,32 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (programsData.ProgRunning)
                 programsData.Step();
+        }
+
+        public void UpdateUIProgramm()
+        {
+            var p = programsData.selected;
+            if (p != null && !programsData.ProgRunning)
+                this.OpenProg(p);
+            if (programsData.ProgRunning)
+                RunProgramm();
+            this.ProgStatus();
+        }
+
+        public void StartedProg((int id, string source) data)
+        {
+            StaticGUI.StartedProg(this, data);
+            this.ProgStatus();
+        }
+
+        public void OpenGuiProgramm()
+        {
+            StaticGUI.OpenGui(this);
+        }
+
+        public void Rename(int Id)
+        {
+            StaticGUI.Rename(this, Id);
         }
 
         #endregion
