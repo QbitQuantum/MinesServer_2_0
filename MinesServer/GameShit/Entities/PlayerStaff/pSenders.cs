@@ -95,7 +95,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             if (msg.Length > 0)
             {
-                p.connection.SendU(new ChatMessagesPacket("FED", p.currentchat.GetMessages()));
+                p.connection.SendU(new ChatMessagesPacket(p.currentchat.tag, p.currentchat.GetMessages()));
             }
         }
     }

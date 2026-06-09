@@ -21,11 +21,29 @@ namespace MinesServer.Network.Chat
             return new(obj["ch"], messages);
         }
 
-        public int Encode(Span<byte> output) => Encoding.UTF8.GetBytes($$"""{"ch":"{{Channel}}","h":[{{string.Join(",", Messages.Select(x =>
+        public int Encode(Span<byte> output)
         {
-            Span<byte> span = stackalloc byte[x.Length];
-            x.Encode(span);
-            return $"\"{Encoding.UTF8.GetString(span)}\"";
-        }))}}]}""", output);
+            var messageStrings = new string[Messages.Length];
+            for (int i = 0; i < Messages.Length; i++)
+            {
+                messageStrings[i] = $"" +
+                    $"{Messages[i].LineId}±" +
+                    $"{Messages[i].Color}±" +
+                    $"{Messages[i].ClanId}±" +
+                    $"{Messages[i].Time}±" +
+                    $"{Messages[i].Nickname}±" +
+                    $"{Messages[i].Text}±" +
+                    $"{Messages[i].Gid}";
+            }
+            string _message = string.Join("\",\"", messageStrings);
+
+            string json = $"{{\"ch\":\"{Channel}\",\"h\":[\"{_message}\"]}}";
+
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            bytes.CopyTo(output);
+
+            return bytes.Length;
+        }
+
     }
 }

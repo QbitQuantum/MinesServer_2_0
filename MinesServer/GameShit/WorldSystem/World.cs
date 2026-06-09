@@ -1,18 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.IO.Pipes;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
+﻿using System.Runtime.CompilerServices;
 using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Generator;
-using MinesServer.GameShit.SysMarket;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
-using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.World;
 using MinesServer.Server;
@@ -73,7 +67,7 @@ namespace MinesServer.GameShit.WorldSystem
             CreateSpawns();
             CommitWorld();
             using var db = new DataBase();
-            if (db.chats.FirstOrDefault(i => i.Name == "FED") == default)
+            if (db.chats.FirstOrDefault(i => i.tag == "FED") == default)
             {
                 db.chats.Add(new GChat.Chat("FED", "Федеральный чат"));
                 db.chats.Add(new GChat.Chat("DNO", "Дно"));

@@ -1,23 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MinesServer.GameShit;
+﻿using MinesServer.GameShit;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
+using MinesServer.GameShit.GChat;
+using MinesServer.GameShit.GUI;
+using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network;
 using MinesServer.Network.Auth;
+using MinesServer.Network.Chat;
 using MinesServer.Network.ConnectionStatus;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
-using MinesServer.Network.HubEvents;
-using MinesServer.Network.Programmator;
 using MinesServer.Network.TypicalEvents;
 using MinesServer.Network.World;
 using MinesServer.Server.Network.TypicalEvents;
 using NetCoreServer;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MinesServer.Server
 {
@@ -94,13 +92,14 @@ namespace MinesServer.Server
 
         private void AU(AUPacket p)
         {
-            auth = new Auth(this);
-            auth.TryToAuthenticate(p, sid);
             if (complite)
             {
                 auth = null;
                 CloseWindow();
+                return;
             }
+            auth = new Auth(this);
+            auth.TryToAuthenticate(p, sid);
         }
 
         private void TY(TYPacket packet)
@@ -132,9 +131,12 @@ namespace MinesServer.Server
                 case XheaPacket xhea: Xhea(packet, xhea); break;
                 case ChinPacket chin: Chin(packet, chin);break;
                 case BldsPacket blds: Blds(packet, blds);break;
-                case TAGRPacket agr:Agr(packet, agr);break;
+                case TAGRPacket agr: Agr(packet, agr);break;
+                case CmenPacket cmen: Cmen(packet, cmen); break;
+                case ChooPacket choo: Choo(packet, choo); break;
+                case CpriPacket cpri: Cpri(packet, cpri); break;
 
-                    /////FIX THIS SH
+                /////FIX THIS SH
                 case TAURPacket taur: Taur(packet, taur);break;
                 default:
                     // Invalid event type
@@ -149,6 +151,98 @@ namespace MinesServer.Server
             //changeAgr
         }
 
+        // Исправленный вариант
+        private void Cmen(TYPacket f, CmenPacket cmen)
+        {
+            var Chats = new List<GCChatEntry>();
+            using var db = new DataBase();
+
+            foreach (var chat in db.chats)
+            {
+                string lastMessageText;
+                string lastMessageAuthor;
+
+                if (chat.messages != null && chat.messages.Any())
+                {
+                    var LastMessage = chat.messages.Last();
+                    lastMessageText = LastMessage.message;
+                    lastMessageAuthor = LastMessage.player.name;
+                }
+                else
+                {
+                    lastMessageText = "";
+                    lastMessageAuthor = "";
+                }
+
+                Chats.Add(new GCChatEntry(
+                    chat.tag,
+                    chat.Name,
+                    lastMessageAuthor,
+                    lastMessageText,
+                    false
+                ));
+            }
+
+            var packet = new ChatListPacket(Chats.ToArray());
+            player.connection?.SendU(packet);
+        }
+
+        private void Choo(TYPacket f, ChooPacket choo)
+        {
+            var SelectChat = DataBase.GetChat(choo.tag);
+            
+            if (SelectChat == null) return; // Аномалия
+
+            player.currentchat = SelectChat;
+            player.SendChat();
+        }
+
+        private void Cpri(TYPacket f, CpriPacket cpri)
+        {
+            LineChat? linechat = DataBase.GetLineChat(cpri.LineId);
+
+            if (linechat == null) return;
+
+            var text = "Избранное";
+
+            bool current_user = linechat.playerid == player.id;
+
+            if (!current_user)
+            {
+                var player = DataBase.GetPlayer(linechat.playerid);
+                
+                if (player == null) return; // аномалия
+                
+                text = $"Написать сообщение игроку %{player.id}% {player.name}";
+            }
+            
+            var _Buttons = new List<MButton>
+            {
+                new MButton("Отправить сообщение", "SendMessage")
+            };
+
+            if (!current_user)
+                _Buttons.Add(new MButton("Отправить предметы", "SendItem"));
+
+            player.win = new Window()
+            {
+                Title = text,
+                Tabs =
+                [
+                    new Tab()
+                    {
+                        Action = "HandlerOpenViewChat",
+                        Label = text,
+                        InitialPage = new Page()
+                        {
+                            Buttons = _Buttons.ToArray()
+                        }
+                    }
+                ]
+            };
+            player.SendWindow();
+        }
+
         private void Taur(TYPacket f,TAURPacket t)
         {
 
@@ -156,7 +250,7 @@ namespace MinesServer.Server
 
         private void Chin(TYPacket f,ChinPacket chin)
         {
-           
+            Console.WriteLine(chin.message);
         }
 
         private void Invn(TYPacket f,INVNPacket invn)

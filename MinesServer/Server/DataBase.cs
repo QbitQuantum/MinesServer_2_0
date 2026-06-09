@@ -24,7 +24,7 @@ namespace MinesServer.Server
         #endregion
 
         #region Utils
-        public DbSet<GLine> lines => Set<GLine>();
+        public DbSet<LineChat> lines => Set<LineChat>();
         public DbSet<Chat> chats => Set<Chat>();
         public DbSet<Box> boxes => Set<Box>();
         public DbSet<Order> orders => Set<Order>();
@@ -143,6 +143,20 @@ namespace MinesServer.Server
             using var db = new DataBase();
             return db.botspots
                 .FirstOrDefault(i => i.id == botSpotId);
+        }
+
+        public static Chat? GetChat(string tag)
+        {
+            using var db = new DataBase();
+            return db.chats
+                .FirstOrDefault(i => i.tag == tag);
+        }
+
+        public static LineChat? GetLineChat(int id)
+        {
+            using var db = new DataBase();
+            return db.lines
+                .FirstOrDefault(i => i.id == id);
         }
 
         public static string NickName(int id)
