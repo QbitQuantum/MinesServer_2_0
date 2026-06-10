@@ -15,7 +15,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Inventory
     { 
-        public int Id { get; set; }
+        public int id { get; set; }
         public Inventory()
         {
             itemstobd ??= JsonConvert.SerializeObject(new Dictionary<int, int>());
@@ -286,7 +286,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 db.inventories.Attach(this);
                 items[index] = value;
                 itemstobd = JsonConvert.SerializeObject(items);
-                DataBase.GetPlayer(Id)?.SendInventory();
+                DataBase.GetPlayer(id)?.SendInventory();
                 db.SaveChanges();
             }
         }

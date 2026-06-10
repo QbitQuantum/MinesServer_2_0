@@ -45,7 +45,7 @@ namespace MinesServer.GameShit.SysMarket
                 }
                 else
                 {
-                    db.inventories.First(i => i.Id == buyerid)[itemid] += num;
+                    db.inventories.First(i => i.id == buyerid)[itemid] += num;
                 }
                 var initiator = DataBase.GetPlayer(initiatorid);
                 if (initiator != null)

@@ -11,7 +11,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Basket
     {
-        public int Id { get; set; }
+        public int id { get; set; }
         public string? serialazed { get; set; }
 
         public Basket(bool n)
