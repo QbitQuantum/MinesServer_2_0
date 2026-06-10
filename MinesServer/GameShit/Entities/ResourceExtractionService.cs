@@ -104,8 +104,7 @@ public static class ResourceExtractionService
     {
         var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
         if (DiggingSkill == null) return true;
-        (float valueDiggingSkillEffect, Operator skillMinus) = (DiggingSkill.Effect, Operator.Minus);
-        World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus);
+        World.DamageCell(x, y, DiggingSkill.Effect);
         return false;
     }
 
