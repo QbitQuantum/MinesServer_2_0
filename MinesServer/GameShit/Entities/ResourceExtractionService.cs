@@ -34,6 +34,10 @@ public static class ResourceExtractionService
         if (TryHandleSpecialBlocks(actor, x, y, cellType))
             return;
 
+        // Обработка базового умения
+        if (TryHandleDamage(skillOwner, x, y))
+            return;
+
         // Добыча кристаллов или обычных блоков
         if (World.isCry(x, y))
         {
@@ -96,6 +100,15 @@ public static class ResourceExtractionService
         return false;
     }
 
+    private static bool TryHandleDamage(Player skillOwner, int x, int y)
+    {
+        var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
+        if (DiggingSkill == null) return true;
+        (float valueDiggingSkillEffect, Operator skillMinus) = (DiggingSkill.Effect, Operator.Minus);
+        World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus);
+        return false;
+    }
+
     private static void TryMoveBoulder(PEntity actor, Player skillOwner, int x, int y)
     {
         var plusy = actor.dir == 2 ? -1 : actor.dir == 0 ? 1 : 0;
@@ -119,16 +132,6 @@ public static class ResourceExtractionService
         ref float mainCb,
         ref CrystalCBStorage allCb)
     {
-        var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
-
-        (float valueDiggingSkillEffect, Operator skillMinus) = DiggingSkill != null ?
-            (DiggingSkill.Effect, Operator.Minus) : (0, Operator.Minus);
-
-        // TODO: Добавь логику бели и остальных умений на кристаллы
-        if (valueDiggingSkillEffect == 0) return;
-        bool destroyed2 = World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus);
-        if (destroyed2) return;
-
         CrystalType crystalType = ParseCryType(cellType);
 
         // Основная добыча
@@ -629,17 +632,9 @@ public static class ResourceExtractionService
         (float valuePercentDamage, Operator skillPercentage) = skill != null ?
             (skill.Effect, Operator.Percentage) : (0, Operator.Minus);
 
-        var DiggingSkill = skillOwner.skillslist.GetSkill(SkillType.Digging);
-
-        (float valueDiggingSkillEffect, Operator skillMinus) = DiggingSkill != null ?
-            (DiggingSkill.Effect, Operator.Minus) : (0, Operator.Minus);
-
-        if (valueDiggingSkillEffect == 0) return;
-        // TODO: Если valuePercentDamage равен нулю, то лучше не вызывать [Микрооптимизация]
         bool destroyed1 = World.DamageCell(x, y, valuePercentDamage, skillPercentage);
-        bool destroyed2 = World.DamageCell(x, y, valueDiggingSkillEffect, skillMinus);
 
-        if (destroyed1 || destroyed2)
+        if (destroyed1)
         {
             ProcessDetection(actor, skillOwner, x, y, cellType, basket);
             ProcessSliming(actor, skillOwner, x, y, cellType, basket);

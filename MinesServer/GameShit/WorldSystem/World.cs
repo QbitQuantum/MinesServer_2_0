@@ -193,7 +193,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             SetDurability(x, y, newDurability);
 
-            bool destroyed = newDurability <= 0.001f;
+            bool destroyed = newDurability <= 0.001f; // == 0f
             if (destroyed) Destroy(x, y);
 
             return destroyed;
