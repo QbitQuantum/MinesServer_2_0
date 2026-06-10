@@ -1,21 +1,12 @@
-﻿using MinesServer.GameShit.Buildings;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
-using MinesServer.Network.HubEvents;
-using MinesServer.Network.HubEvents.Bots;
 using MinesServer.Network.HubEvents.FX;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MinesServer.GameShit.Entities
 {
