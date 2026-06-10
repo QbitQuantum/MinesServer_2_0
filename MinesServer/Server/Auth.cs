@@ -207,7 +207,6 @@ namespace MinesServer.Server
             if (player == null)
             {
                 ShowError("Игрок не найден");
-                SendWorldInfo();
                 SendCurrentWindow();
                 return;
             }

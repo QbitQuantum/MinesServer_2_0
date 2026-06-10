@@ -435,11 +435,8 @@ namespace MinesServer.Server
             auth = null;
             player = _auth_player;
             player.connection = this;
-            // TODO: Сделать метод расширения для отправки пакета,
-            // так будет намного лучше
-            SendU(new AHPacket(player.id, player.hash));
             player.Init();
-
+            SendU(new AHPacket(player.id, player.hash));
         }
 
         #endregion

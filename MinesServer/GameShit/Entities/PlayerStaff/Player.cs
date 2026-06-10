@@ -124,13 +124,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             skillslist.LoadSkills();
             MaxHealth = CalculateMaxHealth();
             Health = Health <= 0 ? MaxHealth : Health;
+            win = null;
 
             MoveToChunk();
 
             SendInitialData();
             SubscribeToEvents();
 
-            win = null;
+            
         }
         public void CreatePlayer()
         {
@@ -173,6 +174,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this.UpdateProg(programsData.selected);
             this.ProgStatus();
             this.SendCrys();
+            this.SendWindow();
         }
 
         private void SubscribeToEvents()
