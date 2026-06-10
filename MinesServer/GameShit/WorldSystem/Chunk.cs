@@ -1,10 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
-using MinesServer.GameShit.VulkSystem;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.HubEvents.Bots;
@@ -187,6 +185,20 @@ namespace MinesServer.GameShit.WorldSystem
 
         #region Отправка сообщений
 
+        public void SendPacketChunks(HBPacket hBPacket)
+        {
+            foreach (var chunk in GetNeighboringChunks())
+            {
+                foreach (var kvp in chunk.bots)
+                {
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    // Может заменить на DataBase.activeplayers.Contains?
+                    var player = kvp.Value;
+                    player.connection?.SendB(hBPacket);
+                }
+            }
+        }
+
         public void SendDirectedFx(int fx, int x, int y, int dir, int color = 0)
         {
             foreach (var chunk in GetNeighboringChunks())
@@ -204,113 +216,45 @@ namespace MinesServer.GameShit.WorldSystem
         public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
         {
             var packet = new HBPacket([new HBBotPacket(id, x, y, dir, skin, cid, tail)]);
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            SendPacketChunks(packet);
         }
 
         public void SendLocalMsg(int id, int x, int y, string msg)
         {
             var packet = new HBPacket([new HBChatPacket(id, x, y, msg)]);
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            SendPacketChunks(packet);
         }
 
         public void SendLeaveBot(int id)
         {
             var packet = new HBPacket([new HBLeavePacket(id)]);
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            SendPacketChunks(packet);
         }
 
         public void SendFx(int x, int y, int fx)
         {
             var packet = new HBPacket([new HBFXPacket(x, y, fx)]);
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            SendPacketChunks(packet);
         }
 
         public void SendCellToBots(int x, int y)
         {
             var packet = new HBPacket([new HBMapPacket(x, y, 1, 1, [World.GetCell(x, y)])]);
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            SendPacketChunks(packet);
         }
 
         private void SendPack(char type, int x, int y, int cid, int off)
         {
             if (type == (char)PackType.None)
                 return;
-
-            // Кэшируем пакет, так как он одинаков для всех получателей
-            var packet = new HBPacket([
-                new HBPacksPacket(GetChunkId(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])
-            ]);
-
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            var packet = new HBPacket([new HBPacksPacket(GetChunkId(x, y), [new HBPack(type, x, y, (byte)cid, (byte)off)])]);
+            SendPacketChunks(packet);
         }
 
         public void ClearPack(int x, int y)
         {
             var packet = new HBPacket([new HBPacksPacket(GetChunkId(x, y), [])]);
-            foreach (var chunk in GetNeighboringChunks())
-            {
-                foreach (var kvp in chunk.bots)
-                {
-                    // Прямой доступ к Player через словарь, без обращения к БД
-                    // Может заменить на DataBase.activeplayers.Contains?
-                    var player = kvp.Value;
-                    player.connection?.SendB(packet);
-                }
-            }
+            SendPacketChunks(packet);
         }
 
         public void ResendPack(Pack p)
