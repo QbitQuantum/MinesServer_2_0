@@ -82,11 +82,7 @@ public static class ResourceExtractionService
     {
         if (cellType == CellType.Box)
         {
-            if (actor is Player player)
-                player.GetBox(x, y);
-            else
-                actor.GetBox(x, y);
-
+            actor.GetBox(x, y);
             World.DamageCell(x, y, 1);
             return true;
         }
