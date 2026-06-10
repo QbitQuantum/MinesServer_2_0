@@ -515,10 +515,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             connection?.CloseWindow();
         }
 
-        public void GetBox(int x, int y)
+        public override long GetBox(int x, int y)
         {
             var result = base.GetBox(x, y);
             connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "+ " + result)]));
+            return result;
         }
 
         public void tp(int x, int y)

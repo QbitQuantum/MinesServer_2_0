@@ -111,7 +111,7 @@ namespace MinesServer.GameShit.Entities
         public abstract void Death();
         public abstract bool Move(int x, int y, DirectionType Type = DirectionType.Unknown);
         public abstract void Update();
-        public long GetBox(int x, int y)
+        public virtual long GetBox(int x, int y)
         {
             var b = Box.GetBox(x, y);
             if (b == null) return 0;
