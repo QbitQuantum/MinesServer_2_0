@@ -18,16 +18,19 @@ namespace MinesServer.GameShit.ClanSystem
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key]
         public int id { get; set; }
-        public virtual List<Request> reqs { get; set; } = new List<Request>();
-        public virtual List<Player> members { get; set; } = new List<Player>();
-        public virtual List<Rank> ranks { get; set; } = new List<Rank>();
         public int ownerid { get; set; }
+        public int lvl { get; set; }
         public string name { get; set; }
-        public string abr { get; set; }
+        public string abbreviation { get; set; }
+        public List<Request> reqs { get; set; } = [];
+        public List<Player> members { get; set; } = [];
+        public List<Rank> ranks { get; set; } = [];
+
         #endregion
         public Clan()
         {
         }
+
         #region clanmain
         public static InventoryItem[] ClanIcons()
         {
@@ -42,20 +45,26 @@ namespace MinesServer.GameShit.ClanSystem
             }
             return l.ToArray();
         }
+
         public void OpenClanWin(Player p)
         {
-            GUI.MButton[] buttons = [new MButton("leave", "leave", (args) => LeaveClan(p))];
-            if (p.id == ownerid && members.Count > 1)
-            {
-                buttons = [];
-            }
+            GUI.MButton[] buttons = [new MButton("Покинуть клан", "leave", (args) => LeaveClan(p))];
             Tab[] tabs = [new Tab()
             {
                 Action = "view",
                 Label = "Обзор",
                 InitialPage = new Page()
                 {
-                    Card = new Card(CardImageType.Clan, id.ToString(), $"<color=white>{name}[{abr}]</color>\nУчастники: <color=white>{members.Count}</color>"),
+                    Card = new Card(CardImageType.Clan, id.ToString(), 
+                    $"<color=white>{name}[{abbreviation}]</color>\n" +
+                    $"Уровень клана: <color=white>{lvl}</color>\n" +
+                    $"ТП <color=white>max: 2</color> Респ <color=white>max: 2</color>\n" +
+                    $"РАСХОД <color=white>x5</color> Войны <color=white>max: 1</color>\n" +
+                    $"Участники: <color=white>{members.Count}</color>\n"
+                    ),
+                    Text = "@@\nПРОКАЧКА КЛАНА: НЕ ВЫБРАНО\n\n\n\n\n\n\n" +
+                    "СООБЩЕНИЕ ДЛЯ СОКЛАНОВ:\n" +
+                    "<color=white>Руководство еще не оставило сообщение для сокланов!</color>\n",
                     Buttons = []
                 }
             },
@@ -107,6 +116,7 @@ namespace MinesServer.GameShit.ClanSystem
         public void OpenPlayerPrew(Player p, Player target, bool changerank = false)
         {
             GUI.MButton[] buttons = [new MButton("Прокачка", "skills", (args) => OpenPlayerSkills(p, target))];
+
             RichListEntry[] list = [];
             if (changerank)
             {
@@ -132,6 +142,7 @@ namespace MinesServer.GameShit.ClanSystem
             });
             p.SendWindow();
         }
+
         public void KickPlayer(Player p, Player target)
         {
             using var db = new DataBase();
@@ -144,6 +155,7 @@ namespace MinesServer.GameShit.ClanSystem
             db.SaveChanges();
             OpenClanWin(p);
         }
+
         public void OpenPlayerSkills(Player p, Player target)
         {
             target = DataBase.GetPlayer(target.id);
@@ -156,6 +168,7 @@ namespace MinesServer.GameShit.ClanSystem
             });
             p.SendWindow();
         }
+
         public void LeaveClan(Player p)
         {
             using var db = new DataBase();
@@ -173,7 +186,9 @@ namespace MinesServer.GameShit.ClanSystem
             db.SaveChanges();
         }
         #endregion
+
         #region requests
+
         public void AddReq(int id)
         {
             using var db = new DataBase();
@@ -194,6 +209,7 @@ namespace MinesServer.GameShit.ClanSystem
             });
             p.SendWindow();
         }
+
         public ListEntry[] Reqs(Player p)
         {
             List<ListEntry> rq = new();
@@ -205,6 +221,7 @@ namespace MinesServer.GameShit.ClanSystem
             }
             return rq.ToArray();
         }
+
         public void OpenReq(Player p, Request target)
         {
             p.win = new Window()
@@ -230,6 +247,7 @@ namespace MinesServer.GameShit.ClanSystem
             db.reqs.Remove(target);
             db.SaveChanges();
         }
+
         public void AddMember(Request q)
         {
             using var db = new DataBase();
@@ -244,20 +262,24 @@ namespace MinesServer.GameShit.ClanSystem
             q.player.SendClan();
             db.SaveChanges();
         }
+
         #endregion
+
         #region creating
-        public static void CreateClan(Player p, int icon, string name, string abr)
+
+        public static void CreateClan(Player p, int icon, string name, string abbreviation)
         {
             using var db = new DataBase();
             db.Attach(p);
+
             if (db.clans.FirstOrDefault(i => i.id == icon || i.name == name) == null)
             {
-                var c = new Clan() { ownerid = p.id, id = icon, abr = abr, name = name };
+                var c = new Clan() { ownerid = p.id, id = icon, abbreviation = abbreviation, name = name };
                 c.ranks = new List<Rank>()
             {
-                new Rank() { name = "хуесос",priority = 0,colorhex = "#00FF00",owner = c },
-                new Rank() { name = "уже смешарик",priority = 20,colorhex = "#ff0000",owner = c },
-                new Rank() { name = "Создатель",priority = 100,colorhex = "#006400",owner = c }
+                new Rank() { name = "хуесос", priority = 0, colorhex = "#00FF00", owner = c },
+                new Rank() { name = "уже смешарик", priority = 20, colorhex = "#ff0000", owner = c },
+                new Rank() { name = "Создатель", priority = 100, colorhex = "#006400", owner = c }
                 };
                 db.Add(c);
                 c.members.Add(p);
@@ -266,68 +288,93 @@ namespace MinesServer.GameShit.ClanSystem
                 p.SendClan();
             }
             db.SaveChanges();
+
             p.win?.CurrentTab.Open(new Page()
             {
                 Title = "КЛАН СОЗДАН",
                 Buttons = []
             });
+
             p.SendWindow();
         }
+
         public static void ChooseIcon(Player p)
         {
             var goingtoend = (Player p, int icon, string name, string abr) =>
             {
                 p.win?.CurrentTab.Open(new Page()
                 {
-                    Text = "@@\nВсе готово для создания клана.Остался последний этап.\n\n <color=#ff8888ff>Условия:</color>\n1. При создании спишется залог 1000 кредитов.\n2. При удалении клана 90% залога возвращается.\n3. При неактивности игроков в течение 2 месяцев клан удаляется.\n4. Мультоводство в игре запрещено. Использование нескольких\nаккаунтов одним человеком может повлечь штраф и санкции вплоть\nдо бана аккаунтов и удаления клана.\n",
+                    Text = "@@\nВсе готово для создания клана.Остался последний этап.\n\n " +
+                    "<color=#ff8888ff>Условия:</color>\n" +
+                    "1. При создании спишется залог 1000 кредитов.\n" +
+                    "2. При удалении клана 90% залога возвращается.\n" +
+                    "3. При неактивности игроков в течение 2 месяцев клан удаляется.\n" +
+                    "4. Мультоводство в игре запрещено. Использование нескольких\n" +
+                    "аккаунтов одним человеком может повлечь штраф и санкции вплоть\n" +
+                    "до бана аккаунтов и удаления клана.\n",
+
                     Title = "ЗАВЕРШЕНИЕ СОЗДАНИЯ КЛАНА",
+
                     Card = new Card(CardImageType.Clan, icon.ToString(), $"<color=white>{name}[{abr}]</color>\n"),
+
                     Buttons = [new MButton("<color=#ff8888ff>ПРИНИМАЮ УСЛОВИЯ</color>", $"complete", (args) => CreateClan(p, icon, name, abr))]
                 });
                 p.SendWindow();
             };
+
             var abrchoose = (Player p, int icon, string name) =>
             {
                 p.win?.CurrentTab.Open(new Page()
                 {
-                    Text = "@@\nВыберите краткое имя клана, заглавными латинскими буквами.\n1-3 буквы. Оно используется в списках, командах консоли и пр.\n\nНапример, Хр@нители - HRA, Герои Меча - GRM\nВыберите сокращение, по которому легко узнать ваш клан.\n",
+                    Text = "@@\nВыберите краткое имя клана, заглавными латинскими буквами.\n" +
+                    "1-3 буквы. Оно используется в списках, командах консоли и пр.\n\n" +
+                    "Например, Хр@нители - HRA, Герои Меча - GRM\n" +
+                    "Выберите сокращение, по которому легко узнать ваш клан.\n",
                     Title = "СОЗДАНИЕ АББРЕВИАТУРЫ",
                     Card = new Card(CardImageType.Clan, icon.ToString(), $"<color=white>{name}</color>\n"),
                     Input = new InputConfig()
                     {
                         IsConsole = false,
-                        Placeholder = "XXX",
+                        Placeholder = "Аббревиатура",
                         MaxLength = 3
                     },
-                    Buttons = [new MButton("Далее", $"next:{ActionMacros.Input}", (args) => goingtoend(p, icon, name, args.Input))]
+                    Buttons = [new MButton("Далее", $"next:{ActionMacros.Input}", (args) => goingtoend(p, icon, name, args.Input!))]
                 });
                 p.SendWindow();
             };
+
             var namechoose = (Player p, int iconid) =>
             {
                 p.win?.CurrentTab.Open(new Page()
                 {
                     Title = "ВЫБОР НАЗВАНИЯ КЛАНА",
-                    Text = "@@\nВыберите название клана.\nВ игре есть модерация, оскорбительные кланы могут быть удалены!\n\nВнимание! Название клана нельзя будет изменить после создания.\n",
+                    Text = "@@\nВыберите название клана.\n" +
+                    "В игре есть модерация, оскорбительные кланы могут быть удалены!\n\n" +
+                    "Внимание! Название клана нельзя будет изменить после создания.\n",
                     Input = new InputConfig()
                     {
                         IsConsole = false,
-                        Placeholder = "clanname"
+                        Placeholder = "Наименование клана"
                     },
-                    Buttons = [new MButton("Продолжить", $"namechoose:{ActionMacros.Input}", (args) => abrchoose(p, iconid, args.Input))]
+                    Buttons = [new MButton("Продолжить", $"namechoose:{ActionMacros.Input}", (args) => abrchoose(p, iconid, args.Input!))]
                 });
                 p.SendWindow();
             };
+
             p.win?.CurrentTab.Open(new Page()
             {
                 Title = "ВЫБОР ЗНАЧКА КЛАНА",
-                Text = "@@Выберите значок клана. Всего значков больше сотни. Для удобства мы\nпоказываем их небольшими порциями. Нажмите ДРУГИЕ, чтобы посмотреть еще.\nДля выбора значка - кликните на него.\n\nВнимание! Значок клана нельзя будет изменить после создания.\n",
+                Text = "@@Выберите значок клана. Всего значков больше сотни. Для удобства мы\n" +
+                "показываем их небольшими порциями. Нажмите ДРУГИЕ, чтобы посмотреть еще.\n" +
+                "Для выбора значка - кликните на него.\n\n" +
+                "Внимание! Значок клана нельзя будет изменить после создания.\n",
                 Buttons = [new MButton("Другие", "nexticons", (args) => ChooseIcon(p))],
                 Inventory = ClanIcons(),
                 OnInventory = (i) => namechoose(p, i - 200)
             });
             p.SendWindow();
         }
+
         public static void OpenCreateWindow(Player p)
         {
             p.win = new Window()
@@ -338,24 +385,36 @@ namespace MinesServer.GameShit.ClanSystem
                     Action = "clancreate:1",
                     InitialPage = new Page()
                     {
-                        Text = "@@\nУра! Вы собираетесь создать новый клан. После создания клана вы сможете\nвыполнять клановые квесты, создавать свои фермы, вести войны с другими\nкланами, защищать и отбивать территории, и многое другое.\n\nСоздание клана - ответственное действие, значок и название клана нельзя\nбудет изменить позже. Поэтому внимательно подумайте над тем, как будет\nзвучать и выглядеть ваш клан в игре.\n\nСоздание клана требует залога в 1000 кредитов.\n",
+                        Text = "@@\nУра! Вы собираетесь создать новый клан. После создания клана вы сможете\n" +
+                        "выполнять клановые квесты, создавать свои фермы, вести войны с другими\n" +
+                        "кланами, защищать и отбивать территории, и многое другое.\n\n" +
+                        "Создание клана - ответственное действие, значок и название клана нельзя\n" +
+                        "будет изменить позже. Поэтому внимательно подумайте над тем, как будет\n" +
+                        "звучать и выглядеть ваш клан в игре.\n\n" +
+                        "Создание клана требует залога в 1000 кредитов.\n",
                         Buttons = [new MButton("ВЫБРАТЬ ЗНАЧОК КЛАНА", "chooseicon", (args) => ChooseIcon(p))],
-
                     }
                 }]
             };
             p.SendWindow();
         }
+
         #endregion
+
         #region clans
+
         public static void OpenClanList(Player p)
         {
             List<ClanListEntry> clans = new();
             using var db = new DataBase();
+
             foreach (var clan in db.clans.Include(i => i.members).Include(i => i.reqs))
             {
-                clans.Add(new ClanListEntry(new MButton($"<color=white>{clan.name}</color> [{clan.abr}]", $"clan{clan.id}", (args) => clan.OpenPreview(p)), (byte)clan.id, $"прием аткрыт"));
+                clans.Add(new ClanListEntry(new MButton(
+                    $"<color=white>{clan.name}</color> [{clan.abbreviation}]", 
+                    $"clan{clan.id}", (args) => clan.OpenPreview(p)), (byte)clan.id, $"Приём открыт"));
             }
+
             p.win = new Window()
             {
                 Tabs = [new Tab()
@@ -377,22 +436,23 @@ namespace MinesServer.GameShit.ClanSystem
         public void OpenPreview(Player p)
         {
             var text = "";
-            MButton[] buttons = [new MButton("Подать заявку", "reqin", (args) => AddReq(p.id))];
-            if (p.clan != null)
-            {
-                buttons = [];
-            }
-            using var db = new DataBase();
+            MButton[] buttons = [];
+
             if (reqs.FirstOrDefault(i => i.player.id == p.id) != null)
             {
                 text += "\n Заявка уже подана";
                 buttons = [];
             }
-            p.win.CurrentTab.Open(new Page()
+            else
+            {
+                if (p.clan == null) buttons = [new MButton("Подать заявку", "reqin", (args) => AddReq(p.id))];
+            }
+            p.win?.CurrentTab.Open(new Page()
             {
                 Text = text,
                 Title = "КЛАНЫ",
-                Card = new Card(CardImageType.Clan, id.ToString(), $"<color=white>{name}</color>\nУчастники: <color=white>{members.Count}</color>"),
+                Card = new Card(CardImageType.Clan, id.ToString(), 
+                    $"<color=white>{name}</color>\nУчастники: <color=white>{members.Count}</color>"),
                 Buttons = buttons
             });
             p.SendWindow();
