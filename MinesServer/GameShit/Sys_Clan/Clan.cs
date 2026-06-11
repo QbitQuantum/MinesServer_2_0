@@ -418,19 +418,20 @@ namespace MinesServer.GameShit.ClanSystem
 
             p.win = new Window()
             {
-                Tabs = [new Tab()
-                {
-                    Action = "clanlist",
-                    Label = "СПИСОК КЛАНОВ",
-                    InitialPage = new Page()
+                Tabs = 
+                [
+                    new Tab()
                     {
-                        Title = "КЛАНЫ",
-                        ClanList = clans.ToArray(),
-                        Buttons = []
+                        Action = "clanlist",
+                        Label = "СПИСОК КЛАНОВ",
+                        InitialPage = new Page()
+                        {
+                            Title = "КЛАНЫ",
+                            ClanList = clans.ToArray(),
+                            Buttons = []
+                        }
                     }
-
-                }
-            ]
+                ]
             };
             p.SendWindow();
         }
