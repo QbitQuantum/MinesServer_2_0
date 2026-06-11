@@ -23,9 +23,9 @@ namespace MinesServer.GameShit.ClanSystem
         [Key]
         public int id { get; set; }
         public int ownerid { get; set; }
-        public int lvl { get; set; }
-        public string name { get; set; }
-        public string abbreviation { get; set; }
+        public int lvl { get; set; } = 0;
+        public string name { get; set; } = string.Empty;
+        public string abbreviation { get; set; } = string.Empty;
         public List<Request> reqs { get; set; } = [];
         public List<Player> members { get; set; } = [];
         public List<Rank> ranks { get; set; } = [];
