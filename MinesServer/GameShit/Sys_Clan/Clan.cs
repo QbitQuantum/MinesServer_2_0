@@ -14,6 +14,10 @@ namespace MinesServer.GameShit.ClanSystem
 {
     public class Clan
     {
+        public Clan()
+        {
+        }
+
         #region fields
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key]
@@ -27,9 +31,6 @@ namespace MinesServer.GameShit.ClanSystem
         public List<Rank> ranks { get; set; } = [];
 
         #endregion
-        public Clan()
-        {
-        }
 
         #region clanmain
         public static InventoryItem[] ClanIcons()
