@@ -120,7 +120,7 @@ namespace MinesServer.GameShit.Programmator
             if (current == null || ServerTime.Now < delay)
                 return;
 
-            if (current.current >= current.ActionCount)
+            if (!current.ValidPosition())
             {
                 current.Reset();
                 Next();
@@ -145,14 +145,14 @@ namespace MinesServer.GameShit.Programmator
                                 if (label == "")
                                 {
                                     label = startpoint.name;
-                                    currentprog[label].current = startpoint.pos;
+                                    currentprog[label].position = startpoint.pos;
                                 }
                                 cFunction = label;
                             }
                             else
                             {
                                 cFunction = startpoint.name;
-                                current.current = startpoint.pos;
+                                current.position = startpoint.pos;
                             }
                             break;
 
@@ -193,7 +193,7 @@ namespace MinesServer.GameShit.Programmator
                                 if (label == "")
                                 {
                                     cFunction = startpoint.name;
-                                    current.current = startpoint.pos;
+                                    current.position = startpoint.pos;
                                     break;
                                 }
                                 currentprog[label].calledfrom = current.calledfrom;
@@ -225,7 +225,7 @@ namespace MinesServer.GameShit.Programmator
                             break;
 
                         case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
-                            if (state) current.current--;
+                            if (state) current.position--;
                             break;
                     }
                     break;

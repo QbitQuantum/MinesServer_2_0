@@ -5,11 +5,13 @@
         private PAction[] _actions = [];
         private int _actionCount = 0;
 
-        public int current = 0;
+        public int position = 0;
         public (int x, int y) startoffset;
         public string? calledfrom;
         public bool? state;
         public ActionType? laststateaction;
+
+        public int ActionCount => _actionCount;
 
         // Свойство для логирования (используется для вывода в консоль)
         public List<PAction> actions => _actions.Take(_actionCount).ToList();
@@ -24,37 +26,24 @@
             _actions[_actionCount++] = action;
         }
 
+        public bool ValidPosition() => position < ActionCount;
+
         public ref PAction GetCurrentAction()
         {
-            if (current >= _actionCount)
+            if (position >= _actionCount)
                 throw new IndexOutOfRangeException();
-            return ref _actions[current];
-        }
-
-        public Span<PAction> GetActionsSpan() => _actions.AsSpan(0, _actionCount);
-
-        public PAction Next
-        {
-            get
-            {
-                // Прямой доступ к массиву без List
-                var action = _actions[current];
-                current++;
-                return action;
-            }
+            return ref _actions[position];
         }
 
         public void Reset()
         {
-            current = 0;
+            position = 0;
             startoffset = (0, 0);
             state = null;
             laststateaction = null;
         }
 
-        public void MoveNext() => current++;
-
-        public int ActionCount => _actionCount;
+        public void MoveNext() => position++;
 
         public static PFunction operator +(PFunction a, PAction b)
         {
