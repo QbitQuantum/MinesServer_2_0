@@ -617,12 +617,8 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Пропуск строки ===
                 case ActionType.NextRow:
-                    break;
-
                 // === Создание функции ===
                 case ActionType.CreateFunction:
-                    break;
-
                 // === Пустые действия ===
                 case ActionType.None:
                 default:
