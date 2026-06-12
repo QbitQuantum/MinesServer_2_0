@@ -141,7 +141,7 @@ public static class ResourceExtractionService
         mainCb -= (float)Math.Truncate(mainCb);
         mainCb += multiplier - floorMult;
 
-        Mine(actor, skillOwner, ref mainCb, basket, cellType, x, y, floorMult, crystalType);
+        Mine(actor, ref mainCb, basket, cellType, x, y, floorMult, crystalType);
 
         // Смежное извлечение (зеленые <-> синие)
         if (skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction))
@@ -182,7 +182,7 @@ public static class ResourceExtractionService
         {
             float adjacentMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.AdjacentExtraction);
             float typeCb = allCb.Get(additionalType.Value);
-            Mine(actor, skillOwner, ref typeCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
+            Mine(actor, ref typeCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
             allCb.Set(additionalType.Value, typeCb);
 
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AdjacentExtraction, 1f);
@@ -222,7 +222,7 @@ public static class ResourceExtractionService
 
         float sortMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.Sort);
         float typeCb = allCb.Get(convertedType);
-        Mine(actor, skillOwner, ref typeCb, basket, cellType, x, y, sortMultiplier, convertedType);
+        Mine(actor, ref typeCb, basket, cellType, x, y, sortMultiplier, convertedType);
         allCb.Set(convertedType, typeCb);
 
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Sort, 1f);
@@ -689,7 +689,6 @@ public static class ResourceExtractionService
 
     private static void Mine(
         PEntity actor,
-        Player skillOwner,
         ref float cb,
         Basket basket,
         CellType cell,
@@ -747,7 +746,7 @@ public static class ResourceExtractionService
             2,
             x,
             y,
-            skillOwner.id,
+            actor.id,
             (int)(odob < 255 ? odob : 255),
             sendType);
     }
