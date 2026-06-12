@@ -68,7 +68,7 @@ public static class ResourceExtractionService
             return false;
         }
 
-        actor.SendDFToBots(0, actor.x, actor.y, actor.id, actor is Player p ? p.dir : actor.dir);
+        actor.SendDFToBots(0, actor.x, actor.y, actor.id, actor.dir);
 
         var cell = World.GetCell(x, y);
         prop = World.GetProp(cell);
