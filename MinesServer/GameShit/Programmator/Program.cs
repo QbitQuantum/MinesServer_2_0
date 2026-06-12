@@ -37,7 +37,6 @@ namespace MinesServer.GameShit.Programmator
             byte[] array = SevenZipHelper.Decompress(Convert.FromBase64String(data));
             int num = BitConverter.ToInt32(array, 0);
             var array2 = Encoding.UTF8.GetString(array, num + 4, array.Length - num - 4).Split(':');
-            bool containsnextrow = false;
             int index = 0;
             for (int i = 0; i < num; i++)
             {
@@ -58,18 +57,14 @@ namespace MinesServer.GameShit.Programmator
                         name = array2[i];
                 }
 
-                // Обработка NextRow до добавления команды
-                if (atype == ActionType.NextRow)
-                {
-                    containsnextrow = true;
-                    // Сбрасываем счетчик строки
-                    index = 0;
-                    continue; // Пропускаем добавление команды
-                }
-
                 // Добавляем команду в текущую функцию
                 switch (atype)
                 {
+                    case ActionType.NextRow:
+                        // Сбрасываем счетчик строки
+                        index = 0;
+                        continue;
+
                     // Управление потоком
                     case ActionType.CreateFunction:
                         functions.Add(name, new PFunction());
@@ -256,19 +251,7 @@ namespace MinesServer.GameShit.Programmator
                 index++;
 
                 // Проверяем, нужно ли обработать конец строки
-                if (index >= 15 && !containsnextrow)
-                {
-                    // Если достигнут лимит строки и нет явного NextRow,
-                    // не вставляем автоматический GoTo, а просто сбрасываем счетчик
-                    index = 0;
-                }
-
-                // Если был NextRow, сбрасываем флаг после обработки строки
-                if (containsnextrow && index >= 15)
-                {
-                    containsnextrow = false;
-                    index = 0;
-                }
+                if (index >= 15) index = 0;
             }
             return functions;
         }
