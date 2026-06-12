@@ -34,21 +34,18 @@ namespace MinesServer.GameShit.Programmator
         // Передаем father параметром
         private static void Check(PEntity p, Func<int, int, bool> func, PFunction father)
         {
+            var flip = p.programsData.flipstate ? -1 : 1;
             int checkX, checkY;
+
             if (father.startoffset != default)
             {
-                var flip = p.programsData.flipstate ? -1 : 1;
                 checkX = p.x + (flip * father.startoffset.x);
                 checkY = p.y + (flip * father.startoffset.y);
             }
             else
             {
-                checkX = p.x + (p.programsData.flipstate ?
-                    -(p.programsData.shiftX + p.programsData.checkX) :
-                    p.programsData.shiftX + p.programsData.checkX);
-                checkY = p.y + (p.programsData.flipstate ?
-                    -(p.programsData.shiftY + p.programsData.checkY) :
-                    p.programsData.shiftY + p.programsData.checkY);
+                checkX = p.x + flip * (p.programsData.shiftX + p.programsData.checkX);
+                checkY = p.y + flip * (p.programsData.shiftY + p.programsData.checkY);
             }
 
             p.programsData.checkX = 0;
