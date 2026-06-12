@@ -1,8 +1,6 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using System.Text;
+using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Programmator.SevenZip.LZMA;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 
 namespace MinesServer.GameShit.Programmator
 {
@@ -31,7 +29,7 @@ namespace MinesServer.GameShit.Programmator
         }
         private Dictionary<string,PFunction> parseNormal()
         {
-            Dictionary<string, PFunction> functions = new();
+            Dictionary<string, PFunction> functions = [];
             functions[""] = new PFunction();
             string currentFunc = "";
             byte[] array = SevenZipHelper.Decompress(Convert.FromBase64String(data));
@@ -41,7 +39,7 @@ namespace MinesServer.GameShit.Programmator
             for (int i = 0; i < num; i++)
             {
                 var atype = GetActionType(Convert.ToInt16(array[i + 4]));
-                //Console.WriteLine(atype);
+
                 var name = "0";
                 var number = 0;
                 if (array2.Length > i)

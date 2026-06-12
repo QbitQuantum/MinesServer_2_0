@@ -1,9 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using MinesServer.GameShit.Entities;
+﻿using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.Server;
 using MoreLinq;
-using System.ComponentModel.Design;
 
 namespace MinesServer.GameShit.Programmator
 {
@@ -67,9 +65,6 @@ namespace MinesServer.GameShit.Programmator
                 Console.WriteLine($"{i.Key} - {string.Join(' ', i.Value.actions.Select(i => $"{i.type} {(i.label is not null ? $"({i.label})" : "")}"))}");
             }
 
-            foreach (var i in currentprog.Values)
-                i.Close();
-
             delay = DateTime.UtcNow;
             Drop();
             ProgRunning = true;
@@ -120,25 +115,23 @@ namespace MinesServer.GameShit.Programmator
 
         public void IncreaseDelay(double ms) => delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
 
-        private object? temp = null;
-
         public void Step()
         {
             if (current == null || ServerTime.Now < delay)
-            {
                 return;
-            }
 
-            PAction action;
-            if (current.actions.Count <= 0 || current.actions.Count - 1 < current.current)
+            if (current.current >= current.ActionCount)
             {
                 current.Reset();
                 Next();
                 return;
             }
 
-            action = current.Next;
-            object result = action.Execute(entity, ref temp)!;
+            ref PAction action = ref current.GetCurrentAction();
+
+            current.MoveNext();
+
+            object? result = action.Execute(entity, current);
 
             switch (result)
             {

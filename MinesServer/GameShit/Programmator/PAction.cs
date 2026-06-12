@@ -1,54 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MinesServer.GameShit.Entities;
-using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
-using System.Drawing;
-using System.Numerics;
-using System.Security.AccessControl;
 
 namespace MinesServer.GameShit.Programmator
 {
     public struct PAction
     {
-        public PFunction father { get; set; }
-
-        public PAction(ActionType t)
-        {
-            type = t;
-            label = "";
-            num = 0;
-            delay = 0;
-        }
-
-        public PAction(ActionType t, string label)
-        {
-            type = t;
-            this.label = label ?? "";
-            num = 0;
-            delay = 0;
-        }
-
-        public PAction(ActionType t, int number)
-        {
-            type = t;
-            label = "";
-            num = number;
-            delay = 0;
-        }
-
-        public PAction(ActionType t, string label, int number)
-        {
-            type = t;
-            this.label = label ?? "";
-            num = number;
-            delay = 0;
-        }
-
-        public double delay;
+        public ActionType type;
         public string label;
         public int num;
-        public ActionType type;
+        public double delay;
+
+        public PAction(ActionType t) : this(t, "", 0) { }
+        public PAction(ActionType t, string label) : this(t, label, 0) { }
+        public PAction(ActionType t, int num) : this(t, "", num) { }
+
+        public PAction(ActionType t, string label, int num)
+        {
+            type = t;
+            this.label = label ?? "";
+            this.num = num;
+            delay = 0;
+        }
 
         private static readonly Dictionary<int, (int dx, int dy)> dirz = new()
         {
@@ -58,50 +31,44 @@ namespace MinesServer.GameShit.Programmator
             { 3, (1, 0) }    // RIGHT
         };
 
-        private void Check(PEntity p, Func<int, int, bool> func)
+        // Передаем father параметром
+        private static void Check(PEntity p, Func<int, int, bool> func, PFunction father)
         {
-            var (checkX, checkY) = GetCheckCoordinates(p);
+            int checkX, checkY;
+            if (father.startoffset != default)
+            {
+                var flip = p.programsData.flipstate ? -1 : 1;
+                checkX = p.x + (flip * father.startoffset.x);
+                checkY = p.y + (flip * father.startoffset.y);
+            }
+            else
+            {
+                checkX = p.x + (p.programsData.flipstate ?
+                    -(p.programsData.shiftX + p.programsData.checkX) :
+                    p.programsData.shiftX + p.programsData.checkX);
+                checkY = p.y + (p.programsData.flipstate ?
+                    -(p.programsData.shiftY + p.programsData.checkY) :
+                    p.programsData.shiftY + p.programsData.checkY);
+            }
 
             p.programsData.checkX = 0;
             p.programsData.checkY = 0;
             p.programsData.shiftX = 0;
             p.programsData.shiftY = 0;
 
+            var result = func(checkX, checkY);
+
             if (father.state == null)
-            {
-                father.state = func(checkX, checkY);
-                return;
-            }
-
-            father.state = father.laststateaction switch
-            {
-                null => func(checkX, checkY),
-                ActionType.Or => (bool)father.state || func(checkX, checkY),
-                ActionType.And => (bool)father.state && func(checkX, checkY),
-                _ => func(checkX, checkY)
-            };
+                father.state = result;
+            else if (father.laststateaction == ActionType.Or)
+                father.state = (bool)father.state || result;
+            else if (father.laststateaction == ActionType.And)
+                father.state = (bool)father.state && result;
+            else
+                father.state = result;
         }
 
-        private (int x, int y) GetCheckCoordinates(PEntity p)
-        {
-            if (father.startoffset != default)
-            {
-                return (
-                    p.x + (p.programsData.flipstate ? -father.startoffset.x : father.startoffset.x),
-                    p.y + (p.programsData.flipstate ? -father.startoffset.y : father.startoffset.y)
-                );
-            }
-
-            return (
-                p.x + (p.programsData.flipstate ?
-                    -(p.programsData.shiftX + p.programsData.checkX) :
-                    p.programsData.shiftX + p.programsData.checkX),
-                p.y + (p.programsData.flipstate ?
-                    -(p.programsData.shiftY + p.programsData.checkY) :
-                    p.programsData.shiftY + p.programsData.checkY)
-            );
-        }
-
+        // Передаем father параметром
         private bool? CallWSAction(PEntity p)
         {
             switch (label.ToLower())
@@ -178,7 +145,7 @@ namespace MinesServer.GameShit.Programmator
             }
         }
 
-        public object? Execute(PEntity p, ref object? template)
+        public object? Execute(PEntity p, PFunction father)
         {
             switch (type)
             {
@@ -294,37 +261,27 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Макросы ===
                 case ActionType.MacrosMine:
-                    if (template is int currentDir)
+                    var directions = new[] { p.dir, (p.dir + 1) % 4, (p.dir + 3) % 4 };
+                    // Ищем первый кристалл за один проход
+                    foreach (var dir in directions)
                     {
-                        var dir = dirz[currentDir];
-                        if (World.isCry(p.x + dir.dx, p.y + dir.dy))
+                        var (dx, dy) = dirz[dir];
+                        if (World.isCry(p.x + dx, p.y + dy))
                         {
-                            p.Bz();
-                            delay = 200;
-                            return true;
-                        }
-                    }
-
-                    foreach (var kv in dirz)
-                    {
-                        if (World.isCry(p.x + kv.Value.dx, p.y + kv.Value.dy))
-                        {
-                            if (p.dir == kv.Key)
+                            if (p.dir == dir)
                             {
                                 p.Bz();
                                 delay = 200;
-                                template = kv.Key;
-                                return true;
                             }
-
-                            p.Move(p.x, p.y, DirectionTypeExt.ToDirection(kv.Key));
-                            delay = p.ServerPause;
+                            else
+                            {
+                                p.Move(p.x, p.y, DirectionTypeExt.ToDirection(dir));
+                                delay = p.ServerPause;
+                            }
                             return true;
                         }
                     }
-
-                    template = null;
-                    break;
+                    break;  // кристаллов нет
 
                 case ActionType.MacrosHeal:
                     if (p.crys?[MinesServer.Enums.CrystalType.Red] > 0 && p.Health < p.MaxHealth)
@@ -475,92 +432,92 @@ namespace MinesServer.GameShit.Programmator
                     p.programsData.checkY = 1;
                     break;
 
-                // === Проверки состояния ===
+                // === Проверки состояния (теперь передаем father) ===
                 case ActionType.IsHpLower100:
-                    Check(p, (x, y) => p.Health < p.MaxHealth);
+                    Check(p, (x, y) => p.Health < p.MaxHealth, father);
                     break;
 
                 case ActionType.IsHpLower50:
-                    Check(p, (x, y) => p.Health < p.MaxHealth / 2);
+                    Check(p, (x, y) => p.Health < p.MaxHealth / 2, father);
                     break;
 
                 case ActionType.IsEmpty:
-                    Check(p, (x, y) => World.GetProp(x, y).isEmpty);
+                    Check(p, (x, y) => World.GetProp(x, y).isEmpty, father);
                     break;
 
                 case ActionType.IsNotEmpty:
-                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty);
+                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty, father);
                     break;
 
                 case ActionType.IsAcid:
-                    Check(p, (x, y) => ((CellType)World.GetCell(x, y)).IsAcid());
+                    Check(p, (x, y) => ((CellType)World.GetCell(x, y)).IsAcid(), father);
                     break;
                 case ActionType.IsRedRock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedRock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedRock, father);
                     break;
 
                 case ActionType.IsBlackRock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.BlackRock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.BlackRock, father);
                     break;
 
                 case ActionType.IsBoulder:
-                    Check(p, (x, y) => World.GetProp(x, y).isBoulder);
+                    Check(p, (x, y) => World.GetProp(x, y).isBoulder, father);
                     break;
 
                 case ActionType.IsSand:
-                    Check(p, (x, y) => World.GetProp(x, y).isSand);
+                    Check(p, (x, y) => World.GetProp(x, y).isSand, father);
                     break;
 
                 case ActionType.IsUnbreakable:
-                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty && !World.GetProp(x, y).is_diggable);
+                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty && !World.GetProp(x, y).is_diggable, father);
                     break;
 
                 case ActionType.IsBox:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Box);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Box, father);
                     break;
 
                 case ActionType.IsBreakableRock:
-                    Check(p, (x, y) => World.GetProp(x, y).is_diggable);
+                    Check(p, (x, y) => World.GetProp(x, y).is_diggable, father);
                     break;
 
                 case ActionType.IsCrystal:
-                    Check(p, (x, y) => World.isCry(x, y));
+                    Check(p, (x, y) => World.isCry(x, y), father);
                     break;
 
                 case ActionType.IsGreenBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.GreenBlock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.GreenBlock, father);
                     break;
 
                 case ActionType.IsYellowBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.YellowBlock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.YellowBlock, father);
                     break;
 
                 case ActionType.IsRedBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedBlock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedBlock, father);
                     break;
 
                 case ActionType.IsFalling:
-                    Check(p, (x, y) => World.GetProp(x, y).isSand || World.GetProp(x, y).isBoulder);
+                    Check(p, (x, y) => World.GetProp(x, y).isSand || World.GetProp(x, y).isBoulder, father);
                     break;
 
                 case ActionType.IsLivingCrystal:
-                    Check(p, (x, y) => World.isAlive(x, y));
+                    Check(p, (x, y) => World.isAlive(x, y), father);
                     break;
 
                 case ActionType.IsPillar:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Support);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Support, father);
                     break;
 
                 case ActionType.IsQuadBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.QuadBlock);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.QuadBlock, father);
                     break;
 
                 case ActionType.IsRoad:
-                    Check(p, (x, y) => World.isRoad(x, y));
+                    Check(p, (x, y) => World.isRoad(x, y), father);
                     break;
 
                 case ActionType.CheckGun:
-                    Check(p, (x, y) => p.HasGun());
+                    Check(p, (x, y) => p.HasGun(), father);
                     break;
 
                 // === Управление потоком ===
@@ -575,7 +532,7 @@ namespace MinesServer.GameShit.Programmator
                     return father.state;
 
                 case ActionType.Return:
-                    return ""; // Пустая строка для возврата из подпрограммы
+                    return "";
 
                 case ActionType.RunIfTrue:
                     if (father.state.HasValue && !father.state.Value)
@@ -604,7 +561,7 @@ namespace MinesServer.GameShit.Programmator
                     var res = CallWSAction(p);
                     if (res.HasValue)
                     {
-                        Check(p, (x, y) => res.Value);
+                        Check(p, (x, y) => res.Value, father);
                         return res.Value;
                     }
                     break;
@@ -657,17 +614,6 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.InvDirRight:
                     p.InverseDirection(type);
                     break;
-
-                /*
-                // === Отладка ===
-                case ActionType.DebugBreak:
-                    p.DebugBreak(label);
-                    break;
-
-                case ActionType.DebugSet:
-                    p.DebugSet(label);
-                    break;
-                */
 
                 // === Пропуск строки ===
                 case ActionType.NextRow:
