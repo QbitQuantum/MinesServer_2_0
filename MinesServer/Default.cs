@@ -1,13 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using System.Drawing;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 using Newtonsoft.Json;
-using System.Drawing;
-using System.Numerics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace MinesServer
 {
@@ -73,20 +69,7 @@ namespace MinesServer
             {
                 server.Stop();
                 server.time.Dispose();
-                using var db = new DataBase();
-                DataBase.activeplayers = new List<Player>();
-                foreach (var i in db.players) i.resp = null;
-                db.boxes.RemoveAll();
-                db.teleports.RemoveAll();
-                db.resps.RemoveAll();
-                db.ups.RemoveAll();
-                db.storages.RemoveAll();
-                db.vulkans.RemoveAll();
-                db.markets.RemoveAll();
-                db.guns.RemoveAll();
-                db.gates.RemoveAll();
-                db.gates.RemoveAll();
-                db.SaveChanges();
+                DataBase.ClearAll();
                 World.W.DeleteWorld();
                 server.Start();
             });

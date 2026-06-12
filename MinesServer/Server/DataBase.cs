@@ -102,6 +102,23 @@ namespace MinesServer.Server
             db.Dispose();
         }
 
+        public static void ClearAll()
+        {
+            using var db = new DataBase();
+            activeplayers = new List<Player>();
+            foreach (var i in db.players) i.resp = null;
+            db.boxes.RemoveAll();
+            db.teleports.RemoveAll();
+            db.resps.RemoveAll();
+            db.ups.RemoveAll();
+            db.storages.RemoveAll();
+            db.vulkans.RemoveAll();
+            db.markets.RemoveAll();
+            db.guns.RemoveAll();
+            db.gates.RemoveAll();
+            db.SaveChanges();
+        }
+
         public static int GetNextId()
         {
             using var db = new DataBase();
