@@ -9,9 +9,10 @@
         public (int x, int y) startoffset;
         public string? calledfrom;
         public bool? state;
-        public ActionType? laststateaction;
 
-        public int ActionCount => _actionCount;
+        public bool ValidPosition => position < _actionCount;
+
+        public ActionType? laststateaction = null;
 
         // Свойство для логирования (используется для вывода в консоль)
         public List<PAction> actions => _actions.Take(_actionCount).ToList();
@@ -26,11 +27,9 @@
             _actions[_actionCount++] = action;
         }
 
-        public bool ValidPosition() => position < ActionCount;
-
         public ref PAction GetCurrentAction()
         {
-            if (position >= _actionCount)
+            if (!ValidPosition)
                 throw new IndexOutOfRangeException();
             return ref _actions[position];
         }

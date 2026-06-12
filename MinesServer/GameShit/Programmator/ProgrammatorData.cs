@@ -120,7 +120,7 @@ namespace MinesServer.GameShit.Programmator
             if (current == null || ServerTime.Now < delay)
                 return;
 
-            if (!current.ValidPosition())
+            if (!current.ValidPosition)
             {
                 current.Reset();
                 Next();
