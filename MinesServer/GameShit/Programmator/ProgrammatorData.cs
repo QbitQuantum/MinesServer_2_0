@@ -117,18 +117,20 @@ namespace MinesServer.GameShit.Programmator
 
         public void Step()
         {
-            if (current == null || ServerTime.Now < delay)
-                return;
-
             if (!current.ValidPosition)
             {
                 current.Reset();
                 Next();
-                return;
             }
 
-            ref PAction action = ref current.GetCurrentAction();
+            while (current.ValidPosition && ServerTime.Now >= delay)
+                ExecuteCurrentAction();
+        }
 
+        // Выносим логику выполнения одного действия в отдельный метод
+        private void ExecuteCurrentAction()
+        {
+            ref PAction action = ref current.GetCurrentAction();
             current.MoveNext();
 
             object? result = action.Execute(entity, current);
@@ -284,8 +286,7 @@ namespace MinesServer.GameShit.Programmator
                     }
                     break;
             }
-
-            //IncreaseDelay(action.delay);
+            IncreaseDelay(action.delay);
         }
     }
 }
