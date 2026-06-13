@@ -43,11 +43,5 @@
         }
 
         public void MoveNext() => position++;
-
-        public static PFunction operator +(PFunction a, PAction b)
-        {
-            a.AddAction(b);
-            return a;
-        }
     }
 }
