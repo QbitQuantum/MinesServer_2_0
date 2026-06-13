@@ -70,33 +70,6 @@ namespace MinesServer.GameShit.Programmator
                         index = 0;
                         break;
 
-                    case ActionType.GoTo:
-                    case ActionType.RunSub:
-                    case ActionType.RunFunction:
-                    case ActionType.RunState:
-                    case ActionType.RunIfFalse:
-                    case ActionType.RunIfTrue:
-                    case ActionType.RunOnRespawn:
-                    case ActionType.Return:
-                    case ActionType.ReturnFunction:
-                    case ActionType.ReturnState:
-                    case ActionType.Restart:
-                        functions[currentFunc].AddAction(new PAction(atype, name));
-                        break;
-
-                    // Команды с меткой и числовым параметром
-                    case ActionType.WritableState:
-                    case ActionType.WritableStateLower:
-                    case ActionType.WritableStateMore:
-                        functions[currentFunc].AddAction(new PAction(atype, name, number));
-                        break;
-
-                    // Команды с числовым параметром
-                    case ActionType.IsHpLower100:
-                    case ActionType.IsHpLower50:
-                        functions[currentFunc].AddAction(new PAction(atype, number));
-                        break;
-
                     // Команды проверки состояния (без параметров)
                     case ActionType.IsNotEmpty:
                     case ActionType.IsEmpty:
@@ -118,8 +91,6 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.IsPillar:
                     case ActionType.IsGreenBlock:
                     case ActionType.CheckGun:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Команды перемещения и вращения
                     case ActionType.MoveUp:
@@ -134,8 +105,6 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.RotateLeftRelative:
                     case ActionType.RotateRightRelative:
                     case ActionType.RotateRandom:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Команды проверки направления
                     case ActionType.CheckUp:
@@ -149,8 +118,6 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.CheckDownRight:
                     case ActionType.CheckForwardLeft:
                     case ActionType.CheckForwardRight:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Команды сдвига
                     case ActionType.ShiftUp:
@@ -158,14 +125,10 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.ShiftDown:
                     case ActionType.ShiftRight:
                     case ActionType.ShiftForward:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Логические операторы
                     case ActionType.Or:
                     case ActionType.And:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Действия
                     case ActionType.Dig:
@@ -175,22 +138,16 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.Heal:
                     case ActionType.BuildPillar:
                     case ActionType.Beep:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Макросы
                     case ActionType.MacrosDig:
                     case ActionType.MacrosBuild:
                     case ActionType.MacrosHeal:
                     case ActionType.MacrosMine:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Специальные команды
                     case ActionType.Flip:
                     case ActionType.FillGun:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Режимы
                     case ActionType.EnableAutoDig:
@@ -199,8 +156,6 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.DisableAgression:
                     case ActionType.EnableHandMode:
                     case ActionType.DisableHandMode:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
 
                     // Специальные действия
                     case ActionType.BOOM:
@@ -219,8 +174,25 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.InvDirLeft:
                     case ActionType.InvDirDown:
                     case ActionType.InvDirRight:
+
+                    // Старт/Стоп
+                    case ActionType.Start:
+                    case ActionType.Stop:
+                    case ActionType.Last:
                         functions[currentFunc].AddAction(new PAction(atype));
                         break;
+
+                    case ActionType.GoTo:
+                    case ActionType.RunSub:
+                    case ActionType.RunFunction:
+                    case ActionType.RunState:
+                    case ActionType.RunIfFalse:
+                    case ActionType.RunIfTrue:
+                    case ActionType.RunOnRespawn:
+                    case ActionType.Return:
+                    case ActionType.ReturnFunction:
+                    case ActionType.ReturnState:
+                    case ActionType.Restart:
 
                     // Отладка
                     case ActionType.DebugBreak:
@@ -228,11 +200,17 @@ namespace MinesServer.GameShit.Programmator
                         functions[currentFunc].AddAction(new PAction(atype, name));
                         break;
 
-                    // Старт/Стоп
-                    case ActionType.Start:
-                    case ActionType.Stop:
-                    case ActionType.Last:
-                        functions[currentFunc].AddAction(new PAction(atype));
+                    // Команды с числовым параметром
+                    case ActionType.IsHpLower100:
+                    case ActionType.IsHpLower50:
+                        functions[currentFunc].AddAction(new PAction(atype, number));
+                        break;
+
+                    // Команды с меткой и числовым параметром
+                    case ActionType.WritableState:
+                    case ActionType.WritableStateLower:
+                    case ActionType.WritableStateMore:
+                        functions[currentFunc].AddAction(new PAction(atype, name, number));
                         break;
 
                     // None или неизвестные команды
