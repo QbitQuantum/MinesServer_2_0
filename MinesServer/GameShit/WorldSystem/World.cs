@@ -407,19 +407,8 @@ namespace MinesServer.GameShit.WorldSystem
         }
         public static bool ContainsPack(int x, int y, out Pack p)
         {
-            if (!ValidCoord(x, y))
-            {
-                p = null;
-                return true;
-            }
-
-            p = GetPack(x, y)!;
-
-            if (p == null)
-            {
-                return false;
-            }
-            return true;
+            p = GetPack(x, y);
+            return p != null;
         }
         #region TODO: Унести типизированную структуру Cell (Cell.cs)
 
