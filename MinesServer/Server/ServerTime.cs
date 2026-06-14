@@ -7,17 +7,19 @@ namespace MinesServer.Server
 {
     public class ServerTime : IDisposable
     {
+        public static DateTime Now => DateTime.UtcNow;
+
         private readonly Thread _updateThread;
         private volatile bool _running = true;
 
         // Таймеры (последнее время выполнения)
-        private DateTime _lastChunksUpdate = DateTime.UtcNow;
-        private DateTime _lastWorldUpdate = DateTime.UtcNow;
-        private DateTime _lastPlayersUpdate = DateTime.UtcNow;
-        private DateTime _lastProgBotSpotUpdate = DateTime.UtcNow;
-        private DateTime _lastOrdersUpdate = DateTime.UtcNow;
-        private DateTime _lastActionsUpdate = DateTime.UtcNow;
-        private DateTime _lastCommitWorld = DateTime.UtcNow;
+        private DateTime _lastChunksUpdate = Now;
+        private DateTime _lastWorldUpdate = Now;
+        private DateTime _lastPlayersUpdate = Now;
+        private DateTime _lastProgBotSpotUpdate = Now;
+        private DateTime _lastOrdersUpdate = Now;
+        private DateTime _lastActionsUpdate = Now;
+        private DateTime _lastCommitWorld = Now;
 
         // Очередь действий
         public readonly Queue<(Action action, Player initiator)> gameActions = new();
@@ -123,9 +125,6 @@ namespace MinesServer.Server
             gameActions.Enqueue((action, p));
             _directActionDelay = DateTime.UtcNow.AddMicroseconds(5);
         }
-
-        public static DateTime Now => DateTime.UtcNow;
-
         public void Dispose()
         {
             _running = false;
