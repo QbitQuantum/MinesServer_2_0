@@ -229,6 +229,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             lastc190hit = now;
         }
 
+        public void HurtC190Stacks()
+        {
+            Hurt(20 + 60 * c190stacks);
+            c190stacks++;
+            lastc190hit = ServerTime.Now;
+        }
+
         private void HandleOffline(DateTime now)
         {
             if (now - afkstarttime <= TimeSpan.FromMinutes(AfkTimeoutMinutes))

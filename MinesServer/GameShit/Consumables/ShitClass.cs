@@ -54,9 +54,7 @@ namespace MinesServer.GameShit.Consumables
             // Обработка игроков в текущей клетке
             foreach (var player in World.W.GetPlayersFromPos(x, y))
             {
-                player.Hurt(20 + 60 * player.c190stacks);
-                player.c190stacks++;
-                player.lastc190hit = DateTime.Now;
+                player.HurtC190Stacks();
             }
 
             // Повреждение клетки, если возможно
