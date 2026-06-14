@@ -27,6 +27,12 @@
             _actions[_actionCount++] = action;
         }
 
+        public void AddActionGotoType()
+        {
+            bool shouldadd = actions.Count > 0 && actions.Last().type != ActionType.GoTo;
+            if (shouldadd) AddAction(new PAction(ActionType.GoTo));
+        }
+
         public ref PAction GetCurrentAction()
         {
             if (!ValidPosition)

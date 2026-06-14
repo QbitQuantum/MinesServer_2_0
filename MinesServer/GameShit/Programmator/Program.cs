@@ -118,7 +118,11 @@ namespace MinesServer.GameShit.Programmator
                 index++;
 
                 // Проверяем, нужно ли обработать конец строки
-                if (index >= 15) index = 0;
+                if (index >= 15)
+                {
+                    functions[currentFunc].AddActionGotoType();
+                    index = 0;
+                }
             }
             return functions;
         }
