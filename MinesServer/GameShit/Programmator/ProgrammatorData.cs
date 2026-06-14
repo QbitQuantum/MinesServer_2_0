@@ -45,6 +45,8 @@ namespace MinesServer.GameShit.Programmator
 
         public bool Running { get; set; }
         public Dictionary<string, PFunction> CurrentProg { get; set; }
+        public List<string> Functions { get; set; } = [];
+
         public DateTime delay;
         private string cFunction;
         public Program? selected { get; set; }
@@ -58,6 +60,7 @@ namespace MinesServer.GameShit.Programmator
         {
             selected = p;
             CurrentProg = p.programm;
+            Functions = CurrentProg.Keys.ToList();
 
             // Логирование функций
             foreach (var i in CurrentProg)
@@ -106,11 +109,11 @@ namespace MinesServer.GameShit.Programmator
 
         private void Next()
         {
-            var i = CurrentProg.Keys.ToList().IndexOf(cFunction);
-            if (CurrentProg.Count > i + 1)
-                cFunction = CurrentProg.ElementAt(i + 1).Key;
+            var i = Functions.IndexOf(cFunction);
+            if (Functions.Count > i + 1)
+                cFunction = Functions[i + 1];
             else
-                cFunction = CurrentProg.First().Key;
+                cFunction = Functions[0];
         }
 
         public void IncreaseDelay(double ms) => delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
