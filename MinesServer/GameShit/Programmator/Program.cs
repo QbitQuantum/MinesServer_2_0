@@ -76,118 +76,6 @@ namespace MinesServer.GameShit.Programmator
                         index = 0;
                         break;
 
-                    // Команды проверки состояния (без параметров)
-                    case ActionType.IsNotEmpty:
-                    case ActionType.IsEmpty:
-                    case ActionType.IsFalling:
-                    case ActionType.IsCrystal:
-                    case ActionType.IsLivingCrystal:
-                    case ActionType.IsBoulder:
-                    case ActionType.IsSand:
-                    case ActionType.IsBreakableRock:
-                    case ActionType.IsUnbreakable:
-                    case ActionType.IsRedRock:
-                    case ActionType.IsBlackRock:
-                    case ActionType.IsAcid:
-                    case ActionType.IsQuadBlock:
-                    case ActionType.IsRoad:
-                    case ActionType.IsRedBlock:
-                    case ActionType.IsYellowBlock:
-                    case ActionType.IsBox:
-                    case ActionType.IsPillar:
-                    case ActionType.IsGreenBlock:
-                    case ActionType.CheckGun:
-
-                    // Команды перемещения и вращения
-                    case ActionType.MoveUp:
-                    case ActionType.MoveLeft:
-                    case ActionType.MoveDown:
-                    case ActionType.MoveRight:
-                    case ActionType.MoveForward:
-                    case ActionType.RotateUp:
-                    case ActionType.RotateLeft:
-                    case ActionType.RotateDown:
-                    case ActionType.RotateRight:
-                    case ActionType.RotateLeftRelative:
-                    case ActionType.RotateRightRelative:
-                    case ActionType.RotateRandom:
-
-                    // Команды проверки направления
-                    case ActionType.CheckUp:
-                    case ActionType.CheckLeft:
-                    case ActionType.CheckDown:
-                    case ActionType.CheckRight:
-                    case ActionType.CheckForward:
-                    case ActionType.CheckUpLeft:
-                    case ActionType.CheckUpRight:
-                    case ActionType.CheckDownLeft:
-                    case ActionType.CheckDownRight:
-                    case ActionType.CheckForwardLeft:
-                    case ActionType.CheckForwardRight:
-
-                    // Команды сдвига
-                    case ActionType.ShiftUp:
-                    case ActionType.ShiftLeft:
-                    case ActionType.ShiftDown:
-                    case ActionType.ShiftRight:
-                    case ActionType.ShiftForward:
-
-                    // Логические операторы
-                    case ActionType.Or:
-                    case ActionType.And:
-
-                    // Действия
-                    case ActionType.Dig:
-                    case ActionType.BuildBlock:
-                    case ActionType.Geology:
-                    case ActionType.BuildRoad:
-                    case ActionType.Heal:
-                    case ActionType.BuildPillar:
-                    case ActionType.Beep:
-
-                    // Макросы
-                    case ActionType.MacrosDig:
-                    case ActionType.MacrosBuild:
-                    case ActionType.MacrosHeal:
-                    case ActionType.MacrosMine:
-
-                    // Специальные команды
-                    case ActionType.Flip:
-                    case ActionType.FillGun:
-
-                    // Режимы
-                    case ActionType.EnableAutoDig:
-                    case ActionType.DisableAutoDig:
-                    case ActionType.EnableAgression:
-                    case ActionType.DisableAgression:
-                    case ActionType.EnableHandMode:
-                    case ActionType.DisableHandMode:
-
-                    // Специальные действия
-                    case ActionType.BOOM:
-                    case ActionType.DISCHARGE:
-                    case ActionType.PROTON:
-                    case ActionType.VB:
-                    case ActionType.Geopack:
-                    case ActionType.ZZ:
-                    case ActionType.C190:
-                    case ActionType.Poly:
-                    case ActionType.Up:
-                    case ActionType.Craft:
-                    case ActionType.Nano:
-                    case ActionType.Rembot:
-                    case ActionType.InvDirUp:
-                    case ActionType.InvDirLeft:
-                    case ActionType.InvDirDown:
-                    case ActionType.InvDirRight:
-
-                    // Старт/Стоп
-                    case ActionType.Start:
-                    case ActionType.Stop:
-                    case ActionType.Last:
-                        functions[currentFunc].AddAction(new PAction(atype));
-                        break;
-
                     case ActionType.GoTo:
                     case ActionType.RunSub:
                     case ActionType.RunFunction:
@@ -218,13 +106,11 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.WritableStateMore:
                         functions[currentFunc].AddAction(new PAction(atype, name, number));
                         break;
-
-                    // None или неизвестные команды
+                    // None или остальные команды
                     case ActionType.None:
                     default:
                         if (atype != ActionType.None)
                         {
-                            Console.WriteLine($"Unknown action ID: {Convert.ToInt16(DecompressedData[i + 4])}");
                             functions[currentFunc].AddAction(new PAction(atype));
                         }
                         break;
