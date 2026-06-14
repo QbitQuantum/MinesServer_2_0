@@ -65,7 +65,7 @@ public class BotSpot : PEntity
 
     public override void Death()
     {
-        if (programsData.ProgRunning)
+        if (programsData.Running)
             programsData.Run();
 
         if (crys.AllCry > 0 && owner is not null)

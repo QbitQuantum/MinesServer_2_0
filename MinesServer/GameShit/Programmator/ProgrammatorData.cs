@@ -9,7 +9,7 @@ namespace MinesServer.GameShit.Programmator
     {
         public ProgrammatorData(PEntity e)
         {
-            ProgRunning = false;
+            Running = false;
             entity = e;
         }
         PEntity entity;
@@ -43,7 +43,7 @@ namespace MinesServer.GameShit.Programmator
                 function.Value.Reset();
         }
 
-        public bool ProgRunning { get; set; }
+        public bool Running { get; set; }
         public Dictionary<string, PFunction> currentprog { get; set; }
         public DateTime delay;
         private string cFunction;
@@ -67,7 +67,7 @@ namespace MinesServer.GameShit.Programmator
 
             delay = DateTime.UtcNow;
             Drop();
-            ProgRunning = true;
+            Running = true;
         }
 
         public bool RespawnOnProg
@@ -86,9 +86,9 @@ namespace MinesServer.GameShit.Programmator
         // TODO: Разделить методы на Run()/Stop()
         public void Run()
         {
-            if (ProgRunning || selected == null)
+            if (Running || selected == null)
             {
-                ProgRunning = false;
+                Running = false;
                 if (selected != null)
                 {
                     using var db = new DataBase();

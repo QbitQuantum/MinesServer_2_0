@@ -53,7 +53,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public bool online => connection != null;
         [NotMapped] public override int cid => clan?.id ?? 0;
         [NotMapped] public override int tail => HasActiveProgram ? 1 : 0;
-        [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
+        [NotMapped] public bool HasActiveProgram => programsData.Running;
 
         public CrystalCBStorage CrystalCB = new();
         public string name { get; set; } = string.Empty;
@@ -637,16 +637,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void ProgrammatorUpdate()
         {
-            if (programsData.ProgRunning)
+            if (programsData.Running)
                 programsData.Step();
         }
 
         public void UpdateUIProgramm()
         {
             var p = programsData.selected;
-            if (p != null && !programsData.ProgRunning)
+            if (p != null && !programsData.Running)
                 this.OpenProg(p);
-            if (programsData.ProgRunning)
+            if (programsData.Running)
                 RunProgramm();
             this.ProgStatus();
         }

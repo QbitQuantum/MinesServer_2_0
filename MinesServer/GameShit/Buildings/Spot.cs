@@ -163,7 +163,7 @@ namespace MinesServer.GameShit.Buildings
                 currentIndex = idx >= 0 ? idx + 1 : 0;
             }
 
-            var isRunning = entity?.programsData.ProgRunning == true;
+            var isRunning = entity?.programsData.Running == true;
 
             var rich = new List<RichListEntry>
             {

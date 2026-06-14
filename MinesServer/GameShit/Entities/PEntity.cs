@@ -39,11 +39,11 @@ namespace MinesServer.GameShit.Entities
 
         public bool HadleProgramm()
         {
-            if (programsData != null && _pdata.ProgRunning)
+            if (programsData != null && _pdata.Running)
             {
                 _pdata.Step();
             }
-            return _pdata.ProgRunning;
+            return _pdata.Running;
         }
 
         public virtual void BotsRender()
