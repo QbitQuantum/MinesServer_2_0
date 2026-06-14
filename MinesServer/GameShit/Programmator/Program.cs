@@ -106,8 +106,7 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.WritableStateMore:
                         functions[currentFunc].AddAction(new PAction(atype, name, number));
                         break;
-                    // None или остальные команды
-                    case ActionType.None:
+                    // Остальные команды
                     default:
                         if (atype != ActionType.None)
                         {
