@@ -39,10 +39,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private DateTime lBotsUpdate = ServerTime.Now;
         private DateTime lastSync = ServerTime.Now;
-
-        public DateTime lastc190hit = ServerTime.Now;
-        public DateTime Delay = ServerTime.Now;
-        public DateTime afkstarttime = ServerTime.Now;
+        private DateTime lastc190hit = ServerTime.Now;
+        private DateTime lastDelay = ServerTime.Now;
+        private DateTime laststarttime = ServerTime.Now;
 
         private readonly List<(int X, int Y)> alreadyvisible = [];
 
@@ -238,7 +237,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void HandleOffline(DateTime now)
         {
-            if (now - afkstarttime <= TimeSpan.FromMinutes(AfkTimeoutMinutes))
+            if (now - laststarttime <= TimeSpan.FromMinutes(AfkTimeoutMinutes))
                 return;
 
             DataBase.activeplayers.Remove(this);
@@ -281,7 +280,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             db.players.Update(this);
             db.SaveChanges();
 
-            afkstarttime = ServerTime.Now;
+            laststarttime = ServerTime.Now;
             connection = null;
             alreadyvisible.Clear();
         }
@@ -496,11 +495,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (HasActiveProgram)
                 return;
 
-            if (Delay >= ServerTime.Now)
+            if (lastDelay >= ServerTime.Now)
                 return;
 
             a();
-            Delay = ServerTime.Now + TimeSpan.FromMilliseconds(delay);
+            lastDelay = ServerTime.Now + TimeSpan.FromMilliseconds(delay);
         }
 
         public override void Bz()
