@@ -23,7 +23,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Player : PEntity
     {
-        public Player() => Delay = DateTime.UtcNow;
+        public Player() => Delay = ServerTime.Now;
 
         private const int BaseMoveDelay = 10000;
         private const int SyncIntervalSeconds = 10;
@@ -34,16 +34,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private (int X, int Y)? lastchunk;
         private float cb;
 
-        private DateTime lBotsUpdate = DateTime.UtcNow;
-        private DateTime lastSync = DateTime.UtcNow;
-        
-        private readonly List<(int X, int Y)> alreadyvisible = [];
-
-        public int c190stacks = 1;
+        private DateTime lBotsUpdate = ServerTime.Now;
+        private DateTime lastSync = ServerTime.Now;
 
         public DateTime lastc190hit = ServerTime.Now;
         public DateTime Delay = ServerTime.Now;
         public DateTime afkstarttime = ServerTime.Now;
+
+        private readonly List<(int X, int Y)> alreadyvisible = [];
+
+        public int c190stacks = 1;
 
         [NotMapped] public Session? connection { get; set; }
         [NotMapped] public Chat? currentchat { get; set; }
@@ -184,7 +184,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Update()
         {
-            var now = DateTime.UtcNow;
+            var now = ServerTime.Now;
 
             if (HadleProgramm())
             {
@@ -271,7 +271,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             db.players.Update(this);
             db.SaveChanges();
 
-            afkstarttime = DateTime.UtcNow;
+            afkstarttime = ServerTime.Now;
             connection = null;
             alreadyvisible.Clear();
         }
@@ -486,11 +486,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (HasActiveProgram)
                 return;
 
-            if (Delay >= DateTime.UtcNow)
+            if (Delay >= ServerTime.Now)
                 return;
 
             a();
-            Delay = DateTime.UtcNow + TimeSpan.FromMilliseconds(delay);
+            Delay = ServerTime.Now + TimeSpan.FromMilliseconds(delay);
         }
 
         public override void Bz()
