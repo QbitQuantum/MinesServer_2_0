@@ -23,7 +23,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Player : PEntity
     {
-        public Player() => Delay = ServerTime.Now;
+        public Player() 
+        {
+        
+        }
 
         private const int BaseMoveDelay = 10000;
         private const int SyncIntervalSeconds = 10;
