@@ -45,7 +45,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private readonly List<(int X, int Y)> alreadyvisible = [];
 
-        public int c190stacks = 1;
+        private int c190stacks = 1;
 
         [NotMapped] public Session? connection { get; set; }
         [NotMapped] public Chat? currentchat { get; set; }
