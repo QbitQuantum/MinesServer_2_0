@@ -15,22 +15,6 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class World
     {
-        public string name { get; private set; }
-        public WorldLayer<byte> road;
-        public WorldLayer<byte> cells;
-        public WorldLayer<float> durability;
-        public static World W;
-        private readonly Chunk[] chunks;
-        
-        // ширина мира в клетках
-        public const int CellsWidth = Chunk.ChunksW * Chunk.ChunkWidth;
-        // высота мира в клетках
-        public const int CellsHeight = Chunk.ChunksH * Chunk.ChunkHeight;
-        // всего клеток в мире
-        public const int TotalVolume = CellsWidth * CellsHeight;
-
-        public Gen gen;
-        private Dictionary<(int, int), CancellationTokenSource?> shit = new();
         public World(string name)
         {
 
@@ -81,6 +65,37 @@ namespace MinesServer.GameShit.WorldSystem
             MServer.started = true;
         }
 
+        public static World W;
+
+        public string name { get; private set; }
+        public WorldLayer<byte> road;
+        public WorldLayer<byte> cells;
+        public WorldLayer<float> durability;
+        
+        private readonly Chunk[] chunks;
+        
+        // ширина мира в клетках
+        public const int CellsWidth = Chunk.ChunksW * Chunk.ChunkWidth;
+        // высота мира в клетках
+        public const int CellsHeight = Chunk.ChunksH * Chunk.ChunkHeight;
+        // всего клеток в мире
+        public const int TotalVolume = CellsWidth * CellsHeight;
+
+        public Gen gen;
+
+        private Dictionary<(int, int), CancellationTokenSource?> shit = [];
+        private static readonly List<(DateTime TriggerTime, Action Action)> _delayedActions = [];
+
+        public int[] cryscostmod = { 10, 10, 15, 10, 15, 15 };
+        public int[] cryscostbase = { 8, 16, 24, 26, 24, 40 };
+
+        public long[] summary = new long[6];
+
+        private static DateTime lastpackupd = ServerTime.Now;
+        private static DateTime lastpackeffect = ServerTime.Now;
+        private static DateTime lazyupd = ServerTime.Now;
+        private static DateTime lastcryupdate = DateTime.MinValue;
+
         /// <summary>
         /// Инициализация соседей для всех чанков
         /// </summary>
@@ -109,8 +124,6 @@ namespace MinesServer.GameShit.WorldSystem
         {
             return new WorldInfoPacket(W.name, CellsWidth, CellsHeight, 1, "DubugVersion", "http://localhost", "Update");
         }
-
-        private static readonly List<(DateTime TriggerTime, Action Action)> _delayedActions = new();
 
         public static void ScheduleAction(TimeSpan delay, Action action)
         {
@@ -467,9 +480,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return (ret,anygun);
         }
-        private static DateTime lastpackupd = ServerTime.Now;
-        private static DateTime lastpackeffect = ServerTime.Now;
-        private static DateTime lazyupd = ServerTime.Now;
+        
         private static void UpdatePacks(TimeSpan interval, ref DateTime lastUpdate, bool shouldDamage)
         {
             if (ServerTime.Now - lastUpdate < interval)
@@ -587,7 +598,6 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
-        public static DateTime lastcryupdate = DateTime.MinValue;
         public static int GetCrysCost(int i)
         {
             return W.cryscostbase[i] + W.cryscostmod[i];
@@ -599,8 +609,6 @@ namespace MinesServer.GameShit.WorldSystem
         {
             W.summary[(int)type] += dob;
         }
-        public int[] cryscostmod = { 10, 10, 15, 10, 15, 15 };
-        public int[] cryscostbase = { 8, 16, 24, 26, 24, 40 };
 
         #region TODO:Заменить public long[] summary = new long[6];
         public class CrystalSummary
@@ -624,8 +632,6 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
         #endregion
-
-        public long[] summary = new long[6];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Chunk GetChunk(int x, int y)
