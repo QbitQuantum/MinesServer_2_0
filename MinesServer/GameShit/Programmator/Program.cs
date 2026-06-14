@@ -27,32 +27,39 @@ namespace MinesServer.GameShit.Programmator
                 return _programm;
             }
         }
+
+        private static (byte[] DecompressedData, int NumBit, string[] ArrayStrings) Decode(string data) 
+        {
+            byte[] DecompressedData = SevenZipHelper.Decompress(Convert.FromBase64String(data));
+            int NumBit = BitConverter.ToInt32(DecompressedData, 0);
+            string[] ArrayStrings = Encoding.UTF8.GetString(DecompressedData, NumBit + 4, DecompressedData.Length - NumBit - 4).Split(':');
+            return (DecompressedData, NumBit, ArrayStrings);
+        }
+
         private Dictionary<string,PFunction> parseNormal()
         {
             Dictionary<string, PFunction> functions = [];
             functions[""] = new PFunction();
             string currentFunc = "";
-            byte[] array = SevenZipHelper.Decompress(Convert.FromBase64String(data));
-            int num = BitConverter.ToInt32(array, 0);
-            var array2 = Encoding.UTF8.GetString(array, num + 4, array.Length - num - 4).Split(':');
+            var (DecompressedData, NumBit, ArrayStrings) = Decode(data);
             int index = 0;
-            for (int i = 0; i < num; i++)
+            for (int i = 0; i < NumBit; i++)
             {
-                var atype = GetActionType(Convert.ToInt16(array[i + 4]));
+                var atype = GetActionType(Convert.ToInt16(DecompressedData[i + 4]));
 
                 var name = "0";
                 var number = 0;
-                if (array2.Length > i)
+                if (ArrayStrings.Length > i)
                 {
-                    if (array2[i].Contains('@'))
+                    if (ArrayStrings[i].Contains('@'))
                     {
-                        var a3 = array2[i].Split('@');
+                        var a3 = ArrayStrings[i].Split('@');
                         name = a3[0];
                         if (int.TryParse(a3[1], out var n))
                             number = n;
                     }
                     else
-                        name = array2[i];
+                        name = ArrayStrings[i];
                 }
 
                 // Добавляем команду в текущую функцию
@@ -218,7 +225,7 @@ namespace MinesServer.GameShit.Programmator
                     default:
                         if (atype != ActionType.None)
                         {
-                            Console.WriteLine($"Unknown action ID: {Convert.ToInt16(array[i + 4])}");
+                            Console.WriteLine($"Unknown action ID: {Convert.ToInt16(DecompressedData[i + 4])}");
                             functions[currentFunc].AddAction(new PAction(atype));
                         }
                         break;
