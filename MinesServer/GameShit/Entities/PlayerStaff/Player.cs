@@ -50,14 +50,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public Window? win { get; set; }
         [NotMapped] public bool online => connection != null;
         [NotMapped] public override int cid => clan?.id ?? 0;
+        [NotMapped] public override int tail => HasActiveProgram ? 1 : 0;
         [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
-        [NotMapped] public int tail => HasActiveProgram ? 1 : 0;
 
         public CrystalCBStorage CrystalCB = new();
         public string name { get; set; } = string.Empty;
         public string hash { get; set; } = string.Empty;
         public string passwd { get; set; } = string.Empty;
-        public int skin { get; set; }
         public long money { get; set; }
         public long creds { get; set; }
         public long opp { get; set; }
@@ -187,6 +186,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var now = DateTime.UtcNow;
 
+            if (HadleProgramm())
+            {
+                UpdateBots(now);
+                return;
+            }
+            
             SyncIfNeeded(now);
             UpdateC190Stacks(now);
 
@@ -657,7 +662,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         #region Rendering
 
-        public void BotsRender()
+        public override void BotsRender()
         {
             if (connection == null) return;
 

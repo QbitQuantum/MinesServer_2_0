@@ -14,7 +14,6 @@ namespace MinesServer.Server
         private DateTime _lastChunksUpdate = DateTime.UtcNow;
         private DateTime _lastWorldUpdate = DateTime.UtcNow;
         private DateTime _lastPlayersUpdate = DateTime.UtcNow;
-        private DateTime _lastProgPlayerUpdate = DateTime.UtcNow;
         private DateTime _lastProgBotSpotUpdate = DateTime.UtcNow;
         private DateTime _lastOrdersUpdate = DateTime.UtcNow;
         private DateTime _lastActionsUpdate = DateTime.UtcNow;
@@ -55,39 +54,20 @@ namespace MinesServer.Server
                     _lastWorldUpdate = now;
                 }
 
-                // === Обновление игроков — 10 раз в секунду ===
                 if ((now - _lastPlayersUpdate).TotalMilliseconds >= 100)
                 {
                     foreach (var player in DataBase.activeplayers)
                     {
-                        player?.Update();
+                        player.Update();
                     }
                     _lastPlayersUpdate = now;
                 }
 
-                // === Программаторы — 10 раз в секунду ===
-                if ((now - _lastProgPlayerUpdate).TotalMilliseconds >= 100)
-                {
-                    var players = DataBase.activeplayers;
-                    for (int i = 0; i < players.Count; i++)
-                    {
-                        if (players[i]?.programsData.ProgRunning == true)
-                        {
-                            players[i].ProgrammatorUpdate();
-                        }
-                    }
-                    _lastProgPlayerUpdate = now;
-                }
-
                 if ((now - _lastProgBotSpotUpdate).TotalMilliseconds >= 100)
                 {
-                    var botspot = DataBase.botspotplayer;
-                    for (int i = 0; i < botspot.Count; i++)
+                    foreach (var botspot in DataBase.botspotplayer)
                     {
-                        if (botspot[i]?.programsData.ProgRunning == true)
-                        {
-                            botspot[i].Update();
-                        }
+                        botspot.Update();
                     }
                     _lastProgBotSpotUpdate = now;
                 }

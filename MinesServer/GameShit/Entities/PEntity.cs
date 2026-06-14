@@ -31,8 +31,26 @@ namespace MinesServer.GameShit.Entities
         public virtual int MaxHealth { get; set; }
         public virtual int pause { get; set; }
         public virtual double ServerPause { get; }
+
         public virtual int cid { get; set; }
-        public int dir { get; set; }
+        public virtual int dir { get; set; }
+        public virtual int tail { get; set; }
+        public virtual int skin { get; set; }
+
+        public bool HadleProgramm()
+        {
+            if (programsData != null && _pdata.ProgRunning)
+            {
+                _pdata.Step();
+            }
+            return _pdata.ProgRunning;
+        }
+
+        public virtual void BotsRender()
+        {
+            World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
+        }
+
         public void AddHp(int Hp)
         {
             Health = Math.Min(Health + Hp, MaxHealth);

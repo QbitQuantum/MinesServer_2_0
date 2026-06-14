@@ -35,8 +35,8 @@ public class BotSpot : PEntity
         db.botspots.Add(this);
         db.SaveChanges();
     }
-    public int tail => 1;
-    public int skin => 3;
+    public override int tail => 1;
+    public override int skin => 3;
     public string name { get; set; } = string.Empty;
     public int owner_id { get; set; } = 0;
     public override int cid => owner?.cid ?? 0;
@@ -144,17 +144,9 @@ public class BotSpot : PEntity
         return true;
     }
 
-    public void SendMyMove()
-    {
-        World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
-    }
-
     public override void Update()
     {
-        if (_pdata.ProgRunning)
-        {
-            SendMyMove();
-            _pdata.Step();
-        }
+        if (HadleProgramm())
+            BotsRender();
     }
 }
