@@ -53,13 +53,12 @@ namespace MinesServer.GameShit.Programmator
                 {
                     if (ArrayStrings[i].Contains('@'))
                     {
-                        var a3 = ArrayStrings[i].Split('@');
-                        name = a3[0];
-                        if (int.TryParse(a3[1], out var n))
+                        var Label = ArrayStrings[i].Split('@');
+                        name = Label[0];
+                        if (int.TryParse(Label[1], out var n))
                             number = n;
                     }
-                    else
-                        name = ArrayStrings[i];
+                    else name = ArrayStrings[i];
                 }
 
                 // Добавляем команду в текущую функцию
