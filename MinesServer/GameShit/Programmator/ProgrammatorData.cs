@@ -39,28 +39,28 @@ namespace MinesServer.GameShit.Programmator
             aggressive = false;
             handMode = false;
 
-            foreach (var function in currentprog)
+            foreach (var function in CurrentProg)
                 function.Value.Reset();
         }
 
         public bool Running { get; set; }
-        public Dictionary<string, PFunction> currentprog { get; set; }
+        public Dictionary<string, PFunction> CurrentProg { get; set; }
         public DateTime delay;
         private string cFunction;
         public Program? selected { get; set; }
 
         private PFunction current
         {
-            get => currentprog[cFunction];
+            get => CurrentProg[cFunction];
         }
 
         public void Run(Program p)
         {
             selected = p;
-            currentprog = p.programm;
+            CurrentProg = p.programm;
 
             // Логирование функций
-            foreach (var i in currentprog)
+            foreach (var i in CurrentProg)
             {
                 Console.WriteLine($"{i.Key} - {string.Join(' ', i.Value.actions.Select(i => $"{i.type} {(i.label is not null ? $"({i.label})" : "")}"))}");
             }
@@ -106,11 +106,11 @@ namespace MinesServer.GameShit.Programmator
 
         private void Next()
         {
-            var i = currentprog.Keys.ToList().IndexOf(cFunction);
-            if (currentprog.Count > i + 1)
-                cFunction = currentprog.ElementAt(i + 1).Key;
+            var i = CurrentProg.Keys.ToList().IndexOf(cFunction);
+            if (CurrentProg.Count > i + 1)
+                cFunction = CurrentProg.ElementAt(i + 1).Key;
             else
-                cFunction = currentprog.First().Key;
+                cFunction = CurrentProg.First().Key;
         }
 
         public void IncreaseDelay(double ms) => delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
@@ -141,13 +141,13 @@ namespace MinesServer.GameShit.Programmator
                     switch (action.type)
                     {
                         case ActionType.GoTo:
-                            if (currentprog.TryGetValue(label, out var _))
+                            if (CurrentProg.TryGetValue(label, out var _))
                             {
                                 current.Reset();
                                 if (label == "")
                                 {
                                     label = startpoint.name;
-                                    currentprog[label].position = startpoint.pos;
+                                    CurrentProg[label].position = startpoint.pos;
                                 }
                                 cFunction = label;
                             }
@@ -159,37 +159,37 @@ namespace MinesServer.GameShit.Programmator
                             break;
 
                         case ActionType.RunSub:
-                            if (currentprog.TryGetValue(label, out var _))
+                            if (CurrentProg.TryGetValue(label, out var _))
                             {
-                                currentprog[label].calledfrom = cFunction;
+                                CurrentProg[label].calledfrom = cFunction;
                                 cFunction = label;
                             }
                             break;
 
                         case ActionType.RunFunction:
-                            if (currentprog.TryGetValue(label, out var _))
+                            if (CurrentProg.TryGetValue(label, out var _))
                             {
                                 if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                                    currentprog[label].startoffset = (shiftX + checkX, shiftY + checkY);
-                                currentprog[label].calledfrom = cFunction;
+                                    CurrentProg[label].startoffset = (shiftX + checkX, shiftY + checkY);
+                                CurrentProg[label].calledfrom = cFunction;
                                 cFunction = label;
                             }
                             break;
 
                         case ActionType.RunState:
-                            if (currentprog.TryGetValue(label, out var _))
+                            if (CurrentProg.TryGetValue(label, out var _))
                             {
                                 if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                                    currentprog[label].startoffset = (shiftX + checkX, shiftY + checkY);
-                                currentprog[label].state = current.state;
-                                currentprog[label].laststateaction = current.laststateaction;
-                                currentprog[label].calledfrom = cFunction;
+                                    CurrentProg[label].startoffset = (shiftX + checkX, shiftY + checkY);
+                                CurrentProg[label].state = current.state;
+                                CurrentProg[label].laststateaction = current.laststateaction;
+                                CurrentProg[label].calledfrom = cFunction;
                                 cFunction = label;
                             }
                             break;
 
                         case ActionType.RunIfTrue or ActionType.RunIfFalse:
-                            if (currentprog.TryGetValue(label, out var _))
+                            if (CurrentProg.TryGetValue(label, out var _))
                             {
                                 current.Reset();
                                 if (label == "")
@@ -198,13 +198,13 @@ namespace MinesServer.GameShit.Programmator
                                     current.position = startpoint.pos;
                                     break;
                                 }
-                                currentprog[label].calledfrom = current.calledfrom;
+                                CurrentProg[label].calledfrom = current.calledfrom;
                                 cFunction = label;
                             }
                             break;
 
                         case ActionType.RunOnRespawn:
-                            if (currentprog.TryGetValue(label, out var _))
+                            if (CurrentProg.TryGetValue(label, out var _))
                             {
                                 GotoDeath = label;
                             }
@@ -257,9 +257,9 @@ namespace MinesServer.GameShit.Programmator
                             if (current.calledfrom is not null)
                             {
                                 if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                                    currentprog[current.calledfrom].startoffset = (shiftX + checkX, shiftY + checkY);
-                                currentprog[current.calledfrom].state = current.state;
-                                currentprog[current.calledfrom].laststateaction = current.laststateaction;
+                                    CurrentProg[current.calledfrom].startoffset = (shiftX + checkX, shiftY + checkY);
+                                CurrentProg[current.calledfrom].state = current.state;
+                                CurrentProg[current.calledfrom].laststateaction = current.laststateaction;
                                 cFunction = current.calledfrom;
                             }
                             break;
