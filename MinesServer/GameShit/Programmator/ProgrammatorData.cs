@@ -718,31 +718,17 @@ namespace MinesServer.GameShit.Programmator
                         CurrentFunction = calledFromState;
                     }
                     break;
-
-                case ActionType.Last:
-                    break;
-                case ActionType.Stop:
-                    Run();
-                    ((Player)entity)?.ProgStatus();
-                    break;
-
                 case ActionType.Start:
                     int pos = CurrentProg.TryGetValue(CurrentFunction, out var startFunc) ? startFunc.position : 0;
                     startpoint = (CurrentFunction, pos);
                     break;
-                case ActionType.Restart:
-                    Run(); // Завершаем программу
-                    Run(); // Запускаем программу
-                    ((Player)entity)?.ProgStatus();
-                    break;
-
                 case ActionType.Flip:
                     flipstate = !flipstate;
                     break;
             }
         }
 
-        public void HandleBoolResult(ActionType actionType, bool Bool)
+        public void HandleBoolResult(ActionType actionType, bool state)
         {
             switch (actionType)
             {
@@ -758,14 +744,14 @@ namespace MinesServer.GameShit.Programmator
                         CurrentFunction = callFromFunc;
                         if (CurrentProg.TryGetValue(callFromFunc, out var callerFunc))
                         {
-                            callerFunc.state = Bool;
+                            callerFunc.state = state;
                             callerFunc.startoffset = (0, 0);
                         }
                     }
                     break;
 
                 case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
-                    if (Bool && CurrentProg.TryGetValue(CurrentFunction, out var MacrosFunction) && MacrosFunction.ValidPosition)
+                    if (state && CurrentProg.TryGetValue(CurrentFunction, out var MacrosFunction) && MacrosFunction.ValidPosition)
                         MacrosFunction.position--;
                     break;
             }
