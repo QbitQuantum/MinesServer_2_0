@@ -678,7 +678,7 @@ namespace MinesServer.GameShit.Programmator
                     break;
             }
 
-            IncreaseDelay(action.delay);
+            IncreaseDelay(result.Delay);
         }
 
         public void HandleNoneResult(ActionType actionType)
@@ -688,29 +688,34 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or ActionType.CheckLeft
                         or ActionType.CheckDownLeft or ActionType.CheckDownRight or ActionType.CheckUpLeft or ActionType.CheckUpRight
                         or ActionType.ShiftUp or ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or ActionType.ShiftForward:
-                    if (APFunction.startoffset != default)
-                    {
-                        APFunction.startoffset = (0, 0);
-                    }
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var shiftFunc) && shiftFunc.startoffset != (0, 0))
+                        shiftFunc.startoffset = (0, 0);
                     break;
 
                 case ActionType.Return:
-                    APFunction.Reset();
-                    if (APFunction.calledfrom is not null)
-                    {
-                        CurrentFunction = APFunction.calledfrom;
-                    }
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var retFunc))
+                        retFunc.Reset();
+                    string? calledFrom = CurrentProg.TryGetValue(CurrentFunction, out var cfFunc) ? cfFunc.calledfrom : null;
+                    if (calledFrom != null)
+                        CurrentFunction = calledFrom;
                     break;
 
                 case ActionType.ReturnState:
-                    APFunction.Reset();
-                    if (APFunction.calledfrom is not null)
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var rsFunc))
+                        rsFunc.Reset();
+                    var (stateVal, lastState, calledFromState) = CurrentProg.TryGetValue(CurrentFunction, out var stateFunc)
+                        ? (stateFunc.state, stateFunc.laststateaction, stateFunc.calledfrom) : (null, null, null);
+                    if (calledFromState != null)
                     {
-                        if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                            CurrentProg[APFunction.calledfrom].startoffset = (shiftX + checkX, shiftY + checkY);
-                        CurrentProg[APFunction.calledfrom].state = APFunction.state;
-                        CurrentProg[APFunction.calledfrom].laststateaction = APFunction.laststateaction;
-                        CurrentFunction = APFunction.calledfrom;
+                        bool hasOffset = shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0;
+                        if (hasOffset && CurrentProg.TryGetValue(calledFromState, out var offsetFunc))
+                            offsetFunc.startoffset = (shiftX + checkX, shiftY + checkY);
+                        if (CurrentProg.TryGetValue(calledFromState, out var callerFunc))
+                        {
+                            callerFunc.state = stateVal;
+                            callerFunc.laststateaction = lastState;
+                        }
+                        CurrentFunction = calledFromState;
                     }
                     break;
 
@@ -722,7 +727,8 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.Start:
-                    //startpoint = (cFunction, current.current);
+                    int pos = CurrentProg.TryGetValue(CurrentFunction, out var startFunc) ? startFunc.position : 0;
+                    startpoint = (CurrentFunction, pos);
                     break;
                 case ActionType.Restart:
                     Run(); // Завершаем программу
@@ -741,18 +747,26 @@ namespace MinesServer.GameShit.Programmator
             switch (actionType)
             {
                 case ActionType.ReturnFunction:
-                    APFunction.Reset();
-                    APFunction.startoffset = (0, 0);
-                    if (APFunction.calledfrom is not null)
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var returnFunction))
                     {
-                        CurrentFunction = APFunction.calledfrom;
+                        returnFunction.Reset();
+                        returnFunction.startoffset = (0, 0);
                     }
-                    APFunction.state = Bool;
-                    APFunction.startoffset = (0, 0);
+                    string? callFromFunc = CurrentProg.TryGetValue(CurrentFunction, out var called) ? called.calledfrom : null;
+                    if (callFromFunc != null)
+                    {
+                        CurrentFunction = callFromFunc;
+                        if (CurrentProg.TryGetValue(callFromFunc, out var callerFunc))
+                        {
+                            callerFunc.state = Bool;
+                            callerFunc.startoffset = (0, 0);
+                        }
+                    }
                     break;
 
                 case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
-                    if (Bool) APFunction.position--;
+                    if (Bool && CurrentProg.TryGetValue(CurrentFunction, out var MacrosFunction) && MacrosFunction.ValidPosition)
+                        MacrosFunction.position--;
                     break;
             }
         }
@@ -762,73 +776,105 @@ namespace MinesServer.GameShit.Programmator
             switch (actionType)
             {
                 case ActionType.GoTo:
-                    if (CurrentProg.TryGetValue(label, out var _))
+                    if (CurrentProg.ContainsKey(label))
                     {
-                        APFunction.Reset();
-                        if (label == "")
+                        if (CurrentProg.TryGetValue(CurrentFunction, out var gotoFunc))
+                            gotoFunc.Reset();
+                        if (string.IsNullOrEmpty(label))
                         {
-                            label = startpoint.name;
-                            CurrentProg[label].position = startpoint.pos;
+                            CurrentFunction = startpoint.name;
+                            if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
+                                spFunc.position = startpoint.pos;
                         }
-                        CurrentFunction = label;
+                        else
+                        {
+                            CurrentFunction = label;
+                        }
                     }
                     else
                     {
                         CurrentFunction = startpoint.name;
-                        APFunction.position = startpoint.pos;
+                        if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
+                            spFunc.position = startpoint.pos;
                     }
                     break;
 
                 case ActionType.RunSub:
-                    if (CurrentProg.TryGetValue(label, out var _))
+                    if (CurrentProg.ContainsKey(label))
                     {
-                        CurrentProg[label].calledfrom = CurrentFunction;
+                        if (CurrentProg.TryGetValue(label, out var subFunc))
+                            subFunc.calledfrom = CurrentFunction;
                         CurrentFunction = label;
                     }
                     break;
 
                 case ActionType.RunFunction:
-                    if (CurrentProg.TryGetValue(label, out var _))
+                    if (CurrentProg.ContainsKey(label))
                     {
-                        if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                            CurrentProg[label].startoffset = (shiftX + checkX, shiftY + checkY);
-                        CurrentProg[label].calledfrom = CurrentFunction;
+                        string caller = CurrentFunction;
+                        bool hasOffset = shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0;
+                        if (hasOffset)
+                        {
+                            var offset = (shiftX + checkX, shiftY + checkY);
+                            if (CurrentProg.TryGetValue(label, out var offsetFunc))
+                                offsetFunc.startoffset = offset;
+                        }
+                        if (CurrentProg.TryGetValue(label, out var runFunc))
+                            runFunc.calledfrom = caller;
                         CurrentFunction = label;
                     }
                     break;
 
                 case ActionType.RunState:
-                    if (CurrentProg.TryGetValue(label, out var _))
+                    if (CurrentProg.ContainsKey(label))
                     {
-                        if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                            CurrentProg[label].startoffset = (shiftX + checkX, shiftY + checkY);
-                        CurrentProg[label].state = APFunction.state;
-                        CurrentProg[label].laststateaction = APFunction.laststateaction;
-                        CurrentProg[label].calledfrom = CurrentFunction;
+                        string caller = CurrentFunction;
+                        var (stateVal, lastState) = CurrentProg.TryGetValue(caller, out var callerFunc)
+                            ? (callerFunc.state, callerFunc.laststateaction)
+                            : (null, null);
+                        bool hasOffset = shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0;
+                        if (hasOffset)
+                        {
+                            var offset = (shiftX + checkX, shiftY + checkY);
+                            if (CurrentProg.TryGetValue(label, out var offsetFunc))
+                                offsetFunc.startoffset = offset;
+                        }
+                        if (CurrentProg.TryGetValue(label, out var stateFunc))
+                        {
+                            stateFunc.state = stateVal;
+                            stateFunc.laststateaction = lastState;
+                            stateFunc.calledfrom = caller;
+                        }
                         CurrentFunction = label;
                     }
                     break;
 
-                case ActionType.RunIfTrue or ActionType.RunIfFalse:
-                    if (CurrentProg.TryGetValue(label, out var _))
+                case ActionType.RunIfTrue:
+                case ActionType.RunIfFalse:
+                    if (CurrentProg.ContainsKey(label))
                     {
-                        APFunction.Reset();
-                        if (label == "")
+                        if (CurrentProg.TryGetValue(CurrentFunction, out var resetFunc))
+                            resetFunc.Reset();
+                        if (string.IsNullOrEmpty(label))
                         {
                             CurrentFunction = startpoint.name;
-                            APFunction.position = startpoint.pos;
-                            break;
+                            if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
+                                spFunc.position = startpoint.pos;
                         }
-                        CurrentProg[label].calledfrom = APFunction.calledfrom;
-                        CurrentFunction = label;
+                        else
+                        {
+                            string? calledFrom = CurrentProg.TryGetValue(CurrentFunction, out var cfFunc)
+                                ? cfFunc.calledfrom : null;
+                            if (CurrentProg.TryGetValue(label, out var condFunc))
+                                condFunc.calledfrom = calledFrom;
+                            CurrentFunction = label;
+                        }
                     }
                     break;
 
                 case ActionType.RunOnRespawn:
-                    if (CurrentProg.TryGetValue(label, out var _))
-                    {
+                    if (CurrentProg.ContainsKey(label))
                         GotoDeath = label;
-                    }
                     break;
             }
         }
