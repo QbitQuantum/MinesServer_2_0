@@ -142,8 +142,13 @@ namespace MinesServer.GameShit.Programmator
             }
         }
 
-        public object? Execute(PEntity p, PFunction father)
+        public (ExecResult Result, string Label, bool Bool, long Delay) Execute(PEntity p, PFunction father)
         {
+            ExecResult Result = ExecResult.None;
+            string Label = "";
+            bool Bool = false;
+            long Delay = 0;
+
             switch (type)
             {
                 // === Движение ===
@@ -275,7 +280,8 @@ namespace MinesServer.GameShit.Programmator
                                 p.Move(p.x, p.y, DirectionTypeExt.ToDirection(dir));
                                 delay = p.ServerPause;
                             }
-                            return true;
+                            Bool = true;
+                            break;
                         }
                     }
                     break;  // кристаллов нет
@@ -286,7 +292,8 @@ namespace MinesServer.GameShit.Programmator
                         if (p.Heal())
                         {
                             delay = 200;
-                            return true;
+                            Bool = true;
+                            break;
                         }
                     }
                     break;
@@ -297,7 +304,8 @@ namespace MinesServer.GameShit.Programmator
                     {
                         delay = 200;
                         p.Bz();
-                        return true;
+                        Bool = true;
+                        break;
                     }
                     break;
 
@@ -307,7 +315,8 @@ namespace MinesServer.GameShit.Programmator
                     {
                         delay = 200;
                         p.Build("G");
-                        return true;
+                        Bool = true;
+                        break;
                     }
                     break;
 
@@ -518,48 +527,45 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 // === Управление потоком ===
+                case ActionType.GoTo:
                 case ActionType.RunSub:
                 case ActionType.RunState:
                 case ActionType.RunFunction:
                 case ActionType.RunOnRespawn:
-                    return label;
+                    Label = label; 
+                    break;
 
                 case ActionType.ReturnFunction:
-                case ActionType.ReturnState:
-                    return father.state;
-
-                case ActionType.Return:
-                    return "";
+                    Bool = father.state ?? false; 
+                    break;
 
                 case ActionType.RunIfTrue:
                     if (father.state.HasValue && !father.state.Value)
-                        return null;
+                        break;
                     father.state = null;
-                    return label;
+                    Label = label; 
+                    break;
 
                 case ActionType.RunIfFalse:
                     if (father.state.HasValue && father.state.Value)
-                        return null;
+                        break;
                     father.state = null;
-                    return label;
+                    Label = label;
+                    break;
 
                 case ActionType.Or:
                 case ActionType.And:
                     father.laststateaction = type;
                     break;
 
-                case ActionType.GoTo:
-                    return label;
-
                 // === Работа с памятью ===
                 case ActionType.WritableState:
                 case ActionType.WritableStateLower:
                 case ActionType.WritableStateMore:
-                    var res = CallWSAction(p);
-                    if (res.HasValue)
+                    // Сброс состояние. Пофиксить
+                    if (label == "del")
                     {
-                        Check(p, (x, y) => res.Value, father);
-                        return res.Value;
+                        //Check(p, (x, y) => res.Value, father);
                     }
                     break;
 
@@ -621,8 +627,7 @@ namespace MinesServer.GameShit.Programmator
                 default:
                     break;
             }
-
-            return null;
+            return (Result, Label, Bool, Delay);
         }
     }
 }
