@@ -1,6 +1,9 @@
-﻿using MinesServer.GameShit.Entities;
+﻿using System;
+using System.Reflection.Emit;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
+using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 
 namespace MinesServer.GameShit.Programmator
@@ -23,6 +26,14 @@ namespace MinesServer.GameShit.Programmator
         public bool autoDig = false; 
         public bool aggressive = false;  
         public bool handMode = false;
+
+        private static readonly Dictionary<int, (int dx, int dy)> dirz = new()
+        {
+            { 0, (0, 1) },   // DOWN
+            { 1, (-1, 0) },  // LEFT
+            { 2, (0, -1) },  // UP
+            { 3, (1, 0) }    // RIGHT
+        };
 
         private void Drop()
         {
@@ -130,13 +141,529 @@ namespace MinesServer.GameShit.Programmator
                 ExecuteCurrentAction();
         }
 
+        private void Check(PEntity p, Func<int, int, bool> function, PFunction father)
+        {
+            var (sx, sy) = CurrentProg.TryGetValue(cFunction, out var f) &&  f.startoffset != (0, 0) ? 
+                f.startoffset : (shiftX + checkX, shiftY + checkY);
+
+            var flip = flipstate ? -1 : 1;
+
+            int x = p.x + flip * sx;
+            int y = p.y + flip * sy;
+
+            checkX = 0;
+            checkY = 0;
+            shiftX = 0;
+            shiftY = 0;
+
+            var result = function(x, y);
+
+            if (father.state == null)
+                father.state = result;
+            else if (father.laststateaction == ActionType.Or)
+                father.state = (bool)father.state || result;
+            else if (father.laststateaction == ActionType.And)
+                father.state = (bool)father.state && result;
+            else
+                father.state = result;
+        }
+
+        public (ExecResult Result, string Label, bool Bool, long Delay) 
+            Execute(PEntity p, PFunction father, PAction action)
+        {
+            ExecResult Result = ExecResult.None;
+            string Label = "";
+            bool Bool = false;
+            long Delay = 0;
+
+            switch (action.type)
+            {
+                // === Движение ===
+                case ActionType.MoveDown:
+                    Delay = p.ServerPause;
+                    if (p.Move(p.x, p.y + 1))
+                        Delay += 200;
+                    break;
+
+                case ActionType.MoveUp:
+                    Delay = p.ServerPause;
+                    if (p.Move(p.x, p.y - 1))
+                        Delay += 200;
+                    break;
+
+                case ActionType.MoveRight:
+                    Delay = p.ServerPause;
+                    if (p.Move(p.x + 1, p.y))
+                        Delay += 200;
+                    break;
+
+                case ActionType.MoveLeft:
+                    Delay = p.ServerPause;
+                    if (p.Move(p.x - 1, p.y))
+                        Delay += 200;
+                    break;
+
+                case ActionType.MoveForward:
+                    Delay = p.ServerPause;
+                    var forward = p.GetDirCord();
+                    if (p.Move(forward.x, forward.y))
+                        Delay += 200;
+                    break;
+
+                // === Вращение ===
+                case ActionType.RotateDown:
+                    Delay = p.ServerPause;
+                    p.Move(p.x, p.y, DirectionType.Down);
+                    break;
+
+                case ActionType.RotateUp:
+                    Delay = p.ServerPause;
+                    p.Move(p.x, p.y, DirectionType.Up);
+                    break;
+
+                case ActionType.RotateLeft:
+                    Delay = p.ServerPause;
+                    p.Move(p.x, p.y, DirectionType.Left);
+                    break;
+
+                case ActionType.RotateRight:
+                    Delay = p.ServerPause;
+                    p.Move(p.x, p.y, DirectionType.Right);
+                    break;
+
+                case ActionType.RotateLeftRelative:
+                    Delay = p.ServerPause;
+                    p.Move(p.x, p.y, DirectionTypeExt.ToDirection((p.dir + 3) % 4));
+                    break;
+
+                case ActionType.RotateRightRelative:
+                    Delay = p.ServerPause;
+                    p.Move(p.x, p.y, DirectionTypeExt.ToDirection((p.dir + 1) % 4));
+                    break;
+
+                case ActionType.RotateRandom:
+                    Delay = p.ServerPause;
+                    var rand = new Random(Guid.NewGuid().GetHashCode());
+                    p.Move(p.x, p.y, DirectionTypeExt.ToDirection(rand.Next(4)));
+                    break;
+
+                // === Действия ===
+                case ActionType.Dig:
+                    Delay = 100;
+                    p.Bz();
+                    break;
+
+                case ActionType.BuildBlock:
+                    Delay = 100;
+                    p.Build("G");
+                    break;
+
+                case ActionType.BuildPillar:
+                    Delay = 100;
+                    p.Build("O");
+                    break;
+
+                case ActionType.BuildRoad:
+                    Delay = 100;
+                    p.Build("R");
+                    break;
+
+                case ActionType.BuildMilitaryBlock:
+                    Delay = 100;
+                    p.Build("V");
+                    break;
+
+                case ActionType.Geology:
+                    Delay = 100;
+                    p.Geo();
+                    break;
+
+                case ActionType.Heal:
+                    if (p.Heal())
+                        Delay = 200;
+                    break;
+
+                case ActionType.Beep:
+                    p.Beep();
+                    Delay = 100;
+                    break;
+
+                // === Макросы ===
+                case ActionType.MacrosMine:
+                    var directions = new[] { p.dir, (p.dir + 1) % 4, (p.dir + 3) % 4 };
+                    // Ищем первый кристалл за один проход
+                    foreach (var dir in directions)
+                    {
+                        var (dx, dy) = dirz[dir];
+                        if (World.isCry(p.x + dx, p.y + dy))
+                        {
+                            if (p.dir == dir)
+                            {
+                                p.Bz();
+                                Delay = 200;
+                            }
+                            else
+                            {
+                                p.Move(p.x, p.y, DirectionTypeExt.ToDirection(dir));
+                                Delay = p.ServerPause;
+                            }
+                            Bool = true;
+                            break;
+                        }
+                    }
+                    break;  // кристаллов нет
+
+                case ActionType.MacrosHeal:
+                    if (p.crys?[MinesServer.Enums.CrystalType.Red] > 0 && p.Health < p.MaxHealth)
+                    {
+                        if (p.Heal())
+                        {
+                            Delay = 200;
+                            Bool = true;
+                            break;
+                        }
+                    }
+                    break;
+
+                case ActionType.MacrosDig:
+                    var digPos = p.GetDirCord();
+                    if (World.GetProp(digPos.x, digPos.y).is_diggable)
+                    {
+                        Delay = 200;
+                        p.Bz();
+                        Bool = true;
+                        break;
+                    }
+                    break;
+
+                case ActionType.MacrosBuild:
+                    var buildPos = p.GetDirCord();
+                    if (World.GetProp(buildPos.x, buildPos.y).isEmpty)
+                    {
+                        Delay = 200;
+                        p.Build("G");
+                        Bool = true;
+                        break;
+                    }
+                    break;
+
+                // === Сдвиги ===
+                case ActionType.ShiftUp:
+                    shiftY--;
+                    break;
+
+                case ActionType.ShiftDown:
+                    shiftY++;
+                    break;
+
+                case ActionType.ShiftRight:
+                    shiftX++;
+                    break;
+
+                case ActionType.ShiftLeft:
+                    shiftX--;
+                    break;
+
+                case ActionType.ShiftForward:
+                    shiftX += p.dir switch
+                    {
+                        1 => -1,
+                        3 => 1,
+                        _ => 0
+                    };
+                    shiftY += p.dir switch
+                    {
+                        0 => 1,
+                        2 => -1,
+                        _ => 0
+                    };
+                    break;
+
+                // === Проверки направления ===
+                case ActionType.CheckForward:
+                    checkX = p.dir switch
+                    {
+                        1 => -1,
+                        3 => 1,
+                        _ => 0
+                    };
+                    checkY = p.dir switch
+                    {
+                        0 => 1,
+                        2 => -1,
+                        _ => 0
+                    };
+                    break;
+
+                case ActionType.CheckRightRelative:
+                    checkX = p.dir switch
+                    {
+                        0 => 1,
+                        2 => -1,
+                        _ => 0
+                    };
+                    checkY = p.dir switch
+                    {
+                        1 => -1,
+                        3 => 1,
+                        _ => 0
+                    };
+                    break;
+
+                case ActionType.CheckLeftRelative:
+                    checkX = p.dir switch
+                    {
+                        0 => -1,
+                        2 => 1,
+                        _ => 0
+                    };
+                    checkY = p.dir switch
+                    {
+                        1 => 1,
+                        3 => -1,
+                        _ => 0
+                    };
+                    break;
+
+                case ActionType.CheckUp:
+                    checkX = 0;
+                    checkY = -1;
+                    break;
+
+                case ActionType.CheckDown:
+                    checkX = 0;
+                    checkY = 1;
+                    break;
+
+                case ActionType.CheckRight:
+                    checkX = 1;
+                    checkY = 0;
+                    break;
+
+                case ActionType.CheckLeft:
+                    checkX = -1;
+                    checkY = 0;
+                    break;
+
+                case ActionType.CheckUpLeft:
+                    checkX = -1;
+                    checkY = -1;
+                    break;
+
+                case ActionType.CheckUpRight:
+                    checkX = 1;
+                    checkY = -1;
+                    break;
+
+                case ActionType.CheckDownLeft:
+                    checkX = -1;
+                    checkY = 1;
+                    break;
+
+                case ActionType.CheckDownRight:
+                    checkX = 1;
+                    checkY = 1;
+                    break;
+
+                // === Проверки состояния (теперь передаем father) ===
+                case ActionType.IsHpLower100:
+                    Check(p, (x, y) => p.Health < p.MaxHealth, father);
+                    break;
+
+                case ActionType.IsHpLower50:
+                    Check(p, (x, y) => p.Health < p.MaxHealth / 2, father);
+                    break;
+
+                case ActionType.IsEmpty:
+                    Check(p, (x, y) => World.GetProp(x, y).isEmpty, father);
+                    break;
+
+                case ActionType.IsNotEmpty:
+                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty, father);
+                    break;
+
+                case ActionType.IsAcid:
+                    Check(p, (x, y) => ((CellType)World.GetCell(x, y)).IsAcid(), father);
+                    break;
+                case ActionType.IsRedRock:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedRock, father);
+                    break;
+
+                case ActionType.IsBlackRock:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.BlackRock, father);
+                    break;
+
+                case ActionType.IsBoulder:
+                    Check(p, (x, y) => World.GetProp(x, y).isBoulder, father);
+                    break;
+
+                case ActionType.IsSand:
+                    Check(p, (x, y) => World.GetProp(x, y).isSand, father);
+                    break;
+
+                case ActionType.IsUnbreakable:
+                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty && !World.GetProp(x, y).is_diggable, father);
+                    break;
+
+                case ActionType.IsBox:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Box, father);
+                    break;
+
+                case ActionType.IsBreakableRock:
+                    Check(p, (x, y) => World.GetProp(x, y).is_diggable, father);
+                    break;
+
+                case ActionType.IsCrystal:
+                    Check(p, (x, y) => World.isCry(x, y), father);
+                    break;
+
+                case ActionType.IsGreenBlock:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.GreenBlock, father);
+                    break;
+
+                case ActionType.IsYellowBlock:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.YellowBlock, father);
+                    break;
+
+                case ActionType.IsRedBlock:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedBlock, father);
+                    break;
+
+                case ActionType.IsFalling:
+                    Check(p, (x, y) => World.GetProp(x, y).isSand || World.GetProp(x, y).isBoulder, father);
+                    break;
+
+                case ActionType.IsLivingCrystal:
+                    Check(p, (x, y) => World.isAlive(x, y), father);
+                    break;
+
+                case ActionType.IsPillar:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Support, father);
+                    break;
+
+                case ActionType.IsQuadBlock:
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.QuadBlock, father);
+                    break;
+
+                case ActionType.IsRoad:
+                    Check(p, (x, y) => World.isRoad(x, y), father);
+                    break;
+
+                case ActionType.CheckGun:
+                    Check(p, (x, y) => p.HasGun(), father);
+                    break;
+
+                // === Управление потоком ===
+                case ActionType.GoTo:
+                case ActionType.RunSub:
+                case ActionType.RunState:
+                case ActionType.RunFunction:
+                case ActionType.RunOnRespawn:
+                    Label = action.label;
+                    break;
+
+                case ActionType.ReturnFunction:
+                    Bool = father.state ?? false;
+                    break;
+
+                case ActionType.RunIfTrue:
+                    if (father.state.HasValue && !father.state.Value)
+                        break;
+                    father.state = null;
+                    Label = action.label;
+                    break;
+
+                case ActionType.RunIfFalse:
+                    if (father.state.HasValue && father.state.Value)
+                        break;
+                    father.state = null;
+                    Label = action.label;
+                    break;
+
+                case ActionType.Or:
+                case ActionType.And:
+                    father.laststateaction = action.type;
+                    break;
+
+                // === Работа с памятью ===
+                case ActionType.WritableState:
+                case ActionType.WritableStateLower:
+                case ActionType.WritableStateMore:
+                    // Сброс состояние. Пофиксить
+                    if (action.label == "del")
+                    {
+                        //Check(p, (x, y) => res.Value, father);
+                    }
+                    break;
+
+                // === Режимы ===
+                case ActionType.EnableAutoDig:
+                    autoDig = true;
+                    break;
+
+                case ActionType.DisableAutoDig:
+                    autoDig = false;
+                    break;
+
+                case ActionType.EnableAgression:
+                    aggressive = true;
+                    break;
+
+                case ActionType.DisableAgression:
+                    aggressive = false;
+                    break;
+
+                case ActionType.EnableHandMode:
+                    handMode = true;
+                    break;
+
+                case ActionType.DisableHandMode:
+                    handMode = false;
+                    break;
+
+                // === Специальные команды ===
+                case ActionType.BOOM:
+                case ActionType.DISCHARGE:
+                case ActionType.PROTON:
+                case ActionType.VB:
+                case ActionType.Geopack:
+                case ActionType.ZZ:
+                case ActionType.C190:
+                case ActionType.Poly:
+                case ActionType.Up:
+                case ActionType.Craft:
+                case ActionType.Nano:
+                case ActionType.Rembot:
+                    p.SpecialAction(action.type);
+                    Delay = 200;
+                    break;
+
+                case ActionType.InvDirUp:
+                case ActionType.InvDirLeft:
+                case ActionType.InvDirDown:
+                case ActionType.InvDirRight:
+                    p.InverseDirection(action.type);
+                    break;
+
+                // === Пропуск строки ===
+                case ActionType.NextRow:
+                // === Создание функции ===
+                case ActionType.CreateFunction:
+                // === Пустые действия ===
+                case ActionType.None:
+                default:
+                    break;
+            }
+            return (Result, Label, Bool, Delay);
+        }
+
         // Выносим логику выполнения одного действия в отдельный метод
         private void ExecuteCurrentAction()
         {
             ref PAction action = ref current.GetCurrentAction();
             current.MoveNext();
 
-            (ExecResult Result, string Label, bool Bool, long Delay) result = action.Execute(entity, current);
+            (ExecResult Result, string Label, bool Bool, long Delay) result = Execute(entity, current, action);
 
             switch (result.Result)
             {
