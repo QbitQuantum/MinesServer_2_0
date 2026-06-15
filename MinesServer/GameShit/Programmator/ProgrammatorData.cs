@@ -651,12 +651,6 @@ namespace MinesServer.GameShit.Programmator
                     p.InverseDirection(action.type);
                     break;
 
-                // === Пропуск строки ===
-                case ActionType.NextRow:
-                // === Создание функции ===
-                case ActionType.CreateFunction:
-                // === Пустые действия ===
-                case ActionType.None:
                 default:
                     break;
             }
