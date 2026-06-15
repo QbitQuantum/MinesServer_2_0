@@ -590,7 +590,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.Or:
                 case ActionType.And:
                     if (CurrentProg.TryGetValue(CurrentFunction, out var Action))
-                        Action.laststateaction = ActionType.Or;
+                        Action.laststateaction = action.type;
                     break;
 
                 // === Работа с памятью ===
