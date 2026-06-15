@@ -73,7 +73,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public Settings settings { get; set; } = null!;
         public PlayerSkills skillslist { get; set; } = null!;
         public Queue<Line> console = new Queue<Line>();
-        public override double ServerPause => (World.isRoad(x, y) ? (pause * 5) * 0.80 : pause * 5) * 1.4 / 1000;
+        public override long ServerPause 
+        {
+            get
+            {
+                var moveSkill = skillslist.GetSkill(SkillType.Movement);
+                long pauseBot = (moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay);
+                long pauseServer = pauseBot * 7 / 1000;
+                return Math.Max(pauseServer, 20);
+            }
+        }
 
         public override int pause
         {
