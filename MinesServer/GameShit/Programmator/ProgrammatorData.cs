@@ -39,7 +39,7 @@ namespace MinesServer.GameShit.Programmator
         {
             startpoint = ("", 0);
             GotoDeath = null;
-            cFunction = "";
+            CurrentFunction = "";
             checkX = 0;
             checkY = 0;
             shiftX = 0;
@@ -59,12 +59,12 @@ namespace MinesServer.GameShit.Programmator
         public List<string> Functions { get; set; } = [];
 
         public DateTime delay;
-        private string cFunction;
+        private string CurrentFunction;
         public Program? selected { get; set; }
 
-        private PFunction CurrentFunction
+        private PFunction APFunction
         {
-            get => CurrentProg[cFunction];
+            get => CurrentProg[CurrentFunction];
         }
 
         public void Run(Program p)
@@ -91,8 +91,8 @@ namespace MinesServer.GameShit.Programmator
 
         public void OnDeath()
         {
-            CurrentFunction.Reset();
-            cFunction = GotoDeath;
+            APFunction.Reset();
+            CurrentFunction = GotoDeath;
         }
 
         private string? GotoDeath;
@@ -120,30 +120,30 @@ namespace MinesServer.GameShit.Programmator
 
         private void Next()
         {
-            var i = Functions.IndexOf(cFunction);
+            var i = Functions.IndexOf(CurrentFunction);
             if (Functions.Count > i + 1)
-                cFunction = Functions[i + 1];
+                CurrentFunction = Functions[i + 1];
             else
-                cFunction = Functions[0];
+                CurrentFunction = Functions[0];
         }
 
         public void IncreaseDelay(double ms) => delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
 
         public void Step()
         {
-            if (!CurrentFunction.ValidPosition)
+            if (!APFunction.ValidPosition)
             {
-                CurrentFunction.Reset();
+                APFunction.Reset();
                 Next();
             }
 
-            while (CurrentFunction.ValidPosition && ServerTime.Now >= delay)
+            while (APFunction.ValidPosition && ServerTime.Now >= delay)
                 ExecuteCurrentAction();
         }
 
         private void Check(PEntity p, Func<int, int, bool> function)
         {
-            var (sx, sy) = CurrentProg.TryGetValue(cFunction, out var f) &&  f.startoffset != (0, 0) ? 
+            var (sx, sy) = CurrentProg.TryGetValue(CurrentFunction, out var f) &&  f.startoffset != (0, 0) ? 
                 f.startoffset : (shiftX + checkX, shiftY + checkY);
 
             var flip = flipstate ? -1 : 1;
@@ -158,7 +158,7 @@ namespace MinesServer.GameShit.Programmator
 
             var result = function(x, y);
 
-            if (CurrentProg.TryGetValue(cFunction, out var father))
+            if (CurrentProg.TryGetValue(CurrentFunction, out var father))
             {
                 if (father.state == null)
                     father.state = result;
@@ -563,14 +563,14 @@ namespace MinesServer.GameShit.Programmator
                     return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.ReturnFunction:
-                    Bool = CurrentProg.TryGetValue(cFunction, out var returnFunctionAction) 
+                    Bool = CurrentProg.TryGetValue(CurrentFunction, out var returnFunctionAction) 
                         ? (returnFunctionAction.state ?? false) : false;
                     return (ExecResult.Label, "", Bool, 0);
 
                 case ActionType.RunIfTrue:
-                    bool? RunIfTrueStateVal = CurrentProg.TryGetValue(cFunction, out var runIfTrueAction) 
+                    bool? RunIfTrueStateVal = CurrentProg.TryGetValue(CurrentFunction, out var runIfTrueAction) 
                         ? runIfTrueAction.state : null;
-                    if (CurrentProg.TryGetValue(cFunction, out var runIfTrueActionReset))
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var runIfTrueActionReset))
                         runIfTrueActionReset.state = null;
                     if (RunIfTrueStateVal == false)
                         return (ExecResult.None, "", false, 0);
@@ -578,9 +578,9 @@ namespace MinesServer.GameShit.Programmator
                     return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.RunIfFalse:
-                    bool? RunIfFalseStateVal = CurrentProg.TryGetValue(cFunction, out var runIfalseAction)
+                    bool? RunIfFalseStateVal = CurrentProg.TryGetValue(CurrentFunction, out var runIfalseAction)
                         ? runIfalseAction.state : null;
-                    if (CurrentProg.TryGetValue(cFunction, out var runIfalseActionReset))
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var runIfalseActionReset))
                         runIfalseActionReset.state = null;
                     if (RunIfFalseStateVal == true)
                         return (ExecResult.None, "", false, 0);
@@ -589,7 +589,7 @@ namespace MinesServer.GameShit.Programmator
 
                 case ActionType.Or:
                 case ActionType.And:
-                    if (CurrentProg.TryGetValue(cFunction, out var Action))
+                    if (CurrentProg.TryGetValue(CurrentFunction, out var Action))
                         Action.laststateaction = ActionType.Or;
                     break;
 
@@ -660,8 +660,8 @@ namespace MinesServer.GameShit.Programmator
         // Выносим логику выполнения одного действия в отдельный метод
         private void ExecuteCurrentAction()
         {
-            ref PAction action = ref CurrentFunction.GetCurrentAction();
-            CurrentFunction.MoveNext();
+            ref PAction action = ref APFunction.GetCurrentAction();
+            APFunction.MoveNext();
 
             (ExecResult Result, string Label, bool Bool, long Delay) result = Execute(entity, action);
 
@@ -688,29 +688,29 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or ActionType.CheckLeft
                         or ActionType.CheckDownLeft or ActionType.CheckDownRight or ActionType.CheckUpLeft or ActionType.CheckUpRight
                         or ActionType.ShiftUp or ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or ActionType.ShiftForward:
-                    if (CurrentFunction.startoffset != default)
+                    if (APFunction.startoffset != default)
                     {
-                        CurrentFunction.startoffset = (0, 0);
+                        APFunction.startoffset = (0, 0);
                     }
                     break;
 
                 case ActionType.Return:
-                    CurrentFunction.Reset();
-                    if (CurrentFunction.calledfrom is not null)
+                    APFunction.Reset();
+                    if (APFunction.calledfrom is not null)
                     {
-                        cFunction = CurrentFunction.calledfrom;
+                        CurrentFunction = APFunction.calledfrom;
                     }
                     break;
 
                 case ActionType.ReturnState:
-                    CurrentFunction.Reset();
-                    if (CurrentFunction.calledfrom is not null)
+                    APFunction.Reset();
+                    if (APFunction.calledfrom is not null)
                     {
                         if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
-                            CurrentProg[CurrentFunction.calledfrom].startoffset = (shiftX + checkX, shiftY + checkY);
-                        CurrentProg[CurrentFunction.calledfrom].state = CurrentFunction.state;
-                        CurrentProg[CurrentFunction.calledfrom].laststateaction = CurrentFunction.laststateaction;
-                        cFunction = CurrentFunction.calledfrom;
+                            CurrentProg[APFunction.calledfrom].startoffset = (shiftX + checkX, shiftY + checkY);
+                        CurrentProg[APFunction.calledfrom].state = APFunction.state;
+                        CurrentProg[APFunction.calledfrom].laststateaction = APFunction.laststateaction;
+                        CurrentFunction = APFunction.calledfrom;
                     }
                     break;
 
@@ -741,18 +741,18 @@ namespace MinesServer.GameShit.Programmator
             switch (actionType)
             {
                 case ActionType.ReturnFunction:
-                    CurrentFunction.Reset();
-                    CurrentFunction.startoffset = (0, 0);
-                    if (CurrentFunction.calledfrom is not null)
+                    APFunction.Reset();
+                    APFunction.startoffset = (0, 0);
+                    if (APFunction.calledfrom is not null)
                     {
-                        cFunction = CurrentFunction.calledfrom;
+                        CurrentFunction = APFunction.calledfrom;
                     }
-                    CurrentFunction.state = Bool;
-                    CurrentFunction.startoffset = (0, 0);
+                    APFunction.state = Bool;
+                    APFunction.startoffset = (0, 0);
                     break;
 
                 case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
-                    if (Bool) CurrentFunction.position--;
+                    if (Bool) APFunction.position--;
                     break;
             }
         }
@@ -764,26 +764,26 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.GoTo:
                     if (CurrentProg.TryGetValue(label, out var _))
                     {
-                        CurrentFunction.Reset();
+                        APFunction.Reset();
                         if (label == "")
                         {
                             label = startpoint.name;
                             CurrentProg[label].position = startpoint.pos;
                         }
-                        cFunction = label;
+                        CurrentFunction = label;
                     }
                     else
                     {
-                        cFunction = startpoint.name;
-                        CurrentFunction.position = startpoint.pos;
+                        CurrentFunction = startpoint.name;
+                        APFunction.position = startpoint.pos;
                     }
                     break;
 
                 case ActionType.RunSub:
                     if (CurrentProg.TryGetValue(label, out var _))
                     {
-                        CurrentProg[label].calledfrom = cFunction;
-                        cFunction = label;
+                        CurrentProg[label].calledfrom = CurrentFunction;
+                        CurrentFunction = label;
                     }
                     break;
 
@@ -792,8 +792,8 @@ namespace MinesServer.GameShit.Programmator
                     {
                         if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
                             CurrentProg[label].startoffset = (shiftX + checkX, shiftY + checkY);
-                        CurrentProg[label].calledfrom = cFunction;
-                        cFunction = label;
+                        CurrentProg[label].calledfrom = CurrentFunction;
+                        CurrentFunction = label;
                     }
                     break;
 
@@ -802,25 +802,25 @@ namespace MinesServer.GameShit.Programmator
                     {
                         if (shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0)
                             CurrentProg[label].startoffset = (shiftX + checkX, shiftY + checkY);
-                        CurrentProg[label].state = CurrentFunction.state;
-                        CurrentProg[label].laststateaction = CurrentFunction.laststateaction;
-                        CurrentProg[label].calledfrom = cFunction;
-                        cFunction = label;
+                        CurrentProg[label].state = APFunction.state;
+                        CurrentProg[label].laststateaction = APFunction.laststateaction;
+                        CurrentProg[label].calledfrom = CurrentFunction;
+                        CurrentFunction = label;
                     }
                     break;
 
                 case ActionType.RunIfTrue or ActionType.RunIfFalse:
                     if (CurrentProg.TryGetValue(label, out var _))
                     {
-                        CurrentFunction.Reset();
+                        APFunction.Reset();
                         if (label == "")
                         {
-                            cFunction = startpoint.name;
-                            CurrentFunction.position = startpoint.pos;
+                            CurrentFunction = startpoint.name;
+                            APFunction.position = startpoint.pos;
                             break;
                         }
-                        CurrentProg[label].calledfrom = CurrentFunction.calledfrom;
-                        cFunction = label;
+                        CurrentProg[label].calledfrom = APFunction.calledfrom;
+                        CurrentFunction = label;
                     }
                     break;
 
