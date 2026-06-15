@@ -6,7 +6,7 @@
         private int _actionCount = 0;
 
         public int position = 0;
-        public (int x, int y) startoffset;
+        public (int x, int y) startoffset = (0, 0);
         public string? calledfrom;
         public bool? state;
 
