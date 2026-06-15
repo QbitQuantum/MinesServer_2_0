@@ -141,7 +141,7 @@ namespace MinesServer.GameShit.Programmator
                 ExecuteCurrentAction();
         }
 
-        private void Check(PEntity p, Func<int, int, bool> function, PFunction father)
+        private void Check(PEntity p, Func<int, int, bool> function)
         {
             var (sx, sy) = CurrentProg.TryGetValue(cFunction, out var f) &&  f.startoffset != (0, 0) ? 
                 f.startoffset : (shiftX + checkX, shiftY + checkY);
@@ -158,18 +158,22 @@ namespace MinesServer.GameShit.Programmator
 
             var result = function(x, y);
 
-            if (father.state == null)
-                father.state = result;
-            else if (father.laststateaction == ActionType.Or)
-                father.state = (bool)father.state || result;
-            else if (father.laststateaction == ActionType.And)
-                father.state = (bool)father.state && result;
-            else
-                father.state = result;
+            if (CurrentProg.TryGetValue(cFunction, out var father))
+            {
+                if (father.state == null)
+                    father.state = result;
+                else if (father.laststateaction == ActionType.Or)
+                    father.state = (bool)father.state || result;
+                else if (father.laststateaction == ActionType.And)
+                    father.state = (bool)father.state && result;
+                else
+                    father.state = result;
+            }
+            
         }
 
         public (ExecResult Result, string Label, bool Bool, long Delay) 
-            Execute(PEntity p, PFunction father, PAction action)
+            Execute(PEntity p, PAction action)
         {
             ExecResult Result = ExecResult.None;
             string Label = "";
@@ -307,8 +311,7 @@ namespace MinesServer.GameShit.Programmator
                                 p.Move(p.x, p.y, DirectionTypeExt.ToDirection(dir));
                                 Delay = p.ServerPause;
                             }
-                            Bool = true;
-                            break;
+                            return (ExecResult.Bool, "", true, Delay);
                         }
                     }
                     break;  // кристаллов нет
@@ -319,8 +322,7 @@ namespace MinesServer.GameShit.Programmator
                         if (p.Heal())
                         {
                             Delay = 200;
-                            Bool = true;
-                            break;
+                            return (ExecResult.Bool, "", true, Delay);
                         }
                     }
                     break;
@@ -331,8 +333,7 @@ namespace MinesServer.GameShit.Programmator
                     {
                         Delay = 200;
                         p.Bz();
-                        Bool = true;
-                        break;
+                        return (ExecResult.Bool, "", true, Delay);
                     }
                     break;
 
@@ -465,92 +466,91 @@ namespace MinesServer.GameShit.Programmator
                     checkY = 1;
                     break;
 
-                // === Проверки состояния (теперь передаем father) ===
                 case ActionType.IsHpLower100:
-                    Check(p, (x, y) => p.Health < p.MaxHealth, father);
+                    Check(p, (x, y) => p.Health < p.MaxHealth);
                     break;
 
                 case ActionType.IsHpLower50:
-                    Check(p, (x, y) => p.Health < p.MaxHealth / 2, father);
+                    Check(p, (x, y) => p.Health < p.MaxHealth / 2);
                     break;
 
                 case ActionType.IsEmpty:
-                    Check(p, (x, y) => World.GetProp(x, y).isEmpty, father);
+                    Check(p, (x, y) => World.GetProp(x, y).isEmpty);
                     break;
 
                 case ActionType.IsNotEmpty:
-                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty, father);
+                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty);
                     break;
 
                 case ActionType.IsAcid:
-                    Check(p, (x, y) => ((CellType)World.GetCell(x, y)).IsAcid(), father);
+                    Check(p, (x, y) => ((CellType)World.GetCell(x, y)).IsAcid());
                     break;
                 case ActionType.IsRedRock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedRock, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedRock);
                     break;
 
                 case ActionType.IsBlackRock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.BlackRock, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.BlackRock);
                     break;
 
                 case ActionType.IsBoulder:
-                    Check(p, (x, y) => World.GetProp(x, y).isBoulder, father);
+                    Check(p, (x, y) => World.GetProp(x, y).isBoulder);
                     break;
 
                 case ActionType.IsSand:
-                    Check(p, (x, y) => World.GetProp(x, y).isSand, father);
+                    Check(p, (x, y) => World.GetProp(x, y).isSand);
                     break;
 
                 case ActionType.IsUnbreakable:
-                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty && !World.GetProp(x, y).is_diggable, father);
+                    Check(p, (x, y) => !World.GetProp(x, y).isEmpty && !World.GetProp(x, y).is_diggable);
                     break;
 
                 case ActionType.IsBox:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Box, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Box);
                     break;
 
                 case ActionType.IsBreakableRock:
-                    Check(p, (x, y) => World.GetProp(x, y).is_diggable, father);
+                    Check(p, (x, y) => World.GetProp(x, y).is_diggable);
                     break;
 
                 case ActionType.IsCrystal:
-                    Check(p, (x, y) => World.isCry(x, y), father);
+                    Check(p, (x, y) => World.isCry(x, y));
                     break;
 
                 case ActionType.IsGreenBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.GreenBlock, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.GreenBlock);
                     break;
 
                 case ActionType.IsYellowBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.YellowBlock, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.YellowBlock);
                     break;
 
                 case ActionType.IsRedBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedBlock, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.RedBlock);
                     break;
 
                 case ActionType.IsFalling:
-                    Check(p, (x, y) => World.GetProp(x, y).isSand || World.GetProp(x, y).isBoulder, father);
+                    Check(p, (x, y) => World.GetProp(x, y).isSand || World.GetProp(x, y).isBoulder);
                     break;
 
                 case ActionType.IsLivingCrystal:
-                    Check(p, (x, y) => World.isAlive(x, y), father);
+                    Check(p, (x, y) => World.isAlive(x, y));
                     break;
 
                 case ActionType.IsPillar:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Support, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.Support);
                     break;
 
                 case ActionType.IsQuadBlock:
-                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.QuadBlock, father);
+                    Check(p, (x, y) => World.GetCell(x, y) == (byte)CellType.QuadBlock);
                     break;
 
                 case ActionType.IsRoad:
-                    Check(p, (x, y) => World.isRoad(x, y), father);
+                    Check(p, (x, y) => World.isRoad(x, y));
                     break;
 
                 case ActionType.CheckGun:
-                    Check(p, (x, y) => p.HasGun(), father);
+                    Check(p, (x, y) => p.HasGun());
                     break;
 
                 // === Управление потоком ===
@@ -560,29 +560,37 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.RunFunction:
                 case ActionType.RunOnRespawn:
                     Label = action.label;
-                    break;
+                    return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.ReturnFunction:
-                    Bool = father.state ?? false;
-                    break;
+                    Bool = CurrentProg.TryGetValue(cFunction, out var returnFunctionAction) 
+                        ? (returnFunctionAction.state ?? false) : false;
+                    return (ExecResult.Label, "", Bool, 0);
 
                 case ActionType.RunIfTrue:
-                    if (father.state.HasValue && !father.state.Value)
-                        break;
-                    father.state = null;
+                    bool? RunIfTrueStateVal = CurrentProg.TryGetValue(cFunction, out var runIfTrueAction) 
+                        ? runIfTrueAction.state : null;
+                    if (CurrentProg.TryGetValue(cFunction, out var runIfTrueActionReset))
+                        runIfTrueActionReset.state = null;
+                    if (RunIfTrueStateVal == false)
+                        return (ExecResult.None, "", false, 0);
                     Label = action.label;
-                    break;
+                    return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.RunIfFalse:
-                    if (father.state.HasValue && father.state.Value)
-                        break;
-                    father.state = null;
+                    bool? RunIfFalseStateVal = CurrentProg.TryGetValue(cFunction, out var runIfalseAction)
+                        ? runIfalseAction.state : null;
+                    if (CurrentProg.TryGetValue(cFunction, out var runIfalseActionReset))
+                        runIfalseActionReset.state = null;
+                    if (RunIfFalseStateVal == true)
+                        return (ExecResult.None, "", false, 0);
                     Label = action.label;
-                    break;
+                    return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.Or:
                 case ActionType.And:
-                    father.laststateaction = action.type;
+                    if (CurrentProg.TryGetValue(cFunction, out var Action))
+                        Action.laststateaction = ActionType.Or;
                     break;
 
                 // === Работа с памятью ===
@@ -591,9 +599,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.WritableStateMore:
                     // Сброс состояние. Пофиксить
                     if (action.label == "del")
-                    {
-                        //Check(p, (x, y) => res.Value, father);
-                    }
+                        Delay = action.num;
                     break;
 
                 // === Режимы ===
@@ -654,7 +660,7 @@ namespace MinesServer.GameShit.Programmator
                 default:
                     break;
             }
-            return (Result, Label, Bool, Delay);
+            return (ExecResult.None, "", false, Delay);
         }
 
         // Выносим логику выполнения одного действия в отдельный метод
@@ -663,7 +669,7 @@ namespace MinesServer.GameShit.Programmator
             ref PAction action = ref current.GetCurrentAction();
             current.MoveNext();
 
-            (ExecResult Result, string Label, bool Bool, long Delay) result = Execute(entity, current, action);
+            (ExecResult Result, string Label, bool Bool, long Delay) result = Execute(entity, action);
 
             switch (result.Result)
             {
