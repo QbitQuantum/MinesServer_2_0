@@ -15,17 +15,34 @@ namespace MinesServer.GameShit.Programmator
             Running = false;
             entity = e;
         }
-        PEntity entity;
-        public int checkX;
-        public int checkY;
-        public int shiftX;
-        public int shiftY;
-        public (string name, int pos) startpoint;
-        public bool flipstate = false;
 
-        public bool autoDig = false; 
-        public bool aggressive = false;  
-        public bool handMode = false;
+        PEntity entity;
+
+        private int СheckX;
+        private int СheckY;
+        private int ShiftX;
+        private int ShiftY;
+        private bool FlipState = false;
+        private string CurrentFunction;
+        private string? GotoDeath;
+        private (string Name, int Position) StartPoint;
+
+        public bool Running { get; set; }
+        public Dictionary<string, PFunction> CurrentProg { get; set; }
+        public List<string> Functions { get; set; } = [];
+
+        public DateTime delay;
+        public Program? selected { get; set; }
+
+        private PFunction Function
+        {
+            get => CurrentProg[CurrentFunction];
+        }
+
+        public bool RespawnOnProg
+        {
+            get => entity is Player && (entity as Player).resp.cost == 0 && GotoDeath != null;
+        }
 
         private static readonly Dictionary<int, (int dx, int dy)> dirz = new()
         {
@@ -37,34 +54,17 @@ namespace MinesServer.GameShit.Programmator
 
         private void Drop()
         {
-            startpoint = ("", 0);
+            StartPoint = ("", 0);
             GotoDeath = null;
             CurrentFunction = "";
-            checkX = 0;
-            checkY = 0;
-            shiftX = 0;
-            shiftY = 0;
-            flipstate = false;
-            // Сброс режимов
-            autoDig = false;
-            aggressive = false;
-            handMode = false;
+            СheckX = 0;
+            СheckY = 0;
+            ShiftX = 0;
+            ShiftY = 0;
+            FlipState = false;
 
             foreach (var function in CurrentProg)
                 function.Value.Reset();
-        }
-
-        public bool Running { get; set; }
-        public Dictionary<string, PFunction> CurrentProg { get; set; }
-        public List<string> Functions { get; set; } = [];
-
-        public DateTime delay;
-        private string CurrentFunction;
-        public Program? selected { get; set; }
-
-        private PFunction APFunction
-        {
-            get => CurrentProg[CurrentFunction];
         }
 
         public void Run(Program p)
@@ -84,18 +84,11 @@ namespace MinesServer.GameShit.Programmator
             Running = true;
         }
 
-        public bool RespawnOnProg
-        {
-            get => entity is Player && (entity as Player).resp.cost == 0 && GotoDeath != null;
-        }
-
         public void OnDeath()
         {
-            APFunction.Reset();
+            Function.Reset();
             CurrentFunction = GotoDeath;
         }
-
-        private string? GotoDeath;
 
         // TODO: Разделить методы на Run()/Stop()
         public void Run()
@@ -131,30 +124,30 @@ namespace MinesServer.GameShit.Programmator
 
         public void Step()
         {
-            if (!APFunction.ValidPosition)
+            if (!Function.ValidPosition)
             {
-                APFunction.Reset();
+                Function.Reset();
                 Next();
             }
 
-            while (APFunction.ValidPosition && ServerTime.Now >= delay)
+            while (Function.ValidPosition && ServerTime.Now >= delay)
                 ExecuteCurrentAction();
         }
 
         private void Check(PEntity p, Func<int, int, bool> function)
         {
             var (sx, sy) = CurrentProg.TryGetValue(CurrentFunction, out var f) &&  f.startoffset != (0, 0) ? 
-                f.startoffset : (shiftX + checkX, shiftY + checkY);
+                f.startoffset : (ShiftX + СheckX, ShiftY + СheckY);
 
-            var flip = flipstate ? -1 : 1;
+            var flip = FlipState ? -1 : 1;
 
             int x = p.x + flip * sx;
             int y = p.y + flip * sy;
 
-            checkX = 0;
-            checkY = 0;
-            shiftX = 0;
-            shiftY = 0;
+            СheckX = 0;
+            СheckY = 0;
+            ShiftX = 0;
+            ShiftY = 0;
 
             var result = function(x, y);
 
@@ -350,29 +343,29 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Сдвиги ===
                 case ActionType.ShiftUp:
-                    shiftY--;
+                    ShiftY--;
                     break;
 
                 case ActionType.ShiftDown:
-                    shiftY++;
+                    ShiftY++;
                     break;
 
                 case ActionType.ShiftRight:
-                    shiftX++;
+                    ShiftX++;
                     break;
 
                 case ActionType.ShiftLeft:
-                    shiftX--;
+                    ShiftX--;
                     break;
 
                 case ActionType.ShiftForward:
-                    shiftX += p.dir switch
+                    ShiftX += p.dir switch
                     {
                         1 => -1,
                         3 => 1,
                         _ => 0
                     };
-                    shiftY += p.dir switch
+                    ShiftY += p.dir switch
                     {
                         0 => 1,
                         2 => -1,
@@ -382,13 +375,13 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Проверки направления ===
                 case ActionType.CheckForward:
-                    checkX = p.dir switch
+                    СheckX = p.dir switch
                     {
                         1 => -1,
                         3 => 1,
                         _ => 0
                     };
-                    checkY = p.dir switch
+                    СheckY = p.dir switch
                     {
                         0 => 1,
                         2 => -1,
@@ -397,13 +390,13 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckRightRelative:
-                    checkX = p.dir switch
+                    СheckX = p.dir switch
                     {
                         0 => 1,
                         2 => -1,
                         _ => 0
                     };
-                    checkY = p.dir switch
+                    СheckY = p.dir switch
                     {
                         1 => -1,
                         3 => 1,
@@ -412,13 +405,13 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckLeftRelative:
-                    checkX = p.dir switch
+                    СheckX = p.dir switch
                     {
                         0 => -1,
                         2 => 1,
                         _ => 0
                     };
-                    checkY = p.dir switch
+                    СheckY = p.dir switch
                     {
                         1 => 1,
                         3 => -1,
@@ -427,43 +420,43 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckUp:
-                    checkX = 0;
-                    checkY = -1;
+                    СheckX = 0;
+                    СheckY = -1;
                     break;
 
                 case ActionType.CheckDown:
-                    checkX = 0;
-                    checkY = 1;
+                    СheckX = 0;
+                    СheckY = 1;
                     break;
 
                 case ActionType.CheckRight:
-                    checkX = 1;
-                    checkY = 0;
+                    СheckX = 1;
+                    СheckY = 0;
                     break;
 
                 case ActionType.CheckLeft:
-                    checkX = -1;
-                    checkY = 0;
+                    СheckX = -1;
+                    СheckY = 0;
                     break;
 
                 case ActionType.CheckUpLeft:
-                    checkX = -1;
-                    checkY = -1;
+                    СheckX = -1;
+                    СheckY = -1;
                     break;
 
                 case ActionType.CheckUpRight:
-                    checkX = 1;
-                    checkY = -1;
+                    СheckX = 1;
+                    СheckY = -1;
                     break;
 
                 case ActionType.CheckDownLeft:
-                    checkX = -1;
-                    checkY = 1;
+                    СheckX = -1;
+                    СheckY = 1;
                     break;
 
                 case ActionType.CheckDownRight:
-                    checkX = 1;
-                    checkY = 1;
+                    СheckX = 1;
+                    СheckY = 1;
                     break;
 
                 case ActionType.IsHpLower100:
@@ -603,6 +596,7 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 // === Режимы ===
+                /*
                 case ActionType.EnableAutoDig:
                     autoDig = true;
                     break;
@@ -625,7 +619,8 @@ namespace MinesServer.GameShit.Programmator
 
                 case ActionType.DisableHandMode:
                     handMode = false;
-                    break;
+                    break; 
+                */
 
                 // === Специальные команды ===
                 case ActionType.BOOM:
@@ -660,8 +655,8 @@ namespace MinesServer.GameShit.Programmator
         // Выносим логику выполнения одного действия в отдельный метод
         private void ExecuteCurrentAction()
         {
-            ref PAction action = ref APFunction.GetCurrentAction();
-            APFunction.MoveNext();
+            ref PAction action = ref Function.GetCurrentAction();
+            Function.MoveNext();
 
             (ExecResult Result, string Label, bool Bool, long Delay) result = Execute(entity, action);
 
@@ -707,9 +702,9 @@ namespace MinesServer.GameShit.Programmator
                         ? (stateFunc.state, stateFunc.laststateaction, stateFunc.calledfrom) : (null, null, null);
                     if (calledFromState != null)
                     {
-                        bool hasOffset = shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
                         if (hasOffset && CurrentProg.TryGetValue(calledFromState, out var offsetFunc))
-                            offsetFunc.startoffset = (shiftX + checkX, shiftY + checkY);
+                            offsetFunc.startoffset = (ShiftX + СheckX, ShiftY + СheckY);
                         if (CurrentProg.TryGetValue(calledFromState, out var callerFunc))
                         {
                             callerFunc.state = stateVal;
@@ -720,10 +715,10 @@ namespace MinesServer.GameShit.Programmator
                     break;
                 case ActionType.Start:
                     int pos = CurrentProg.TryGetValue(CurrentFunction, out var startFunc) ? startFunc.position : 0;
-                    startpoint = (CurrentFunction, pos);
+                    StartPoint = (CurrentFunction, pos);
                     break;
                 case ActionType.Flip:
-                    flipstate = !flipstate;
+                    FlipState = !FlipState;
                     break;
             }
         }
@@ -768,9 +763,9 @@ namespace MinesServer.GameShit.Programmator
                             gotoFunc.Reset();
                         if (string.IsNullOrEmpty(label))
                         {
-                            CurrentFunction = startpoint.name;
+                            CurrentFunction = StartPoint.Name;
                             if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
-                                spFunc.position = startpoint.pos;
+                                spFunc.position = StartPoint.Position;
                         }
                         else
                         {
@@ -779,9 +774,9 @@ namespace MinesServer.GameShit.Programmator
                     }
                     else
                     {
-                        CurrentFunction = startpoint.name;
+                        CurrentFunction = StartPoint.Name;
                         if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
-                            spFunc.position = startpoint.pos;
+                            spFunc.position = StartPoint.Position;
                     }
                     break;
 
@@ -798,10 +793,10 @@ namespace MinesServer.GameShit.Programmator
                     if (CurrentProg.ContainsKey(label))
                     {
                         string caller = CurrentFunction;
-                        bool hasOffset = shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
                         if (hasOffset)
                         {
-                            var offset = (shiftX + checkX, shiftY + checkY);
+                            var offset = (ShiftX + СheckX, ShiftY + СheckY);
                             if (CurrentProg.TryGetValue(label, out var offsetFunc))
                                 offsetFunc.startoffset = offset;
                         }
@@ -818,10 +813,10 @@ namespace MinesServer.GameShit.Programmator
                         var (stateVal, lastState) = CurrentProg.TryGetValue(caller, out var callerFunc)
                             ? (callerFunc.state, callerFunc.laststateaction)
                             : (null, null);
-                        bool hasOffset = shiftX != 0 || shiftY != 0 || checkX != 0 || checkY != 0;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
                         if (hasOffset)
                         {
-                            var offset = (shiftX + checkX, shiftY + checkY);
+                            var offset = (ShiftX + СheckX, ShiftY + СheckY);
                             if (CurrentProg.TryGetValue(label, out var offsetFunc))
                                 offsetFunc.startoffset = offset;
                         }
@@ -843,9 +838,9 @@ namespace MinesServer.GameShit.Programmator
                             resetFunc.Reset();
                         if (string.IsNullOrEmpty(label))
                         {
-                            CurrentFunction = startpoint.name;
+                            CurrentFunction = StartPoint.Name;
                             if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
-                                spFunc.position = startpoint.pos;
+                                spFunc.position = StartPoint.Position;
                         }
                         else
                         {
