@@ -29,7 +29,7 @@
 
         public void AddActionGotoType()
         {
-            bool shouldadd = actions.Count > 0 && actions.Last().type != ActionType.GoTo;
+            bool shouldadd = actions.Count > 0 && actions.Last().ActionType != ActionType.GoTo;
             if (shouldadd) AddAction(new PAction(ActionType.GoTo));
         }
 

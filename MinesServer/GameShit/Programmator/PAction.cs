@@ -6,10 +6,9 @@ namespace MinesServer.GameShit.Programmator
 {
     public struct PAction
     {
-        public ActionType type;
-        public string label;
-        public int num;
-        public double delay;
+        public ActionType ActionType { get; set; }
+        public string Label { get; set; }
+        public int Num { get; set; }
 
         public PAction(ActionType t) : this(t, "", 0) { }
         public PAction(ActionType t, string label) : this(t, label, 0) { }
@@ -17,10 +16,9 @@ namespace MinesServer.GameShit.Programmator
 
         public PAction(ActionType t, string label, int num)
         {
-            type = t;
-            this.label = label ?? "";
-            this.num = num;
-            delay = 0;
+            ActionType = t;
+            Label = label ?? "";
+            Num = num;
         }
     }
 }

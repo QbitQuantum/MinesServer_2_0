@@ -75,7 +75,7 @@ namespace MinesServer.GameShit.Programmator
             // Логирование функций
             foreach (var i in CurrentProg)
             {
-                Console.WriteLine($"{i.Key} - {string.Join(' ', i.Value.actions.Select(i => $"{i.type} {(i.label is not null ? $"({i.label})" : "")}"))}");
+                Console.WriteLine($"{i.Key} - {string.Join(' ', i.Value.actions.Select(i => $"{i.ActionType} {(i.Label is not null ? $"({i.Label})" : "")}"))}");
             }
 
             Delay = DateTime.UtcNow;
@@ -391,7 +391,7 @@ namespace MinesServer.GameShit.Programmator
             bool Bool = false;
             long Delay = 0;
 
-            switch (action.type)
+            switch (action.ActionType)
             {
                 // === Движение ===
                 case ActionType.MoveDown:
@@ -770,7 +770,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.RunState:
                 case ActionType.RunFunction:
                 case ActionType.RunOnRespawn:
-                    Label = action.label;
+                    Label = action.Label;
                     return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.ReturnFunction:
@@ -785,7 +785,7 @@ namespace MinesServer.GameShit.Programmator
                         runIfTrueActionReset.State = null;
                     if (RunIfTrueStateVal == false)
                         return (ExecResult.None, "", false, 0);
-                    Label = action.label;
+                    Label = action.Label;
                     return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.RunIfFalse:
@@ -795,13 +795,13 @@ namespace MinesServer.GameShit.Programmator
                         runIfalseActionReset.State = null;
                     if (RunIfFalseStateVal == true)
                         return (ExecResult.None, "", false, 0);
-                    Label = action.label;
+                    Label = action.Label;
                     return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.Or:
                 case ActionType.And:
                     if (CurrentProg.TryGetValue(CurrentFunction, out var Action))
-                        Action.laststateaction = action.type;
+                        Action.laststateaction = action.ActionType;
                     break;
 
                 // === Работа с памятью ===
@@ -809,8 +809,8 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.WritableStateLower:
                 case ActionType.WritableStateMore:
                     // Сброс состояние. Пофиксить
-                    if (action.label == "del")
-                        Delay = action.num;
+                    if (action.Label == "del")
+                        Delay = action.Num;
                     break;
 
                 // === Режимы ===
@@ -853,7 +853,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.Craft:
                 case ActionType.Nano:
                 case ActionType.Rembot:
-                    p.SpecialAction(action.type);
+                    p.SpecialAction(action.ActionType);
                     Delay = 200;
                     break;
 
@@ -861,7 +861,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.InvDirLeft:
                 case ActionType.InvDirDown:
                 case ActionType.InvDirRight:
-                    p.InverseDirection(action.type);
+                    p.InverseDirection(action.ActionType);
                     break;
 
                 default:
@@ -881,13 +881,13 @@ namespace MinesServer.GameShit.Programmator
             switch (result.Result)
             {
                 case ExecResult.None:
-                    HandleNoneResult(action.type);
+                    HandleNoneResult(action.ActionType);
                     break;
                 case ExecResult.Bool:
-                    HandleBoolResult(action.type, result.Bool);
+                    HandleBoolResult(action.ActionType, result.Bool);
                     break;
                 case ExecResult.Label:
-                    HandleLabelResult(action.type, result.Label);
+                    HandleLabelResult(action.ActionType, result.Label);
                     break;
             }
 
