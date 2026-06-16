@@ -548,8 +548,7 @@ namespace MinesServer.GameShit.Programmator
                     {
                         Delay = 200;
                         p.Build("G");
-                        Bool = true;
-                        break;
+                        return (ExecResult.Bool, "", true, Delay);
                     }
                     break;
 
