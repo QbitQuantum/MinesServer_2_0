@@ -26,12 +26,11 @@ namespace MinesServer.GameShit.Programmator
         private string CurrentFunction { get; set; }
         private string? GotoDeath { get; set; }
         private (string Name, int Position) StartPoint { get; set; }
+        private DateTime Delay { get; set; }
 
         public bool Running { get; set; }
         public Dictionary<string, PFunction> CurrentProg { get; set; }
         public List<string> Functions { get; set; } = [];
-
-        public DateTime delay { get; set; }
         public Program? selected { get; set; }
 
         private PFunction Function
@@ -79,7 +78,7 @@ namespace MinesServer.GameShit.Programmator
                 Console.WriteLine($"{i.Key} - {string.Join(' ', i.Value.actions.Select(i => $"{i.type} {(i.label is not null ? $"({i.label})" : "")}"))}");
             }
 
-            delay = DateTime.UtcNow;
+            Delay = DateTime.UtcNow;
             Drop();
             Running = true;
         }
@@ -120,7 +119,7 @@ namespace MinesServer.GameShit.Programmator
                 CurrentFunction = Functions[0];
         }
 
-        public void IncreaseDelay(double ms) => delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
+        public void IncreaseDelay(double ms) => Delay = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
 
         public void Step()
         {
@@ -130,7 +129,7 @@ namespace MinesServer.GameShit.Programmator
                 Next();
             }
 
-            while (Function.ValidPosition && ServerTime.Now >= delay)
+            while (Function.ValidPosition && ServerTime.Now >= Delay)
                 ExecuteCurrentAction();
         }
 
