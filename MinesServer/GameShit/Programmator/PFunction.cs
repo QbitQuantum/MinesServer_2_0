@@ -5,12 +5,12 @@
         private PAction[] _actions = [];
         private int _actionCount = 0;
 
-        public int position = 0;
-        public (int x, int y) startoffset = (0, 0);
-        public string? calledfrom;
-        public bool? state;
+        public int Position { get; set; } = 0;
+        public (int x, int y) StartOffset { get; set; } = (0, 0);
+        public string? CalledFrom { get; set; }
+        public bool? State { get; set; }
 
-        public bool ValidPosition => position < _actionCount;
+        public bool ValidPosition => Position < _actionCount;
 
         public ActionType? laststateaction = null;
 
@@ -37,17 +37,15 @@
         {
             if (!ValidPosition)
                 throw new IndexOutOfRangeException();
-            return ref _actions[position];
+            return ref _actions[Position];
         }
 
         public void Reset()
         {
-            position = 0;
-            startoffset = (0, 0);
-            state = null;
-            laststateaction = null;
+            Position = 0;
+            StartOffset = (0, 0);
         }
 
-        public void MoveNext() => position++;
+        public void MoveNext() => Position++;
     }
 }
