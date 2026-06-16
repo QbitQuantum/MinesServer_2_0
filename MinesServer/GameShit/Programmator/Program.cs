@@ -43,6 +43,8 @@ namespace MinesServer.GameShit.Programmator
             string currentFunc = "";
             var (DecompressedData, NumBit, ArrayStrings) = Decode(data);
             int index = 0;
+            bool ContainsNextRow = false;
+
             for (int i = 0; i < NumBit; i++)
             {
                 var atype = GetActionType(Convert.ToInt16(DecompressedData[i + 4]));
@@ -65,9 +67,8 @@ namespace MinesServer.GameShit.Programmator
                 switch (atype)
                 {
                     case ActionType.NextRow:
-                        // Сбрасываем счетчик строки
-                        index = 0;
-                        continue;
+                        ContainsNextRow = true;
+                        break;
 
                     // Управление потоком
                     case ActionType.CreateFunction:
@@ -115,14 +116,16 @@ namespace MinesServer.GameShit.Programmator
                         break;
                 }
 
-                index++;
-
                 // Проверяем, нужно ли обработать конец строки
                 if (index >= 15)
                 {
-                    functions[currentFunc].AddActionGotoType();
+                    if (!ContainsNextRow)
+                        functions[currentFunc].AddActionGotoType();
+                    ContainsNextRow = true;
                     index = 0;
                 }
+
+                index++;
             }
             return functions;
         }
