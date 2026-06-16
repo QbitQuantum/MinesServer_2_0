@@ -9,10 +9,9 @@
         public (int x, int y) StartOffset { get; set; } = (0, 0);
         public string? CalledFrom { get; set; }
         public bool? State { get; set; }
+        public ActionType? LastStateAction { get; set; } = null;
 
         public bool ValidPosition => Position < _actionCount;
-
-        public ActionType? laststateaction = null;
 
         // Свойство для логирования (используется для вывода в консоль)
         public List<PAction> actions => _actions.Take(_actionCount).ToList();

@@ -367,9 +367,9 @@ namespace MinesServer.GameShit.Programmator
             {
                 if (father.State == null)
                     father.State = result;
-                else if (father.laststateaction == ActionType.Or)
+                else if (father.LastStateAction == ActionType.Or)
                     father.State = (bool)father.State || result;
-                else if (father.laststateaction == ActionType.And)
+                else if (father.LastStateAction == ActionType.And)
                     father.State = (bool)father.State && result;
                 else
                     father.State = result;
@@ -794,7 +794,7 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.Or:
                 case ActionType.And:
                     if (CurrentProg.TryGetValue(CurrentFunction, out var Action))
-                        Action.laststateaction = action.ActionType;
+                        Action.LastStateAction = action.ActionType;
                     break;
 
                 // === Работа с памятью ===
@@ -910,7 +910,7 @@ namespace MinesServer.GameShit.Programmator
                     if (CurrentProg.TryGetValue(CurrentFunction, out var rsFunc))
                         rsFunc.Reset();
                     var (stateVal, lastState, calledFromState) = CurrentProg.TryGetValue(CurrentFunction, out var stateFunc)
-                        ? (stateFunc.State, stateFunc.laststateaction, stateFunc.CalledFrom) : (null, null, null);
+                        ? (stateFunc.State, stateFunc.LastStateAction, stateFunc.CalledFrom) : (null, null, null);
                     if (calledFromState != null)
                     {
                         bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
@@ -919,7 +919,7 @@ namespace MinesServer.GameShit.Programmator
                         if (CurrentProg.TryGetValue(calledFromState, out var callerFunc))
                         {
                             callerFunc.State = stateVal;
-                            callerFunc.laststateaction = lastState;
+                            callerFunc.LastStateAction = lastState;
                         }
                         CurrentFunction = calledFromState;
                     }
@@ -1022,7 +1022,7 @@ namespace MinesServer.GameShit.Programmator
                     {
                         string caller = CurrentFunction;
                         var (stateVal, lastState) = CurrentProg.TryGetValue(caller, out var callerFunc)
-                            ? (callerFunc.State, callerFunc.laststateaction)
+                            ? (callerFunc.State, callerFunc.LastStateAction)
                             : (null, null);
                         bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
                         if (hasOffset)
@@ -1034,7 +1034,7 @@ namespace MinesServer.GameShit.Programmator
                         if (CurrentProg.TryGetValue(label, out var stateFunc))
                         {
                             stateFunc.State = stateVal;
-                            stateFunc.laststateaction = lastState;
+                            stateFunc.LastStateAction = lastState;
                             stateFunc.CalledFrom = caller;
                         }
                         CurrentFunction = label;
