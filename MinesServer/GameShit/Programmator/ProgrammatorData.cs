@@ -150,12 +150,6 @@ namespace MinesServer.GameShit.Programmator
                         functions[currentFunc].AddAction(new PAction(atype, name));
                         break;
 
-                    // Команды с числовым параметром
-                    case ActionType.IsHpLower100:
-                    case ActionType.IsHpLower50:
-                        functions[currentFunc].AddAction(new PAction(atype, number));
-                        break;
-
                     // Команды с меткой и числовым параметром
                     case ActionType.WritableState:
                     case ActionType.WritableStateLower:
