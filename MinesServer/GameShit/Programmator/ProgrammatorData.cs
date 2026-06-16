@@ -18,20 +18,20 @@ namespace MinesServer.GameShit.Programmator
 
         PEntity entity;
 
-        private int СheckX;
-        private int СheckY;
-        private int ShiftX;
-        private int ShiftY;
-        private bool FlipState = false;
-        private string CurrentFunction;
-        private string? GotoDeath;
-        private (string Name, int Position) StartPoint;
+        private int СheckX { get; set; }
+        private int СheckY { get; set; }
+        private int ShiftX { get; set; }
+        private int ShiftY { get; set; }
+        private bool FlipState { get; set; }
+        private string CurrentFunction { get; set; }
+        private string? GotoDeath { get; set; }
+        private (string Name, int Position) StartPoint { get; set; }
 
         public bool Running { get; set; }
         public Dictionary<string, PFunction> CurrentProg { get; set; }
         public List<string> Functions { get; set; } = [];
 
-        public DateTime delay;
+        public DateTime delay { get; set; }
         public Program? selected { get; set; }
 
         private PFunction Function
