@@ -57,7 +57,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (p.cid == 0) p.connection?.SendU(new ClanHidePacket());
             else p.connection?.SendU(new ClanShowPacket(p.cid));
         }
-        public static void ProgStatus(this Player p) => p.connection?.SendU(new ProgrammatorPacket(p.programsData.Running));
+        public static void ProgStatus(this Player p) => p.connection?.SendU(new ProgrammatorPacket(p.programsData.ProgRunning));
         public static void SendAutoDigg(this Player p) => p.connection?.SendU(new AutoDiggPacket(p.autoDig));
         public static void SendSpeed(this Player p) => p.connection?.SendU(new SpeedPacket((int)(p.pause * 5 * 1.4 / 1000 * 1.7), (int) (p.pause * 0.80 * 5 * 1.4 / 1000 * 1.7), 100000));
         public static void SendCrys(this Player p) => p.connection?.SendU(p.crys.BPacket);

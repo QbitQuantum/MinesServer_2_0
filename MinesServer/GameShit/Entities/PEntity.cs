@@ -30,7 +30,7 @@ namespace MinesServer.GameShit.Entities
         public virtual int Health { get; set; }
         public virtual int MaxHealth { get; set; }
         public virtual int pause { get; set; }
-        public virtual long ServerPause { get; }
+        public virtual double ServerPause { get; }
 
         public virtual int cid { get; set; }
         public virtual int dir { get; set; }
@@ -39,11 +39,11 @@ namespace MinesServer.GameShit.Entities
 
         public bool HadleProgramm()
         {
-            if (programsData != null && _pdata.Running)
+            if (programsData != null && _pdata.ProgRunning)
             {
                 _pdata.Step();
             }
-            return _pdata.Running;
+            return _pdata.ProgRunning;
         }
 
         public virtual void BotsRender()

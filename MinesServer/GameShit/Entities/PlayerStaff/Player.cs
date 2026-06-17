@@ -53,7 +53,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public bool online => connection != null;
         [NotMapped] public override int cid => clan?.id ?? 0;
         [NotMapped] public override int tail => HasActiveProgram ? 1 : 0;
-        [NotMapped] public bool HasActiveProgram => programsData.Running;
+        [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
 
         public CrystalCBStorage CrystalCB = new();
         public string name { get; set; } = string.Empty;
@@ -73,16 +73,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public Settings settings { get; set; } = null!;
         public PlayerSkills skillslist { get; set; } = null!;
         public Queue<Line> console = new Queue<Line>();
-        public override long ServerPause 
-        {
-            get
-            {
-                var moveSkill = skillslist.GetSkill(SkillType.Movement);
-                long pauseBot = (moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay);
-                long pauseServer = pauseBot * 7 / 1000;
-                return Math.Max(pauseServer, 20);
-            }
-        }
+        public override double ServerPause => (World.isRoad(x, y) ? (pause * 5) * 0.80 : pause * 5) * 1.4 / 1000;
 
         public override int pause
         {
@@ -646,16 +637,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void ProgrammatorUpdate()
         {
-            if (programsData.Running)
+            if (programsData.ProgRunning)
                 programsData.Step();
         }
 
         public void UpdateUIProgramm()
         {
             var p = programsData.selected;
-            if (p != null && !programsData.Running)
+            if (p != null && !programsData.ProgRunning)
                 this.OpenProg(p);
-            if (programsData.Running)
+            if (programsData.ProgRunning)
                 RunProgramm();
             this.ProgStatus();
         }
