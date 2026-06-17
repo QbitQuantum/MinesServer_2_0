@@ -18,8 +18,8 @@ namespace MinesServer.GameShit.Programmator
 
         PEntity entity;
 
-        private int СheckX { get; set; }
-        private int СheckY { get; set; }
+        private int CheckX { get; set; }
+        private int CheckY { get; set; }
         private int ShiftX { get; set; }
         private int ShiftY { get; set; }
         private bool FlipState { get; set; }
@@ -56,8 +56,8 @@ namespace MinesServer.GameShit.Programmator
             StartPoint = ("", 0);
             GotoDeath = null;
             CurrentFunction = "";
-            СheckX = 0;
-            СheckY = 0;
+            CheckX = 0;
+            CheckY = 0;
             ShiftX = 0;
             ShiftY = 0;
             FlipState = false;
@@ -349,15 +349,15 @@ namespace MinesServer.GameShit.Programmator
         private void Check(PEntity p, Func<int, int, bool> function)
         {
             var (sx, sy) = CurrentProg.TryGetValue(CurrentFunction, out var f) &&  f.StartOffset != (0, 0) ? 
-                f.StartOffset : (ShiftX + СheckX, ShiftY + СheckY);
+                f.StartOffset : (ShiftX + CheckX, ShiftY + CheckY);
 
             var flip = FlipState ? -1 : 1;
 
             int x = p.x + flip * sx;
             int y = p.y + flip * sy;
 
-            СheckX = 0;
-            СheckY = 0;
+            CheckX = 0;
+            CheckY = 0;
             ShiftX = 0;
             ShiftY = 0;
 
@@ -586,13 +586,13 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Проверки направления ===
                 case ActionType.CheckForward:
-                    СheckX = p.dir switch
+                    CheckX = p.dir switch
                     {
                         1 => -1,
                         3 => 1,
                         _ => 0
                     };
-                    СheckY = p.dir switch
+                    CheckY = p.dir switch
                     {
                         0 => 1,
                         2 => -1,
@@ -601,13 +601,13 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckRightRelative:
-                    СheckX = p.dir switch
+                    CheckX = p.dir switch
                     {
                         0 => 1,
                         2 => -1,
                         _ => 0
                     };
-                    СheckY = p.dir switch
+                    CheckY = p.dir switch
                     {
                         1 => -1,
                         3 => 1,
@@ -616,13 +616,13 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckLeftRelative:
-                    СheckX = p.dir switch
+                    CheckX = p.dir switch
                     {
                         0 => -1,
                         2 => 1,
                         _ => 0
                     };
-                    СheckY = p.dir switch
+                    CheckY = p.dir switch
                     {
                         1 => 1,
                         3 => -1,
@@ -631,43 +631,43 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckUp:
-                    СheckX = 0;
-                    СheckY = -1;
+                    CheckX = 0;
+                    CheckY = -1;
                     break;
 
                 case ActionType.CheckDown:
-                    СheckX = 0;
-                    СheckY = 1;
+                    CheckX = 0;
+                    CheckY = 1;
                     break;
 
                 case ActionType.CheckRight:
-                    СheckX = 1;
-                    СheckY = 0;
+                    CheckX = 1;
+                    CheckY = 0;
                     break;
 
                 case ActionType.CheckLeft:
-                    СheckX = -1;
-                    СheckY = 0;
+                    CheckX = -1;
+                    CheckY = 0;
                     break;
 
                 case ActionType.CheckUpLeft:
-                    СheckX = -1;
-                    СheckY = -1;
+                    CheckX = -1;
+                    CheckY = -1;
                     break;
 
                 case ActionType.CheckUpRight:
-                    СheckX = 1;
-                    СheckY = -1;
+                    CheckX = 1;
+                    CheckY = -1;
                     break;
 
                 case ActionType.CheckDownLeft:
-                    СheckX = -1;
-                    СheckY = 1;
+                    CheckX = -1;
+                    CheckY = 1;
                     break;
 
                 case ActionType.CheckDownRight:
-                    СheckX = 1;
-                    СheckY = 1;
+                    CheckX = 1;
+                    CheckY = 1;
                     break;
 
                 case ActionType.IsHpLower100:
@@ -913,9 +913,9 @@ namespace MinesServer.GameShit.Programmator
                         ? (stateFunc.State, stateFunc.LastStateAction, stateFunc.CalledFrom) : (null, null, null);
                     if (calledFromState != null)
                     {
-                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0;
                         if (hasOffset && CurrentProg.TryGetValue(calledFromState, out var offsetFunc))
-                            offsetFunc.StartOffset = (ShiftX + СheckX, ShiftY + СheckY);
+                            offsetFunc.StartOffset = (ShiftX + CheckX, ShiftY + CheckY);
                         if (CurrentProg.TryGetValue(calledFromState, out var callerFunc))
                         {
                             callerFunc.State = stateVal;
@@ -1004,10 +1004,10 @@ namespace MinesServer.GameShit.Programmator
                     if (CurrentProg.ContainsKey(label))
                     {
                         string caller = CurrentFunction;
-                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0;
                         if (hasOffset)
                         {
-                            var offset = (ShiftX + СheckX, ShiftY + СheckY);
+                            var offset = (ShiftX + CheckX, ShiftY + CheckY);
                             if (CurrentProg.TryGetValue(label, out var offsetFunc))
                                 offsetFunc.StartOffset = offset;
                         }
@@ -1024,10 +1024,10 @@ namespace MinesServer.GameShit.Programmator
                         var (stateVal, lastState) = CurrentProg.TryGetValue(caller, out var callerFunc)
                             ? (callerFunc.State, callerFunc.LastStateAction)
                             : (null, null);
-                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || СheckX != 0 || СheckY != 0;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0;
                         if (hasOffset)
                         {
-                            var offset = (ShiftX + СheckX, ShiftY + СheckY);
+                            var offset = (ShiftX + CheckX, ShiftY + CheckY);
                             if (CurrentProg.TryGetValue(label, out var offsetFunc))
                                 offsetFunc.StartOffset = offset;
                         }
