@@ -295,26 +295,26 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public DateTime time = DateTime.Now;
         public void Use(Player p)
         {
+            if (!p.HandleUseInventory(DateTime.UtcNow))
+                return;
+
             var (x, y) = p.GetDirCord();
 
             var selectedItem = ItemTypeExt.GetItemById(selected);
 
-            if (DateTime.Now - time >= TimeSpan.FromMilliseconds(400) || p.programsData.ProgRunning)
-            {
-                if (typeditems.ContainsKey(selected) && !World.ContainsPack(x, y, out var pack)
+            if (typeditems.ContainsKey(selected) && !World.ContainsPack(x, y, out var pack)
                     && (World.GetProp(x, y).can_place_over || selectedItem.CanBePlacedAnywhere())
                     && this[selected] > 0)
+            {
+                if (typeditems[selected](p))
                 {
-                    if (typeditems[selected](p))
-                    {
-                        this[selected]--;
-                        if (this[selected] == 0)
-                            miniq.Remove(selected);
-                        p.SendInventory();
-                    }
+                    this[selected]--;
+                    if (this[selected] == 0)
+                        miniq.Remove(selected);
+                    p.SendInventory();
                 }
-                time = DateTime.Now;
             }
+            time = DateTime.Now;
         }
         private void AddChoose(int item)
         {

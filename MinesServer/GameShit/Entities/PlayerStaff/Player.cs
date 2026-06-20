@@ -42,6 +42,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private DateTime lastc190hit = ServerTime.Now;
         private DateTime lastDelay = ServerTime.Now;
         private DateTime laststarttime = ServerTime.Now;
+        private DateTime lastuseinventory = ServerTime.Now;
 
         private readonly List<(int X, int Y)> alreadyvisible = [];
 
@@ -231,6 +232,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             Hurt(20 + 60 * c190stacks);
             c190stacks++;
             lastc190hit = ServerTime.Now;
+        }
+
+        public bool HandleUseInventory(DateTime time)
+        {
+            DateTime now = ServerTime.Now;
+            bool canUse = (now - lastuseinventory) >= TimeSpan.FromMilliseconds(400) ||
+                           programsData.ProgRunning;
+            if (canUse)
+                lastuseinventory = now;
+            return canUse;
         }
 
         private void HandleOffline(DateTime now)
