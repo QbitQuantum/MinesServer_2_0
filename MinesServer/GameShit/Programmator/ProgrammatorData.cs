@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator.SevenZip.LZMA;
 using MinesServer.Server;
 
@@ -341,160 +342,205 @@ namespace MinesServer.GameShit.Programmator
             ref PAction action = ref Function.GetCurrentAction();
             Function.MoveNext();
 
-            object? result = action.Execute(Entity, Function);
+            (ExecResult Result, string Label, bool Bool, double Delay) = action.Execute(Entity, Function);
 
-            switch (result)
+            switch (Result)
             {
-                case string label:
-                    switch (action.Type)
-                    {
-                        case ActionType.GoTo:
-                            if (CurrentProg.TryGetValue(label, out var _))
-                            {
-                                Function.Reset();
-                                if (label == "")
-                                {
-                                    label = StartPoint.Name;
-                                    CurrentProg[label].Position = StartPoint.Pos;
-                                }
-                                CurrentFunction = label;
-                            }
-                            else
-                            {
-                                CurrentFunction = StartPoint.Name;
-                                Function.Position = StartPoint.Pos;
-                            }
-                            break;
-
-                        case ActionType.RunSub:
-                            if (CurrentProg.TryGetValue(label, out var _))
-                            {
-                                CurrentProg[label].CalledFrom = CurrentFunction;
-                                CurrentFunction = label;
-                            }
-                            break;
-
-                        case ActionType.RunFunction:
-                            if (CurrentProg.TryGetValue(label, out var _))
-                            {
-                                if (ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0)
-                                    CurrentProg[label].StartOffset = (ShiftX + CheckX, ShiftY + CheckY);
-                                CurrentProg[label].CalledFrom = CurrentFunction;
-                                CurrentFunction = label;
-                            }
-                            break;
-
-                        case ActionType.RunState:
-                            if (CurrentProg.TryGetValue(label, out var _))
-                            {
-                                if (ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0)
-                                    CurrentProg[label].StartOffset = (ShiftX + CheckX, ShiftY + CheckY);
-                                CurrentProg[label].State = Function.State;
-                                CurrentProg[label].LastStateAction = Function.LastStateAction;
-                                CurrentProg[label].CalledFrom = CurrentFunction;
-                                CurrentFunction = label;
-                            }
-                            break;
-
-                        case ActionType.RunIfTrue or ActionType.RunIfFalse:
-                            if (CurrentProg.TryGetValue(label, out var _))
-                            {
-                                Function.Reset();
-                                if (label == "")
-                                {
-                                    CurrentFunction = StartPoint.Name;
-                                    Function.Position = StartPoint.Pos;
-                                    break;
-                                }
-                                CurrentProg[label].CalledFrom = Function.CalledFrom;
-                                CurrentFunction = label;
-                            }
-                            break;
-
-                        case ActionType.RunOnRespawn:
-                            if (CurrentProg.TryGetValue(label, out var _))
-                            {
-                                GotoDeath = label;
-                            }
-                            break;
-                    }
+                case ExecResult.None:
+                    HandleNoneResult(action.Type);
                     break;
-
-                case bool state:
-                    switch (action.Type)
-                    {
-                        case ActionType.ReturnFunction:
-                            Function.Reset();
-                            Function.StartOffset = (0, 0);
-                            if (Function.CalledFrom is not null)
-                            {
-                                CurrentFunction = Function.CalledFrom;
-                            }
-                            Function.State = state;
-                            Function.StartOffset = (0, 0);
-                            break;
-
-                        case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
-                            if (state) Function.Position--;
-                            break;
-                    }
+                case ExecResult.Bool:
+                    HandleBoolResult(action.Type, Bool);
                     break;
-
-                case null:
-                    switch (action.Type)
-                    {
-                        case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or ActionType.CheckLeft
-                        or ActionType.CheckDownLeft or ActionType.CheckDownRight or ActionType.CheckUpLeft or ActionType.CheckUpRight
-                        or ActionType.ShiftUp or ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or ActionType.ShiftForward:
-                            if (Function.StartOffset != default)
-                            {
-                                Function.StartOffset = (0, 0);
-                            }
-                            break;
-
-                        case ActionType.Return:
-                            Function.Reset();
-                            if (Function.CalledFrom is not null)
-                            {
-                                CurrentFunction = Function.CalledFrom;
-                            }
-                            break;
-
-                        case ActionType.ReturnState:
-                            Function.Reset();
-                            if (Function.CalledFrom is not null)
-                            {
-                                if (ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0)
-                                    CurrentProg[Function.CalledFrom].StartOffset = (ShiftX + CheckX, ShiftY + CheckY);
-                                CurrentProg[Function.CalledFrom].State = Function.State;
-                                CurrentProg[Function.CalledFrom].LastStateAction = Function.LastStateAction;
-                                CurrentFunction = Function.CalledFrom;
-                            }
-                            break;
-
-                        case ActionType.Last:
-                            break;
-                        case ActionType.Stop:
-                            Run();
-                            ((Player)Entity)?.ProgStatus();
-                            break;
-
-                        case ActionType.Start:
-                            //startpoint = (cFunction, current.current);
-                            break;
-                        case ActionType.Restart:
-                            Run(); // Завершаем программу
-                            Run(); // Запускаем программу
-                            ((Player)Entity)?.ProgStatus();
-                            break;
-
-                        case ActionType.Flip:
-                            FlipState = !FlipState;
-                            break;
-                    }
+                case ExecResult.Label:
+                    HandleLabelResult(action.Type, Label);
                     break;
             }
             IncreaseDelay(action.DelayAction);
+        }
+
+        public void HandleLabelResult(ActionType actionType, string label)
+        {
+            switch (actionType)
+            {
+                case ActionType.GoTo:
+                    if (CurrentProg.ContainsKey(label))
+                    {
+                        if (CurrentProg.TryGetValue(CurrentFunction, out var gotoFunc))
+                            gotoFunc.Reset();
+                        if (string.IsNullOrEmpty(label))
+                        {
+                            CurrentFunction = StartPoint.Name;
+                            if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
+                                spFunc.Position = StartPoint.Pos;
+                        }
+                        else
+                        {
+                            CurrentFunction = label;
+                        }
+                    }
+                    else
+                    {
+                        CurrentFunction = StartPoint.Name;
+                        if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
+                            spFunc.Position = StartPoint.Pos;
+                    }
+                    break;
+
+                case ActionType.RunSub:
+                    if (CurrentProg.ContainsKey(label))
+                    {
+                        if (CurrentProg.TryGetValue(label, out var subFunc))
+                            subFunc.CalledFrom = CurrentFunction;
+                        CurrentFunction = label;
+                    }
+                    break;
+
+                case ActionType.RunFunction:
+                    if (CurrentProg.ContainsKey(label))
+                    {
+                        string caller = CurrentFunction;
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0;
+                        if (hasOffset)
+                        {
+                            var offset = (ShiftX + CheckX, ShiftY + CheckY);
+                            if (CurrentProg.TryGetValue(label, out var offsetFunc))
+                                offsetFunc.StartOffset = offset;
+                        }
+                        if (CurrentProg.TryGetValue(label, out var runFunc))
+                            runFunc.CalledFrom = caller;
+                        CurrentFunction = label;
+                    }
+                    break;
+
+                case ActionType.RunState:
+                    if (CurrentProg.ContainsKey(label))
+                    {
+                        string caller = CurrentFunction;
+                        var (stateVal, lastState) = CurrentProg.TryGetValue(caller, out var callerFunc)
+                            ? (callerFunc.State, callerFunc.LastStateAction)
+                            : (null, null);
+                        bool hasOffset = ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0;
+                        if (hasOffset)
+                        {
+                            var offset = (ShiftX + CheckX, ShiftY + CheckY);
+                            if (CurrentProg.TryGetValue(label, out var offsetFunc))
+                                offsetFunc.StartOffset = offset;
+                        }
+                        if (CurrentProg.TryGetValue(label, out var stateFunc))
+                        {
+                            stateFunc.State = stateVal;
+                            stateFunc.LastStateAction = lastState;
+                            stateFunc.CalledFrom = caller;
+                        }
+                        CurrentFunction = label;
+                    }
+                    break;
+
+                case ActionType.RunIfTrue:
+                case ActionType.RunIfFalse:
+                    if (CurrentProg.ContainsKey(label))
+                    {
+                        if (CurrentProg.TryGetValue(CurrentFunction, out var resetFunc))
+                            resetFunc.Reset();
+                        if (string.IsNullOrEmpty(label))
+                        {
+                            CurrentFunction = StartPoint.Name;
+                            if (CurrentProg.TryGetValue(CurrentFunction, out var spFunc))
+                                spFunc.Position = StartPoint.Pos;
+                        }
+                        else
+                        {
+                            string? calledFrom = CurrentProg.TryGetValue(CurrentFunction, out var cfFunc)
+                                ? cfFunc.CalledFrom : null;
+                            if (CurrentProg.TryGetValue(label, out var condFunc))
+                                condFunc.CalledFrom = calledFrom;
+                            CurrentFunction = label;
+                        }
+                    }
+                    break;
+
+                case ActionType.RunOnRespawn:
+                    if (CurrentProg.ContainsKey(label))
+                        GotoDeath = label;
+                    break;
+            }
+        }
+
+        public void HandleBoolResult(ActionType actionType, bool state)
+        {
+            switch (actionType)
+            {
+                case ActionType.ReturnFunction:
+                    Function.Reset();
+                    Function.StartOffset = (0, 0);
+                    if (Function.CalledFrom is not null)
+                    {
+                        CurrentFunction = Function.CalledFrom;
+                    }
+                    Function.State = state;
+                    Function.StartOffset = (0, 0);
+                    break;
+
+                case ActionType.MacrosDig or ActionType.MacrosHeal or ActionType.MacrosMine:
+                    if (state) Function.Position--;
+                    break;
+            }
+        }
+
+        public void HandleNoneResult(ActionType actionType)
+        {
+            switch (actionType)
+            {
+                case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or ActionType.CheckLeft
+                        or ActionType.CheckDownLeft or ActionType.CheckDownRight or ActionType.CheckUpLeft or ActionType.CheckUpRight
+                        or ActionType.ShiftUp or ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or ActionType.ShiftForward:
+                    if (Function.StartOffset != default)
+                    {
+                        Function.StartOffset = (0, 0);
+                    }
+                    break;
+
+                case ActionType.Return:
+                    Function.Reset();
+                    if (Function.CalledFrom is not null)
+                    {
+                        CurrentFunction = Function.CalledFrom;
+                    }
+                    break;
+
+                case ActionType.ReturnState:
+                    Function.Reset();
+                    if (Function.CalledFrom is not null)
+                    {
+                        if (ShiftX != 0 || ShiftY != 0 || CheckX != 0 || CheckY != 0)
+                            CurrentProg[Function.CalledFrom].StartOffset = (ShiftX + CheckX, ShiftY + CheckY);
+                        CurrentProg[Function.CalledFrom].State = Function.State;
+                        CurrentProg[Function.CalledFrom].LastStateAction = Function.LastStateAction;
+                        CurrentFunction = Function.CalledFrom;
+                    }
+                    break;
+
+                case ActionType.Last:
+                    break;
+                case ActionType.Stop:
+                    Run();
+                    ((Player)Entity)?.ProgStatus();
+                    break;
+
+                case ActionType.Start:
+                    //startpoint = (cFunction, current.current);
+                    break;
+                case ActionType.Restart:
+                    Run(); // Завершаем программу
+                    Run(); // Запускаем программу
+                    ((Player)Entity)?.ProgStatus();
+                    break;
+
+                case ActionType.Flip:
+                    FlipState = !FlipState;
+                    break;
+            }
         }
     }
 }

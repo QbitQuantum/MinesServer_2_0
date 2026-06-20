@@ -142,7 +142,7 @@ namespace MinesServer.GameShit.Programmator
             }
         }
 
-        public object? Execute(PEntity p, PFunction father)
+        public (ExecResult Result, string Label, bool Bool, double Delay) Execute(PEntity p, PFunction father)
         {
             switch (Type)
             {
@@ -275,7 +275,7 @@ namespace MinesServer.GameShit.Programmator
                                 p.Move(p.x, p.y, DirectionTypeExt.ToDirection(dir));
                                 DelayAction = p.ServerPause;
                             }
-                            return true;
+                            return (ExecResult.Bool, "", true, DelayAction);
                         }
                     }
                     break;  // кристаллов нет
@@ -286,7 +286,7 @@ namespace MinesServer.GameShit.Programmator
                         if (p.Heal())
                         {
                             DelayAction = 200;
-                            return true;
+                            return (ExecResult.Bool, "", true, DelayAction);
                         }
                     }
                     break;
@@ -297,7 +297,7 @@ namespace MinesServer.GameShit.Programmator
                     {
                         DelayAction = 200;
                         p.Bz();
-                        return true;
+                        return (ExecResult.Bool, "", true, DelayAction);
                     }
                     break;
 
@@ -307,7 +307,7 @@ namespace MinesServer.GameShit.Programmator
                     {
                         DelayAction = 200;
                         p.Build("G");
-                        return true;
+                        return (ExecResult.Bool, "", true, DelayAction);
                     }
                     break;
 
@@ -522,26 +522,26 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.RunState:
                 case ActionType.RunFunction:
                 case ActionType.RunOnRespawn:
-                    return Label;
+                    return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.ReturnFunction:
                 case ActionType.ReturnState:
-                    return father.State;
+                    return (ExecResult.Bool, "", father.State ?? false, 0);
 
                 case ActionType.Return:
-                    return "";
+                    return (ExecResult.Label, "", false, 0);
 
                 case ActionType.RunIfTrue:
                     if (father.State.HasValue && !father.State.Value)
-                        return null;
+                        return (ExecResult.None, "", false, 0);
                     father.State = null;
-                    return Label;
+                    return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.RunIfFalse:
                     if (father.State.HasValue && father.State.Value)
-                        return null;
+                        return (ExecResult.None, "", false, 0);
                     father.State = null;
-                    return Label;
+                    return (ExecResult.Label, Label, false, 0);
 
                 case ActionType.Or:
                 case ActionType.And:
@@ -549,7 +549,7 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.GoTo:
-                    return Label;
+                    return (ExecResult.Label, Label, false, DelayAction);
 
                 // === Работа с памятью ===
                 case ActionType.WritableState:
@@ -559,7 +559,7 @@ namespace MinesServer.GameShit.Programmator
                     if (res.HasValue)
                     {
                         Check(p, (x, y) => res.Value, father);
-                        return res.Value;
+                        return (ExecResult.Bool, Label, res.Value, DelayAction);
                     }
                     break;
 
@@ -622,7 +622,7 @@ namespace MinesServer.GameShit.Programmator
                     break;
             }
 
-            return null;
+            return (ExecResult.None, "", false, DelayAction);
         }
     }
 }
