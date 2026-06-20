@@ -2,10 +2,8 @@
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.GUI.Horb.List;
-using MinesServer.GameShit.Programmator.SevenZip.LZMA;
 using MinesServer.Network.Programmator;
 using MinesServer.Server;
-using System.Text;
 
 namespace MinesServer.GameShit.Programmator
 {

@@ -1,7 +1,4 @@
-﻿
-using MinesServer.Enums;
-
-namespace MinesServer.GameShit.Enums
+﻿namespace MinesServer.GameShit.Enums
 {
     public enum DirectionType
     {

@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using MinesServer.GameShit.Enums;
+﻿using MinesServer.GameShit.Enums;
 using RcherNZ.AccidentalNoise;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MinesServer.GameShit.Generator
 {

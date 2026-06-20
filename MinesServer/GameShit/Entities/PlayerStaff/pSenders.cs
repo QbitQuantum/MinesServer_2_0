@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using MinesServer.Enums;
-using MinesServer.GameShit.Generator;
+﻿using MinesServer.Enums;
 using MinesServer.GameShit.Programmator;
-using MinesServer.GameShit.SysCraft;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.BotInfo;
 using MinesServer.Network.Chat;
@@ -18,7 +8,6 @@ using MinesServer.Network.Movement;
 using MinesServer.Network.Programmator;
 using MinesServer.Server;
 using MinesServer.Server.Network;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MinesServer.Enums;
+﻿using MinesServer.Enums;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.Network.GUI;
 

@@ -1,12 +1,5 @@
 ﻿using MinesServer.GameShit.Entities.PlayerStaff;
-using MinesServer.Network.TypicalEvents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MinesServer.Network.Tutorial;
-using System.Security.Policy;
 
 namespace MinesServer.GameShit.Sys_Miss
 {

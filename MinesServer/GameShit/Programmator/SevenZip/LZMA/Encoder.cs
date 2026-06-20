@@ -1,10 +1,5 @@
 ﻿using MinesServer.GameShit.Programmator.SevenZip.LZ;
 using MinesServer.GameShit.Programmator.SevenZip.RangeCoder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MinesServer.GameShit.Programmator.SevenZip.LZMA
 {

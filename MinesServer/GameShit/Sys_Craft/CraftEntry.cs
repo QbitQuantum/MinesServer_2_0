@@ -1,5 +1,4 @@
 ﻿using MinesServer.GameShit.SysCraft;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.Sys_Craft

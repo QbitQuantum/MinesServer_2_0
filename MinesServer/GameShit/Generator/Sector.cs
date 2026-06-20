@@ -1,6 +1,5 @@
 ﻿using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
-using MinesServer.Network.TypicalEvents;
 
 namespace MinesServer.GameShit.Generator
 {

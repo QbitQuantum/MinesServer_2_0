@@ -1,6 +1,5 @@
 ﻿using MinesServer.Network.Constraints;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace MinesServer.Network.TypicalEvents
 {
