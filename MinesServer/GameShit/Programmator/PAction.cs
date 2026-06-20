@@ -13,7 +13,6 @@ namespace MinesServer.GameShit.Programmator
 
         public PAction(ActionType t) : this(t, "", 0) { }
         public PAction(ActionType t, string label) : this(t, label, 0) { }
-        public PAction(ActionType t, int num) : this(t, "", num) { }
 
         public PAction(ActionType t, string label, int num)
         {
