@@ -1,7 +1,8 @@
-﻿using MinesServer.GameShit.Entities;
+﻿using System.Text;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Programmator.SevenZip.LZMA;
 using MinesServer.Server;
-using MoreLinq;
 
 namespace MinesServer.GameShit.Programmator
 {
@@ -27,7 +28,8 @@ namespace MinesServer.GameShit.Programmator
         public bool ProgRunning { get; set; }
 
         public DateTime DelayProgramm { get; set; }
-        public Dictionary<string, PFunction> CurrentProg { get; set; }
+        public Dictionary<string, PFunction> CurrentProg { get; set; } = [];
+        public List<string> FunctionOrder { get; set; } = [];
         public Program? Selected { get; set; }
 
         public (string Name, int Pos) StartPoint { get; set; }
@@ -50,10 +52,227 @@ namespace MinesServer.GameShit.Programmator
                 function.Value.Reset();
         }
 
+        private static (byte[] DecompressedData, int NumBit, string[] ArrayStrings) Decode(string DataProgramm)
+        {
+            byte[] DecompressedData = SevenZipHelper.Decompress(Convert.FromBase64String(DataProgramm));
+            int NumBit = BitConverter.ToInt32(DecompressedData, 0);
+            string[] ArrayStrings = Encoding.UTF8.GetString(DecompressedData, NumBit + 4, DecompressedData.Length - NumBit - 4).Split(':');
+            return (DecompressedData, NumBit, ArrayStrings);
+        }
+
+        private static (Dictionary<string, PFunction>, List<string>) ParseProgramm(string DataProgramm)
+        {
+            Dictionary<string, PFunction> ParseCurrentProg = [];
+            List<string> ParseFunctionOrder = [];
+
+            ParseCurrentProg[""] = new PFunction();
+            string currentFunc = "";
+            var (DecompressedData, NumBit, ArrayStrings) = Decode(DataProgramm);
+            int index = 0;
+
+            for (int i = 0; i < NumBit; i++)
+            {
+                var atype = ActionTypeExtensions.GetActionType(Convert.ToInt16(DecompressedData[i + 4]));
+
+                var name = "0";
+                var number = 0;
+                if (ArrayStrings.Length > i)
+                {
+                    if (ArrayStrings[i].Contains('@'))
+                    {
+                        var Label = ArrayStrings[i].Split('@');
+                        name = Label[0];
+                        if (int.TryParse(Label[1], out var n))
+                            number = n;
+                    }
+                    else
+                        name = ArrayStrings[i];
+                }
+
+                // Добавляем команду в текущую функцию
+                switch (atype)
+                {
+                    case ActionType.NextRow:
+                        // Сбрасываем счетчик строки
+                        index = 0;
+                        continue;
+
+                    // Управление потоком
+                    case ActionType.CreateFunction:
+                        ParseCurrentProg.Add(name, new PFunction());
+                        currentFunc = name;
+                        index = 0;
+                        break;
+
+                    // Команды проверки состояния (без параметров)
+                    case ActionType.IsNotEmpty:
+                    case ActionType.IsEmpty:
+                    case ActionType.IsFalling:
+                    case ActionType.IsCrystal:
+                    case ActionType.IsLivingCrystal:
+                    case ActionType.IsBoulder:
+                    case ActionType.IsSand:
+                    case ActionType.IsBreakableRock:
+                    case ActionType.IsUnbreakable:
+                    case ActionType.IsRedRock:
+                    case ActionType.IsBlackRock:
+                    case ActionType.IsAcid:
+                    case ActionType.IsQuadBlock:
+                    case ActionType.IsRoad:
+                    case ActionType.IsRedBlock:
+                    case ActionType.IsYellowBlock:
+                    case ActionType.IsBox:
+                    case ActionType.IsPillar:
+                    case ActionType.IsGreenBlock:
+                    case ActionType.CheckGun:
+
+                    // Команды перемещения и вращения
+                    case ActionType.MoveUp:
+                    case ActionType.MoveLeft:
+                    case ActionType.MoveDown:
+                    case ActionType.MoveRight:
+                    case ActionType.MoveForward:
+                    case ActionType.RotateUp:
+                    case ActionType.RotateLeft:
+                    case ActionType.RotateDown:
+                    case ActionType.RotateRight:
+                    case ActionType.RotateLeftRelative:
+                    case ActionType.RotateRightRelative:
+                    case ActionType.RotateRandom:
+
+                    // Команды проверки направления
+                    case ActionType.CheckUp:
+                    case ActionType.CheckLeft:
+                    case ActionType.CheckDown:
+                    case ActionType.CheckRight:
+                    case ActionType.CheckForward:
+                    case ActionType.CheckUpLeft:
+                    case ActionType.CheckUpRight:
+                    case ActionType.CheckDownLeft:
+                    case ActionType.CheckDownRight:
+                    case ActionType.CheckForwardLeft:
+                    case ActionType.CheckForwardRight:
+
+                    // Команды сдвига
+                    case ActionType.ShiftUp:
+                    case ActionType.ShiftLeft:
+                    case ActionType.ShiftDown:
+                    case ActionType.ShiftRight:
+                    case ActionType.ShiftForward:
+
+                    // Логические операторы
+                    case ActionType.Or:
+                    case ActionType.And:
+
+                    // Действия
+                    case ActionType.Dig:
+                    case ActionType.BuildBlock:
+                    case ActionType.Geology:
+                    case ActionType.BuildRoad:
+                    case ActionType.Heal:
+                    case ActionType.BuildPillar:
+                    case ActionType.Beep:
+
+                    // Макросы
+                    case ActionType.MacrosDig:
+                    case ActionType.MacrosBuild:
+                    case ActionType.MacrosHeal:
+                    case ActionType.MacrosMine:
+
+                    // Специальные команды
+                    case ActionType.Flip:
+                    case ActionType.FillGun:
+
+                    // Режимы
+                    case ActionType.EnableAutoDig:
+                    case ActionType.DisableAutoDig:
+                    case ActionType.EnableAgression:
+                    case ActionType.DisableAgression:
+                    case ActionType.EnableHandMode:
+                    case ActionType.DisableHandMode:
+
+                    // Специальные действия
+                    case ActionType.BOOM:
+                    case ActionType.DISCHARGE:
+                    case ActionType.PROTON:
+                    case ActionType.VB:
+                    case ActionType.Geopack:
+                    case ActionType.ZZ:
+                    case ActionType.C190:
+                    case ActionType.Poly:
+                    case ActionType.Up:
+                    case ActionType.Craft:
+                    case ActionType.Nano:
+                    case ActionType.Rembot:
+                    case ActionType.InvDirUp:
+                    case ActionType.InvDirLeft:
+                    case ActionType.InvDirDown:
+                    case ActionType.InvDirRight:
+
+                    // Старт/Стоп
+                    case ActionType.Start:
+                    case ActionType.Stop:
+                    case ActionType.Last:
+                        ParseCurrentProg[currentFunc].AddAction(new PAction(atype));
+                        break;
+
+                    case ActionType.GoTo:
+                    case ActionType.RunSub:
+                    case ActionType.RunFunction:
+                    case ActionType.RunState:
+                    case ActionType.RunIfFalse:
+                    case ActionType.RunIfTrue:
+                    case ActionType.RunOnRespawn:
+                    case ActionType.Return:
+                    case ActionType.ReturnFunction:
+                    case ActionType.ReturnState:
+                    case ActionType.Restart:
+
+                    // Отладка
+                    case ActionType.DebugBreak:
+                    case ActionType.DebugSet:
+                        ParseCurrentProg[currentFunc].AddAction(new PAction(atype, name));
+                        break;
+
+                    // Команды с числовым параметром
+                    case ActionType.IsHpLower100:
+                    case ActionType.IsHpLower50:
+                        ParseCurrentProg[currentFunc].AddAction(new PAction(atype, number));
+                        break;
+
+                    // Команды с меткой и числовым параметром
+                    case ActionType.WritableState:
+                    case ActionType.WritableStateLower:
+                    case ActionType.WritableStateMore:
+                        ParseCurrentProg[currentFunc].AddAction(new PAction(atype, name, number));
+                        break;
+
+                    // None или неизвестные команды
+                    case ActionType.None:
+                    default:
+                        if (atype != ActionType.None)
+                        {
+                            ParseCurrentProg[currentFunc].AddAction(new PAction(atype));
+                        }
+                        break;
+                }
+
+                index++;
+
+                // Проверяем, нужно ли обработать конец строки
+                if (index >= 15) index = 0;
+            }
+
+            ParseFunctionOrder = ParseCurrentProg.Keys.ToList();
+            return (ParseCurrentProg, ParseFunctionOrder);
+        }
+
         public void Run(Program p)
         {
             Selected = p;
-            CurrentProg = p.programm;
+            var (ParseCurrentProg, ParseFunctionOrder) = ParseProgramm(p.data);
+            CurrentProg = ParseCurrentProg;
+            FunctionOrder = ParseFunctionOrder;
 
             // Логирование функций
             foreach (var i in CurrentProg)
@@ -95,11 +314,11 @@ namespace MinesServer.GameShit.Programmator
 
         private void Next()
         {
-            var i = CurrentProg.Keys.ToList().IndexOf(CurrentFunction);
-            if (CurrentProg.Count > i + 1)
-                CurrentFunction = CurrentProg.ElementAt(i + 1).Key;
+            var i = FunctionOrder.IndexOf(CurrentFunction);
+            if (FunctionOrder.Count > i + 1)
+                CurrentFunction = FunctionOrder[i + 1];
             else
-                CurrentFunction = CurrentProg.First().Key;
+                CurrentFunction = FunctionOrder[0];
         }
 
         public void IncreaseDelay(double ms) => DelayProgramm = ServerTime.Now + TimeSpan.FromMilliseconds(ms);
