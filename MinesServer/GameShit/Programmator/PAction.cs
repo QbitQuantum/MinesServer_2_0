@@ -302,8 +302,8 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.MacrosBuild:
-                    var buildPos = p.GetDirCord();
-                    if (World.GetProp(buildPos.x, buildPos.y).isEmpty)
+                    var (x, y) = p.GetDirCord();
+                    if (World.GetProp(x, y).isEmpty)
                     {
                         DelayAction = 200;
                         p.Build("G");
