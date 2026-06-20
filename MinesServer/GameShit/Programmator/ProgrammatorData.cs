@@ -20,10 +20,6 @@ namespace MinesServer.GameShit.Programmator
         public (string name, int pos) startpoint;
         public bool flipstate = false;
 
-        public bool autoDig = false; 
-        public bool aggressive = false;  
-        public bool handMode = false;
-
         private void Drop()
         {
             startpoint = ("", 0);
@@ -34,11 +30,6 @@ namespace MinesServer.GameShit.Programmator
             shiftX = 0;
             shiftY = 0;
             flipstate = false;
-            // Сброс режимов
-            autoDig = false;
-            aggressive = false;
-            handMode = false;
-
             foreach (var function in currentprog)
                 function.Value.Reset();
         }

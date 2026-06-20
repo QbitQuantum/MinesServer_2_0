@@ -62,8 +62,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public long money { get; set; }
         public long creds { get; set; }
         public long opp { get; set; }
-        public bool autoDig { get; set; }
-        public bool agression { get; set; }
         public Clan? clan { get; set; }
         public Rank? clanrank { get; set; }
         public Resp? resp { get; set; }

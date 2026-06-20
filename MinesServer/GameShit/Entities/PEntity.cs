@@ -31,11 +31,13 @@ namespace MinesServer.GameShit.Entities
         public virtual int MaxHealth { get; set; }
         public virtual int pause { get; set; }
         public virtual double ServerPause { get; }
-
         public virtual int cid { get; set; }
         public virtual int dir { get; set; }
         public virtual int tail { get; set; }
         public virtual int skin { get; set; }
+        public virtual bool autoDig { get; set; }
+        public virtual bool agression { get; set; }
+        public virtual bool handMode { get; set; }
 
         public bool HadleProgramm()
         {

@@ -565,27 +565,27 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Режимы ===
                 case ActionType.EnableAutoDig:
-                    p.programsData.autoDig = true;
+                    p.autoDig = true;
                     break;
 
                 case ActionType.DisableAutoDig:
-                    p.programsData.autoDig = false;
+                    p.autoDig = false;
                     break;
 
                 case ActionType.EnableAgression:
-                    p.programsData.aggressive = true;
+                    p.agression = true;
                     break;
 
                 case ActionType.DisableAgression:
-                    p.programsData.aggressive = false;
+                    p.agression = false;
                     break;
 
                 case ActionType.EnableHandMode:
-                    p.programsData.handMode = true;
+                    p.handMode = true;
                     break;
 
                 case ActionType.DisableHandMode:
-                    p.programsData.handMode = false;
+                    p.handMode = false;
                     break;
 
                 // === Специальные команды ===
