@@ -145,11 +145,16 @@ namespace MinesServer.GameShit.Entities
 
         public void SendDFToBots(int fx, int fxx, int fxy, int bid, int dir, int col = 0)
         {
+            // Создаем пакет один раз для всех ботов
+            var packet = new HBPacket([new HBDirectedFXPacket(bid, fxx, fxy, fx, dir, col)]);
+            
             foreach (var chunk in World.W.GetVisibleChunks(x, y))
             {
-                foreach (var player in chunk.bots.Select(id => DataBase.GetPlayer(id.Key)))
+                foreach (var kvp in chunk.bots)
                 {
-                    player?.connection?.SendB(new HBPacket([new HBDirectedFXPacket(bid, fxx, fxy, fx, dir, col)]));
+                    // Прямой доступ к Player через словарь, без обращения к БД
+                    var player = kvp.Value;
+                    player.connection?.SendB(packet);
                 }
             }
         }
