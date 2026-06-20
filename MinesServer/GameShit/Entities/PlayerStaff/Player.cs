@@ -170,7 +170,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this.SendChat();
             this.SendSettings();
             this.SendConfig();
-            this.UpdateProg(programsData.selected);
+            this.UpdateProg(programsData.Selected);
             this.ProgStatus();
             this.SendCrys();
             this.SendWindow();
@@ -641,7 +641,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void UpdateUIProgramm()
         {
-            var p = programsData.selected;
+            var p = programsData.Selected;
             if (p != null && !programsData.ProgRunning)
                 this.OpenProg(p);
             if (programsData.ProgRunning)

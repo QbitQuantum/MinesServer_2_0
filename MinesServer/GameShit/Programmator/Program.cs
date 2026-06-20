@@ -27,7 +27,7 @@ namespace MinesServer.GameShit.Programmator
                 return _programm;
             }
         }
-        private Dictionary<string,PFunction> parseNormal()
+        private Dictionary<string, PFunction> parseNormal()
         {
             Dictionary<string, PFunction> functions = [];
             functions[""] = new PFunction();

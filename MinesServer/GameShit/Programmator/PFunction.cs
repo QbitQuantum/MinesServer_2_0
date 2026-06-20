@@ -5,14 +5,14 @@
         private PAction[] _actions = [];
         private int _actionCount = 0;
 
-        public int position = 0;
-        public (int x, int y) startoffset;
-        public string? calledfrom;
-        public bool? state;
+        public int Position { get; set; } = 0;
 
-        public bool ValidPosition => position < _actionCount;
+        public (int X, int Y) StartOffset { get; set; }
+        public ActionType? LastStateAction { get; set; } = null;
+        public string? CalledFrom { get; set; }
+        public bool? State { get; set; }
 
-        public ActionType? laststateaction = null;
+        public bool ValidPosition => Position < _actionCount;
 
         // Свойство для логирования (используется для вывода в консоль)
         public List<PAction> actions => _actions.Take(_actionCount).ToList();
@@ -31,17 +31,17 @@
         {
             if (!ValidPosition)
                 throw new IndexOutOfRangeException();
-            return ref _actions[position];
+            return ref _actions[Position];
         }
 
         public void Reset()
         {
-            position = 0;
-            startoffset = (0, 0);
-            state = null;
-            laststateaction = null;
+            Position = 0;
+            StartOffset = (0, 0);
+            State = null;
+            LastStateAction = null;
         }
 
-        public void MoveNext() => position++;
+        public void MoveNext() => Position++;
     }
 }

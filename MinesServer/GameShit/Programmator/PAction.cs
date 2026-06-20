@@ -6,10 +6,10 @@ namespace MinesServer.GameShit.Programmator
 {
     public struct PAction
     {
-        public ActionType type;
-        public string label;
-        public int num;
-        public double delay;
+        public ActionType Type;
+        public string Label;
+        public int Num;
+        public double DelayAction;
 
         public PAction(ActionType t) : this(t, "", 0) { }
         public PAction(ActionType t, string label) : this(t, label, 0) { }
@@ -17,10 +17,10 @@ namespace MinesServer.GameShit.Programmator
 
         public PAction(ActionType t, string label, int num)
         {
-            type = t;
-            this.label = label ?? "";
-            this.num = num;
-            delay = 0;
+            Type = t;
+            this.Label = label ?? "";
+            this.Num = num;
+            DelayAction = 0;
         }
 
         private static readonly Dictionary<int, (int dx, int dy)> dirz = new()
@@ -34,107 +34,107 @@ namespace MinesServer.GameShit.Programmator
         // Передаем father параметром
         private static void Check(PEntity p, Func<int, int, bool> func, PFunction father)
         {
-            var flip = p.programsData.flipstate ? -1 : 1;
+            var flip = p.programsData.FlipState ? -1 : 1;
             int checkX, checkY;
 
-            if (father.startoffset != default)
+            if (father.StartOffset != default)
             {
-                checkX = p.x + (flip * father.startoffset.x);
-                checkY = p.y + (flip * father.startoffset.y);
+                checkX = p.x + (flip * father.StartOffset.X);
+                checkY = p.y + (flip * father.StartOffset.Y);
             }
             else
             {
-                checkX = p.x + flip * (p.programsData.shiftX + p.programsData.checkX);
-                checkY = p.y + flip * (p.programsData.shiftY + p.programsData.checkY);
+                checkX = p.x + flip * (p.programsData.ShiftX + p.programsData.CheckX);
+                checkY = p.y + flip * (p.programsData.ShiftY + p.programsData.CheckY);
             }
 
-            p.programsData.checkX = 0;
-            p.programsData.checkY = 0;
-            p.programsData.shiftX = 0;
-            p.programsData.shiftY = 0;
+            p.programsData.CheckX = 0;
+            p.programsData.CheckY = 0;
+            p.programsData.ShiftX = 0;
+            p.programsData.ShiftY = 0;
 
             var result = func(checkX, checkY);
 
-            if (father.state == null)
-                father.state = result;
-            else if (father.laststateaction == ActionType.Or)
-                father.state = (bool)father.state || result;
-            else if (father.laststateaction == ActionType.And)
-                father.state = (bool)father.state && result;
+            if (father.State == null)
+                father.State = result;
+            else if (father.LastStateAction == ActionType.Or)
+                father.State = (bool)father.State || result;
+            else if (father.LastStateAction == ActionType.And)
+                father.State = (bool)father.State && result;
             else
-                father.state = result;
+                father.State = result;
         }
 
         // Передаем father параметром
         private bool? CallWSAction(PEntity p)
         {
-            switch (label.ToLower())
+            switch (Label.ToLower())
             {
                 case "geo":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.geo.Count == num,
-                        ActionType.WritableStateLower => p.geo.Count < num,
-                        ActionType.WritableStateMore => p.geo.Count > num,
+                        ActionType.WritableState => p.geo.Count == Num,
+                        ActionType.WritableStateLower => p.geo.Count < Num,
+                        ActionType.WritableStateMore => p.geo.Count > Num,
                         _ => null
                     };
 
                 case "crys":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.crys?.AllCry == num,
-                        ActionType.WritableStateLower => p.crys?.AllCry < num,
-                        ActionType.WritableStateMore => p.crys?.AllCry > num,
+                        ActionType.WritableState => p.crys?.AllCry == Num,
+                        ActionType.WritableStateLower => p.crys?.AllCry < Num,
+                        ActionType.WritableStateMore => p.crys?.AllCry > Num,
                         _ => null
                     };
 
                 case "red":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Red] == num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Red] < num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Red] > num,
+                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Red] == Num,
+                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Red] < Num,
+                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Red] > Num,
                         _ => null
                     };
 
                 case "green":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Green] == num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Green] < num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Green] > num,
+                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Green] == Num,
+                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Green] < Num,
+                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Green] > Num,
                         _ => null
                     };
 
                 case "blue":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Blue] == num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Blue] < num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Blue] > num,
+                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Blue] == Num,
+                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Blue] < Num,
+                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Blue] > Num,
                         _ => null
                     };
 
                 case "white":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.White] == num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.White] < num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.White] > num,
+                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.White] == Num,
+                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.White] < Num,
+                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.White] > Num,
                         _ => null
                     };
 
                 case "violet":
-                    return type switch
+                    return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Violet] == num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Violet] < num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Violet] > num,
+                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Violet] == Num,
+                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Violet] < Num,
+                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Violet] > Num,
                         _ => null
                     };
 
                 case "del":
-                    delay = num;
+                    DelayAction = Num;
                     return null;
 
                 default:
@@ -144,116 +144,116 @@ namespace MinesServer.GameShit.Programmator
 
         public object? Execute(PEntity p, PFunction father)
         {
-            switch (type)
+            switch (Type)
             {
                 // === Движение ===
                 case ActionType.MoveDown:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     if (p.Move(p.x, p.y + 1))
-                        delay += 200;
+                        DelayAction += 200;
                     break;
 
                 case ActionType.MoveUp:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     if (p.Move(p.x, p.y - 1))
-                        delay += 200;
+                        DelayAction += 200;
                     break;
 
                 case ActionType.MoveRight:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     if (p.Move(p.x + 1, p.y))
-                        delay += 200;
+                        DelayAction += 200;
                     break;
 
                 case ActionType.MoveLeft:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     if (p.Move(p.x - 1, p.y))
-                        delay += 200;
+                        DelayAction += 200;
                     break;
 
                 case ActionType.MoveForward:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     var forward = p.GetDirCord();
                     if (p.Move(forward.x, forward.y))
-                        delay += 200;
+                        DelayAction += 200;
                     break;
 
                 // === Вращение ===
                 case ActionType.RotateDown:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     p.Move(p.x, p.y, DirectionType.Down);
                     break;
 
                 case ActionType.RotateUp:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     p.Move(p.x, p.y, DirectionType.Up);
                     break;
 
                 case ActionType.RotateLeft:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     p.Move(p.x, p.y, DirectionType.Left);
                     break;
 
                 case ActionType.RotateRight:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     p.Move(p.x, p.y, DirectionType.Right);
                     break;
 
                 case ActionType.RotateLeftRelative:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     p.Move(p.x, p.y, DirectionTypeExt.ToDirection((p.dir + 3) % 4));
                     break;
 
                 case ActionType.RotateRightRelative:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     p.Move(p.x, p.y, DirectionTypeExt.ToDirection((p.dir + 1) % 4));
                     break;
 
                 case ActionType.RotateRandom:
-                    delay = p.ServerPause;
+                    DelayAction = p.ServerPause;
                     var rand = new Random(Guid.NewGuid().GetHashCode());
                     p.Move(p.x, p.y, DirectionTypeExt.ToDirection(rand.Next(4)));
                     break;
 
                 // === Действия ===
                 case ActionType.Dig:
-                    delay = 100;
+                    DelayAction = 100;
                     p.Bz();
                     break;
 
                 case ActionType.BuildBlock:
-                    delay = 100;
+                    DelayAction = 100;
                     p.Build("G");
                     break;
 
                 case ActionType.BuildPillar:
-                    delay = 100;
+                    DelayAction = 100;
                     p.Build("O");
                     break;
 
                 case ActionType.BuildRoad:
-                    delay = 100;
+                    DelayAction = 100;
                     p.Build("R");
                     break;
 
                 case ActionType.BuildMilitaryBlock:
-                    delay = 100;
+                    DelayAction = 100;
                     p.Build("V");
                     break;
 
                 case ActionType.Geology:
-                    delay = 100;
+                    DelayAction = 100;
                     p.Geo();
                     break;
 
                 case ActionType.Heal:
                     if (p.Heal())
-                        delay = 200;
+                        DelayAction = 200;
                     break;
 
                 case ActionType.Beep:
                     p.Beep();
-                    delay = 100;
+                    DelayAction = 100;
                     break;
 
                 // === Макросы ===
@@ -268,12 +268,12 @@ namespace MinesServer.GameShit.Programmator
                             if (p.dir == dir)
                             {
                                 p.Bz();
-                                delay = 200;
+                                DelayAction = 200;
                             }
                             else
                             {
                                 p.Move(p.x, p.y, DirectionTypeExt.ToDirection(dir));
-                                delay = p.ServerPause;
+                                DelayAction = p.ServerPause;
                             }
                             return true;
                         }
@@ -285,7 +285,7 @@ namespace MinesServer.GameShit.Programmator
                     {
                         if (p.Heal())
                         {
-                            delay = 200;
+                            DelayAction = 200;
                             return true;
                         }
                     }
@@ -295,7 +295,7 @@ namespace MinesServer.GameShit.Programmator
                     var digPos = p.GetDirCord();
                     if (World.GetProp(digPos.x, digPos.y).is_diggable)
                     {
-                        delay = 200;
+                        DelayAction = 200;
                         p.Bz();
                         return true;
                     }
@@ -305,7 +305,7 @@ namespace MinesServer.GameShit.Programmator
                     var buildPos = p.GetDirCord();
                     if (World.GetProp(buildPos.x, buildPos.y).isEmpty)
                     {
-                        delay = 200;
+                        DelayAction = 200;
                         p.Build("G");
                         return true;
                     }
@@ -313,29 +313,29 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Сдвиги ===
                 case ActionType.ShiftUp:
-                    p.programsData.shiftY--;
+                    p.programsData.ShiftY--;
                     break;
 
                 case ActionType.ShiftDown:
-                    p.programsData.shiftY++;
+                    p.programsData.ShiftY++;
                     break;
 
                 case ActionType.ShiftRight:
-                    p.programsData.shiftX++;
+                    p.programsData.ShiftX++;
                     break;
 
                 case ActionType.ShiftLeft:
-                    p.programsData.shiftX--;
+                    p.programsData.ShiftX--;
                     break;
 
                 case ActionType.ShiftForward:
-                    p.programsData.shiftX += p.dir switch
+                    p.programsData.ShiftX += p.dir switch
                     {
                         1 => -1,
                         3 => 1,
                         _ => 0
                     };
-                    p.programsData.shiftY += p.dir switch
+                    p.programsData.ShiftY += p.dir switch
                     {
                         0 => 1,
                         2 => -1,
@@ -345,13 +345,13 @@ namespace MinesServer.GameShit.Programmator
 
                 // === Проверки направления ===
                 case ActionType.CheckForward:
-                    p.programsData.checkX = p.dir switch
+                    p.programsData.CheckX = p.dir switch
                     {
                         1 => -1,
                         3 => 1,
                         _ => 0
                     };
-                    p.programsData.checkY = p.dir switch
+                    p.programsData.CheckY = p.dir switch
                     {
                         0 => 1,
                         2 => -1,
@@ -360,13 +360,13 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckRightRelative:
-                    p.programsData.checkX = p.dir switch
+                    p.programsData.CheckX = p.dir switch
                     {
                         0 => 1,
                         2 => -1,
                         _ => 0
                     };
-                    p.programsData.checkY = p.dir switch
+                    p.programsData.CheckY = p.dir switch
                     {
                         1 => -1,
                         3 => 1,
@@ -375,13 +375,13 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckLeftRelative:
-                    p.programsData.checkX = p.dir switch
+                    p.programsData.CheckX = p.dir switch
                     {
                         0 => -1,
                         2 => 1,
                         _ => 0
                     };
-                    p.programsData.checkY = p.dir switch
+                    p.programsData.CheckY = p.dir switch
                     {
                         1 => 1,
                         3 => -1,
@@ -390,43 +390,43 @@ namespace MinesServer.GameShit.Programmator
                     break;
 
                 case ActionType.CheckUp:
-                    p.programsData.checkX = 0;
-                    p.programsData.checkY = -1;
+                    p.programsData.CheckX = 0;
+                    p.programsData.CheckY = -1;
                     break;
 
                 case ActionType.CheckDown:
-                    p.programsData.checkX = 0;
-                    p.programsData.checkY = 1;
+                    p.programsData.CheckX = 0;
+                    p.programsData.CheckY = 1;
                     break;
 
                 case ActionType.CheckRight:
-                    p.programsData.checkX = 1;
-                    p.programsData.checkY = 0;
+                    p.programsData.CheckX = 1;
+                    p.programsData.CheckY = 0;
                     break;
 
                 case ActionType.CheckLeft:
-                    p.programsData.checkX = -1;
-                    p.programsData.checkY = 0;
+                    p.programsData.CheckX = -1;
+                    p.programsData.CheckY = 0;
                     break;
 
                 case ActionType.CheckUpLeft:
-                    p.programsData.checkX = -1;
-                    p.programsData.checkY = -1;
+                    p.programsData.CheckX = -1;
+                    p.programsData.CheckY = -1;
                     break;
 
                 case ActionType.CheckUpRight:
-                    p.programsData.checkX = 1;
-                    p.programsData.checkY = -1;
+                    p.programsData.CheckX = 1;
+                    p.programsData.CheckY = -1;
                     break;
 
                 case ActionType.CheckDownLeft:
-                    p.programsData.checkX = -1;
-                    p.programsData.checkY = 1;
+                    p.programsData.CheckX = -1;
+                    p.programsData.CheckY = 1;
                     break;
 
                 case ActionType.CheckDownRight:
-                    p.programsData.checkX = 1;
-                    p.programsData.checkY = 1;
+                    p.programsData.CheckX = 1;
+                    p.programsData.CheckY = 1;
                     break;
 
                 // === Проверки состояния (теперь передаем father) ===
@@ -522,34 +522,34 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.RunState:
                 case ActionType.RunFunction:
                 case ActionType.RunOnRespawn:
-                    return label;
+                    return Label;
 
                 case ActionType.ReturnFunction:
                 case ActionType.ReturnState:
-                    return father.state;
+                    return father.State;
 
                 case ActionType.Return:
                     return "";
 
                 case ActionType.RunIfTrue:
-                    if (father.state.HasValue && !father.state.Value)
+                    if (father.State.HasValue && !father.State.Value)
                         return null;
-                    father.state = null;
-                    return label;
+                    father.State = null;
+                    return Label;
 
                 case ActionType.RunIfFalse:
-                    if (father.state.HasValue && father.state.Value)
+                    if (father.State.HasValue && father.State.Value)
                         return null;
-                    father.state = null;
-                    return label;
+                    father.State = null;
+                    return Label;
 
                 case ActionType.Or:
                 case ActionType.And:
-                    father.laststateaction = type;
+                    father.LastStateAction = Type;
                     break;
 
                 case ActionType.GoTo:
-                    return label;
+                    return Label;
 
                 // === Работа с памятью ===
                 case ActionType.WritableState:
@@ -601,15 +601,15 @@ namespace MinesServer.GameShit.Programmator
                 case ActionType.Craft:
                 case ActionType.Nano:
                 case ActionType.Rembot:
-                    p.SpecialAction(type);
-                    delay = 200;
+                    p.SpecialAction(Type);
+                    DelayAction = 200;
                     break;
 
                 case ActionType.InvDirUp:
                 case ActionType.InvDirLeft:
                 case ActionType.InvDirDown:
                 case ActionType.InvDirRight:
-                    p.InverseDirection(type);
+                    p.InverseDirection(Type);
                     break;
 
                 // === Пропуск строки ===
