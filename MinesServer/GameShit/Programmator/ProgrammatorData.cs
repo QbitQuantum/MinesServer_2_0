@@ -210,6 +210,10 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.InvDirDown:
                     case ActionType.InvDirRight:
 
+                    // Проверка состояние робота
+                    case ActionType.IsHpLower100:
+                    case ActionType.IsHpLower50:
+
                     // Старт/Стоп
                     case ActionType.Start:
                     case ActionType.Stop:
@@ -233,12 +237,6 @@ namespace MinesServer.GameShit.Programmator
                     case ActionType.DebugBreak:
                     case ActionType.DebugSet:
                         ParseCurrentProg[currentFunc].AddAction(new PAction(atype, name));
-                        break;
-
-                    // Команды с числовым параметром
-                    case ActionType.IsHpLower100:
-                    case ActionType.IsHpLower50:
-                        ParseCurrentProg[currentFunc].AddAction(new PAction(atype, number));
                         break;
 
                     // Команды с меткой и числовым параметром
