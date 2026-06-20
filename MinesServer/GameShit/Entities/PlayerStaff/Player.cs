@@ -234,7 +234,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             lastc190hit = ServerTime.Now;
         }
 
-        public bool HandleUseInventory(DateTime time)
+        public bool HandleUseInventory()
         {
             DateTime now = ServerTime.Now;
             bool canUse = (now - lastuseinventory) >= TimeSpan.FromMilliseconds(400) ||

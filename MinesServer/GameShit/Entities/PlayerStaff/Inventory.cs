@@ -292,10 +292,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var invgrid = minv ? miniq.Select(i => new KeyValuePair<int, int>(i, this[i])).ToDictionary() : items;
             return new InventoryPacket(new InventoryShowPacket(invgrid, selected, Lenght));
         }
-        public DateTime time = DateTime.Now;
+
         public void Use(Player p)
         {
-            if (!p.HandleUseInventory(DateTime.UtcNow))
+            if (!p.HandleUseInventory())
                 return;
 
             var (x, y) = p.GetDirCord();
@@ -314,7 +314,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     p.SendInventory();
                 }
             }
-            time = DateTime.Now;
         }
         private void AddChoose(int item)
         {
