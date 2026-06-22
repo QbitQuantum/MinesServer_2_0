@@ -34,9 +34,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public Player? owner { get; set; }
         public override Basket crys { get; set; }
 
-        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
-        private float cb; // Для дробной части добычи
-
         public override void Build(string type) { } // Боты не строят
 
         public override void Bz()
@@ -45,7 +42,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return;
 
             // Просто вызываем сервис, опыт начисляется внутри через owner.skillslist
-            ResourceExtractionService.PerformDig(this, owner, ref cb, CrystalCB, crys);
+            ResourceExtractionService.PerformDig(this, owner, crys);
         }
 
         public override void Death()

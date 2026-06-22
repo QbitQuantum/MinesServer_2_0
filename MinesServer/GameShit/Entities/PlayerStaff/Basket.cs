@@ -13,6 +13,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public int id { get; set; }
         public string? serialazed { get; set; }
 
+        // TODO: Сделать частью БД
+        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
+
         public Basket(bool n)
         {
             _cry = new long[6];

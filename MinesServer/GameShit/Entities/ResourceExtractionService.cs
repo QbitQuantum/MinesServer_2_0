@@ -22,8 +22,6 @@ public static class ResourceExtractionService
     public static void PerformDig(
     PEntity actor,
     Player skillOwner,
-    ref float mainCb,
-    CrystalCBStorage allCb,
     Basket basket)
     {
         // Базовая валидация
@@ -41,7 +39,7 @@ public static class ResourceExtractionService
         // Добыча кристаллов или обычных блоков
         if (World.isCry(x, y))
         {
-            ProcessCrystalMining(actor, skillOwner, x, y, cellType, basket, ref mainCb, allCb);
+            ProcessCrystalMining(actor, skillOwner, x, y, cellType, basket);
         }
         else
         {
@@ -127,32 +125,30 @@ public static class ResourceExtractionService
         int x,
         int y,
         CellType cellType,
-        Basket basket,
-        ref float mainCb,
-        CrystalCBStorage allCb)
+        Basket basket)
     {
         CrystalType crystalType = ParseCryType(cellType);
 
         // Основная добыча
         float mainMultiplier = skillOwner.skillslist.GetMiningMultiplier();
 
-        float multiplier = 1 + (float)Math.Truncate(mainCb) + mainMultiplier;
+        float multiplier = 1 + (float)Math.Truncate(basket.CrystalCB.GlobalCB) + mainMultiplier;
         float floorMult = (float)Math.Truncate(multiplier);
-        mainCb -= (float)Math.Truncate(mainCb);
-        mainCb += multiplier - floorMult;
+        basket.CrystalCB.GlobalCB -= (float)Math.Truncate(basket.CrystalCB.GlobalCB);
+        basket.CrystalCB.GlobalCB += multiplier - floorMult;
 
-        Mine(actor, ref mainCb, basket, cellType, x, y, floorMult, crystalType);
+        Mine(actor, basket, cellType, x, y, floorMult, crystalType);
 
         // Смежное извлечение (зеленые <-> синие)
         if (skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction))
         {
-            ProcessAdjacentExtraction(actor, skillOwner, x, y, cellType, basket, crystalType, allCb);
+            ProcessAdjacentExtraction(actor, skillOwner, x, y, cellType, basket, crystalType);
         }
 
         // Сортировка (красные -> фиолетовые -> голубые -> белые -> красные)
         if (skillOwner.skillslist.HasSkill(SkillType.Sort))
         {
-            ProcessSorting(actor, skillOwner, x, y, cellType, basket, crystalType, allCb);
+            ProcessSorting(actor, skillOwner, x, y, cellType, basket, crystalType);
         }
 
         // Начисление опыта за кристаллы
@@ -168,8 +164,7 @@ public static class ResourceExtractionService
         int y,
         CellType cellType,
         Basket basket,
-        CrystalType originalType,
-        CrystalCBStorage allCb)
+        CrystalType originalType)
     {
         CrystalType? additionalType = null;
 
@@ -181,9 +176,9 @@ public static class ResourceExtractionService
         if (additionalType.HasValue)
         {
             float adjacentMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.AdjacentExtraction);
-            float typeCb = allCb.Get(additionalType.Value);
-            Mine(actor, ref typeCb, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
-            allCb.Set(additionalType.Value, typeCb);
+            float typeCb = basket.CrystalCB.Get(additionalType.Value);
+            Mine(actor, basket, cellType, x, y, adjacentMultiplier, additionalType.Value);
+            basket.CrystalCB.Set(additionalType.Value, typeCb);
 
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.AdjacentExtraction, 1f);
             skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Extraction, 1f);
@@ -197,8 +192,7 @@ public static class ResourceExtractionService
         int y,
         CellType cellType,
         Basket basket,
-        CrystalType originalType,
-        CrystalCBStorage allCb)
+        CrystalType originalType)
     {
         CrystalType convertedType;
 
@@ -221,9 +215,9 @@ public static class ResourceExtractionService
         }
 
         float sortMultiplier = skillOwner.skillslist.GetSkillEffect(SkillType.Sort);
-        float typeCb = allCb.Get(convertedType);
-        Mine(actor, ref typeCb, basket, cellType, x, y, sortMultiplier, convertedType);
-        allCb.Set(convertedType, typeCb);
+        float typeCb = basket.CrystalCB.Get(convertedType);
+        Mine(actor, basket, cellType, x, y, sortMultiplier, convertedType);
+        basket.CrystalCB.Set(convertedType, typeCb);
 
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Sort, 1f);
     }
@@ -689,7 +683,6 @@ public static class ResourceExtractionService
 
     private static void Mine(
         PEntity actor,
-        ref float cb,
         Basket basket,
         CellType cell,
         int x,
@@ -715,13 +708,13 @@ public static class ResourceExtractionService
         }
 
         // Добавляем накопленный CB к множителю
-        float totalWithCb = multiplier + cb;
+        float totalWithCb = multiplier + basket.CrystalCB.GlobalCB;
 
         // Определяем количество целых кристаллов
         long odob = (long)Math.Truncate(totalWithCb);
 
         // Обновляем CB - оставляем только дробную часть
-        cb = totalWithCb - odob;
+        basket.CrystalCB.GlobalCB = totalWithCb - odob;
 
         if (odob <= 0)
             return;

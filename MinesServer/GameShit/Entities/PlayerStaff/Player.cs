@@ -34,7 +34,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private const int C190StackResetMinutes = 1;
 
         private (int X, int Y)? lastchunk;
-        private float cb;
 
         private DateTime lBotsUpdate = ServerTime.Now;
         private DateTime lastc190hit = ServerTime.Now;
@@ -54,7 +53,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public override int tail => HasActiveProgram ? 1 : 0;
         [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
 
-        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
         public string name { get; set; } = string.Empty;
         public string hash { get; set; } = string.Empty;
         public string passwd { get; set; } = string.Empty;
@@ -498,7 +496,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Bz()
         {
-            ResourceExtractionService.PerformDig(this, this, ref cb, CrystalCB, crys);
+            ResourceExtractionService.PerformDig(this, this, crys);
         }
 
         public override void Beep() 

@@ -6,6 +6,8 @@ namespace MinesServer.GameShit.Entities
 {
     public class CrystalCBStorage
     {
+        public float GlobalCB { get; set; }
+
         public Dictionary<CrystalType, float> Values { get; private set; } = new();
 
         public float Get(CrystalType type)
