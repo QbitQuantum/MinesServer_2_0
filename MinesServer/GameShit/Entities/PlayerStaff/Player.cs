@@ -509,7 +509,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Beep() 
         {
-            pSenders.Beep(this);
+            this.SendBeep();
         }
 
         public void BBox(long[]? c)
