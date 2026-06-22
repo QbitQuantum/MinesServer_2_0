@@ -29,7 +29,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         private const int BaseMoveDelay = 10000;
-        private const int SyncIntervalSeconds = 10;
         private const int AfkTimeoutMinutes = 5;
         private const int BotUpdateIntervalSeconds = 4;
         private const int C190StackResetMinutes = 1;
@@ -38,7 +37,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private float cb;
 
         private DateTime lBotsUpdate = ServerTime.Now;
-        private DateTime lastSync = ServerTime.Now;
         private DateTime lastc190hit = ServerTime.Now;
         private DateTime lastDelay = ServerTime.Now;
         private DateTime laststarttime = ServerTime.Now;
@@ -193,7 +191,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return;
             }
             
-            SyncIfNeeded(now);
             UpdateC190Stacks(now);
 
             if (!online)
@@ -204,18 +201,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             UpdateBots(now);
             HandleCurrentCell();
-        }
-
-        private void SyncIfNeeded(DateTime now)
-        {
-            if (now - lastSync > TimeSpan.FromSeconds(SyncIntervalSeconds))
-            {
-                using var db = new DataBase();
-                db.Entry(this).State = EntityState.Modified;
-                db.Entry(this).Collection(p => p.programs).IsModified = false;
-                db.SaveChanges();
-                lastSync = now;
-            }
         }
 
         private void UpdateC190Stacks(DateTime now)
