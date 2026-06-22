@@ -3,6 +3,7 @@ using MinesServer.Enums;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.GameShit.Skills;
+using MinesServer.Network.GUI;
 using MinesServer.Server;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
@@ -347,16 +348,25 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
 
         /// <summary>
+        /// Получение множителя опыта от навыка
+        /// </summary>
+        private float UpgradeEffect()
+        {
+            return GetSkill(SkillType.Upgrade)?.Effect ?? 0f;
+        }
+
+        /// <summary>
         /// Обрабатывает получение опыта для конкретного типа навыка
         /// </summary>
         public void HandleExperience(Player player, SkillType skillType, float baseExp = 1f)
         {
             LoadSkills();
-
             var skill = GetSkill(skillType);
-            skill?.AddExp(player, baseExp);
+            if (skill == null) return;
+            var skillProgress = skill.AddExp(baseExp, UpgradeEffect());
+            player.connection?.SendU(new SkillsPacket(skillProgress));
+            Save();
         }
-
 
         /// <summary>
         /// Обрабатывает получение опыта при добыче ресурсов

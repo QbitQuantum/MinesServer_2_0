@@ -761,14 +761,14 @@ public static class ResourceExtractionService
         if (actor.Health == actor.MaxHealth)
             return false;
 
+        if (!actor.crys.RemoveCrys(CrystalType.Red, 1))
+            return false;
+
         var heal = skillOwner.skillslist.GetSkill(SkillType.Repair);
         if (heal == default)
             return false;
 
-        if (!actor.crys.RemoveCrys(CrystalType.Red, 1))
-            return false;
-
-        heal.AddExp(skillOwner);
+        skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Repair, 1);
 
         actor.AddHp((int)heal.Effect);
 

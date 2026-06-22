@@ -47,7 +47,7 @@ namespace MinesServer.GameShit.Skills
         {
             if (!isUpReady()) return;
 
-            Dictionary<string, int> v = new();
+            Dictionary<string, int> v = [];
             exp -= Expiriense;
             lvl += 1;
             v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
@@ -68,22 +68,14 @@ namespace MinesServer.GameShit.Skills
             }
         }
 
-        public void AddExp(Player p, float expv = 1)
+        public Dictionary<string, int> AddExp(float expv = 1, float UpgradeEffect = 0)
         {
-            Dictionary<string, int> v = new();
-
-            var SkillUpgrade = p.skillslist.GetSkill(SkillType.Upgrade);
-
-            // TODO: Добавить функцию MultiExp
-            // И по возможности кэшировать все значения функций
-            // Чтобы постоянно не перебирать
-            if (SkillUpgrade != null)
-                expv *= 1f + (SkillUpgrade.Effect / 100f);
-
+            Dictionary<string, int> skillProgress = [];
+            if (UpgradeEffect != 0)
+                expv *= 1f + (UpgradeEffect / 100f);
             exp += expv;
-            v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
-            p.connection?.SendU(new SkillsPacket(v));
-            p.skillslist.Save();
+            skillProgress.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
+            return skillProgress;
         }
 
         public bool isUpReady()
