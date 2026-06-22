@@ -498,12 +498,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Bz()
         {
-            // TODO: Пофиксить. Проблема может возникать из-за серрилизации из бд
-            if (CrystalCB == null)
-            {
-                CrystalCB = new CrystalCBStorage();
-                Console.WriteLine("CrystalCB был null в Bz(), создан новый");
-            }
             ResourceExtractionService.PerformDig(this, this, ref cb, CrystalCB, crys);
         }
 

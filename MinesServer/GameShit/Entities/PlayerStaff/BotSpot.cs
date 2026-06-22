@@ -44,12 +44,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (owner is null)
                 return;
 
-            // TODO: Пофиксить. Проблема может возникать из-за серрилизации из бд
-            if (CrystalCB == null)
-            {
-                CrystalCB = new CrystalCBStorage();
-                Console.WriteLine("CrystalCB был null в Bz(), создан новый");
-            }
             // Просто вызываем сервис, опыт начисляется внутри через owner.skillslist
             ResourceExtractionService.PerformDig(this, owner, ref cb, CrystalCB, crys);
         }
