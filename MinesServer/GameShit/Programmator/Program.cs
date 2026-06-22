@@ -8,17 +8,17 @@ namespace MinesServer.GameShit.Programmator
         {
 
         }
-        public Program(Player P,string name,string data)
+        public Program(Player owner, string name, string data)
         {
-            owner = P;
+            this.owner = owner;
             this.name = name;
             this.data = data;
         }
 
         public int id { get; set; }
-        public string name { get; set; }
-        public string data { get; set; }
-        public Player owner { get; set; }
+        public string name { get; set; } = string.Empty;
+        public string data { get; set; } = string.Empty;
+        public Player? owner { get; set; } = null;
 
     }
 }
