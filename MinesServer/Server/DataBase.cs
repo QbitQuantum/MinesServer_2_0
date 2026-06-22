@@ -250,6 +250,18 @@ namespace MinesServer.Server
             db.SaveChanges();
         }
 
+        public static Program? SaveAndGetProg((int id, string source) data)
+        {
+            using var db = new DataBase();
+            Program? programm = db.progs.FirstOrDefault(i => i.id == data.id);
+            if (programm != default)
+            {
+                programm.data = data.source;
+                db.SaveChanges();
+            }
+            return programm;
+        }
+
         // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
         // Либо инкапсулировать полностью
         public static List<Player> activeplayers = new();

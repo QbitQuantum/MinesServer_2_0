@@ -71,18 +71,6 @@ namespace MinesServer.GameShit.Programmator
             };
             p.SendWindow();
         }
-        public static void StartedProg(Player p, (int id, string source) data)
-        {
-            using var db = new DataBase();
-            var programm = db.progs.FirstOrDefault(i => i.id == data.id);
-            if (programm != default)
-            {
-                programm.data = data.source;
-                db.SaveChanges();
-                p.RunProgramm(programm);
-                p.UpdateProg(programm);
-            }
-        }
         public static void OpenCreateProg(Player p)
         {
             p.win.CurrentTab.Open(new Page()

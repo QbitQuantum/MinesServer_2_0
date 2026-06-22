@@ -647,7 +647,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void StartedProg((int id, string source) data)
         {
-            StaticGUI.StartedProg(this, data);
+            Program? programm = DataBase.SaveAndGetProg(data);
+            if (programm != default)
+            {
+                RunProgramm(programm);
+                this.UpdateProg(programm);
+            }
             this.ProgStatus();
         }
 
