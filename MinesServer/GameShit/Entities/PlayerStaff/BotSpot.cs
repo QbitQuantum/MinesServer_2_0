@@ -34,7 +34,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public Player? owner { get; set; }
         public override Basket crys { get; set; }
 
-        public CrystalCBStorage CrystalCB = new();
+        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
         private float cb; // Для дробной части добычи
 
         public override void Build(string type) { } // Боты не строят
@@ -51,7 +51,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 Console.WriteLine("CrystalCB был null в Bz(), создан новый");
             }
             // Просто вызываем сервис, опыт начисляется внутри через owner.skillslist
-            ResourceExtractionService.PerformDig(this, owner, ref cb, ref CrystalCB, crys);
+            ResourceExtractionService.PerformDig(this, owner, ref cb, CrystalCB, crys);
         }
 
         public override void Death()

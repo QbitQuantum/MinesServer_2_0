@@ -54,7 +54,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         [NotMapped] public override int tail => HasActiveProgram ? 1 : 0;
         [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
 
-        public CrystalCBStorage CrystalCB = new();
+        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
         public string name { get; set; } = string.Empty;
         public string hash { get; set; } = string.Empty;
         public string passwd { get; set; } = string.Empty;
@@ -504,7 +504,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 CrystalCB = new CrystalCBStorage();
                 Console.WriteLine("CrystalCB был null в Bz(), создан новый");
             }
-            ResourceExtractionService.PerformDig(this, this, ref cb, ref CrystalCB, crys);
+            ResourceExtractionService.PerformDig(this, this, ref cb, CrystalCB, crys);
         }
 
         public override void Beep() 

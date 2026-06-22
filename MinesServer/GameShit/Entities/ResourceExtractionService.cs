@@ -23,7 +23,7 @@ public static class ResourceExtractionService
     PEntity actor,
     Player skillOwner,
     ref float mainCb,
-    ref CrystalCBStorage allCb,
+    CrystalCBStorage allCb,
     Basket basket)
     {
         // Базовая валидация
@@ -41,7 +41,7 @@ public static class ResourceExtractionService
         // Добыча кристаллов или обычных блоков
         if (World.isCry(x, y))
         {
-            ProcessCrystalMining(actor, skillOwner, x, y, cellType, basket, ref mainCb, ref allCb);
+            ProcessCrystalMining(actor, skillOwner, x, y, cellType, basket, ref mainCb, allCb);
         }
         else
         {
@@ -129,7 +129,7 @@ public static class ResourceExtractionService
         CellType cellType,
         Basket basket,
         ref float mainCb,
-        ref CrystalCBStorage allCb)
+        CrystalCBStorage allCb)
     {
         CrystalType crystalType = ParseCryType(cellType);
 
@@ -146,13 +146,13 @@ public static class ResourceExtractionService
         // Смежное извлечение (зеленые <-> синие)
         if (skillOwner.skillslist.HasSkill(SkillType.AdjacentExtraction))
         {
-            ProcessAdjacentExtraction(actor, skillOwner, x, y, cellType, basket, crystalType, ref allCb);
+            ProcessAdjacentExtraction(actor, skillOwner, x, y, cellType, basket, crystalType, allCb);
         }
 
         // Сортировка (красные -> фиолетовые -> голубые -> белые -> красные)
         if (skillOwner.skillslist.HasSkill(SkillType.Sort))
         {
-            ProcessSorting(actor, skillOwner, x, y, cellType, basket, crystalType, ref allCb);
+            ProcessSorting(actor, skillOwner, x, y, cellType, basket, crystalType, allCb);
         }
 
         // Начисление опыта за кристаллы
@@ -169,7 +169,7 @@ public static class ResourceExtractionService
         CellType cellType,
         Basket basket,
         CrystalType originalType,
-        ref CrystalCBStorage allCb)
+        CrystalCBStorage allCb)
     {
         CrystalType? additionalType = null;
 
@@ -198,7 +198,7 @@ public static class ResourceExtractionService
         CellType cellType,
         Basket basket,
         CrystalType originalType,
-        ref CrystalCBStorage allCb)
+        CrystalCBStorage allCb)
     {
         CrystalType convertedType;
 
