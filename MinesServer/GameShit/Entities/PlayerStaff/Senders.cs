@@ -11,7 +11,7 @@ using MinesServer.Server.Network;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {
-    public static class pSenders
+    public static class Senders
     {
         public static void SendGeo(this Player p)
         {
