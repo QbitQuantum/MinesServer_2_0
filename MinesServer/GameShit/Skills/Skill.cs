@@ -38,9 +38,18 @@ namespace MinesServer.GameShit.Skills
         {
         }
 
+        public Skill(int lvl, float exp, SkillType type)
+        {
+            this.lvl = lvl;
+            this.exp = exp;
+            this.type = type;
+        }
+
         public int lvl = 1;
         public float exp = 0;
         public SkillType type;
+
+        public SaledSkill saledSkill => new(lvl, isUpReady(), type);
 
         public Dictionary<string, int> Up()
         {
@@ -60,6 +69,23 @@ namespace MinesServer.GameShit.Skills
             exp += expv;
             skillProgress.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
             return skillProgress;
+        }
+
+        //  Mетод проверки уровня
+        public bool IsLevelSatisfied(int requiredLevel)
+        {
+            return lvl >= requiredLevel;
+        }
+
+        // Метод для получения отставания по уровню
+        public int GetLevelDeficit(int requiredLevel)
+        {
+            return requiredLevel - lvl;
+        }
+
+        public bool IsRequiered(SkillType RequiredSkill, int RequiredLevel)
+        {
+            return type == RequiredSkill && lvl >= RequiredLevel;
         }
 
         public bool isUpReady()

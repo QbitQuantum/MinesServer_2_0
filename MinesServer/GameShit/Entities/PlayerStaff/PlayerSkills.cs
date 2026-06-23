@@ -162,10 +162,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             foreach (var req in info.Requirements)
             {
-                var hasReq = skills.Values.Any(s =>
-                    s?.type == req.RequiredSkill &&
-                    s?.lvl >= req.RequiredLevel);
-
+                var hasReq = skills.Values.Any(s => s?.IsRequiered(req.RequiredSkill, req.RequiredLevel) ?? false);
                 if (!hasReq)
                     return false; // Не выполнено хотя бы одно требование
             }
@@ -232,12 +229,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void ForceInstallSkill(SkillType skillType, int slot, int lvl, float exp)
         {
-            skills[slot] = new Skill
-            {
-                type = skillType,
-                lvl = lvl,
-                exp = exp
-            };
+            skills[slot] = new Skill(lvl, exp, skillType);
         }
 
         public void Save()
@@ -299,21 +291,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 {
                     var playerSkill = GetSkill(req.RequiredSkill);
 
-                    // Если требуемого навыка НЕТ У ИГРОКА - навык полностью недоступен
                     if (playerSkill == null)
                     {
                         allRequirementsExist = false;
                         break;
                     }
 
-                    int playerLevel = playerSkill.lvl;
-
-                    // Проверяем уровень
-                    if (playerLevel < req.RequiredLevel)
+                    // Используем инкапсулированные методы
+                    if (!playerSkill.IsLevelSatisfied(req.RequiredLevel))
                     {
                         allRequirementsMet = false;
-                        int missing = req.RequiredLevel - playerLevel;
-                        maxMissingLevels = Math.Max(maxMissingLevels, missing);
+                        maxMissingLevels = Math.Max(maxMissingLevels,
+                            playerSkill.GetLevelDeficit(req.RequiredLevel));
                     }
                 }
 
@@ -342,7 +331,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             for (int i = 0; i < slots; i++)
             {
                 if (skills.TryGetValue(i, out Skill? value) && value is not null)
-                    ski.Add(new UpSkill(i, value.lvl, value.isUpReady(), value.type));
+                {
+                    var saled = value.saledSkill;
+                    ski.Add(new UpSkill(i, saled.Lvl, saled.IsUp, saled.Type));
+                }
             }
             return ski.ToArray();
         }
