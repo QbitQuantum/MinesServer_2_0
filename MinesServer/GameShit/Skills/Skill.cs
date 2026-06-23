@@ -1,6 +1,5 @@
 ﻿using MinesServer.Enums;
 using MinesServer.GameShit.Entities.PlayerStaff;
-using MinesServer.Network.GUI;
 
 namespace MinesServer.GameShit.Skills
 {
@@ -43,29 +42,14 @@ namespace MinesServer.GameShit.Skills
         public float exp = 0;
         public SkillType type;
 
-        public void Up(Player p)
+        public Dictionary<string, int> Up()
         {
-            if (!isUpReady()) return;
-
-            Dictionary<string, int> v = [];
+            Dictionary<string, int> skillProgress = [];
+            if (!isUpReady()) return skillProgress;
             exp -= Expiriense;
             lvl += 1;
-            v.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
-            p.connection?.SendU(new SkillsPacket(v));
-            p.SendLvl();
-            p.skillslist.Save();
-
-            if (type == SkillType.Movement ||
-                type == SkillType.RoadMovement)
-            {
-                p.SendSpeed();
-            }
-
-            if (type == SkillType.Health)
-            {
-                p.MaxHealth = (int)Effect;
-                p.SendHealth();
-            }
+            skillProgress.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
+            return skillProgress;
         }
 
         public Dictionary<string, int> AddExp(float expv = 1, float UpgradeEffect = 0)

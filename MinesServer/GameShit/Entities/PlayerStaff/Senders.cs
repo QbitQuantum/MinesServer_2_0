@@ -58,6 +58,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());
         public static void SendConfig(this Player p) => p.connection?.SendU(new ConfigPacket("oldprogramformat+"));
         public static void SendSettings(this Player p) => p.settings.SendSettings(p);
+        public static void SendSkills(this Player p, Dictionary<string, int> skillProgress)
+        {
+            if (skillProgress.Count == 0 || p.connection == null) return;
+            p.connection?.SendU(new SkillsPacket(skillProgress));
+        }
         public static void UpdateProg(this Player p, Program? prog)
         {
             if (prog == null) return;

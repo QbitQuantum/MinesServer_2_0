@@ -232,7 +232,24 @@ namespace MinesServer.GameShit.Buildings
                                 p.SendMoney();
                             }
 
-                            skillfromslot.Up(p);
+                            var SkillProgress = skillfromslot.Up();
+                            // Сперва сохраняем данные
+                            p.skillslist.Save();
+
+                            p.SendSkills(SkillProgress);
+                            p.SendLvl();
+
+                            if (skillfromslot.type == SkillType.Movement || skillfromslot.type == SkillType.RoadMovement)
+                            {
+                                p.SendSpeed();
+                            }
+
+                            if (skillfromslot.type == SkillType.Health)
+                            {
+                                p.MaxHealth = (int)skillfromslot.Effect;
+                                p.SendHealth();
+                            }
+
                             p.win = GUIWin(p);
                             p.SendWindow();
                         }) :
