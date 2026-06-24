@@ -41,7 +41,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private DateTime laststarttime = ServerTime.Now;
         private DateTime lastuseinventory = ServerTime.Now;
 
-        private readonly List<(int X, int Y)> alreadyvisible = [];
+        private readonly HashSet<(int X, int Y)> alreadyvisible = [];
 
         private int c190stacks = 1;
 
@@ -724,18 +724,42 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private List<(int x, int y)> GetNewChunks(List<(int x, int y)> currentChunks)
         {
-            return currentChunks.Where(chunk => !alreadyvisible.Contains(chunk)).ToList();
+            var result = new List<(int x, int y)>();
+            foreach (var chunk in currentChunks)
+            {
+                if (!alreadyvisible.Contains(chunk))
+                    result.Add(chunk);
+            }
+            return result;
         }
 
         private List<(int x, int y)> GetObsoleteChunks(List<(int x, int y)> currentChunks)
         {
-            return alreadyvisible.Where(chunk => !currentChunks.Contains(chunk)).ToList();
+            var currentSet = new HashSet<(int x, int y)>(currentChunks);
+            var result = new List<(int x, int y)>();
+            foreach (var seen in alreadyvisible)
+            {
+                if (!currentSet.Contains(seen))
+                    result.Add(seen);
+            }
+            return result;
         }
+
         private void SendPackets(IEnumerable<IHubPacket> packets)
         {
-            var packetArray = packets.ToArray();
-            if (packetArray.Any())
-                connection?.SendB(new HBPacket(packetArray));
+            if (connection == null) return;
+            if (packets == null) return;
+
+            if (packets is ICollection<IHubPacket> collection)
+            {
+                if (collection.Count == 0) return;
+                connection.SendB(new HBPacket(collection.ToArray()));
+                return;
+            }
+
+            var list = packets.ToList();
+            if (list.Count == 0) return;
+            connection.SendB(new HBPacket(list.ToArray()));
         }
 
         private void UpdateTrackedChunks(
