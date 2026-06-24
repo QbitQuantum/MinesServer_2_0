@@ -338,7 +338,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdatePosition(int x, int y)
         {
-            if (Vector2.Distance(new Vector2(this.x, this.y), new Vector2(x, y)) >= 1f)
+            int dx = this.x - x;
+            int dy = this.y - y;
+            int distSq = dx * dx + dy * dy;
+
+            if (distSq >= 1)
             {
                 skillslist.HandleExperience(this, SkillType.Movement, 1);
                 if (World.isRoad(x, y))
