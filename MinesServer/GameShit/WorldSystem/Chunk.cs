@@ -66,10 +66,18 @@ namespace MinesServer.GameShit.WorldSystem
 
         private bool shouldbeloaded => ShouldBeLoadedBots() || ContainsAlive || updlasttick;
 
-        public byte[] cells => Enumerable.Range(0, ChunkHeight)
-            .SelectMany(y => Enumerable.Range(0, ChunkWidth)
-                .Select(x => this[x, y]))
-            .ToArray();
+        public byte[] cells
+        {
+            get
+            {
+                var result = new byte[ChunkWidth * ChunkHeight];
+                int index = 0;
+                for (int y = 0; y < ChunkHeight; y++)
+                    for (int x = 0; x < ChunkWidth; x++)
+                        result[index++] = this[x, y];
+                return result;
+            }
+        }
 
         private byte this[int x, int y]
         {
