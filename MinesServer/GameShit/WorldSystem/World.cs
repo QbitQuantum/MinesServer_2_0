@@ -497,7 +497,7 @@ namespace MinesServer.GameShit.WorldSystem
         {
             if (ServerTime.Now - lastUpdate < interval)
                 return;
-            using var db = new DataBase();
+
             for (int chx = 0; chx < Chunk.ChunksW; chx++)
             {
                 for (int chy = 0; chy < Chunk.ChunksH; chy++)
@@ -511,7 +511,6 @@ namespace MinesServer.GameShit.WorldSystem
 
                         if (Pack is PackDamage damagable)
                         {
-                            db.Attach(pack.Value);
                             if (shouldDamage)
                             {
                                 damagable.Damage(2);
@@ -522,7 +521,6 @@ namespace MinesServer.GameShit.WorldSystem
                     }
                 }
             }
-            db.SaveChanges();
             lastUpdate = ServerTime.Now;
         }
 
