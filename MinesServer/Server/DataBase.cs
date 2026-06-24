@@ -99,7 +99,6 @@ namespace MinesServer.Server
         {
             using var db = new DataBase();
             db.SaveChanges();
-            db.Dispose();
         }
 
         public static void ClearAll()
