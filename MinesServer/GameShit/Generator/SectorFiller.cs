@@ -5,15 +5,12 @@ namespace MinesServer.GameShit.Generator
 {
     public class SectorFiller
     {
-        public CellType[] typedmap;
         private Random rand = new Random();
-        public string info;
         private ImplicitFractal NotTypedNoise()
         {
             var type = (FractalType)rand.Next(0, 5);
             var basis = (BasisType)rand.Next(0, 4);
             var interpol = (InterpolationType)rand.Next(0, 4);
-            info = $"{type} {basis} {interpol}";
             return new ImplicitFractal(type, basis, interpol)
             {
                 Octaves = rand.Next(4, 20),
@@ -71,7 +68,6 @@ namespace MinesServer.GameShit.Generator
         }
         private Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float, float)> parts, (float minvalue,float maxvalue) data)
         {
-            var fr = NotTypedNoise();
             var typesresult = new Dictionary<CellType, int>();
             foreach (var c in s.seccells)
             {

@@ -1,11 +1,19 @@
 ﻿using MinesServer.GameShit.Enums;
-using MinesServer.GameShit.WorldSystem;
 
 namespace MinesServer.GameShit.Generator
 {
     public class Sector
     {
         private static Random r = new Random();
+
+        public Sector(List<SectorCell> seccells, int width, int height, int depth)
+        {
+            this.seccells = seccells;
+            this.width = width;
+            this.height = height;
+            this.depth = depth;
+        }
+
         public CellType[] GenerateInsides()
         {
             var gig = r.Next(1, 101) >= 80 ? true : false;
@@ -81,12 +89,11 @@ namespace MinesServer.GameShit.Generator
         }
 
 
-        public List<SectorCell> seccells;
-        public List<Cell> cells;
-        public int height;
-        public int width;
-        public int depth;
-        public CellType[] crys;
-        public CellType[] types;
+        public List<SectorCell> seccells = [];
+        public int height = default;
+        public int width = default;
+        private int depth = default;
+        private CellType[] crys = [];
+        private CellType[] types = [];
     }
 }

@@ -13,6 +13,7 @@ namespace MinesServer.GameShit.Generator
             this.seed = seed;
             r = new Random(seed);
         }
+
         public Sectors((int, int) size)
         {
             this.size = size;
@@ -20,9 +21,11 @@ namespace MinesServer.GameShit.Generator
             r = new Random(seed);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int size_index(int x, int y)
             => x * size.y + y;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool valid_size(int x, int y)
             => x < size.x && x >= 0 && y < size.y && y >= 0;
 
@@ -30,8 +33,17 @@ namespace MinesServer.GameShit.Generator
         private SectorCell sector_map(int x, int y)
             => map[size_index(x, y)];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float chs(int y)
             => 30f - (y * 0.0028f);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static CellType GetCellType(int value) => value switch
+        {
+            1 => CellType.RedRock,
+            2 => CellType.BlackRock,
+            _ => CellType.Empty
+        };
 
         public void DetectAndFillSectors()
         {
@@ -83,13 +95,7 @@ namespace MinesServer.GameShit.Generator
                         }
                     }
 
-                    var s = new Sector()
-                    {
-                        seccells = ce,
-                        width = swidth,
-                        height = sheight,
-                        depth = depth
-                    };
+                    var s = new Sector(ce, swidth, sheight, depth);
 
                     if (s.seccells.Count < 50)
                     {
@@ -208,54 +214,54 @@ namespace MinesServer.GameShit.Generator
             Console.WriteLine(mid);
             resample(res);
         }
-        private void Clean()
-        {
-            Console.WriteLine("adding empty space");
-            var c = 0;
-            for (int y = 0; y < size.y; y++)
-            {
-                for (int x = 0; x < size.x; x++)
-                {
-                    var _sector = sector_map(x, y);
 
-                    if (_sector.value == 2 && r.Next(1, 101) > 90)
-                    {
-                        _sector.value = 0;
-                    }
-                    else if (_sector.value == 1 && r.Next(1, 101) > 95)
-                    {
-                        _sector.value = 0;
-                    }
-                    c++;
-                }
-                Console.Write($"\r{c}/{map.Length} empty space");
-            }
-            Console.Write($"");
-        }
         public void End()
         {
             Console.WriteLine("ending");
-            Add();
-            Clean();
+            CleanCs(0, true);
+            for (int i = 1; i < 6; i++)
+                CleanCs(i);
+
+            // Единый проход по всем секторам
             for (int x = 0; x < size.x; x++)
             {
                 for (int y = 0; y < size.y; y++)
                 {
-                    var _sector = sector_map(x, y);
+                    var sector = sector_map(x, y);
 
-                    CellType _type_sector;
-
-                    switch (_sector.value)
+                    if (sector.value == 0)
                     {
-                        case 1: _type_sector = CellType.RedRock; break;
-                        case 2: _type_sector = CellType.BlackRock; break;
-                        default: _type_sector = CellType.Empty; break;
+                        // TODO: наверное стоит пропускать
+                        // Так как по умолчанию и так пустой
+                        // А ещё лучше использовать get
+                        // Так как только для этого и используется
+                        // А еще проще синхронизировать
+                        sector.type = CellType.Empty;
+                        continue;
                     }
-                    _sector.type = _type_sector;
+
+                    // Шанс превратить RedRock в BlackRock
+                    if (sector.value == 1 && r.Next(1, 101) < chs(y))
+                    {
+                        sector.value = 2;
+                    }
+
+                    if (sector.value == 2 && r.Next(1, 101) > 90)
+                    {
+                        sector.value = 0;
+                    }
+                    else if (sector.value == 1 && r.Next(1, 101) > 95)
+                    {
+                        sector.value = 0;
+                    }
+
+                    sector.type = GetCellType((int)sector.value);
                 }
             }
+
             Console.WriteLine("end");
         }
+
         public void AddW(double freq = 25, double lac = 1, InterpolationType t = InterpolationType.Cubic, float res = .45f)
         {
             // TODO: Кажется хрень происходит
@@ -270,33 +276,6 @@ namespace MinesServer.GameShit.Generator
                 }
             }
             map = temp;
-        }
-        private void Add()
-        {
-            CleanCs(0, true);
-            for (int i = 1; i < 6; i++)
-            {
-                CleanCs(i);
-            }
-            Console.WriteLine("adding black rock");
-            var counter = 0;
-            for (int x = 0; x < size.x; x++)
-            {
-                for (int y = 0; y < size.y; y++)
-                {
-                    counter++;
-                    var _sector = sector_map(x, y);
-                    if (_sector.value == 1)
-                    {
-                        if (r.Next(1, 101) < chs(y))
-                        {
-                            _sector.value = 2;
-                        }
-                    }
-                }
-                Console.Write($"\r{counter}/{map.Length} black rock");
-            }
-            Console.WriteLine("");
         }
 
         private void Boom(int x, int y)

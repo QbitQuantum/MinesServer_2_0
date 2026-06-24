@@ -10,22 +10,19 @@ namespace MinesServer.GameShit.Generator
     // Будешь делать вид что будем "мокать" - получишь леща по шее
     public class Gen
     {
-        public List<(int, int)> spawns;
-        public static Gen THIS;
         public Gen(int width, int height)
         {
-            THIS = this;
-            Gen.height = height;
-            Gen.width = width;
-            spawns = new List<(int, int)>();
-
+            Height = height;
+            Width = width;
         }
-        public static int height;
-        public static int width;
+
+        private int Height { get; }
+        private int Width { get; }
+
         public void StartGeneration()
         {
             Console.WriteLine("Generating sectors");
-            var sec = new Sectors((width, height));
+            var sec = new Sectors((Width, Height));
             sec.GenerateENoise(15, 1, RcherNZ.AccidentalNoise.InterpolationType.Cubic);
             sec.AddW(15, 1, RcherNZ.AccidentalNoise.InterpolationType.Linear);
             sec.AddW(25, 5, RcherNZ.AccidentalNoise.InterpolationType.Linear);
@@ -33,28 +30,25 @@ namespace MinesServer.GameShit.Generator
             sec.End();
             var map = sec.map;
             var rc = 0;
-            for (int x = 0; x < width; x += 32)
+            for (int x = 0; x < Width; x += 32)
             {
-                for (int y = 0; y < height; y += 32)
+                for (int y = 0; y < Height; y += 32)
                 {
                     for (int chx = 0; chx < 32; chx++)
                     {
                         for (int chy = 0; chy < 32; chy++)
                         {
-                            int index = (x + chx) * height + (y + chy);
+                            int index = (x + chx) * Height + (y + chy);
                             var m_value = map[index].value;
-                            var t = 
-                                m_value == 2 ? (byte)CellType.BlackRock : 
-                                m_value == 1 ? (byte)CellType.RedRock : 
-                                (byte)CellType.Empty;
-                            World.SetCell((x + chx), (y + chy), t);
+                            var cell = m_value == 2 ? CellType.BlackRock : 
+                                m_value == 1 ? CellType.RedRock : CellType.Empty;
+                            World.SetCell((x + chx), (y + chy), cell);
                             rc++;
                         }
-
                     }
                 }
-                Console.Write($"\r{rc}/{map.Length} saving rocks");
             }
+            Console.Write($"\r{rc}/{map.Length} saving rocks");
             sec.DetectAndFillSectors();
             Console.WriteLine("END END");
         }
