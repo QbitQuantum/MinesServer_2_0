@@ -84,7 +84,7 @@ namespace MinesServer.GameShit.WorldSystem
         public Gen gen;
 
         private Dictionary<(int, int), CancellationTokenSource?> shit = [];
-        private static readonly List<(DateTime TriggerTime, Action Action)> _delayedActions = [];
+        private static readonly PriorityQueue<Action, DateTime> _delayedActions = new();
 
         public int[] cryscostmod = { 10, 10, 15, 10, 15, 15 };
         public int[] cryscostbase = { 8, 16, 24, 26, 24, 40 };
@@ -127,8 +127,31 @@ namespace MinesServer.GameShit.WorldSystem
 
         public static void ScheduleAction(TimeSpan delay, Action action)
         {
-            _delayedActions.Add((ServerTime.Now + delay, action));
+            _delayedActions.Enqueue(action, ServerTime.Now + delay);
         }
+
+        private static void UpdateDelay()
+        {
+            while (_delayedActions.Count > 0)
+            {
+                if (!_delayedActions.TryPeek(out _, out DateTime triggerTime))
+                    break;
+
+                if (triggerTime > ServerTime.Now)
+                    break;
+
+                var action = _delayedActions.Dequeue();
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Delayed action failed: {ex}");
+                }
+            }
+        }
+
         public void CreateSpawns()
         {
             using (var db = new DataBase())
@@ -536,26 +559,6 @@ namespace MinesServer.GameShit.WorldSystem
             }
             W.summary = new long[6];
             lastUpdate = ServerTime.Now;
-        }
-
-        private static void UpdateDelay()
-        {
-            for (int i = _delayedActions.Count - 1; i >= 0; i--)
-            {
-                var (triggerTime, action) = _delayedActions[i];
-                if (ServerTime.Now >= triggerTime)
-                {
-                    _delayedActions.RemoveAt(i);
-                    try
-                    {
-                        action();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Delayed action failed: {ex}");
-                    }
-                }
-            }
         }
 
         public static void Update()
