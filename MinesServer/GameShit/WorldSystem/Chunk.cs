@@ -46,9 +46,9 @@ namespace MinesServer.GameShit.WorldSystem
         private World? _world;
 
         // Кэшированные соседи
-        private Chunk?[] _cachedNeighbors = null!;
-        private (int x, int y)[] _cachedNeighborCoords = null!;
-        private readonly Dictionary<(int dx, int dy), Chunk?> _neighborDict = new();
+        private Chunk[] _cachedNeighbors = [];
+        private (int x, int y)[] _cachedNeighborCoords = [];
+        private readonly Dictionary<(int dx, int dy), Chunk> _neighborDict = [];
 
         public ConcurrentDictionary<int, Player> bots { get; } = new();
         public (int x, int y) pos { get; }
@@ -88,7 +88,7 @@ namespace MinesServer.GameShit.WorldSystem
             _world = world;
 
             // Подсчитываем количество валидных соседей
-            var validNeighbors = new List<(int x, int y, Chunk? chunk)>();
+            var validNeighbors = new List<(int x, int y, Chunk chunk)>();
 
             for (int dy = -VIEW_RADIUS; dy <= VIEW_RADIUS; dy++)
             {
@@ -123,14 +123,11 @@ namespace MinesServer.GameShit.WorldSystem
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<Chunk> GetNeighboringChunks(int radius = VIEW_RADIUS)
         {
-            if (radius == VIEW_RADIUS && _cachedNeighbors != null)
+            if (radius == VIEW_RADIUS)
             {
                 // Возвращаем только существующие чанки
                 for (int i = 0; i < _cachedNeighbors.Length; i++)
-                {
-                    if (_cachedNeighbors[i] != null)
-                        yield return _cachedNeighbors[i]!;
-                }
+                    yield return _cachedNeighbors[i];
                 yield break;
             }
 
@@ -174,7 +171,7 @@ namespace MinesServer.GameShit.WorldSystem
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<(int x, int y)> GetNeighboringChunkCoordinates(int radius = VIEW_RADIUS)
         {
-            if (radius == VIEW_RADIUS && _cachedNeighborCoords != null)
+            if (radius == VIEW_RADIUS)
             {
                 return _cachedNeighborCoords; 
             }
