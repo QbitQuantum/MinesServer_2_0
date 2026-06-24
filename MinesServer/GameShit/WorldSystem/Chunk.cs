@@ -287,14 +287,14 @@ namespace MinesServer.GameShit.WorldSystem
         {
             _cellsToUpdateBoulderSand.Clear();
 
-            for (int y = 0; y < ChunkWidth; y++)
+            for (int y = 0; y < ChunkHeight; y++)
             {
-                for (int x = 0; x < ChunkHeight; x++)
+                for (int x = 0; x < ChunkWidth; x++)
                 {
                     byte cell = this[x, y];
                     var prop = World.GetProp(cell);
 
-                    if (prop.isSand || prop.isBoulder)
+                    if ((prop.isSand || prop.isBoulder))
                         _cellsToUpdateBoulderSand.Add((WorldX + x, WorldY + y, cell));
                 }
             }
@@ -302,10 +302,12 @@ namespace MinesServer.GameShit.WorldSystem
             foreach (var (worldX, worldY, cell) in _cellsToUpdateBoulderSand)
             {
                 var prop = World.GetProp(cell);
-                if (prop.isSand && Physics.Sand(worldX, worldY))
+                if ((prop.isSand && Physics.Sand(worldX, worldY)) ||
+                    (prop.isBoulder && Physics.Boulder(worldX, worldY)))
+                {
                     updlasttick = true;
-                else if (prop.isBoulder && Physics.Boulder(worldX, worldY))
-                    updlasttick = true;
+                    break;
+                }
             }
         }
 
