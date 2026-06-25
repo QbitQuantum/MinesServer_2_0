@@ -29,11 +29,12 @@ namespace MinesServer.Server
 
         private readonly ServerTime _serverTime;
         private bool complite = false;
-        private string sid { get; set; } = "";
+        private string sid = "";
         private DateTime lastpong = ServerTime.Now;
         private int nextexpected;
-        public Player? player;
-        public Auth? auth;
+        private Player? player;
+        private Auth? auth;
+
         #endregion
 
         private static string GenerateSessionId()
