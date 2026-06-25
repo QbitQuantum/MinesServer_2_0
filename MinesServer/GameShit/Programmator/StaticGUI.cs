@@ -2,7 +2,6 @@
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.GUI.Horb.List;
-using MinesServer.Network.Programmator;
 using MinesServer.Server;
 
 namespace MinesServer.GameShit.Programmator
@@ -44,7 +43,7 @@ namespace MinesServer.GameShit.Programmator
                     var prog = db.progs.FirstOrDefault(p => p.id == id);
                     prog.name = args.Input;
                     db.SaveChanges();
-                    p.connection?.SendU(new UpdateProgrammatorPacket(prog.id, prog.name, prog.data));
+                    p.UpdateProg(prog);
                 }
                 p.win = null;
             };
