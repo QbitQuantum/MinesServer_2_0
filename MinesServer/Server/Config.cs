@@ -2,6 +2,9 @@
 {
     public class Config
     {
-        public string? WorldName { get; set; }
+        public Config(string WorldName) { 
+            this.WorldName = WorldName;
+        }
+        public readonly string WorldName = "MinesServer";
     }
 }

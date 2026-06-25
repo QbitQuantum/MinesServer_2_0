@@ -62,7 +62,7 @@ namespace MinesServer.GameShit.WorldSystem
             Console.WriteLine("LoadConfirmed");
             Console.WriteLine("Started");
             CommitWorld();
-            MServer.started = true;
+            SysCraft.RDes.Init();
         }
 
         public static World W;

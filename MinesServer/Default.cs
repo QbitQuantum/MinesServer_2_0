@@ -17,8 +17,14 @@ namespace MinesServer
                 .Any(p => p.Name == name);
         }
         public static bool ToBool(this string s) => s != "0";
-        public static int port = 8090;
-        private static Dictionary<string, Action> commands = new Dictionary<string, Action>();
+
+        private static readonly int port = 8090;
+        private static readonly Dictionary<string, Action> commands = [];
+        private static MServer server { get; set; }
+
+        public static Config cfg;
+        public static Regex def = new Regex("^[а-яА-ЯёЁa-zA-Z 0-9]+$");
+
         public static void Main(string[] args)
         {
             CellsSerializer.Load();
@@ -28,15 +34,14 @@ namespace MinesServer
                 cfg = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath));
             else
             {
-                cfg = new Config();
-                cfg.WorldName = "ff";
+                cfg = new Config("ff");
                 File.WriteAllText(configPath, JsonConvert.SerializeObject(cfg, Formatting.Indented));
             }
             server = new MServer(System.Net.IPAddress.Any, port);
             server.Start();
             Loop();
-
         }
+        
         private static void Loop()
         {
             commands.Add("save", () =>
@@ -58,7 +63,6 @@ namespace MinesServer
             commands.Add("fullnew", () =>
             {
                 server.Stop();
-                server.time.Dispose();
                 World.W.DeleteWorld();
                 var db = new DataBase();
                 db.Delete();
@@ -68,7 +72,6 @@ namespace MinesServer
             commands.Add("newworld", () =>
             {
                 server.Stop();
-                server.time.Dispose();
                 DataBase.ClearAll();
                 World.W.DeleteWorld();
                 server.Start();
@@ -80,7 +83,9 @@ namespace MinesServer
                     commands[l]();
             }
         }
+        
         public static void RemoveAll<T>(this Microsoft.EntityFrameworkCore.DbSet<T> s) where T : class => s.RemoveRange(s);
+        
         public static Bitmap ConvertMapPart(int fromx,int fromy,int tox,int toy)
         {
             var bitmap = new Bitmap(tox - fromx, toy - fromy);
@@ -93,12 +98,10 @@ namespace MinesServer
             }
             return bitmap;
         }
-        public static Config cfg;
-        public static Regex def = new Regex("^[а-яА-ЯёЁa-zA-Z 0-9]+$");
+        
         public static void WriteError(string ex)
         {
             Console.WriteLine("WriteError caused error " + $"{ex}");
         }
-        public static MServer server { get; set; }
     }
 }

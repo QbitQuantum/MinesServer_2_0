@@ -9,6 +9,7 @@ namespace MinesServer.Server
 
         private readonly Thread _updateThread;
         private volatile bool _running = true;
+        private volatile bool _started = false;
 
         // Таймеры (последнее время выполнения)
         private DateTime _lastChunksUpdate = Now;
@@ -31,7 +32,14 @@ namespace MinesServer.Server
                 IsBackground = true,
                 Name = "Server Update Loop"
             };
-            _updateThread.Start();
+        }
+
+        public void Start() {
+            if (!_started)
+            {
+                _updateThread.Start();
+                _started = true;
+            }
         }
 
         private void RunUpdateLoop()
@@ -123,6 +131,7 @@ namespace MinesServer.Server
             gameActions.Enqueue((action, p));
             _directActionDelay = DateTime.UtcNow.AddMicroseconds(5);
         }
+
         public void Dispose()
         {
             _running = false;

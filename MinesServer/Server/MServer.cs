@@ -3,36 +3,35 @@ using MinesServer.GameShit.WorldSystem;
 using NetCoreServer;
 using System.Net;
 using System.Net.Sockets;
+
 namespace MinesServer.Server
 {
     public class MServer : TcpServer
     {
-        public System.Timers.Timer timer;
-        public ServerTime time { get; private set; }
-        public static bool started = false;
-        CancellationTokenSource s = new();
+        private readonly ServerTime time = new ServerTime();
 
         public MServer(IPAddress address, int port) : base(address, port)
         {
             MConsole.InitCommands();
-            GameShit.SysCraft.RDes.Init();
             OptionKeepAlive = true;
         }
+
         public override bool Start()
         {
             new World(Default.cfg.WorldName);
-            time = new ServerTime();
+            time.Start();
             return base.Start();
         }
+
         public override bool Stop()
         {
-            s.Cancel();
+            time.Dispose();
             return base.Stop();
         }
+
         protected override TcpSession CreateSession()
         {
-            var s = new Session(this, time);
-            return s;
+            return new Session(this, time);
         }
         protected override void OnError(SocketError error)
         {
