@@ -528,10 +528,12 @@ namespace MinesServer.GameShit.WorldSystem
         {
             if (ServerTime.Now - lastUpdate < interval)
                 return;
+
+            var packet = new OnlinePacket(DataBase.activeplayers.Count, 0);
+
             foreach (var player in DataBase.activeplayers)
-            {
-                player.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
-            }
+                player.connection?.SendU(packet);
+
             lastUpdate = ServerTime.Now;
         }
 
