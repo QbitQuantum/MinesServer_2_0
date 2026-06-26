@@ -336,7 +336,6 @@ namespace MinesServer.Server
             {
                 Default.WriteError(ex.ToString());
             }
-            db.Dispose();
         }
     }
 }
