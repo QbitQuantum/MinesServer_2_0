@@ -266,71 +266,51 @@ namespace MinesServer.Server
         public static List<Player> activeplayers = new();
         public static List<BotSpot> botspotplayer = new();
         private static readonly Dictionary<int, string> _nicklist = new();
+
+        public IEnumerable<IEnumerable<Pack>> GetAllPackCollections()
+        {
+            yield return spots.Cast<Pack>();
+            yield return vulkans.Cast<Pack>();
+            yield return resps.Cast<Pack>();
+            yield return markets.Cast<Pack>();
+            yield return ups.Cast<Pack>();
+            yield return guns.Cast<Pack>();
+            yield return storages.Cast<Pack>();
+            yield return crafts.Cast<Pack>();
+            yield return teleports.Cast<Pack>();
+            yield return gates.Cast<Pack>();
+            yield return ncs.Cast<Pack>();
+            yield return observatory.Cast<Pack>();
+            yield return mayak.Cast<Pack>();
+            yield return jobs.Cast<Pack>();
+        }
+
+        private static void LoadPacksBuild(DataBase db)
+        {
+            foreach (var collection in db.GetAllPackCollections())
+            {
+                foreach (Pack item in collection)
+                {
+                    item.Build();
+                }
+            }
+        }
+
+        private static void LoadBoxBuild(DataBase db)
+        {
+            foreach (var box in db.boxes)
+            {
+                World.SetCell(box.x, box.y, 90);
+            }
+        }
+
         public static void Load()
         {
             using var db = new DataBase();
             try
             {
-                foreach (var i in db.boxes)
-                {
-                    World.SetCell(i.x, i.y, 90);
-                }
-                foreach (var i in db.gates)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.vulkans)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.resps)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.markets)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.ups)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.guns)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.storages)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.crafts)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.teleports)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.spots)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.ncs)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.observatory)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.mayak)
-                {
-                    i.Build();
-                }
-                foreach (var i in db.jobs)
-                {
-                    i.Build();
-                }
+                LoadBoxBuild(db);
+                LoadPacksBuild(db);
             }
             catch (Exception ex)
             {
