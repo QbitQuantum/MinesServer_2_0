@@ -51,6 +51,17 @@ namespace MinesServer.Server
         public DbSet<Jobs> jobs => Set<Jobs>();
         #endregion
 
+        #region fields
+
+        // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
+        // Либо инкапсулировать полностью
+        public static List<Player> activeplayers = [];
+        public static List<BotSpot> botspotplayer = [];
+        private static readonly Dictionary<int, string> _nicklist = [];
+
+        #endregion
+
+
         public DataBase() : base() => Database.EnsureCreated();
         public void Delete() => Database.EnsureDeleted();
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -260,12 +271,6 @@ namespace MinesServer.Server
             }
             return programm;
         }
-
-        // TODO: Сделать получение через World, чтобы ServerTime не имел дотступ к DataBase
-        // Либо инкапсулировать полностью
-        public static List<Player> activeplayers = new();
-        public static List<BotSpot> botspotplayer = new();
-        private static readonly Dictionary<int, string> _nicklist = new();
 
         public IEnumerable<IEnumerable<Pack>> GetAllPackCollections()
         {
