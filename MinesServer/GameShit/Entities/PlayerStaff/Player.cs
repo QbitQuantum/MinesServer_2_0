@@ -491,7 +491,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (HasActiveProgram)
                 return;
 
-            if (lastDelay >= ServerTime.Now)
+            if (ServerTime.Now < lastDelay)
                 return;
 
             a();
