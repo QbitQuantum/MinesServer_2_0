@@ -29,7 +29,6 @@ namespace MinesServer.GameShit.Entities
         public abstract Basket? crys { get; set; }
         public virtual int Health { get; set; }
         public virtual int MaxHealth { get; set; }
-        public virtual int pause { get; set; }
         public virtual double ServerPause { get; }
         public virtual int cid { get; set; }
         public virtual int dir { get; set; }

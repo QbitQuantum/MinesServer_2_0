@@ -48,7 +48,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         }
         public static void ProgStatus(this Player p) => p.connection?.SendU(new ProgrammatorPacket(p.programsData.ProgRunning));
         public static void SendAutoDigg(this Player p) => p.connection?.SendU(new AutoDiggPacket(p.autoDig));
-        public static void SendSpeed(this Player p) => p.connection?.SendU(new SpeedPacket((int)(p.pause * 5 * 1.4 / 1000 * 1.7), (int) (p.pause * 0.80 * 5 * 1.4 / 1000 * 1.7), 100000));
         public static void SendCrys(this Player p) => p.connection?.SendU(p.crys.BPacket);
         public static void SendHealth(this Player p) => p.connection?.SendU(new LivePacket(p.Health, p.MaxHealth));
         public static void SendBeep(this Player p) => p.connection?.SendU(new BibikaPacket());
@@ -58,6 +57,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());
         public static void SendConfig(this Player p) => p.connection?.SendU(new ConfigPacket("oldprogramformat+"));
         public static void SendSettings(this Player p) => p.settings.SendSettings(p);
+
+        public static void SendSpeed(this Player p)
+        {
+            var _serverPause = p.ServerPause * 1.7;
+            p.connection?.SendU(new SpeedPacket((int)(_serverPause), (int)(_serverPause * 0.80), 100000));
+        }
+
         public static void SendSkills(this Player p, Dictionary<string, int> skillProgress)
         {
             if (skillProgress.Count == 0 || p.connection == null) return;
