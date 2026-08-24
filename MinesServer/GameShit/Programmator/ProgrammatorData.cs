@@ -480,9 +480,11 @@ namespace MinesServer.GameShit.Programmator
         {
             switch (actionType)
             {
-                case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or ActionType.CheckLeft
-                        or ActionType.CheckDownLeft or ActionType.CheckDownRight or ActionType.CheckUpLeft or ActionType.CheckUpRight
-                        or ActionType.ShiftUp or ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or ActionType.ShiftForward:
+                case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or 
+                ActionType.CheckLeft or ActionType.CheckDownLeft or ActionType.CheckDownRight or 
+                ActionType.CheckUpLeft or ActionType.CheckUpRight or ActionType.ShiftUp or 
+                ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or 
+                ActionType.ShiftForward:
                     if (Function.StartOffset != default)
                     {
                         Function.StartOffset = (0, 0);
