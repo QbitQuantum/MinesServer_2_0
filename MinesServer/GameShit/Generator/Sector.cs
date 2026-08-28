@@ -89,11 +89,11 @@ namespace MinesServer.GameShit.Generator
         }
 
 
-        public List<SectorCell> seccells = [];
-        public int height = default;
-        public int width = default;
-        private int depth = default;
-        private CellType[] crys = [];
-        private CellType[] types = [];
+        public List<SectorCell> seccells;
+        public int height;
+        public int width;
+        public int depth;
+        public CellType[] crys;
+        public CellType[] types;
     }
 }
