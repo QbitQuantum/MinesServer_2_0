@@ -100,7 +100,12 @@ namespace MinesServer.GameShit.Programmator
 
                     // Управление потоком
                     case ActionType.CreateFunction:
-                        ParseCurrentProg.Add(name, new PFunction());
+                        // Проверяем, существует ли уже функция с таким именем
+                        if (!ParseCurrentProg.ContainsKey(name))
+                        {
+                            ParseCurrentProg.Add(name, new PFunction());
+                        }
+                        // Если функция уже существует - игнорируем создание новой
                         currentFunc = name;
                         index = 0;
                         break;
