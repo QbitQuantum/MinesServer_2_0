@@ -3,7 +3,7 @@ using RcherNZ.AccidentalNoise;
 
 namespace MinesServer.GameShit.Generator
 {
-    public class SectorFiller
+    public static class SectorFiller
     {
         private static readonly Random rand = new Random();
 
@@ -21,7 +21,7 @@ namespace MinesServer.GameShit.Generator
             };
         }
 
-        private Dictionary<CellType, (float, float)> RandomSizedParts(CellType[] availableCellTypes)
+        private static Dictionary<CellType, (float, float)> RandomSizedParts(CellType[] availableCellTypes)
         {
             var RandomCellTypes = new Dictionary<CellType, (float start, float end)>();
             foreach (var type in availableCellTypes)
@@ -39,7 +39,7 @@ namespace MinesServer.GameShit.Generator
             return RandomCellTypes;
         }
 
-        private (float min, float max) FillNoiseToSector(Sector s)
+        private static (float min, float max) FillNoiseToSector(Sector s)
         {
             var fr = NotTypedNoise();
             float max = (float)fr.Get(0, 0);
@@ -70,7 +70,7 @@ namespace MinesServer.GameShit.Generator
             return (min, max);
         }
 
-        private Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float start, float min)> parts)
+        private static Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float start, float min)> parts)
         {
             (float minvalue, float maxvalue) = FillNoiseToSector(s);
             var typesresult = new Dictionary<CellType, int>();
@@ -79,7 +79,11 @@ namespace MinesServer.GameShit.Generator
                 c.value = ((c.value - minvalue) / (maxvalue - minvalue));
                 for (int i = 0; i < parts.Count; i++)
                 {
-                    c.type = c.value >= parts.ElementAt(i).Value.start && c.value <= parts.ElementAt(i).Value.min ? parts.ElementAt(i).Key : c.type;
+                    var (start, min) = parts.ElementAt(i).Value;
+                    if (c.value >= start && c.value <= min)
+                        c.type = parts.ElementAt(i).Key;
+                    // else c.type = c.type;
+
                     if (!typesresult.TryGetValue(c.type, out int value))
                         typesresult[c.type] = 1;
                     else
@@ -91,7 +95,7 @@ namespace MinesServer.GameShit.Generator
             return typesresult;
         }
 
-        public void CreateFillForCells(Sector s)
+        public static void CreateFillForCells(Sector s)
         {
             var availableCellTypes = s.GenerateInsides();
             bool gig = s.seccells.Count <= 40000;

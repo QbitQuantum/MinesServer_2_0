@@ -109,9 +109,8 @@ namespace MinesServer.GameShit.Generator
 
                     Console.WriteLine($"{secnum} sector filling");
                     secnum++;
-                    var inside = new SectorFiller();
-                    
-                    inside.CreateFillForCells(s);
+
+                    SectorFiller.CreateFillForCells(s);
 
                     Console.WriteLine("saving sector " + s.seccells.Count);
                     foreach (var c in s.seccells)
