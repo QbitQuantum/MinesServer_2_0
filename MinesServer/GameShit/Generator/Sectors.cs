@@ -1,5 +1,5 @@
-﻿using MinesServer.GameShit.Enums;
-﻿using System.Runtime.CompilerServices;
+﻿﻿using System.Runtime.CompilerServices;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
 using RcherNZ.AccidentalNoise;
 
@@ -7,18 +7,23 @@ namespace MinesServer.GameShit.Generator
 {
     public class Sectors
     {
+        private readonly Random rand = new Random();
+        private readonly (int x, int y)[] dirs = [(0, 1), (0, -1), (-1, 0), (1, 0)];
+        private readonly int seed;
+        private double min, mid, max;
+        private (int x, int y) size;
+        public SectorCell[] map;
+
+        public Sectors((int, int) size) : this(Environment.TickCount, size)
+        {
+
+        }
+
         public Sectors(int seed, (int, int) size)
         {
             this.size = size;
             this.seed = seed;
-            r = new Random(seed);
-        }
-
-        public Sectors((int, int) size)
-        {
-            this.size = size;
-            seed = Environment.TickCount;
-            r = new Random(seed);
+            this.rand = new Random(seed);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,7 +53,7 @@ namespace MinesServer.GameShit.Generator
         public void DetectAndFillSectors()
         {
             List<Sector> sectors = [];
-            List<SectorCell> ce = [];
+            List<SectorCell> seccells = [];
             Queue<SectorCell> que = [];
             int secnum = 0;
 
@@ -75,7 +80,7 @@ namespace MinesServer.GameShit.Generator
                         depth = Math.Min(depth, cell.pos.y);
                         swidth = Math.Max(swidth, cell.pos.x - startX);
                         sheight = Math.Max(sheight, cell.pos.y - startY);
-                        ce.Add(cell);
+                        seccells.Add(cell);
                         cell.sector = sectors.Count;
 
                         foreach (var i in dirs)
@@ -86,7 +91,7 @@ namespace MinesServer.GameShit.Generator
                             if (!valid_size(nx, ny))
                                 continue;
 
-                            var ncell = map[size_index(nx, ny)];
+                            var ncell = sector_map(nx, ny);
                             if (ncell.sector == -1 && ncell.value == 0)
                             {
                                 ncell.sector = sectors.Count;
@@ -95,7 +100,7 @@ namespace MinesServer.GameShit.Generator
                         }
                     }
 
-                    var s = new Sector(ce, swidth, sheight, depth);
+                    var s = new Sector(seccells, swidth, sheight, depth);
 
                     if (s.seccells.Count < 50)
                     {
@@ -105,9 +110,8 @@ namespace MinesServer.GameShit.Generator
                     Console.WriteLine($"{secnum} sector filling");
                     secnum++;
                     var inside = new SectorFiller();
-                    bool gig = s.seccells.Count <= 40000;
-
-                    inside.CreateFillForCells(s, gig, s.GenerateInsides());
+                    
+                    inside.CreateFillForCells(s);
 
                     Console.WriteLine("saving sector " + s.seccells.Count);
                     foreach (var c in s.seccells)
@@ -116,7 +120,7 @@ namespace MinesServer.GameShit.Generator
                     }
 
                     World.CommitWorld();
-                    ce = [];
+                    seccells = [];
                 }
             }
 
@@ -149,10 +153,10 @@ namespace MinesServer.GameShit.Generator
                                 }
                             }
                         }
-                        if ((3 < ch && r.Next(1, 101) > 60) || (e > 1))
+                        if ((3 < ch && rand.Next(1, 101) > 60) || (e > 1))
                         {
                             _sector.value = 2;
-                            if (r.Next(1, 101) > 95 && b)
+                            if (rand.Next(1, 101) > 95 && b)
                             {
                                 Boom(x, y);
                             }
@@ -167,15 +171,25 @@ namespace MinesServer.GameShit.Generator
                 y--;
             }
         }
-        public void GenerateENoise(double freq = 25, double lac = 1, InterpolationType t = InterpolationType.Cubic, float res = .45f)
+
+        private static ImplicitFractal NotTypedNoise(double _Frequency, double _Lacunarity, int _Seed, InterpolationType Interpolation)
         {
-            fr = new ImplicitFractal(FractalType.RidgedMulti, BasisType.GradientValue, t)
+            var type = FractalType.RidgedMulti;
+            var basis = BasisType.GradientValue;
+            var interpolation = Interpolation;
+            return new ImplicitFractal(type, basis, interpolation)
             {
                 Octaves = 1,
-                Frequency = freq,
-                Lacunarity = lac,
-                Seed = seed
+                Frequency = _Frequency,
+                Lacunarity = _Lacunarity,
+                Seed = _Seed,
             };
+        }
+
+        public void GenerateENoise(double _Frequency = 25, double _Lacunarity = 1, InterpolationType Interpolation = InterpolationType.Cubic, float res = .45f)
+        {
+            var fr = NotTypedNoise(_Frequency, _Lacunarity, seed, Interpolation);
+
             Console.WriteLine(fr.Type);
             map = new SectorCell[size.x * size.y];
             max = (float)fr.Get(0, 0);
@@ -241,16 +255,16 @@ namespace MinesServer.GameShit.Generator
                     }
 
                     // Шанс превратить RedRock в BlackRock
-                    if (sector.value == 1 && r.Next(1, 101) < chs(y))
+                    if (sector.value == 1 && rand.Next(1, 101) < chs(y))
                     {
                         sector.value = 2;
                     }
 
-                    if (sector.value == 2 && r.Next(1, 101) > 90)
+                    if (sector.value == 2 && rand.Next(1, 101) > 90)
                     {
                         sector.value = 0;
                     }
-                    else if (sector.value == 1 && r.Next(1, 101) > 95)
+                    else if (sector.value == 1 && rand.Next(1, 101) > 95)
                     {
                         sector.value = 0;
                     }
@@ -280,7 +294,7 @@ namespace MinesServer.GameShit.Generator
 
         private void Boom(int x, int y)
         {
-            var b = r.Next(3, 7);
+            var b = rand.Next(3, 7);
             for (int xx = -b; xx <= b; xx++)
             {
                 for (int yy = -b; yy <= b; yy++)
@@ -291,15 +305,16 @@ namespace MinesServer.GameShit.Generator
 
                     var _sector = sector_map(nx, ny);
 
-                    if ((_sector.value == 0 && r.Next(1, 101) > 60) || 
-                        (_sector.value == 1 && r.Next(1, 101) < chs(y)))
+                    if ((_sector.value == 0 && rand.Next(1, 101) > 60) || 
+                        (_sector.value == 1 && rand.Next(1, 101) < chs(y)))
                     {
                         _sector.value = 2;
                     }
                 }
             }
         }
-        public void resample(float res = .45f)
+
+        private void resample(float res = .45f)
         {
             for (int x = 0; x < size.x; x++)
             {
@@ -310,13 +325,5 @@ namespace MinesServer.GameShit.Generator
                 }
             }
         }
-        private readonly (int x, int y)[] dirs = [(0, 1), (0, -1), (-1, 0), (1, 0)];
-        private readonly int seed;
-        private double min, mid, max;
-        public SectorCell[] map;
-        private ImplicitFractal fr;
-        private (int x, int y) size;
-        public Random r = new Random();
-        
     }
 }

@@ -4,7 +4,13 @@ namespace MinesServer.GameShit.Generator
 {
     public class Sector
     {
-        private static Random r = new Random();
+        private static readonly Random rand = new Random();
+        private readonly int depth;
+        private CellType[] crys;
+        private CellType[] types;
+        public List<SectorCell> seccells;
+        public int height;
+        public int width;
 
         public Sector(List<SectorCell> seccells, int width, int height, int depth)
         {
@@ -16,7 +22,8 @@ namespace MinesServer.GameShit.Generator
 
         public CellType[] GenerateInsides()
         {
-            var gig = r.Next(1, 101) >= 80 ? true : false;
+            var gig = rand.Next(1, 101) >= 80;
+
             if (types == null)
             {
                 crys = depth switch
@@ -57,43 +64,29 @@ namespace MinesServer.GameShit.Generator
                 };
             }
 
-            var re = new CellType[0];
-            if (gig)
+            if (gig) return crys.ToArray();
+
+            var result = new HashSet<CellType>();
+
+            int mineralCount = rand.Next(1, types.Length);
+            int attempts = 0;
+            int maxAttempts = mineralCount * 10;
+            while (result.Count < mineralCount && attempts < maxAttempts)
             {
-                re = re.Concat(crys).ToArray();
-                return re;
+                result.Add(types[rand.Next(types.Length)]);
+                attempts++;
             }
-            var lenm = r.Next(1, types.Length);
-            var lencry = r.Next(1, crys.Length);
-            for (int i = 0; i < lenm; i++)
+
+            int crystalCount = rand.Next(1, crys.Length);
+            attempts = 0;
+            maxAttempts = crystalCount * 10;
+            while (result.Count < mineralCount + crystalCount && attempts < maxAttempts)
             {
-                var j = types[r.Next(0, types.Length)];
-                if (!re.Contains(j))
-                {
-                    re = re.Append(j).ToArray();
-                    continue;
-                }
-                i--;
+                result.Add(crys[rand.Next(crys.Length)]);
+                attempts++;
             }
-            for (int i = 0; i < lencry; i++)
-            {
-                var j = crys[r.Next(0, crys.Length)];
-                if (!re.Contains(j))
-                {
-                    re = re.Append(j).ToArray();
-                    continue;
-                }
-                i--;
-            }
-            return re;
+
+            return result.ToArray();
         }
-
-
-        public List<SectorCell> seccells;
-        public int height;
-        public int width;
-        public int depth;
-        public CellType[] crys;
-        public CellType[] types;
     }
 }

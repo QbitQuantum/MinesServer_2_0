@@ -5,8 +5,9 @@ namespace MinesServer.GameShit.Generator
 {
     public class SectorFiller
     {
-        private Random rand = new Random();
-        private ImplicitFractal NotTypedNoise()
+        private static readonly Random rand = new Random();
+
+        private static ImplicitFractal NotTypedNoise()
         {
             var type = (FractalType)rand.Next(0, 5);
             var basis = (BasisType)rand.Next(0, 4);
@@ -19,24 +20,26 @@ namespace MinesServer.GameShit.Generator
 
             };
         }
-        private Dictionary<CellType, (float, float)> RandomSizedParts(params CellType[] args)
+
+        private Dictionary<CellType, (float, float)> RandomSizedParts(CellType[] availableCellTypes)
         {
-            var dick = new Dictionary<CellType, (float, float)>();
-            foreach (var d in args)
+            var RandomCellTypes = new Dictionary<CellType, (float start, float end)>();
+            foreach (var type in availableCellTypes)
             {
                 float start = (float)rand.NextDouble();
                 float end = start + (float)rand.NextDouble();
-                while (dick.Values.Any(segment => segment.Item1 <= end && segment.Item2 >= start))
+                while (RandomCellTypes.Values.Any(segment => segment.start <= end && segment.end >= start))
                 {
                     start = (float)rand.NextDouble();
                     end = start + (float)rand.NextDouble();
                     continue;
                 }
-                dick[d] = (start, end);
+                RandomCellTypes[type] = (start, end);
             }
-            return dick;
+            return RandomCellTypes;
         }
-        private (float min,float max) FillNoiseToSector(Sector s)
+
+        private (float min, float max) FillNoiseToSector(Sector s)
         {
             var fr = NotTypedNoise();
             float max = (float)fr.Get(0, 0);
@@ -66,40 +69,49 @@ namespace MinesServer.GameShit.Generator
             }
             return (min, max);
         }
-        private Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float, float)> parts, (float minvalue,float maxvalue) data)
+
+        private Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float start, float min)> parts)
         {
+            (float minvalue, float maxvalue) = FillNoiseToSector(s);
             var typesresult = new Dictionary<CellType, int>();
             foreach (var c in s.seccells)
             {
-                c.value = ((c.value - data.minvalue) / (data.maxvalue - data.minvalue));
+                c.value = ((c.value - minvalue) / (maxvalue - minvalue));
                 for (int i = 0; i < parts.Count; i++)
                 {
-                    c.type = c.value >= parts.ElementAt(i).Value.Item1 && c.value <= parts.ElementAt(i).Value.Item2 ? parts.ElementAt(i).Key : c.type;
-                    if (!typesresult.ContainsKey(c.type))
+                    c.type = c.value >= parts.ElementAt(i).Value.start && c.value <= parts.ElementAt(i).Value.min ? parts.ElementAt(i).Key : c.type;
+                    if (!typesresult.TryGetValue(c.type, out int value))
                         typesresult[c.type] = 1;
                     else
                     {
-                        typesresult[c.type]++;
+                        typesresult[c.type] = ++value;
                     }
                 }
             }
             return typesresult;
         }
-        public void CreateFillForCells(Sector s, bool gig = false, params CellType[] args)
+
+        public void CreateFillForCells(Sector s)
         {
+            var availableCellTypes = s.GenerateInsides();
+            bool gig = s.seccells.Count <= 40000;
+            var partsseccells = s.seccells.Count * 0.4;
+
             Console.WriteLine("");
             var segmentsmall = 0;
             var notenouthparts = 0;
             var empty = 0;
+
             restart:
-            var parts = RandomSizedParts(args);
-            while(parts.Count < args.Length)
+
+            var parts = RandomSizedParts(availableCellTypes);
+            while(parts.Count < availableCellTypes.Length)
             {
-                parts = RandomSizedParts(args);
+                parts = RandomSizedParts(availableCellTypes);
             }
+
         refillnoise:
-            var data = FillNoiseToSector(s);
-            var result = SampleAndFindTypes(s, parts, data);
+            var result = SampleAndFindTypes(s, parts);
             Console.Write("\r                                                                                  ");
             if (result.Count < parts.Count)
             {
@@ -113,7 +125,7 @@ namespace MinesServer.GameShit.Generator
                 Console.Write("\rto small result");
                 goto refillnoise;
             }
-            if (result.ContainsKey(CellType.Empty) && s.seccells.Count * 0.4 < result[CellType.Empty])
+            if (result.TryGetValue(CellType.Empty, out int value) && partsseccells < value)
             {
                 empty++;
                 if (empty > 4)
@@ -126,7 +138,7 @@ namespace MinesServer.GameShit.Generator
             }
             foreach (var i in result)
             {
-                var check = (s.seccells.Count / parts.Count) * 0.4 > i.Value;
+                var check = (partsseccells / parts.Count) > i.Value;
                 if (check)
                 {
                     segmentsmall++;
@@ -142,7 +154,7 @@ namespace MinesServer.GameShit.Generator
             }
             if (gig)
             {
-                var ft = args[rand.Next(0, args.Length - 1)];
+                var ft = availableCellTypes[rand.Next(0, availableCellTypes.Length - 1)];
                 foreach (var c in s.seccells)
                 {
                     if (c.type == CellType.Empty)
@@ -157,7 +169,8 @@ namespace MinesServer.GameShit.Generator
             }
             Console.WriteLine("");
         }
-        public static int alive(int x)
+
+        private static int alive(int x)
         {
             return 90 + x / 1000;
         }
