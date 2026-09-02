@@ -8,13 +8,11 @@ namespace MinesServer.GameShit.Generator
         private readonly int depth;
         private CellType[] crys;
         private CellType[] types;
-        public List<SectorCell> seccells;
-        public int height;
-        public int width;
+        public readonly int height;
+        public readonly int width;
 
-        public Sector(List<SectorCell> seccells, int width, int height, int depth)
+        public Sector(int width, int height, int depth)
         {
-            this.seccells = seccells;
             this.width = width;
             this.height = height;
             this.depth = depth;
