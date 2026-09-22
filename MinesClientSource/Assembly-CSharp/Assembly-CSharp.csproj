@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{07E76DFF-D516-4107-86B2-9040C90A96DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Assembly-CSharp</RootNamespace>
+    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>..\..\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>..\..\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\..\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>..\..\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+      <HintPath>..\..\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AMCheker.cs" />
+    <Compile Include="AuthManager.cs" />
+    <Compile Include="AutoFollow.cs" />
+    <Compile Include="AYSWindowManager.cs" />
+    <Compile Include="BetterMines\SDK\AutomationAPI\RunnerOnPointReached.cs" />
+    <Compile Include="BetterMines\SDK\AutomationAPI\RunnerPoint.cs" />
+    <Compile Include="BoomScript.cs" />
+    <Compile Include="BotInfo.cs" />
+    <Compile Include="BzScript.cs" />
+    <Compile Include="CellModel.cs" />
+    <Compile Include="CellRender.cs" />
+    <Compile Include="CellRenderConfig.cs" />
+    <Compile Include="ChatLineInfo.cs" />
+    <Compile Include="ChatManager.cs" />
+    <Compile Include="CheckerConfig.cs" />
+    <Compile Include="ClanSpriteScript.cs" />
+    <Compile Include="ClearPoolOnDestroy.cs" />
+    <Compile Include="ClientConfig.cs" />
+    <Compile Include="ClientController.cs" />
+    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="ConnectionStatusEvent.cs" />
+    <Compile Include="CrysAutScript.cs" />
+    <Compile Include="CrysPlusScript.cs" />
+    <Compile Include="CrystallSection.cs" />
+    <Compile Include="CrystalScroller.cs" />
+    <Compile Include="ExternalGUIPanel.cs" />
+    <Compile Include="FakeGenerator.cs" />
+    <Compile Include="FPSCountScript.cs" />
+    <Compile Include="FuelLineScript.cs" />
+    <Compile Include="GCMessage.cs" />
+    <Compile Include="GlobalChatLineModel.cs" />
+    <Compile Include="GlobalChatManager.cs" />
+    <Compile Include="GOPool.cs" />
+    <Compile Include="GUIManager.cs" />
+    <Compile Include="GunShotScript.cs" />
+    <Compile Include="HealthCalculator\HealthCalculator.cs" />
+    <Compile Include="HORBConfig.cs" />
+    <Compile Include="ImageCache.cs" />
+    <Compile Include="InventoryItem.cs" />
+    <Compile Include="InventoryPanel.cs" />
+    <Compile Include="IPoolable.cs" />
+    <Compile Include="LocalChatMessages.cs" />
+    <Compile Include="LocalMessage.cs" />
+    <Compile Include="M3Decompressor.cs" />
+    <Compile Include="MapBlock.cs" />
+    <Compile Include="MapModel.cs" />
+    <Compile Include="MapViewer.cs" />
+    <Compile Include="MiniMapViewer.cs" />
+    <Compile Include="MiniSkillManager.cs" />
+    <Compile Include="MiniSkillScript.cs" />
+    <Compile Include="MissionPad.cs" />
+    <Compile Include="ModsWrapper.cs" />
+    <Compile Include="MoneyWrapper.cs" />
+    <Compile Include="MyPipeline.cs" />
+    <Compile Include="MyPipelineAsset.cs" />
+    <Compile Include="MyUI\MyInputField.cs" />
+    <Compile Include="MyUI\SetPropertyUtility.cs" />
+    <Compile Include="ObjectModel.cs" />
+    <Compile Include="Obvyazka.cs" />
+    <Compile Include="Obvyazka3\EventCallbackSet.cs" />
+    <Compile Include="Obvyazka3\EventPair.cs" />
+    <Compile Include="Obvyazka3\GameConnection.cs" />
+    <Compile Include="Obvyazka3\JSON.cs" />
+    <Compile Include="Obvyazka3\JSONArray.cs" />
+    <Compile Include="Obvyazka3\JSONBool.cs" />
+    <Compile Include="Obvyazka3\JSONLazyCreator.cs" />
+    <Compile Include="Obvyazka3\JSONNode.cs" />
+    <Compile Include="Obvyazka3\JSONNodeType.cs" />
+    <Compile Include="Obvyazka3\JSONNull.cs" />
+    <Compile Include="Obvyazka3\JSONNumber.cs" />
+    <Compile Include="Obvyazka3\JSONObject.cs" />
+    <Compile Include="Obvyazka3\JSONString.cs" />
+    <Compile Include="Obvyazka3\JSONTextMode.cs" />
+    <Compile Include="Obvyazka3\ParameteredEvent.cs" />
+    <Compile Include="Obvyazka3\SocketIOConnection.cs" />
+    <Compile Include="Obvyazka3\SocketState.cs" />
+    <Compile Include="Obvyazka3\TCPConnection.cs" />
+    <Compile Include="OKMessage.cs" />
+    <Compile Include="OKWindowManager.cs" />
+    <Compile Include="OrderParams.cs" />
+    <Compile Include="OverlayRenderer.cs" />
+    <Compile Include="PackData.cs" />
+    <Compile Include="PackRenderer.cs" />
+    <Compile Include="PackSpriteScript.cs" />
+    <Compile Include="PackType.cs" />
+    <Compile Include="PopupManager.cs" />
+    <Compile Include="ProgAction.cs" />
+    <Compile Include="ProgPanel.cs" />
+    <Compile Include="ProgrammatorManager.cs" />
+    <Compile Include="ProgrammatorView.cs" />
+    <Compile Include="ProgrammWrapper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourcesManager.cs" />
+    <Compile Include="RobotRenderer.cs" />
+    <Compile Include="RobotScript.cs" />
+    <Compile Include="RoutePoint.cs" />
+    <Compile Include="RuntimeCommandSelector.cs" />
+    <Compile Include="ServerController.cs" />
+    <Compile Include="ServerTime.cs" />
+    <Compile Include="SevenZip\Buffer\InBuffer.cs" />
+    <Compile Include="SevenZip\Buffer\OutBuffer.cs" />
+    <Compile Include="SevenZip\CoderPropID.cs" />
+    <Compile Include="SevenZip\CommandLineParser\CommandForm.cs" />
+    <Compile Include="SevenZip\CommandLineParser\CommandSubCharsSet.cs" />
+    <Compile Include="SevenZip\CommandLineParser\Parser.cs" />
+    <Compile Include="SevenZip\CommandLineParser\SwitchForm.cs" />
+    <Compile Include="SevenZip\CommandLineParser\SwitchResult.cs" />
+    <Compile Include="SevenZip\CommandLineParser\SwitchType.cs" />
+    <Compile Include="SevenZip\Compression\LZMA\Base.cs" />
+    <Compile Include="SevenZip\Compression\LZMA\Decoder.cs" />
+    <Compile Include="SevenZip\Compression\LZMA\Encoder.cs" />
+    <Compile Include="SevenZip\Compression\LZMA\SevenZipHelper.cs" />
+    <Compile Include="SevenZip\Compression\LZ\BinTree.cs" />
+    <Compile Include="SevenZip\Compression\LZ\IInWindowStream.cs" />
+    <Compile Include="SevenZip\Compression\LZ\IMatchFinder.cs" />
+    <Compile Include="SevenZip\Compression\LZ\InWindow.cs" />
+    <Compile Include="SevenZip\Compression\LZ\OutWindow.cs" />
+    <Compile Include="SevenZip\Compression\RangeCoder\BitDecoder.cs" />
+    <Compile Include="SevenZip\Compression\RangeCoder\BitEncoder.cs" />
+    <Compile Include="SevenZip\Compression\RangeCoder\BitTreeDecoder.cs" />
+    <Compile Include="SevenZip\Compression\RangeCoder\BitTreeEncoder.cs" />
+    <Compile Include="SevenZip\Compression\RangeCoder\Decoder.cs" />
+    <Compile Include="SevenZip\Compression\RangeCoder\Encoder.cs" />
+    <Compile Include="SevenZip\CRC.cs" />
+    <Compile Include="SevenZip\DataErrorException.cs" />
+    <Compile Include="SevenZip\ICodeProgress.cs" />
+    <Compile Include="SevenZip\ICoder.cs" />
+    <Compile Include="SevenZip\InvalidParamException.cs" />
+    <Compile Include="SevenZip\ISetCoderProperties.cs" />
+    <Compile Include="SevenZip\ISetDecoderProperties.cs" />
+    <Compile Include="SevenZip\IWriteCoderProperties.cs" />
+    <Compile Include="SkillButtonScript.cs" />
+    <Compile Include="SkillConfig.cs" />
+    <Compile Include="SkillsWrapper.cs" />
+    <Compile Include="SmartBuffer.cs" />
+    <Compile Include="SoundManager.cs" />
+    <Compile Include="StateLineScript.cs" />
+    <Compile Include="StatePanel.cs" />
+    <Compile Include="StringSelectorScript.cs" />
+    <Compile Include="SurfaceRenderer.cs" />
+    <Compile Include="SwitchForm.cs" />
+    <Compile Include="SwitchResult.cs" />
+    <Compile Include="SwitchType.cs" />
+    <Compile Include="TerrainRendererScript.cs" />
+    <Compile Include="TutorialNavigation.cs" />
+    <Compile Include="TypedCallback.cs" />
+    <Compile Include="UPConfig.cs" />
+    <Compile Include="WebImage.cs" />
+    <Compile Include="WindowActivator.cs" />
+    <Compile Include="WorldInitScript.cs" />
+    <Compile Include="WorldSize.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
