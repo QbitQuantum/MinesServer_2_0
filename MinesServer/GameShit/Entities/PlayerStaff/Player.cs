@@ -669,9 +669,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void BotsRender()
         {
-            if (connection == null) return;
-
-            World.W.SendBotsInfo(id, x, y, dir, skin, cid, tail);
+            if (!online) return;
+            base.BotsRender();
         }
 
         public void CheckChunkChanged(bool force = false)
