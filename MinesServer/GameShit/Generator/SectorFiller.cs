@@ -39,21 +39,21 @@ namespace MinesServer.GameShit.Generator
             return RandomCellTypes;
         }
 
-        private static (float min, float max) FillNoiseToSector(Sector s, List<SectorCell> seccells)
+        private static (float min, float max) FillNoiseToSector(Sector s)
         {
             var fr = NotTypedNoise();
             float max = (float)fr.Get(0, 0);
             float min = (float)fr.Get(0, 0);
             double localoffsetx = rand.NextDouble();
             double localoffsety = rand.NextDouble();
-            foreach (var c in seccells)
+            foreach (var c in s.seccells)
             {
                 var x = c.pos.x == 0 ? 100 : c.pos.x;
                 var y = c.pos.y == 0 ? 100 : c.pos.y;
                 var widthx = (s.width) == 0 ? 100 : (s.width);
                 var heighty = (s.height) == 0 ? 100 : (s.height);
                 var v = (float)fr.Get((float)((float)x / (float)widthx), (float)((float)y / (float)heighty));
-                while (double.IsNaN(v) || v == 0)
+                while (v == double.NaN || v == 0)
                 {
                     localoffsetx += rand.NextDouble();
                     localoffsety += rand.NextDouble();
@@ -70,14 +70,13 @@ namespace MinesServer.GameShit.Generator
             return (min, max);
         }
 
-        private static Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float start, float min)> parts, List<SectorCell> seccells)
+        private static Dictionary<CellType, int> SampleAndFindTypes(Sector s, Dictionary<CellType, (float start, float min)> parts)
         {
-            (float minvalue, float maxvalue) = FillNoiseToSector(s, seccells);
+            (float minvalue, float maxvalue) = FillNoiseToSector(s);
             var typesresult = new Dictionary<CellType, int>();
-            var difference = maxvalue - minvalue;
-            foreach (var c in seccells)
+            foreach (var c in s.seccells)
             {
-                c.value = ((c.value - minvalue) / difference);
+                c.value = ((c.value - minvalue) / (maxvalue - minvalue));
                 for (int i = 0; i < parts.Count; i++)
                 {
                     var (start, min) = parts.ElementAt(i).Value;
@@ -96,11 +95,11 @@ namespace MinesServer.GameShit.Generator
             return typesresult;
         }
 
-        public static void CreateFillForCells(Sector s, List<SectorCell> seccells)
+        public static void CreateFillForCells(Sector s)
         {
             var availableCellTypes = s.GenerateInsides();
-            bool gig = seccells.Count <= 40000;
-            var partsseccells = seccells.Count * 0.4;
+            bool gig = s.seccells.Count <= 40000;
+            var partsseccells = s.seccells.Count * 0.4;
 
             Console.WriteLine("");
             var segmentsmall = 0;
@@ -116,7 +115,7 @@ namespace MinesServer.GameShit.Generator
             }
 
         refillnoise:
-            var result = SampleAndFindTypes(s, parts, seccells);
+            var result = SampleAndFindTypes(s, parts);
             Console.Write("\r                                                                                  ");
             if (result.Count < parts.Count)
             {
@@ -141,11 +140,9 @@ namespace MinesServer.GameShit.Generator
                 }
                 goto refillnoise;
             }
-
-            var partsseccellsCount = partsseccells / parts.Count;
             foreach (var i in result)
             {
-                var check = partsseccellsCount > i.Value;
+                var check = (partsseccells / parts.Count) > i.Value;
                 if (check)
                 {
                     segmentsmall++;
@@ -162,13 +159,13 @@ namespace MinesServer.GameShit.Generator
             if (gig)
             {
                 var ft = availableCellTypes[rand.Next(0, availableCellTypes.Length - 1)];
-                foreach (var c in seccells)
+                foreach (var c in s.seccells)
                 {
                     if (c.type == CellType.Empty)
                     {
                         c.type = ft;
                     }
-                    if (alive(seccells.Count) > rand.Next(1, 101))
+                    if (alive(s.seccells.Count) > rand.Next(1, 101))
                     {
                         //c.type = randalive
                     }

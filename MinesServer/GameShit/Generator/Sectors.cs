@@ -100,9 +100,9 @@ namespace MinesServer.GameShit.Generator
                         }
                     }
 
-                    var s = new Sector(swidth, sheight, depth);
+                    var s = new Sector(seccells, swidth, sheight, depth);
 
-                    if (seccells.Count < 50)
+                    if (s.seccells.Count < 50)
                     {
                         continue;
                     }
@@ -110,11 +110,10 @@ namespace MinesServer.GameShit.Generator
                     Console.WriteLine($"{secnum} sector filling");
                     secnum++;
 
-                    SectorFiller.CreateFillForCells(s, seccells);
+                    SectorFiller.CreateFillForCells(s);
 
-                    Console.WriteLine("saving sector " + seccells.Count);
-
-                    foreach (var c in seccells)
+                    Console.WriteLine("saving sector " + s.seccells.Count);
+                    foreach (var c in s.seccells)
                     {
                         World.SetCell(c.pos.x, c.pos.y, (byte)c.type);
                     }
