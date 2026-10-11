@@ -20,7 +20,11 @@ namespace MinesServer.GameShit.WorldSystem
 
             W = this;
             this.name = name;
-            gen = new Gen(CellsWidth, CellsHeight);
+            var parameters = GenerationParameters.Default(seed: 1337);
+            generator = new WorldGenerator(
+                width: World.CellsWidth,
+                height: World.CellsHeight,
+                parameters);
             chunks = new Chunk[Chunk.ChunksW * Chunk.ChunksH];
             for (int i = 0; i < chunks.Length; i++)
             {
@@ -39,7 +43,13 @@ namespace MinesServer.GameShit.WorldSystem
                 durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
                 Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
                 Console.WriteLine("EmptyMapGeneration");
-                gen.StartGeneration();
+                GenerationResult result = generator.GenerateAndWrite(Chunk.ChunkWidth, Chunk.ChunksH);
+                foreach (GeneratedSector sector in result.Sectors)
+                {
+                    Console.WriteLine(
+                        $"Пещера #{sector.Id}: {sector.Size} клеток, " +
+                        $"центр ({sector.CenterX}, {sector.CenterY})");
+                }
                 Console.WriteLine("Generation End");
             }
             else
@@ -81,7 +91,7 @@ namespace MinesServer.GameShit.WorldSystem
         // всего клеток в мире
         public const int TotalVolume = CellsWidth * CellsHeight;
 
-        public Gen gen;
+        public WorldGenerator generator;
 
         private Dictionary<(int, int), CancellationTokenSource?> shit = [];
         private static readonly PriorityQueue<Action, DateTime> _delayedActions = new();
