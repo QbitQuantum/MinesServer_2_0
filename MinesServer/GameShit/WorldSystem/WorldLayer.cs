@@ -243,6 +243,10 @@ namespace MinesServer.GameShit.WorldSystem
         {
             var chunk = new T[_count];
             var bytes = MemoryMarshal.AsBytes(chunk.AsSpan());
+
+            long required = (long)(index + 1) * _count * _typeSize;
+            if (_stream.Length < required)
+                return chunk;
             _stream.Position = (long)index * _count * _typeSize;
             _stream.ReadExactly(bytes);
             return chunk;
