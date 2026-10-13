@@ -64,14 +64,14 @@ namespace MinesServer.GameShit.Buildings
         protected override void ClearBuilding()
         {
             World.SetCell(x, y, 32, false);
-            World.SetCell(x + 1, y, 35, false);
-            World.SetCell(x - 1, y, 35, false);
-            World.SetCell(x, y - 1, 35, false);
-            World.SetCell(x, y + 1, 35, false);
-            World.SetCell(x + 1, y + 1, 35, false);
-            World.SetCell(x - 1, y + 1, 35, false);
-            World.SetCell(x + 1, y - 1, 35, false);
-            World.SetCell(x - 1, y - 1, 35, false);
+            World.SetCell(x + 1, y, 32, false);
+            World.SetCell(x - 1, y, 32, false);
+            World.SetCell(x, y - 1, 32, false);
+            World.SetCell(x, y + 1, 32, false);
+            World.SetCell(x + 1, y + 1, 32, false);
+            World.SetCell(x - 1, y + 1, 32, false);
+            World.SetCell(x + 1, y - 1, 32, false);
+            World.SetCell(x - 1, y - 1, 32, false);
         }
         public override void Destroy(Player p)
         {

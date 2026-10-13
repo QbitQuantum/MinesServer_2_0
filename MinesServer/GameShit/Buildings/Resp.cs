@@ -105,8 +105,8 @@ namespace MinesServer.GameShit.Buildings
         }
         protected override void ClearBuilding()
         {
-            World.SetCell(x, y, 32, false); /* -> */ World.W.cells[x, y] = 32;
-            World.SetCell(x + 1, y, 32, false); /* -> */ World.W.cells[x + 1, y] = 32;
+            World.SetCell(x, y, 32, false);
+            World.SetCell(x + 1, y, 32, false);
             World.SetCell(x - 1, y, 32, false);
             World.SetCell(x, y - 1, 32, false);
             World.SetCell(x, y + 1, 32, false);
@@ -116,7 +116,7 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x - 1, y - 1, 32, false);
             World.SetCell(x + 1, y + 2, 32, false);
             World.SetCell(x - 1, y + 2, 32, false);
-            World.SetCell(x, y + 2, 32, false); /* -> */ World.W.cells[x, y + 2] = 32;
+            World.SetCell(x, y + 2, 32, false);
             for (int xx = x + 2; xx < x + 6; xx++)
             {
                 for (int yy = y - 1; yy < y + 3; yy++)

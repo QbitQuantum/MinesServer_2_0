@@ -55,11 +55,11 @@ namespace MinesServer.GameShit.Buildings
             World.SetCell(x + 1, y + 1, 32, false);
             World.SetCell(x + 2, y + 1, 32, false);
 
-            World.SetCell(x - 2, y + 2, 35, false);
+            World.SetCell(x - 2, y + 2, 32, false);
             World.SetCell(x - 1, y + 2, 32, false);
             World.SetCell(x, y + 2, 32, false);
             World.SetCell(x + 1, y + 2, 32, false);
-            World.SetCell(x + 2, y + 2, 35, false);
+            World.SetCell(x + 2, y + 2, 32, false);
         }
         public override void Build()
         {

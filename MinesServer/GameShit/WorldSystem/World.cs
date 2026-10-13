@@ -252,33 +252,9 @@ namespace MinesServer.GameShit.WorldSystem
 
         public static void Destroy(int x, int y, DestroyCellType t = DestroyCellType.Cell)
         {
-            if (!ValidCoord(x, y))
-            {
-                return;
-            }
-            switch (t)
-            {
-                case DestroyCellType.Cell:
-                    if (W.cells[x, y] != 0)
-                    {
-                        W.cells[x, y] = 32;
-                        W.road[x, y] = W.road[x, y] == 0 ? 32 : W.road[x, y];
-                    }
-                    break;
-                case DestroyCellType.Road:
-                    if (W.road[x, y] is not (32 or 37 or 36))
-                    {
-                        W.road[x, y] = 32;
-                    }
-                    break;
-                case DestroyCellType.CellAndRoad:
-                    W.cells[x, y] = 32;
-                    if (W.road[x, y] is not (32 or 37 or 36))
-                    {
-                        W.road[x, y] = 32;
-                    }
-                    break;
-            }
+            if (!ValidCoord(x, y)) return;
+            byte Type = t == DestroyCellType.Cell ? W.road[x, y] ?? 32 : (byte)32;
+            SetCell(x, y, Type);
             DestroyCell(x, y);
         }
 
@@ -351,7 +327,7 @@ namespace MinesServer.GameShit.WorldSystem
             if (!ValidCoord(x + plusx, y + plusy)) return;
             var cell = GetCell(x, y);
             var durability = GetDurability(x, y);
-            Destroy(x, y, DestroyCellType.Cell);
+            Destroy(x, y);
             SetCell(x + plusx, y + plusy, cell);
             DamageCell(x + plusx, y + plusy, durability, Operator.Unknown);
             W.GetChunk(x + plusx, y + plusy).updlasttick = true;
@@ -359,25 +335,31 @@ namespace MinesServer.GameShit.WorldSystem
         public static void SetCell(int x, int y, CellType type) => SetCell(x, y, (byte)type);
         public static void SetCell(int x, int y, byte cell, bool packmesh = false)
         {
-            if (!ValidCoord(x, y))
-            {
-                return;
-            }
-            
-            if (GetProp(cell).isEmpty)
-            {
-                W.cells[x, y] = 0;
-                W.road[x, y] = cell;
-            }
-            else
-            {
-                W.cells[x, y] = cell;
-                W.durability[x, y] = GetProp(cell).durability;
-            }
+            if (!ValidCoord(x, y)) return;
+
+            var Prop = GetProp(cell);
+
+            W.cells[x, y] = cell;
+
+            if (Prop.isEmpty) W.road[x, y] = cell;
+
+            SetDurability(x, y, Prop.durability);
+
             if (W.shit.ContainsKey((x, y)))
                 W.shit[(x, y)]?.Cancel();
 
             SetProp(x, y, packmesh);
+        }
+
+        public static byte GetCell(int x, int y)
+        {
+            if (!ValidCoord(x, y)) return 0;
+            var cell = W.cells[x, y] ?? 0;
+            if (cell == 0)
+            {
+                cell = W.road[x, y] ?? 32;
+            }
+            return cell;
         }
 
         public static bool PackPart(int x, int y)
@@ -413,17 +395,6 @@ namespace MinesServer.GameShit.WorldSystem
             return W.GetChunk(x, y).GetPack(x, y);
         }
 
-        public static byte GetCell(int x, int y)
-        {
-            if (!ValidCoord(x, y)) return 0;
-            var cell = W.cells[x, y] ?? 0;
-            if (cell == 0)
-            {
-                var r = W.road[x, y] ?? 32;
-                return r;
-            }
-            return cell;
-        }
         public Stack<Player> GetPlayersFromPos(int x, int y)
         {
             var st = new Stack<Player>();

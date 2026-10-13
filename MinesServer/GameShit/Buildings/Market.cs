@@ -42,12 +42,7 @@ namespace MinesServer.GameShit.Buildings
                 for (int yy = -2; yy < 3; yy++)
                 {
                     int px = x + xx, py = y + yy;
-                    if (px == x || py == y)
-                    {
-                        World.SetCell(px, py, 32, false); /* -> */ World.W.cells[px, py] = 32;
-                        continue;
-                    }
-                    World.SetCell(px, py, 32, false); /* -> */ World.W.cells[px, py] = 32;
+                    World.SetCell(px, py, 32, false);
                 }
             }
             World.SetCell(x + 2, y + 2, 32, false);
