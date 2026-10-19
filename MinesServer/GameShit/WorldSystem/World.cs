@@ -253,7 +253,12 @@ namespace MinesServer.GameShit.WorldSystem
         public static void Destroy(int x, int y, DestroyCellType t = DestroyCellType.Cell)
         {
             if (!ValidCoord(x, y)) return;
-            byte Type = t == DestroyCellType.Cell ? W.road[x, y] ?? 32 : (byte)32;
+            byte Type = 32;
+            if (t == DestroyCellType.Cell)
+            {
+                Type = W.road[x, y] ?? 32;
+                if (Type == 0) Type = 32;
+            }
             SetCell(x, y, Type);
             DestroyCell(x, y);
         }
