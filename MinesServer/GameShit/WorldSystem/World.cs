@@ -492,9 +492,6 @@ namespace MinesServer.GameShit.WorldSystem
                     {
                         var Pack = pack.Value;
 
-                        if (Pack == null)
-                            continue;
-
                         if (Pack is PackDamage damagable)
                         {
                             if (shouldDamage)
