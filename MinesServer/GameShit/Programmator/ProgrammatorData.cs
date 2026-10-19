@@ -2,8 +2,8 @@
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
-using MinesServer.GameShit.Programmator.SevenZip.LZMA;
 using MinesServer.Server;
+using SevenZip.Compression.LZMA;
 
 namespace MinesServer.GameShit.Programmator
 {
