@@ -1,6 +1,7 @@
 ﻿using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
+using MinesServer.GameShit.GUI.Horb.Canvas;
 using MinesServer.GameShit.GUI.Horb.List.Rich;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
@@ -26,59 +27,16 @@ namespace MinesServer.GameShit.Buildings
 
         [NotMapped] public override PackType type => PackType.Resp;
         [NotMapped] public override int PackId => 1;
-        public int cost { get; set; }
-        public long moneyinside { get; set; }
-        
-        #endregion
-
-        public void OnRespawn(Player p)
-        {
-            if (ownerid == 0) return;
-
-            using var db = new DataBase();
-            db.Attach(this);
-
-            bool ExistMoney = p.money > cost;
-            bool ExistCharge = charge > 0;
-
-            if (ExistMoney && ExistCharge)
-            {
-                p.money -= cost;
-                moneyinside += cost;
-                charge--;
-            }
-
-            p.SendMoney();
-            base.Update();
-
-            db.SaveChanges();
-        }
-        [NotMapped]
-        public override int off
+        [NotMapped] public int clanzone { get; set; }
+        [NotMapped] public override int off
         {
             get => (charge > 0 ? 1 : 0);
         }
-        public (int x, int y) GetRandompoint()
-        {
-            var r = new Random();
-            return (r.Next(x + 2, x + 5), r.Next(y - 1, y + 3));
-        }
-        public void Fill(Player p, long num)
-        {
-            using var db = new DataBase();
-            if (p.crys[CrystalType.Blue] < num)
-            {
-                num = p.crys[CrystalType.Blue];
-            }
-            db.Attach(this);
-            if (p.crys.RemoveCrys(CrystalType.Blue, num))
-            {
-                charge += (int)num;
-            }
-            p.win?.CurrentTab.Replace(AdmnPage(p));
-            p.SendWindow();
-            db.SaveChanges();
-        }
+        public int cost { get; set; }
+        public long moneyinside { get; set; }
+
+        #endregion
+
         #region affectworld
         public override void Build()
         {
@@ -133,25 +91,73 @@ namespace MinesServer.GameShit.Buildings
             foreach (var i in db.players.Include(p => p.resp))
             {
                 var player = DataBase.GetPlayer(i.id);
-                player.resp = null;
+                if (player != null) player.resp = null;
             }
             db.resps.Remove(this);
             db.SaveChanges();
+
             if (Physics.r.Next(1, 101) < 40)
             {
                 p.connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "ШПАААК ВЫПАЛ")]));
                 p.inventory[1]++;
             }
         }
+
         #endregion
+
+        public void OnRespawn(Player p)
+        {
+            if (ownerid == 0) return;
+
+            bool ExistMoney = p.money > cost;
+            bool ExistCharge = charge > 0;
+
+            if (ExistMoney && ExistCharge)
+            {
+                using var db = new DataBase();
+                db.Attach(this);
+                p.money -= cost;
+                moneyinside += cost;
+                charge--;
+                p.SendMoney();
+                base.Update();
+                db.SaveChanges();
+            }
+        }
+
+        public (int x, int y) GetRandompoint()
+        {
+            var r = new Random();
+            return (r.Next(x + 2, x + 5), r.Next(y - 1, y + 3));
+        }
+
+        public void Fill(Player p, long num)
+        {
+            using var db = new DataBase();
+            if (p.crys[CrystalType.Blue] < num)
+            {
+                num = p.crys[CrystalType.Blue];
+            }
+            db.Attach(this);
+            if (p.crys.RemoveCrys(CrystalType.Blue, num))
+            {
+                charge += (int)num;
+            }
+            p.win?.CurrentTab.Replace(AdmnPage(p));
+            p.SendWindow();
+            db.SaveChanges();
+        }
+
         public void AdminSaveChanges(Player p, Dictionary<string, string> d)
         {
+            cid = 0;
             if (bool.TryParse(d["clan"], out var clan))
             {
-                if (DataBase.GetPlayer(ownerid) != null)
+                if (clan)
                 {
-                    cid = clan ? DataBase.GetPlayer(ownerid).cid : 0;
-                }
+                    var Player = DataBase.GetPlayer(ownerid);
+                    if (Player != null) cid = Player.cid;
+                }                
             }
             if (int.TryParse(d["cost"], out var costs) && costs >= 0 && costs <= 5000)
             {
@@ -163,66 +169,145 @@ namespace MinesServer.GameShit.Buildings
             }
             p.win?.CurrentTab.Replace(AdmnPage(p));
         }
-        public int clanzone { get; set; }
-        private IPage AdmnPage(Player p)
+
+        private Page AdmnPage(Player p)
         {
-            MButton[] fillbuttons = [p.crys[CrystalType.Blue] >= 100 ? new MButton("+100", "fill:100", (args) => Fill(p, 100)) : new MButton("+100", "fill:100"),
-                p.crys[CrystalType.Blue] >= 1000 ? new MButton("+1000", "fill:1000", (args) => Fill(p, 1000)) : new MButton("+1000", "fill:1000"),
-                p.crys[CrystalType.Blue] >= 0 ? new MButton("max", "fill:max", (args) => Fill(p, (long)(maxcharge - charge))) : new MButton("max", "fill:max")
+            var Crystall = p.crys[CrystalType.Blue];
+            MButton[] fillbuttons = [
+                Crystall >= 100 ? new MButton("+100", "fill:100", (args) => Fill(p, 100)) : new MButton("+100", "fill:100"),
+                Crystall >= 1000 ? new MButton("+1000", "fill:1000", (args) => Fill(p, 1000)) : new MButton("+1000", "fill:1000"),
+                Crystall >= 0 ? new MButton("max", "fill:max", (args) => Fill(p, (long)(maxcharge - charge))) : new MButton("max", "fill:max")
                ];
+
             return new Page()
             {
                 Text = " ",
                 RichList = new RichListConfig()
                 {
-                    Entries = [RichListEntry.Fill("заряд", (int)charge, (int)maxcharge, CrystalType.Blue, fillbuttons[0], fillbuttons[1], fillbuttons[2]),
-                        RichListEntry.Text("hp"),
+                    Entries = 
+                    [
+                        RichListEntry.Fill("заряд", (int)charge, (int)maxcharge, CrystalType.Blue, fillbuttons[0], fillbuttons[1], fillbuttons[2]),
+                        RichListEntry.Text("hp", "hp"),
                         RichListEntry.UInt32("cost", "cost", (uint)cost),
                         RichListEntry.Button($"прибыль {moneyinside}$", moneyinside == 0 ? default : new MButton("Получить", "getprofit", (args) => { 
-                            using var db = new DataBase(); p.money += moneyinside; moneyinside = 0; p.SendMoney(); db.SaveChanges(); p.win?.CurrentTab.Replace(AdmnPage(p)); p.SendWindow(); 
+                            using var db = new DataBase(); 
+                            p.money += moneyinside; moneyinside = 0; 
+                            p.SendMoney(); 
+                            db.SaveChanges(); 
+                            p.win?.CurrentTab.Replace(AdmnPage(p)); 
+                            p.SendWindow(); 
                         })),
                         RichListEntry.Bool("Клановый респ", "clan", cid > 0),
                         RichListEntry.UInt32("clanzone", "clanzone", (uint)clanzone)
-                            ]
+                    ]
                 },
                 Buttons = [new MButton("СОХРАНИТЬ", $"save:{ActionMacros.RichList}", (args) => { AdminSaveChanges(p, args.RichList); })]
             };
         }
-        public override Window? GUIWin(Player p)
+
+        private Tab RespTab(Player p)
         {
-            Action adminaction = (p.id == ownerid) ? () =>
+            Action? adminaction = (p.id == ownerid) ? () =>
             {
-                if (p.id == ownerid)
-                {
-                    p.win?.CurrentTab.Open(AdmnPage(p));
-                }
-            } : null;
-            Page page = (p.resp.x != x && p.resp.y != y) ? new Page()
+                p.win?.CurrentTab.Open(AdmnPage(p));
+            }
+            : null;
+
+            bool InvalidPlayerResp = p.resp == null || (p.resp != null && p.resp.x != x && p.resp.y != y);
+
+            MButton[] buttons = InvalidPlayerResp ? [new MButton("ПРИВЯЗАТЬ", "bind", (args) =>
+            {
+                p.resp = this;
+                p.win  = GUIWin(p)!;
+            })]
+            : [];
+
+            string viewtext = $"@@Респ - это место, где будет появляться ваш робот после уничтожения\n\nЦена восстановления: <color=green>${cost}</color>\n\n" +
+                "<color=green>" + (InvalidPlayerResp ? "Привязать робота к респу?" : "Вы привязаны к этому респу") + "</color>";
+
+            Page page = new Page()
             {
                 OnAdmin = adminaction,
-                Text = $"@@Респ - это место, где будет появляться ваш робот\nпосле уничтожения (HP = 0)\n\nЦена восстановления: <color=green>${cost}</color>\n\n<color=#f88>Привязать робота к респу?</color>",
-                Buttons = [new MButton("ПРИВЯЗАТЬ", "bind", (args) =>
-                {
-                    p.resp = this;
-                    p.win = GUIWin(p)!;
-                })]
-            } : new Page()
-            {
-                OnAdmin = adminaction,
-                Text = $"@@Респ - это место, где будет появляться ваш робот\nпосле уничтожения (HP = 0)\n\nЦена восстановления: <color=green>${cost}</color>\n\n<color=#8f8>Вы привязаны к этому респу.</color>",
-                Buttons = []
+                Text = viewtext,
+                Buttons = buttons
             };
 
+            return new Tab()
+            {
+                Label = "Респаун",
+                Action = "respawn",
+                InitialPage = page
+            };
+        }
+
+        private CanvasElement[] CanvasSkinsTab()
+        {
+            List<CanvasElement> n = new();
+
+            n.Add(CanvasElement.MicroButton(
+                new MButton($"<color=#00ff00>НАДЕТО</color>", "skin0"),
+                    originDX: -200, originDY: -100));
+
+            n.Add(CanvasElement.MicroButton(
+                new MButton($"<color=yellow>100</color>", "skin1"),
+                    originDX: 125));
+
+            n.Add(CanvasElement.MicroButton(
+                new MButton($"<color=yellow>500</color>", "skin2"),
+                    originDX: 125));
+
+            n.Add(CanvasElement.MicroButton(
+                new MButton($"<color=yellow>1000</color>", "skin3"),
+                    originDX: 125));
+
+            n.Add(CanvasElement.TextField("<color=yellow>   ПЧЕЛА</color>\n\n\n", originDX: -385, originDY: 87));
+            n.Add(CanvasElement.TextField("<color=yellow>   ТОЛСТЯК</color>\n\n<size=11>При перевесе\nурон в 4 раза\n    меньше</size>", originDX: 135));
+            n.Add(CanvasElement.TextField("<color=yellow>   КОМАР</color>\n\n<size=11>Вас не видят\n бот-радары</size>", originDX: 120));
+            n.Add(CanvasElement.TextField("<color=yellow>   ВДОВА</color>\n\n<size=11>   +100 к\n потреблению\nпушек</size>", originDX: 120));
+
+            n.Add(CanvasElement.Image("inner:SKIN:0", originDX: -365, originDY: 90, width: 2, height: 2));
+            n.Add(CanvasElement.Image("inner:SKIN:4", originDX: 125, width: 2, height: 2));
+            n.Add(CanvasElement.Image("inner:SKIN:5", originDX: 125, width: 2, height: 2));
+            n.Add(CanvasElement.Image("inner:SKIN:6", originDX: 125, width: 2, height: 2));
+
+            n.Add(CanvasElement.MicroButton(
+                new MButton($"->", "right"),
+                    originDX: 100, originDY: -75));
+
+            return n.ToArray();
+        }
+
+        private Tab SkinsTab(Player p)
+        {
+            return new Tab()
+            {
+                Action = "SkinsTab",
+                Label = "Cкины",
+                InitialPage = new Page()
+                {
+                    Canvas = CanvasSkinsTab(),
+                    Style = new Style()
+                    {
+                        Space = 0,
+                        Canvas = new GridStyle()
+                        {
+                            Height = 275
+                        }
+                    },
+                    Buttons = [],
+                }
+            };
+        }
+
+        public override Window? GUIWin(Player p)
+        {
             return new Window()
             {
-                Title = "РЕСП",
+                ShowTabs = true,
+                Title = "Респаун",
                 Tabs = [
-                    new Tab()
-                    {
-                        Label = "РЕСП",
-                        Action = "resp",
-                        InitialPage = page
-                    }
+                    RespTab(p),
+                    SkinsTab(p)
                 ]
             };
         }
