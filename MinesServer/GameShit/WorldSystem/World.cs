@@ -82,9 +82,9 @@ namespace MinesServer.GameShit.WorldSystem
         public WorldLayer<byte> road;
         public WorldLayer<byte> cells;
         public WorldLayer<float> durability;
-        
+
         private readonly Chunk[] chunks;
-        
+
         // ширина мира в клетках
         public const int CellsWidth = Chunk.ChunksW * Chunk.ChunkWidth;
         // высота мира в клетках
@@ -132,14 +132,10 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         public static WorldInfoPacket WorldMapInfoPacket()
-        {
-            return new WorldInfoPacket(W.name, CellsWidth, CellsHeight, 1, "DubugVersion", "http://localhost", "Update");
-        }
+            => new WorldInfoPacket(W.name, CellsWidth, CellsHeight, 1, "DubugVersion", "http://localhost", "Update");
 
         public static void ScheduleAction(TimeSpan delay, Action action)
-        {
-            _delayedActions.Enqueue(action, ServerTime.Now + delay);
-        }
+            => _delayedActions.Enqueue(action, ServerTime.Now + delay);
 
         private static void UpdateDelay()
         {
@@ -247,9 +243,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         private static void DestroyCell(int x, int y)
-        {
-            W.GetChunk(x, y).DestroyCell(x, y);
-        }
+            => W.GetChunk(x, y).DestroyCell(x, y);
 
         public static void Destroy(int x, int y, DestroyCellType t = DestroyCellType.Cell)
         {
@@ -292,11 +286,11 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool IsCollectable(int x, int y) => IsCollectable(GetProp(x, y));
         public static bool IsForDigging(int x, int y) => IsForDigging(GetProp(x, y));
         public static bool IsBlockedForPlacement(int x, int y) => IsBlockedForPlacement(GetProp(x, y));
-        
+
         public static bool CanDamageCell(int x, int y)
             => !isAlive(x, y) && !isBuildingBlock(x, y) && IsForDigging(x, y);
 
-        public static bool IsEmptyForPlace(int x, int y) 
+        public static bool IsEmptyForPlace(int x, int y)
             => IsEmpty(x, y) && W.GetPlayersFromPos(x, y).Count == 0;
 
         public static (int x, int y) FindEmptyForBox(int x, int y)
@@ -396,9 +390,7 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         public static void UpdatePack(Pack pack)
-        {
-            W.GetChunk(pack.x, pack.y).ResendPack(pack);
-        }
+            => W.GetChunk(pack.x, pack.y).ResendPack(pack);
 
         public static Pack? GetPack(int x, int y)
         {
@@ -429,21 +421,13 @@ namespace MinesServer.GameShit.WorldSystem
         #region TODO: Унести типизированную структуру Cell (Cell.cs)
 
         public static bool isBuildingBlock(int x, int y)
-        {
-            return ((CellType)GetCell(x, y)).IsBuildingBlock();
-        }
+            => ((CellType)GetCell(x, y)).IsBuildingBlock();
         public static bool isAlive(int x, int y)
-        {
-            return ((CellType)GetCell(x, y)).IsAlive();
-        }
+            => ((CellType)GetCell(x, y)).IsAlive();
         public static bool isRoad(int x, int y)
-        {
-            return ((CellType)GetCell(x, y)).IsRoad();
-        }
+            => ((CellType)GetCell(x, y)).IsRoad();
         public static bool isCry(int x, int y)
-        {
-            return ((CellType)GetCell(x, y)).IsCry();
-        }
+            => ((CellType)GetCell(x, y)).IsCry();
         #endregion
 
         public static bool ValidCoord(int x, int y) => x >= 0 && y >= 0 && x < CellsWidth && y < CellsHeight;
@@ -471,7 +455,7 @@ namespace MinesServer.GameShit.WorldSystem
                     // Проверяем квадрат расстояния
                     if (dxSqr + dy * dy <= Gun.attackRadiusSq)
                     {
-                        if (ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var pack) 
+                        if (ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var pack)
                             && pack != null && pack is Gun gun)
                         {
                             anygun = true;
@@ -485,7 +469,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return (ret,anygun);
         }
-        
+
         private static void UpdatePacks(TimeSpan interval, ref DateTime lastUpdate, bool shouldDamage)
         {
             if (ServerTime.Now - lastUpdate < interval)
@@ -581,16 +565,12 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         public static int GetCrysCost(int i)
-        {
-            return W.cryscostbase[i] + W.cryscostmod[i];
-        }
+            => W.cryscostbase[i] + W.cryscostmod[i];
 
         // TODO: Заменить на типизированный CrystalSummary
         // Сейчас используем временное приведение, потом переделаем на нормальную типизацию
         public static void AddDob(CrystalType type, long dob)
-        {
-            W.summary[(int)type] += dob;
-        }
+            => W.summary[(int)type] += dob;
 
         #region TODO:Заменить public long[] summary = new long[6];
         public class CrystalSummary
@@ -608,10 +588,8 @@ namespace MinesServer.GameShit.WorldSystem
             public long Total => _values.Sum();
 
             public IReadOnlyDictionary<CrystalType, long> ToDictionary()
-            {
-                return Enum.GetValues<CrystalType>()
+                => Enum.GetValues<CrystalType>()
                     .ToDictionary(t => t, t => this[t]);
-            }
         }
         #endregion
 
@@ -624,18 +602,14 @@ namespace MinesServer.GameShit.WorldSystem
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Chunk GetPosChunk(int chunkX, int chunkY)
-        {
-            return chunks[chunkX + chunkY * Chunk.ChunksW];
-        }
+            => chunks[chunkX + chunkY * Chunk.ChunksW];
+
         public IEnumerable<(int x, int y)> GetVisibleChunksPos(int x, int y, int radius = 2)
-        {
-            return GetChunk(x, y).GetNeighboringChunkCoordinates(radius);
-        }
+            => GetChunk(x, y).GetNeighboringChunkCoordinates(radius);
 
         public IEnumerable<Chunk> GetVisibleChunks(int x, int y, int radius = 2)
-        {
-            return GetChunk(x, y).GetNeighboringChunks(radius);
-        }
+            => GetChunk(x, y).GetNeighboringChunks(radius);
+
         public IEnumerable<Chunk> GetChunksInRange(int x, int y, int radius)
         {
             var pos = Chunk.GetChunkPosByCoords(x, y);
@@ -659,34 +633,22 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         public void SendDirectedFx(int fx, int x, int y, int dir, int color = 0)
-        {
-            GetChunk(x, y).SendDirectedFx(fx, x, y, dir, color);
-        }
+            => GetChunk(x, y).SendDirectedFx(fx, x, y, dir, color);
 
         public void SendFx(int x, int y, int fx)
-        {
-            GetChunk(x, y).SendFx(x, y, fx);
-        }
+            => GetChunk(x, y).SendFx(x, y, fx);
 
         public void SendBotsInfo(int id, int x, int y, int dir, int skin, int cid, int tail)
-        {
-            GetChunk(x, y).SendBotsInfo(id, x, y, dir, skin, cid, tail);
-        }
+            => GetChunk(x, y).SendBotsInfo(id, x, y, dir, skin, cid, tail);
 
         public void SendLocalMsg(int id, int x, int y, string msg)
-        {
-            GetChunk(x, y).SendLocalMsg(id, x, y, msg);
-        }
+            => GetChunk(x, y).SendLocalMsg(id, x, y, msg);
 
         public void SendLeaveBot(int id, int x, int y)
-        {
-            GetChunk(x, y).SendLeaveBot(id);
-        }
+            => GetChunk(x, y).SendLeaveBot(id);
 
         public HBMapPacket MapPacket(int x, int y)
-        {
-            return GetChunk(x, y).MapPacket();
-        }
+            => GetChunk(x, y).MapPacket();
 
         public static void SendWorldInfo(Player player)
         {
