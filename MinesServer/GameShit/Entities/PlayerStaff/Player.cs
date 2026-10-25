@@ -790,13 +790,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (clan == null)
                 return;
 
-            using var db = new DataBase();
-            db.clans
-                .Where(i => i.id == clan.id)
-                .Include(p => p.members)
-                .Include(p => p.reqs)
-                .FirstOrDefault()
-                ?.OpenClanWin(this);
+            Clan.OpenWinAsync(this);
         }
 
         public void OpenMyBuildings()

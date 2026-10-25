@@ -27,7 +27,7 @@ namespace MinesServer.GameShit
             });
             commands.Add("clans", (p, arg) =>
             {
-                Clan.OpenClanList(p);
+                Clan.OpenListAsync(p);
             });
             commands.Add("setitem", (p, arg) =>
             {

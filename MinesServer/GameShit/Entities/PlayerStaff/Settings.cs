@@ -69,7 +69,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             MButton[] btns = [new MButton("Сохранить", $"save:{ActionMacros.RichList}", (args) => { Save(p, args.RichList); })];
             if (p.cid == 0)
             {
-                btns = btns.Append(new MButton("Создать клан", $"clancreate", (args) => { Clan.OpenCreateWindow(p); })).ToArray();
+                btns = btns.Append(new MButton("Создать клан", $"clancreate", (args) => { Clan.OpenCreateWindowAsync(p); })).ToArray();
             }
             p.win = new Window()
             {
