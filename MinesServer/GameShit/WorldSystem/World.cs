@@ -414,7 +414,7 @@ namespace MinesServer.GameShit.WorldSystem
             }
             return st;
         }
-        public static bool ContainsPack(int x, int y, out Pack p)
+        public static bool ContainsPack(int x, int y, out Pack? p)
         {
             p = GetPack(x, y);
             return p != null;
@@ -464,10 +464,10 @@ namespace MinesServer.GameShit.WorldSystem
                     // Проверяем квадрат расстояния
                     if (dxSqr + dy * dy <= Gun.attackRadiusSq)
                     {
-                        if (ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var p) && p is Gun)
+                        if (ValidCoord(checkX, checkY) && ContainsPack(checkX, checkY, out var pack) 
+                            && pack != null && pack is Gun gun)
                         {
                             anygun = true;
-                            var gun = (Gun)p;
                             if (gun.charge > 0 && gun.cid != cid)
                             {
                                 return (false, true);

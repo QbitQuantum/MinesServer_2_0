@@ -306,7 +306,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             UpdatePosition(x, y);
 
-            if (World.ContainsPack(x, y, out var pack) && 
+            if (World.ContainsPack(x, y, out var pack) && pack != null &&
                 (pack.cid == cid ||
                 pack.ownerid == id) &&
                 !HasActiveProgram)
