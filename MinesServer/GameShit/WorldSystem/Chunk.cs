@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
+using MinesServer.GameShit.GUI;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.HubEvents.Bots;
@@ -49,10 +50,12 @@ namespace MinesServer.GameShit.WorldSystem
         private Chunk[] _cachedNeighbors = [];
         private (int x, int y)[] _cachedNeighborCoords = [];
         private readonly Dictionary<(int dx, int dy), Chunk> _neighborDict = [];
-
+        private Dictionary<int, Func<Player, Window?>> guiKeys { get; } = new();
+        private Dictionary<Pack, HashSet<int>> packGuiKeys { get; } = new();
         public ConcurrentDictionary<int, Player> bots { get; } = new();
         public (int x, int y) pos { get; }
         private bool[] packsprop { get; set; }
+        private List<int> PartPackResp { get; set; } = [];
         public Dictionary<int, Pack> packs { get; } = new();
 
         private bool ContainsAlive = false;
@@ -465,6 +468,16 @@ namespace MinesServer.GameShit.WorldSystem
         public void AddPack(Pack p)
         {
             packs[GetPackId(p.x, p.y)] = p;
+
+            var keys = new HashSet<int>();
+            foreach (var ((kx, ky), factory) in p.KeysGUIOpen)
+            {
+                int key = GetPackId(kx, ky);
+                guiKeys[key] = factory;
+                keys.Add(key);
+            }
+            packGuiKeys[p] = keys;
+
             SendPack((char)p.type, p.x, p.y, p.cid, p.off);
         }
 
@@ -472,6 +485,12 @@ namespace MinesServer.GameShit.WorldSystem
         {
             if (packs.Remove(GetPackId(p.x, p.y)))
                 ClearPack(p.x, p.y);
+
+            if (packGuiKeys.Remove(p, out var keys))
+            {
+                foreach (var key in keys)
+                    guiKeys.Remove(key);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -486,6 +505,9 @@ namespace MinesServer.GameShit.WorldSystem
             LoadPackProps();
             return packsprop[GetPackId(x, y)];
         }
+
+        public Func<Player, Window?>? GetGuiFactory(int x, int y)
+            => guiKeys.TryGetValue(GetPackId(x, y), out var f) ? f : null;
 
         public HBMapPacket MapPacket()
         {

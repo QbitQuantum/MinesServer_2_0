@@ -35,6 +35,18 @@ namespace MinesServer.GameShit.Buildings
         public int cost { get; set; }
         public long moneyinside { get; set; }
 
+        public override IReadOnlyDictionary<(int x, int y), Func<Player, Window?>> KeysGUIOpen
+        {
+            get
+            {
+                return new Dictionary<(int x, int y), Func<Player, Window?>>
+                {
+                    [(x, y)] = GUIWin,
+                    [(x, y + 2)] = GUIWin2,
+                };
+            }
+        }
+
         #endregion
 
         #region affectworld
@@ -308,6 +320,30 @@ namespace MinesServer.GameShit.Buildings
                 Tabs = [
                     RespTab(p),
                     SkinsTab(p)
+                ]
+            };
+        }
+
+        public Window? GUIWin2(Player p)
+        {
+            return new Window()
+            {
+                Title = "Ремонтная станция",
+                Tabs = [
+                    new Tab()
+                    {
+                        Action = "view_tab_remont",
+                        Label = "Ремонтная станция",
+                        InitialPage = new Page()
+                        {
+                            Text = "Вашему роботу не хвататет 70hp\n Вы хотите починить робота его за <color=green>700$</color>?",
+                            Buttons = 
+                            [
+                                new MButton("<color=green>Да</color>", $"yes_remont"),
+                                new MButton("Нет", $"no_remont")
+                            ],
+                        }
+                    }
                 ]
             };
         }

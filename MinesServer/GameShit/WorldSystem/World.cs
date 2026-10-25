@@ -4,6 +4,7 @@ using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Generator;
+using MinesServer.GameShit.GUI;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
@@ -365,6 +366,12 @@ namespace MinesServer.GameShit.WorldSystem
                 cell = W.road[x, y] ?? 32;
             }
             return cell;
+        }
+
+        public static Func<Player, Window?>? GetGuiFactory(int x, int y)
+        {
+            if (!ValidCoord(x, y)) return null;
+            return W.GetChunk(x, y).GetGuiFactory(x, y);
         }
 
         public static bool PackPart(int x, int y)

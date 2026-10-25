@@ -306,13 +306,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             UpdatePosition(x, y);
 
-            if (World.ContainsPack(x, y, out var pack) && pack != null &&
-                (pack.cid == cid ||
-                pack.ownerid == id) &&
-                !HasActiveProgram)
+            var factory = World.GetGuiFactory(x, y);
+            if (factory != null)
             {
-                win = pack.GUIWin(this);
-                this.SendWindow();
+                var w = factory(this);
+                if (w != null) { win = w; this.SendWindow(); }
             }
 
             return false;

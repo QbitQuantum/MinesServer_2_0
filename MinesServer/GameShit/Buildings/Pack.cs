@@ -18,6 +18,14 @@ namespace MinesServer.GameShit.Buildings
         public virtual int cid { get; set; }
         public virtual int off { get; set; }
         public virtual int PackId { get; set; } = -1;
+        public virtual IReadOnlyDictionary<(int x, int y), Func<Player, Window?>> KeysGUIOpen
+        {
+            get { return new Dictionary<(int x, int y), Func<Player, Window?>> { [(x, y)] = GUIWin }; }
+        }
+
+        protected Func<Player, Window?> MakeGui(Func<Player, Window?> factory)
+            => p => (p.cid == cid || p.id == ownerid) && !p.HasActiveProgram ? factory(p) : null;
+
         public virtual PackType type { get; }
         public virtual int ownerid { get; set; }
 
