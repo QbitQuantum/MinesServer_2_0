@@ -519,6 +519,16 @@ namespace MinesServer.GameShit.WorldSystem
                 cells);
         }
 
+        public IEnumerable<IHubPacket> GetChunkModel()
+        {
+            var packets = new List<IHubPacket>();
+            // Собираем карту чанка
+            packets.Add(MapPacket());
+            // Собираем паки чанка
+            packets.AddRange(pPakcs());
+            return packets;
+        }
+
         /// <summary>
         /// Создаём пакеты для удаления всех паков в чанке
         /// </summary>

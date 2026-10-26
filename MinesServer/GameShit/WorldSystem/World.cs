@@ -650,6 +650,9 @@ namespace MinesServer.GameShit.WorldSystem
         public HBMapPacket MapPacket(int x, int y)
             => GetChunk(x, y).MapPacket();
 
+        public IEnumerable<IHubPacket> GetChunkModel(int chunkX, int chunkY)
+            => GetPosChunk(chunkX, chunkY).GetChunkModel();
+
         public static void SendWorldInfo(Player player)
         {
             var mapPackets = new List<IHubPacket>();
@@ -667,7 +670,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             foreach (var (chunkX, chunkY) in chunksToAdd)
             {
-                packets.AddRange(GetChunkPackets(chunkX, chunkY));
+                packets.AddRange(GetChunkModel(chunkX, chunkY));
             }
             return packets;
         }
@@ -685,20 +688,6 @@ namespace MinesServer.GameShit.WorldSystem
                     yield return packet;
                 }
             }
-        }
-
-        public IEnumerable<IHubPacket> GetChunkPackets(int chunkX, int chunkY)
-        {
-            var packets = new List<IHubPacket>();
-            var chunk = GetPosChunk(chunkX, chunkY);
-
-            // Отправляем карту чанка
-            packets.Add(chunk.MapPacket());
-
-            // Отправляем паки чанка
-            packets.AddRange(chunk.pPakcs());
-
-            return packets;
         }
     }
 }
