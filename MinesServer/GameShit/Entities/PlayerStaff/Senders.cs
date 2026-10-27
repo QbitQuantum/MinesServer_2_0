@@ -6,6 +6,7 @@ using MinesServer.Network.Chat;
 using MinesServer.Network.GUI;
 using MinesServer.Network.Movement;
 using MinesServer.Network.Programmator;
+using MinesServer.Network.World;
 using MinesServer.Server;
 using MinesServer.Server.Network;
 
@@ -52,6 +53,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendHealth(this Player p) => p.connection?.SendU(new LivePacket(p.Health, p.MaxHealth));
         public static void SendBeep(this Player p) => p.connection?.SendU(new BibikaPacket());
         public static void SendBotInfo(this Player p) => p.connection?.SendU(new BotInfoPacket(p.name, p.x, p.y, p.id));
+        public static void SendBotUpdateInfo(this Player p) => p.connection?.SendU(new NickListPacket(new Dictionary<int, string> { [p.id] = p.name }));
         public static void SendLvl(this Player p) => p.connection?.SendU(new LevelPacket(p.skillslist.lvlsummary()));
         public static void SendOnline(this Player p) => p.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());

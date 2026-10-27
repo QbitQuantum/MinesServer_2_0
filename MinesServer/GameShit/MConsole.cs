@@ -69,8 +69,9 @@ namespace MinesServer.GameShit
                 {
                     p.name = arg.Split(' ')[1];
                     using var db = new DataBase();
+                    db.players.Update(p);
                     db.SaveChanges();
-                    db.Dispose();
+                    p.SendBotUpdateInfo();
                 }
             });
             commands.Add("addmis", (p, arg) =>
