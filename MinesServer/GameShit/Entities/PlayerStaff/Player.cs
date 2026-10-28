@@ -270,8 +270,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void dOnDisconnect()
         {
             using var db = new DataBase();
-            db.players.Update(this);
-            db.SaveChanges();
+            var player = db.players.FirstOrDefault(x => x.id == this.id);
+            if (player is not null)
+            {
+                player.laststarttime = ServerTime.Now;
+                db.SaveChanges();
+            }
 
             laststarttime = ServerTime.Now;
             connection = null;

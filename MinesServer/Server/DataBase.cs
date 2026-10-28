@@ -94,8 +94,8 @@ namespace MinesServer.Server
                .AutoInclude();
             var b = modelBuilder.Entity<Player>();
             b.HasOne(i => i.resp).WithMany().OnDelete(DeleteBehavior.SetNull);
-                b.Navigation(c => c.programs)
-                .AutoInclude();
+            b.Navigation(c => c.programs)
+            .AutoInclude();
             modelBuilder.Entity<Request>()
                 .Navigation(c => c.player)
                 .AutoInclude();
@@ -216,16 +216,16 @@ namespace MinesServer.Server
                 return player;
             }
             using var db = new DataBase();
-                return db.players
-                .Where(i => i.name == name)
-                .Include(p => p.clanrank)
-                .Include(p => p.clan)
-                .Include(p => p.inventory)
-                .Include(p => p.crys)
-                .Include(p => p.skillslist)
-                .Include(p => p.settings)
-                .Include(p => p.resp)
-                .FirstOrDefault();
+            return db.players
+            .Where(i => i.name == name)
+            .Include(p => p.clanrank)
+            .Include(p => p.clan)
+            .Include(p => p.inventory)
+            .Include(p => p.crys)
+            .Include(p => p.skillslist)
+            .Include(p => p.settings)
+            .Include(p => p.resp)
+            .FirstOrDefault();
         }
 
         public static bool PlayerExists(string name)
@@ -322,5 +322,161 @@ namespace MinesServer.Server
                 Default.WriteError(ex.ToString());
             }
         }
+
+        #region Clan saves
+
+        /// <summary>
+        /// Подача заявки в клан.
+        /// </summary>
+        public static async Task<bool> SaveClanRequestAsync(int clanId, int playerId)
+        {
+            await using var db = new DataBase();
+            var clan = await db.clans.Include(c => c.reqs).FirstOrDefaultAsync(c => c.id == clanId);
+            if (clan is null) return false;
+
+            clan.reqs.Add(new Request
+            {
+                PlayerId = playerId,
+                ClanId = clan.id,
+                reqtime = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Принятие заявки: переносит игрока в клан с дефолтным рангом и удаляет заявку.
+        /// </summary>
+        public static async Task<bool> SaveAcceptRequestAsync(int clanId, int requestId, Rank defaultRank)
+        {
+            await using var db = new DataBase();
+            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == clanId);
+            if (clan is null) return false;
+
+            var request = clan.reqs.FirstOrDefault(r => r.id == requestId);
+            if (request is null) return false;
+
+            request.player.clan = clan;
+            request.player.clanrank = defaultRank;
+            clan.reqs.Remove(request);
+
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Отклонение заявки.
+        /// </summary>
+        public static async Task<bool> SaveDeclineRequestAsync(int clanId, int requestId)
+        {
+            await using var db = new DataBase();
+            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == clanId);
+            if (clan is null) return false;
+
+            var req = clan.reqs.FirstOrDefault(r => r.id == requestId);
+            if (req is null) return false;
+
+            clan.reqs.Remove(req);
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Выход игрока из клана, включая передачу владения или удаление клана.
+        /// </summary>
+        public static async Task<bool> SaveLeaveClanAsync(int clanId, int playerId, Rank? ownerRank)
+        {
+            await using var db = new DataBase();
+            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == clanId);
+            if (clan is null) return false;
+
+            var isOwner = clan.ownerid == playerId;
+            var player = clan.members.FirstOrDefault(m => m.id == playerId);
+            if (player is not null)
+            {
+                player.clan = null;
+                player.clanrank = null;
+            }
+
+            if (isOwner)
+            {
+                var heir = clan.members
+                    .Where(m => m.id != playerId)
+                    .OrderByDescending(m => m.clanrank?.priority ?? 0)
+                    .FirstOrDefault();
+
+                if (heir is null)
+                {
+                    db.clans.Remove(clan);
+                }
+                else
+                {
+                    if (ownerRank is null)
+                        throw new InvalidOperationException($"У клана {clan.id} отсутствует ранг владельца.");
+                    clan.ownerid = heir.id;
+                    heir.clanrank = ownerRank;
+                }
+            }
+
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Исключение игрока из клана.
+        /// </summary>
+        public static async Task<bool> SaveKickAsync(int clanId, int targetId)
+        {
+            await using var db = new DataBase();
+            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == clanId);
+            if (clan is null) return false;
+
+            var target = clan.members.FirstOrDefault(m => m.id == targetId);
+            if (target is null) return false;
+
+            target.clan = null;
+            target.clanrank = null;
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Смена звания игрока.
+        /// </summary>
+        public static async Task<bool> SaveChangeRankAsync(int clanId, int targetId, int rankId)
+        {
+            await using var db = new DataBase();
+            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == clanId);
+            if (clan is null) return false;
+
+            var target = clan.members.FirstOrDefault(m => m.id == targetId);
+            var newRank = clan.ranks.FirstOrDefault(r => r.id == rankId);
+            if (target is null || newRank is null) return false;
+
+            target.clanrank = newRank;
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Создание клана.
+        /// </summary>
+        public static async Task<bool> SaveCreateClanAsync(Clan clan)
+        {
+            await using var db = new DataBase();
+
+            if (await db.clans.AnyAsync(c => c.id == clan.id)) return false;
+            if (await db.clans.AnyAsync(c => c.name.ToLower() == clan.name.ToLower())) return false;
+
+            foreach (var r in clan.ranks) r.owner = clan;
+
+            var ownerRank = clan.ranks.First(r => r.priority == Clan.OwnerPriority);
+
+            db.clans.Add(clan);
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        #endregion
     }
 }
