@@ -72,11 +72,7 @@ namespace MinesServer.GameShit.Buildings
             db.SaveChanges();
 
             // Small chance to refund the Crafter item back to the owner.
-            if (Physics.r.Next(1, 101) < 40)
-            {
-                p.connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "Крафтер разобран. Часть деталей сохранена.")]));
-                p.inventory[24]++;
-            }
+            TryToReturnInventory(p);
         }
         #endregion
 

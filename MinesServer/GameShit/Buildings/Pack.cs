@@ -18,6 +18,7 @@ namespace MinesServer.GameShit.Buildings
         public virtual int cid { get; set; }
         public virtual int off { get; set; }
         public virtual int PackId { get; set; } = -1;
+        protected virtual bool Roll { get; set; } = Physics.r.Next(1, 101) < 40;
         public virtual IReadOnlyDictionary<(int x, int y), Func<Player, Window?>> KeysGUIOpen
         {
             get { return new Dictionary<(int x, int y), Func<Player, Window?>> { [(x, y)] = GUIWin }; }
@@ -25,6 +26,15 @@ namespace MinesServer.GameShit.Buildings
 
         protected Func<Player, Window?> MakeGui(Func<Player, Window?> factory)
             => p => (p.cid == cid || p.id == ownerid) && !p.HasActiveProgram ? factory(p) : null;
+
+        protected void TryToReturnInventory(Player p)
+        {
+            if (Roll)
+            {
+                p.SendLocalPrivateMessage(0, x, y, "Пак разобран. Часть деталей сохранена.");
+                p.inventory[PackId]++;
+            }
+        }
 
         public virtual PackType type { get; }
         public virtual int ownerid { get; set; }

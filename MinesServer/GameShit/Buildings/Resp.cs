@@ -108,11 +108,7 @@ namespace MinesServer.GameShit.Buildings
             db.resps.Remove(this);
             db.SaveChanges();
 
-            if (Physics.r.Next(1, 101) < 40)
-            {
-                p.connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "ШПАААК ВЫПАЛ")]));
-                p.inventory[1]++;
-            }
+            TryToReturnInventory(p);
         }
 
         #endregion

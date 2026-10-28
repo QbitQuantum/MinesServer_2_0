@@ -105,11 +105,8 @@ namespace MinesServer.GameShit.Buildings
             using var db = new DataBase();
             db.storages.Remove(this);
             db.SaveChanges();
-            if (Physics.r.Next(1, 101) < 40)
-            {
-                p.connection?.SendB(new HBPacket([new HBChatPacket(0, x, y, "ШПАААК ВЫПАЛ")]));
-                p.inventory[29]++;
-            }
+
+            TryToReturnInventory(p);
         }
         #endregion
         private void StockTransfer(long[]? sliders, Player p)
