@@ -137,7 +137,7 @@ namespace MinesServer.GameShit.Buildings
             // RichListEntry.DropDown запрещает ':' внутри значений.
             return text.Replace(":", "·");
         }
-        private IPage ProgramsPage(Player p)
+        private Page ProgramsPage(Player p)
         {
             using var db = new DataBase();
             var progs = db.progs
