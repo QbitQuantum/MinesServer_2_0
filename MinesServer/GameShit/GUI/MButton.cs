@@ -27,7 +27,12 @@ namespace MinesServer.GameShit.GUI
                     output += temp[i..(i + 3)];
                     temp = temp[(i + 3)..];
                 }
-                var args = new ActionArgs();
+                var args = new ActionArgs
+                {
+                    Action = action,
+                    ActionFormat = ActionFormat,
+                    Label = Label
+                };
                 var ind = 1;
                 while (output.Length > 0)
                 {
