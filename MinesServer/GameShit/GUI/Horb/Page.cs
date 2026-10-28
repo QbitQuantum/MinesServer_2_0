@@ -1,7 +1,7 @@
 ﻿using MinesServer.Enums;
 using MinesServer.GameShit.GUI.Horb.Canvas;
 using MinesServer.GameShit.GUI.Horb.List;
-using MinesServer.GameShit.GUI.Horb.List.Rich;
+using MinesServer.GameShit.GUI.Horb.Rich;
 using System.Text.RegularExpressions;
 
 namespace MinesServer.GameShit.GUI.Horb

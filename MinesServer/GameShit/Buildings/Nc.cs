@@ -4,7 +4,7 @@ using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.GUI.Horb.Canvas;
-using MinesServer.GameShit.GUI.Horb.List.Rich;
+using MinesServer.GameShit.GUI.Horb.Rich;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;

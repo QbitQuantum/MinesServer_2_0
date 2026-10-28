@@ -1,6 +1,6 @@
 ﻿using MinesServer.Enums;
 
-namespace MinesServer.GameShit.GUI.Horb.List.Rich
+namespace MinesServer.GameShit.GUI.Horb.Rich
 {
     public readonly struct RichListEntry
     {

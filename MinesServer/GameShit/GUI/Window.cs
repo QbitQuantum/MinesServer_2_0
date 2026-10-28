@@ -1,7 +1,7 @@
 ﻿using MinesServer.Enums;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.GUI.Horb.Canvas;
-using MinesServer.GameShit.GUI.Horb.List.Rich;
+using MinesServer.GameShit.GUI.Horb.Rich;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.Network;
 using SimpleJSON;

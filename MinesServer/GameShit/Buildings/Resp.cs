@@ -2,7 +2,6 @@
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Horb;
 using MinesServer.GameShit.GUI.Horb.Canvas;
-using MinesServer.GameShit.GUI.Horb.List.Rich;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
@@ -10,6 +9,8 @@ using MinesServer.Server;
 using MinesServer.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using MinesServer.GameShit.GUI.Horb.Rich;
+
 namespace MinesServer.GameShit.Buildings
 {
     public sealed class Resp : PackCharge
