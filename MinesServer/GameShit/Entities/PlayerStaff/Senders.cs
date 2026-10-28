@@ -59,6 +59,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());
         public static void SendConfig(this Player p) => p.connection?.SendU(new ConfigPacket("oldprogramformat+"));
         public static void SendSettings(this Player p) => p.settings.SendSettings(p);
+        public static void ShowInfo(this Player p, string message, string title = "Ошибка") => p.connection?.SendU(new OKPacket(title, message));
 
         public static void SendSpeed(this Player p)
         {

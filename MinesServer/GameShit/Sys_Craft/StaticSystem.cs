@@ -129,13 +129,13 @@ namespace MinesServer.GameShit.Sys_Craft
         {
             if (!World.ContainsPack(p.x, p.y, out var craft) || num <= 0)
             {
-                p.connection?.SendU(new OKPacket("Невозможно начать крафт", "Подойдите к крафтеру и попробуйте снова."));
+                p.ShowInfo("Подойдите к крафтеру и попробуйте снова.", "Невозможно начать крафт");
                 return;
             }
 
             if (!MeetReqs(p, r, num))
             {
-                p.connection?.SendU(new OKPacket("Недостаточно ресурсов", "У вас не хватает ресурсов или кристаллов для этого крафта."));
+                p.ShowInfo("У вас не хватает ресурсов или кристаллов для этого крафта.", "Недостаточно ресурсов");
                 return;
             }
 
@@ -144,7 +144,7 @@ namespace MinesServer.GameShit.Sys_Craft
             var c = craft as Crafter;
             if (c is null)
             {
-                p.connection?.SendU(new OKPacket("Ошибка крафта", "Здание крафтера не найдено."));
+                p.ShowInfo("Здание крафтера не найдено.", "Ошибка крафта");
                 return;
             }
 

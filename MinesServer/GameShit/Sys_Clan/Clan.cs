@@ -109,11 +109,6 @@ namespace MinesServer.GameShit.ClanSystem
         private bool HasPendingRequest(int playerId) =>
             reqs.Any(r => r.PlayerId == playerId && !r.IsExpired);
 
-        private static void ShowInfo(Player p, string message, string title = "Ошибка")
-        {
-            p.connection?.SendU(new OKPacket(title, message));
-        }
-
         public static Task OpenCreateWindowAsync(Player p)
         {
             p.win = new Window
@@ -350,7 +345,7 @@ namespace MinesServer.GameShit.ClanSystem
                         if (!int.TryParse(args.Input, out var idx)
                             || idx < 0 || idx >= available.Length)
                         {
-                            ShowInfo(p, "Некорректно выбрано звание.");
+                            p.ShowInfo("Некорректно выбрано звание.");
                             return;
                         }
                         await ChangeRankAsync(p, targetId, available[idx].id);
@@ -415,9 +410,9 @@ namespace MinesServer.GameShit.ClanSystem
                         InitialPage = new Page
                         {
                             Text = $"@@Заявка на прием в клан:\n\n" +
-                                   $"Имя: <color=white>{request.player.name}</color>\n" +
-                                   $"ID <color=white>{request.player.id}</color>\n" +
-                                   $"Истекает через: {request.TimeLeft:hh\\:mm}",
+                                    $"Имя: <color=white>{request.player.name}</color>\n" +
+                                    $"ID <color=white>{request.player.id}</color>\n" +
+                                    $"Истекает через: {request.TimeLeft:hh\\:mm}",
                             Buttons =
                             [
                                 new MButton("Принять", "accept",
@@ -437,7 +432,7 @@ namespace MinesServer.GameShit.ClanSystem
         {
             if (p.clan is not null)
             {
-                ShowInfo(p, "Вы уже состоите в клане.");
+                p.ShowInfo("Вы уже состоите в клане.");
                 return;
             }
 
@@ -445,83 +440,83 @@ namespace MinesServer.GameShit.ClanSystem
             var clan = await db.clans.Include(c => c.reqs).FirstOrDefaultAsync(c => c.id == clanId);
             if (clan is null)
             {
-                ShowInfo(p, "Клан не найден.");
+                p.ShowInfo("Клан не найден.");
                 return;
             }
             if (clan.HasPendingRequest(p.id))
             {
-                ShowInfo(p, "Заявка уже подана.");
+                p.ShowInfo("Заявка уже подана.");
                 return;
             }
 
             var saved = await DataBase.SaveClanRequestAsync(clanId, p.id);
             if (!saved)
             {
-                ShowInfo(p, "Клан не найден.");
+                p.ShowInfo("Клан не найден.");
                 return;
             }
 
             await OpenPreviewAsync(p, clanId);
         }
 
-        private static async Task AcceptRequestAsync(Player actor, int requestId)
+        private static async Task AcceptRequestAsync(Player p, int requestId)
         {
             await using var db = new DataBase();
             var clan = await db.clans.WithGraph()
-                .FirstOrDefaultAsync(c => c.id == actor.clan!.id);
+                .FirstOrDefaultAsync(c => c.id == p.clan!.id);
             if (clan is null)
             {
-                ShowInfo(actor, "Клан не найден.");
+                p.ShowInfo("Клан не найден.");
                 return;
             }
 
-            var perm = clan.CheckManageRequests(actor);
+            var perm = clan.CheckManageRequests(p);
             if (!perm.Allowed)
             {
-                ShowInfo(actor, perm.Error!);
+                p.ShowInfo(perm.Error!);
                 return;
             }
 
             var request = clan.reqs.FirstOrDefault(r => r.id == requestId);
             if (request is null || request.IsExpired || request.player.clan is not null)
             {
-                ShowInfo(actor, "Заявка недействительна или игрок уже в клане.");
+                p.ShowInfo("Заявка недействительна или игрок уже в клане.");
                 return;
             }
 
             await DataBase.SaveAcceptRequestAsync(clan.id, requestId, clan.DefaultRank);
 
-            await OpenWinAsync(actor);
+            await OpenWinAsync(p);
         }
 
-        private static async Task DeclineRequestAsync(Player actor, int requestId)
+        private static async Task DeclineRequestAsync(Player p, int requestId)
         {
             await using var db = new DataBase();
             var clan = await db.clans.WithGraph()
-                .FirstOrDefaultAsync(c => c.id == actor.clan!.id);
+                .FirstOrDefaultAsync(c => c.id == p.clan!.id);
             if (clan is null)
             {
-                ShowInfo(actor, "Клан не найден.");
+                p.ShowInfo("Клан не найден.");
                 return;
             }
 
-            var perm = clan.CheckManageRequests(actor);
+            var perm = clan.CheckManageRequests(p);
             if (!perm.Allowed)
             {
-                ShowInfo(actor, perm.Error!);
+                p.ShowInfo(perm.Error!);
                 return;
             }
 
             var req = clan.reqs.FirstOrDefault(r => r.id == requestId);
             if (req is null)
             {
-                ShowInfo(actor, "Заявка не найдена.");
+                p.ShowInfo("Заявка не найдена.");
                 return;
             }
 
             await DataBase.SaveDeclineRequestAsync(clan.id, requestId);
 
-            await OpenWinAsync(actor);
+            await OpenWinAsync(p);
         }
 
         private static async Task LeaveAsync(Player p)
@@ -550,43 +545,43 @@ namespace MinesServer.GameShit.ClanSystem
             p.SendWindow();
         }
 
-        private static async Task KickAsync(Player actor, int targetId)
+        private static async Task KickAsync(Player p, int targetId)
         {
             await using var db = new DataBase();
             var clan = await db.clans.WithGraph()
-                .FirstOrDefaultAsync(c => c.id == actor.clan!.id);
+                .FirstOrDefaultAsync(c => c.id == p.clan!.id);
             if (clan is null)
             {
-                ShowInfo(actor, "Клан не найден.");
+                p.ShowInfo("Клан не найден.");
                 return;
             }
 
             var target = clan.members.FirstOrDefault(m => m.id == targetId);
             if (target is null)
             {
-                ShowInfo(actor, "Игрок не найден в клане.");
+                p.ShowInfo("Игрок не найден в клане.");
                 return;
             }
 
-            var perm = clan.CheckActOn(actor, target);
+            var perm = clan.CheckActOn(p, target);
             if (!perm.Allowed)
             {
-                ShowInfo(actor, perm.Error!);
+                p.ShowInfo(perm.Error!);
                 return;
             }
 
             await DataBase.SaveKickAsync(clan.id, targetId);
 
-            await OpenWinAsync(actor);
+            await OpenWinAsync(p);
         }
 
-        private static async Task ChangeRankAsync(Player actor, int targetId, int rankId)
+        private static async Task ChangeRankAsync(Player p, int targetId, int rankId)
         {
             await using var db = new DataBase();
-            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == actor.clan!.id);
+            var clan = await db.clans.WithGraph().FirstOrDefaultAsync(c => c.id == p.clan!.id);
             if (clan is null)
             {
-                ShowInfo(actor, "Клан не найден.");
+                p.ShowInfo("Клан не найден.");
                 return;
             }
 
@@ -595,20 +590,20 @@ namespace MinesServer.GameShit.ClanSystem
 
             if (target is null || newRank is null)
             {
-                ShowInfo(actor, "Игрок или звание не найдены.");
+                p.ShowInfo("Игрок или звание не найдены.");
                 return;
             }
 
-            var perm = clan.CheckAssignRank(actor, target, newRank);
+            var perm = clan.CheckAssignRank(p, target, newRank);
             if (!perm.Allowed)
             {
-                ShowInfo(actor, perm.Error!);
+                p.ShowInfo(perm.Error!);
                 return;
             }
 
             await DataBase.SaveChangeRankAsync(clan.id, targetId, rankId);
 
-            await OpenPlayerPreviewAsync(actor, targetId);
+            await OpenPlayerPreviewAsync(p, targetId);
         }
 
         private static async Task ChooseIconStepAsync(Player p)
@@ -617,7 +612,7 @@ namespace MinesServer.GameShit.ClanSystem
             var taken = (await db.clans.AsNoTracking().Select(c => c.id).ToListAsync()).ToHashSet();
             if (taken.Count >= 218)
             {
-                ShowInfo(p, "Свободных значков клана не осталось.");
+                p.ShowInfo("Свободных значков клана не осталось.");
                 return;
             }
 
@@ -642,7 +637,7 @@ namespace MinesServer.GameShit.ClanSystem
                     var iconId = i - 200;
                     if (iconId is < 1 or > 218)
                     {
-                        ShowInfo(p, "Некорректный значок клана.");
+                        p.ShowInfo("Некорректный значок клана.");
                         return;
                     }
                     await NameStepAsync(p, iconId);
@@ -677,7 +672,7 @@ namespace MinesServer.GameShit.ClanSystem
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                ShowInfo(p, "Название клана не может быть пустым.");
+                p.ShowInfo("Название клана не может быть пустым.");
                 return Task.CompletedTask;
             }
 
@@ -706,7 +701,7 @@ namespace MinesServer.GameShit.ClanSystem
         {
             if (string.IsNullOrWhiteSpace(abbr))
             {
-                ShowInfo(p, "Аббревиатура не может быть пустой.");
+                p.ShowInfo("Аббревиатура не может быть пустой.");
                 return Task.CompletedTask;
             }
 
@@ -734,17 +729,17 @@ namespace MinesServer.GameShit.ClanSystem
 
             if (name.Length < MinNameLength || name.Length > MaxNameLength)
             {
-                ShowInfo(p, $"Название клана должно быть от {MinNameLength} до {MaxNameLength} символов.");
+                p.ShowInfo($"Название клана должно быть от {MinNameLength} до {MaxNameLength} символов.");
                 return;
             }
             if (abbr.Length is < 1 or > MaxAbbreviationLength)
             {
-                ShowInfo(p, $"Аббревиатура должна быть от 1 до {MaxAbbreviationLength} символов.");
+                p.ShowInfo($"Аббревиатура должна быть от 1 до {MaxAbbreviationLength} символов.");
                 return;
             }
             if (!abbr.All(char.IsAsciiLetterUpper))
             {
-                ShowInfo(p, "Аббревиатура должна состоять только из заглавных латинских букв.");
+                p.ShowInfo("Аббревиатура должна состоять только из заглавных латинских букв.");
                 return;
             }
 
@@ -752,12 +747,12 @@ namespace MinesServer.GameShit.ClanSystem
 
             if (await db.clans.AnyAsync(c => c.id == iconId))
             {
-                ShowInfo(p, "Этот значок уже занят другим кланом.");
+                p.ShowInfo("Этот значок уже занят другим кланом.");
                 return;
             }
             if (await db.clans.AnyAsync(c => c.name.ToLower() == name.ToLower()))
             {
-                ShowInfo(p, "Клан с таким названием уже существует.");
+                p.ShowInfo("Клан с таким названием уже существует.");
                 return;
             }
 
@@ -779,7 +774,7 @@ namespace MinesServer.GameShit.ClanSystem
             var created = await DataBase.SaveCreateClanAsync(clan);
             if (!created)
             {
-                ShowInfo(p, "Не удалось создать клан (значок или имя заняты).");
+                p.ShowInfo("Не удалось создать клан (значок или имя заняты).");
                 return;
             }
 
@@ -791,7 +786,7 @@ namespace MinesServer.GameShit.ClanSystem
             p.win = null;
             p.SendWindow();
 
-            ShowInfo(p, "Удачи в клановой игре. Помни: клан — это не один игрок, а семья. " +
+            p.ShowInfo("Удачи в клановой игре. Помни: клан — это не один игрок, а семья. " +
                 "Держитесь вместе, выручайте друг друга и получайте от игры удовольствие.", 
                 "Клан успешно создан!");
         }
