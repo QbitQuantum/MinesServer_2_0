@@ -1,4 +1,4 @@
-﻿namespace MinesServer.GameShit.GUI.Horb.Canvas
+﻿namespace MinesServer.GameShit.GUI.Canvas
 {
     public enum CanvasElementPivot
     {

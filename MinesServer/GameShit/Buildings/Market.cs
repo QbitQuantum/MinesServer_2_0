@@ -1,14 +1,15 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using MinesServer.Enums;
+using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
-using MinesServer.GameShit.GUI.Horb;
+using MinesServer.GameShit.GUI.Crystal;
+using MinesServer.GameShit.GUI.Rich;
+using MinesServer.GameShit.GUI.Styles;
 using MinesServer.GameShit.SysMarket;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using MinesServer.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
-using MinesServer.GameShit.GUI.Horb.Rich;
 
 namespace MinesServer.GameShit.Buildings
 {

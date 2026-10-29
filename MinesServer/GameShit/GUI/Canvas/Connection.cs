@@ -1,7 +1,7 @@
 using System.Drawing;
 using MinesServer.GameShit.Buildings;
 
-namespace MinesServer.GameShit.GUI.Horb.Canvas
+namespace MinesServer.GameShit.GUI.Canvas
 {
     /// <summary>
     /// Connection between two teleport points or from a point to arbitrary coordinates.

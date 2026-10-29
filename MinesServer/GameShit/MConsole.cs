@@ -1,8 +1,9 @@
 ﻿using MinesServer.GameShit.ClanSystem;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
-using MinesServer.GameShit.GUI.Horb;
-using MinesServer.GameShit.GUI.Horb.Canvas;
+using MinesServer.GameShit.GUI.Canvas;
+using MinesServer.GameShit.GUI.Inputs;
+using MinesServer.GameShit.GUI.Styles;
 using MinesServer.GameShit.Sys_Miss;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;

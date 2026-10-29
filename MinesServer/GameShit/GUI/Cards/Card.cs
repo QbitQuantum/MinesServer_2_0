@@ -1,4 +1,4 @@
-﻿namespace MinesServer.GameShit.GUI.Horb
+﻿namespace MinesServer.GameShit.GUI.Cards
 {
     public readonly record struct Card(CardImageType ImageType, string ImageURI, string Text)
     {

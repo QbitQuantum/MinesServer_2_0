@@ -1,7 +1,6 @@
 ﻿using MinesServer.GameShit.ClanSystem;
 using MinesServer.GameShit.GUI;
-using MinesServer.GameShit.GUI.Horb;
-using MinesServer.GameShit.GUI.Horb.Rich;
+using MinesServer.GameShit.GUI.Rich;
 using MinesServer.Network;
 using MinesServer.Server;
 using System.ComponentModel.DataAnnotations;

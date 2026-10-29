@@ -1,4 +1,4 @@
-﻿namespace MinesServer.GameShit.GUI.Horb
+﻿namespace MinesServer.GameShit.GUI.Inventory
 {
     public enum InventoryTextColor
     {

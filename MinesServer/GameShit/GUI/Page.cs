@@ -1,13 +1,21 @@
 ﻿using MinesServer.Enums;
-using MinesServer.GameShit.GUI.Horb.Canvas;
-using MinesServer.GameShit.GUI.Horb.List;
-using MinesServer.GameShit.GUI.Horb.Rich;
+using MinesServer.GameShit.GUI.Canvas;
+using MinesServer.GameShit.GUI.Cards;
+using MinesServer.GameShit.GUI.Crystal;
+using MinesServer.GameShit.GUI.Inputs;
+using MinesServer.GameShit.GUI.Inventory;
+using MinesServer.GameShit.GUI.List;
+using MinesServer.GameShit.GUI.Rich;
+using MinesServer.GameShit.GUI.Styles;
 using System.Text.RegularExpressions;
 
-namespace MinesServer.GameShit.GUI.Horb
+namespace MinesServer.GameShit.GUI
 {
     public readonly struct Page : IPage
     {
+        public string? Title { get; init; }
+        public string? Text { get; init; }
+        public Action? OnAdmin { get; init; }
         public required MButton[] Buttons { get; init; }
         public CrystalConfig? CrystalConfig { get; init; }
         public ListEntry[]? List { get; init; }
@@ -18,9 +26,6 @@ namespace MinesServer.GameShit.GUI.Horb
         public InventoryItem[]? Inventory { get; init; }
         public Style? Style { get; init; }
         public Card? Card { get; init; }
-        public string? Title { get; init; }
-        public string? Text { get; init; }
-        public Action? OnAdmin { get; init; }
         public Action<int>? OnInventory { get; init; }
 
         public bool ProcessButton(string action)

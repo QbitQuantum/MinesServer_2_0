@@ -1,7 +1,8 @@
 ﻿using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
-using MinesServer.GameShit.GUI.Horb;
-using MinesServer.GameShit.GUI.Horb.List;
+using MinesServer.GameShit.GUI.Inputs;
+using MinesServer.GameShit.GUI.List;
+using MinesServer.GameShit.GUI.Styles;
 using MinesServer.Server;
 
 namespace MinesServer.GameShit.Programmator

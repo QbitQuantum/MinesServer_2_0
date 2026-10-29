@@ -1,6 +1,6 @@
 ﻿using MinesServer.Enums;
 
-namespace MinesServer.GameShit.GUI.Horb
+namespace MinesServer.GameShit.GUI.Inventory
 {
     public readonly record struct InventoryItem(int Id, string UpText, string DownText, uint? Amount, bool Faint, InventoryTextColor UpTextColor, InventoryTextColor DownTextColor)
     {

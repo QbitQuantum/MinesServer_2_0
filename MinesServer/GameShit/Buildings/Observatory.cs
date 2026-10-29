@@ -2,8 +2,8 @@
 using System.Drawing;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
-using MinesServer.GameShit.GUI.Horb;
-using MinesServer.GameShit.GUI.Horb.Canvas;
+using MinesServer.GameShit.GUI.Canvas;
+using MinesServer.GameShit.GUI.Styles;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 

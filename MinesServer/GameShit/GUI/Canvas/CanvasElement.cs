@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace MinesServer.GameShit.GUI.Horb.Canvas
+namespace MinesServer.GameShit.GUI.Canvas
 {
     // Отрисовка происходит в координатах Height/2-Width/2
     // dx-dy - конечная позиция линии
