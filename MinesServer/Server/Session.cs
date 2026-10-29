@@ -258,7 +258,7 @@ namespace MinesServer.Server
 
         private void Res(TYPacket f, RESPPacket p) => _player?.Death();
 
-        private void Inus(TYPacket f, INUSPacket inus) => _player?.inventory.Use(_player);
+        private void Inus(TYPacket f, INUSPacket inus) => _player?.inventory.UseSelectedItem(_player);
 
         private void Sett(TYPacket f, SettPacket p) => _player?.settings.SendSettingsGUI(_player);
 
@@ -310,7 +310,7 @@ namespace MinesServer.Server
         private void Incl(TYPacket f, INCLPacket incl)
         {
             if (!incl.selection.HasValue || _player is null) return;
-            _player.inventory.Choose(incl.selection.Value, _player);
+            _player.inventory.SelectItem(incl.selection.Value, _player);
         }
 
         private void DigHandler(TYPacket parent, XdigPacket packet) => _player?.TryAct(() =>

@@ -57,7 +57,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendBotUpdateInfo(this Player p) => p.connection?.SendU(new NickListPacket(new Dictionary<int, string> { [p.id] = p.name }));
         public static void SendLvl(this Player p) => p.connection?.SendU(new LevelPacket(p.skillslist.lvlsummary()));
         public static void SendOnline(this Player p) => p.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
-        public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.InvToSend());
+        public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.BuildInventoryPacket());
         public static void SendConfig(this Player p) => p.connection?.SendU(new ConfigPacket("oldprogramformat+"));
         public static void SendSettings(this Player p) => p.settings.SendSettings(p);
         public static void ShowInfo(this Player p, string message, string title = "Ошибка") => p.connection?.SendU(new OKPacket(title, message));

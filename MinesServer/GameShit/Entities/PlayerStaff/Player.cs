@@ -856,30 +856,30 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             {
                 case ActionType.BOOM:
                     inventory.selected = (int)Item.PlasmaBomb;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.DISCHARGE:
                     inventory.selected = (int)Item.DischargeBomb;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.PROTON:
                     inventory.selected = (int)Item.ProtonBomb;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.VB:
                     Build("V");
                     break;
                 case ActionType.Geopack:
                     inventory.selected = (int)Item.Geopack;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.ZZ:
                     inventory.selected = (int)Item.DefenseCharge;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.C190:
                     inventory.selected = (int)Item.C190;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.Up:
                     // TODO: Прокачка всех скилов
@@ -889,11 +889,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     break;
                 case ActionType.Nano:
                     inventory.selected = (int)Item.NanoBot;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 case ActionType.Rembot:
                     inventory.selected = (int)Item.RepairBot;
-                    inventory.Use(this);
+                    inventory.UseSelectedItem(this);
                     break;
                 default:
                     break;

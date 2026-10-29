@@ -1,265 +1,234 @@
-﻿using MinesServer.Enums;
+﻿using System.Numerics;
+using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
-using MinesServer.GameShit.Consumables;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
-using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
 using MinesServer.Server;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations.Schema;
+
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Inventory
-    { 
-        public int id { get; set; }
+    {
         public Inventory()
         {
             itemstobd ??= JsonConvert.SerializeObject(new Dictionary<int, int>());
-            typeditems = new Dictionary<int, ItemUsage>
+            _itemUsages = CreateItemUsages();
+        }
+
+        private const int MiniQueueCapacity = 4;
+        private const int DischargeBombRadius = 10;
+
+        public int id { get; set; }
+        public bool minv = true;
+        public int selected = -1;
+        public string? itemstobd { get; set; }
+        private readonly List<int> _miniQueue = [];
+        private readonly Dictionary<int, ItemUsage> _itemUsages;
+
+        private delegate bool ItemUsage(Player player);
+
+        private Dictionary<int, int>? _itemsCache;
+
+        public int this[int itemId]
+        {
+            get
             {
-                {
-                    (int)Item.Teleport,
-                    (p) => {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))
-                        {
-                            new Teleport(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                     }
-                },
-                {
-                    (int)Item.Respawn,
-                    (p) =>
+                if (!Items.TryGetValue(itemId, out var count))
+                    Items[itemId] = count = 0;
+                return count;
+            }
+            set
+            {
+                Items[itemId] = value;
+
+                using var db = new DataBase();
+                db.inventories.Attach(this);
+                DataBase.GetPlayer(id)?.SendInventory();
+                db.SaveChanges();
+            }
+        }
+
+        private Dictionary<int, int> Items
+        {
+            get => _itemsCache ??= DeserializeItems(itemstobd);
+            set
+            {
+                _itemsCache = value;
+                itemstobd = JsonConvert.SerializeObject(value);
+            }
+        }
+
+        public InventoryPacket BuildInventoryPacket()
+        {
+            var slots = CountNonEmptySlots();
+
+            if (_miniQueue.Count < MiniQueueCapacity && slots > 0)
+                foreach (var itemId in Items.Keys.ToList())
+                    AddToMiniQueue(itemId);
+
+            var grid = minv
+                ? _miniQueue.ToDictionary(itemId => itemId, itemId => this[itemId])
+                : Items;
+
+            return new InventoryPacket(new InventoryShowPacket(grid, selected, CountNonEmptySlots()));
+        }
+
+        public void UseSelectedItem(Player player)
+        {
+            if (!player.HandleUseInventory() || selected < 0)
+                return;
+
+            if (!_itemUsages.TryGetValue(selected, out var usage))
+                return;
+
+            var (x, y) = player.GetDirCord();
+            var selectedItem = ItemTypeExt.GetItemById(selected);
+
+            var canPlaceHere =
+                !World.ContainsPack(x, y, out _) &&
+                (World.GetProp(x, y).can_place_over || selectedItem.CanBePlacedAnywhere()) &&
+                this[selected] > 0;
+
+            if (!canPlaceHere || !usage(player))
+                return;
+
+            this[selected]--;
+            if (this[selected] == 0)
+                _miniQueue.Remove(selected);
+
+            player.SendInventory();
+        }
+
+        public void SelectItem(int itemId, Player player)
+        {
+            AddToMiniQueue(itemId);
+            selected = itemId;
+
+            var packet = itemId == -1
+                ? InventoryPacket.Close()
+                : InventoryPacket.Choose(
+                    "Выбран предмет - " + ItemTypeExt.PackName(itemId),
+                    new bool[0, 0], 123, 123, 12);
+
+            player.SendInventory();
+            player.connection?.SendU(packet);
+        }
+
+        private static Dictionary<int, int> DeserializeItems(string? json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return [];
+            return JsonConvert.DeserializeObject<Dictionary<int, int>>(json) ?? [];
+        }
+
+        private int CountNonEmptySlots()
+        {
+            var emptyKeys = Items
+                .Where(kv => kv.Value <= 0)
+                .Select(kv => kv.Key)
+                .ToList();
+
+            foreach (var key in emptyKeys)
+                Items.Remove(key);
+
+            return Items.Count;
+        }
+
+        private void AddToMiniQueue(int itemId)
+        {
+            if (itemId == -1 || _miniQueue.Contains(itemId))
+                return;
+
+            if (_miniQueue.Count >= MiniQueueCapacity)
+                _miniQueue.RemoveAt(0);
+
+            _miniQueue.Add(itemId);
+        }
+
+        private static Dictionary<int, ItemUsage> CreateItemUsages()
+        {
+            return new Dictionary<int, ItemUsage>
+            {
+                { (int)Item.Teleport,        p => TryBuildPack(p, (x, y) => new Teleport(x, y, p.id), -2, 2, -2, 1) },
+                { (int)Item.Respawn,         p => TryBuildPack(p, (x, y) => new Resp(x, y, p.id),     -2, 6, -2, 3) },
+                { (int)Item.SpotBot,         p => TryBuildPack(p, (x, y) => new Spot(x, y, p.id),      1, 1,  1, 1) },
+                { (int)Item.Up,              p => TryBuildPack(p, (x, y) => new Up(x, y, p.id),       -2, 2, -3, 4) },
+                { (int)Item.Market,          p => TryBuildPack(p, (x, y) => new Market(x, y, p.id),   -3, 3, -3, 3) },
+                { (int)Item.ScienceCenter,   p => TryBuildPack(p, (x, y) => new NC(x, y, p.id),        1, 1,  1, 1) },
+                { (int)Item.Crafter,         p => TryBuildPack(p, (x, y) => new Crafter(x, y, p.id),  -2, 2, -2, 2) },
+                { (int)Item.Storage,         p => TryBuildPack(p, (x, y) => new Storage(x, y, p.id),  -2, 2, -2, 1) },
+
+                { (int)Item.Gun, p =>
                     {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(-2, 6, -2, 3, coord.x, coord.y, p))
-                        {
-                            new Resp(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.SpotBot,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(1, 1, 1, 1, coord.x, coord.y, p))
-                        {
-                            new Spot(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.Up,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(-2, 2, -3, 4, coord.x, coord.y, p))
-                        {
-                            new Up(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.Market,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(-3, 3, -3, 3, coord.x, coord.y, p))
-                        {
-                            new Market(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.ScienceCenter,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(1, 1, 1, 1, coord.x, coord.y, p))
-                        {
-                            new NC(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.PlasmaBomb,
-                    ShitClass.Boom
-                },
-                {
-                    (int)Item.ProtonBomb,
-                    ShitClass.Prot
-                },
-                {
-                    (int)Item.DischargeBomb,
-                    (p) => ShitClass.Raz(p)
-                },
-                {
-                    (int)Item.Geopack,
-                    (p) => ShitClass.Geopack(10,p)
-                },
-                {
-                    (int)Item.GeopackBlue,
-                    (p) => ShitClass.Geopack(11,p)
-                },
-                {
-                    (int)Item.GeopackRed,
-                    (p) => ShitClass.Geopack(12,p)
-                },
-                {
-                    (int)Item.GeopackPurple,
-                    (p) => ShitClass.Geopack(13,p)
-                },
-                {
-                    (int)Item.GeopackBlack,
-                    (p) => ShitClass.Geopack(14,p)
-                },
-                {
-                    (int)Item.GeopackWhite,
-                    (p) => ShitClass.Geopack(15,p)
-                },
-                {
-                    (int)Item.GeopackCyan,
-                    (p) => ShitClass.Geopack(16,p)
-                },
-                {
-                    (int)Item.Crafter,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord(true);
-                        Console.WriteLine(coord);
-                        if (World.CanBuildPack(-2, 2, -2, 2, coord.x, coord.y, p))
-                        {
-                            new Crafter(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.Gun,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(-2, 2, -2, 2, coord.x, coord.y, p) && p.clan != null)
-                        {
-                            new Gun(coord.x, coord.y, p.id, p.cid).Build();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.ClanGate,
-                    (p) =>
-                    {
-                        var coord = p.GetDirCord();
-                        var c = World.AccessGun(coord.x,coord.y,p.cid);
-                        if (p.clan != null && c.access && c.anygun)
-                        {
-                            var Gate = new Gate(coord.x,coord.y, p.cid);
-                            Gate.Build();
-                            using var db = new DataBase();
-                            db.gates.Add(Gate);
-                            db.SaveChanges();
-                            return true;
-                        }
-                        return false;
-                    }
-                },
-                {
-                    (int)Item.Disassembler,
-                    (p) =>
-                    {
+                        if (p.clan == null) return false;
                         var (x, y) = p.GetDirCord(true);
-                        var pack = World.GetPack(x, y);
-
-                        if (pack == null)
-                            return false;
-
-                        if (p.id != pack.ownerid && p.cid != pack.cid)
-                            return false;
-
-                        Player? player = p.id == pack.ownerid ?
-                                p : DataBase.GetPlayer(pack.ownerid);
-
-                        if (player == null)
-                            return false;
-
-                        pack.Destroy(player);
-
+                        if (!World.CanBuildPack(-2, 2, -2, 2, x, y, p)) return false;
+                        new Gun(x, y, p.id, p.cid).Build();
                         return true;
                     }
                 },
-                {
-                    (int)Item.Storage, 
-                    (p) => 
+
+                { (int)Item.ClanGate, p =>
                     {
-                        var coord = p.GetDirCord(true);
-                        if (World.CanBuildPack(-2, 2, -2, 1, coord.x, coord.y, p))
-                        {
-                            new Storage(coord.x, coord.y, p.id).Build();
-                            return true;
-                        }
-                        return false;
+                        if (p.clan == null) return false;
+                        var (x, y) = p.GetDirCord();
+                        var access = World.AccessGun(x, y, p.cid);
+                        if (!access.access || !access.anygun) return false;
+
+                        var gate = new Gate(x, y, p.cid);
+                        gate.Build();
+                        using var db = new DataBase();
+                        db.gates.Add(gate);
+                        db.SaveChanges();
+                        return true;
                     }
                 },
-                {
-                    (int)Item.GeopackHypnoskal,
-                    (p) => ShitClass.Geopack(34,p)
-                },
-                {
-                    (int)Item.Polymer,
-                    ShitClass.Poli
-                },
-                {
-                    (int)Item.C190,
-                    ShitClass.C190Shot
-                },
-                {
-                    (int)Item.GeopackBlackSkal,
-                    (p) => ShitClass.Geopack(42,p)
-                },
-                {
-                    (int)Item.GeopackRedSkal,
-                    (p) => ShitClass.Geopack(43,p)
-                },
-                {
-                    (int)Item.GeopackRainbow,
-                    (p) => ShitClass.Geopack(46,p)
-                },
-                {
-                    (int)Item.DefenseCharge,
-                    (p) =>
+
+                { (int)Item.Disassembler, p =>
                     {
-                        // TODO: Реализовать
-                        return false;
+                        var (x, y) = p.GetDirCord(true);
+                        var pack = World.GetPack(x, y);
+                        if (pack == null) return false;
+                        if (p.id != pack.ownerid && p.cid != pack.cid) return false;
+
+                        var owner = p.id == pack.ownerid ? p : DataBase.GetPlayer(pack.ownerid);
+                        if (owner == null) return false;
+
+                        pack.Destroy(owner);
+                        return true;
                     }
                 },
-                {
-                    (int)Item.NanoBot,
-                    (p) =>
+
+                { (int)Item.PlasmaBomb,      DetonatePlasmaBomb },
+                { (int)Item.ProtonBomb,      DetonateProtonBomb },
+                { (int)Item.DischargeBomb,   DetonateDischargeBomb },
+                { (int)Item.Polymer,         PlacePolymer },
+                { (int)Item.C190,            FireC190 },
+
+                { (int)Item.Geopack,         p => HandleGeopack(p, GeopackMode.Collect) },
+                { (int)Item.GeopackBlue,     p => HandleGeopack(p, GeopackMode.Place, CellType.AliveBlue) },
+                { (int)Item.GeopackRed,      p => HandleGeopack(p, GeopackMode.Place, CellType.AliveRed) },
+                { (int)Item.GeopackPurple,   p => HandleGeopack(p, GeopackMode.Place, CellType.AliveViol) },
+                { (int)Item.GeopackBlack,    p => HandleGeopack(p, GeopackMode.Place, CellType.AliveBlack) },
+                { (int)Item.GeopackWhite,    p => HandleGeopack(p, GeopackMode.Place, CellType.AliveWhite) },
+                { (int)Item.GeopackCyan,     p => HandleGeopack(p, GeopackMode.Place, CellType.AliveCyan) },
+                { (int)Item.GeopackHypnoskal, p => HandleGeopack(p, GeopackMode.Place, CellType.HypnoRock) },
+                { (int)Item.GeopackBlackSkal, p => HandleGeopack(p, GeopackMode.Place, CellType.BlackRock) },
+                { (int)Item.GeopackRedSkal,   p => HandleGeopack(p, GeopackMode.Place, CellType.RedRock) },
+                { (int)Item.GeopackRainbow,   p => HandleGeopack(p, GeopackMode.Place, CellType.AliveRainbow) },
+
+                { (int)Item.DefenseCharge, _ => false },
+
+                { (int)Item.NanoBot, p =>
                     {
                         p.AddHp(50);
                         p.SendDFToBots(5, 0, 0, p.id, 0);
                         return true;
                     }
                 },
-                {
-                    (int)Item.RepairBot,
-                    (p) =>
+
+                { (int)Item.RepairBot, p =>
                     {
                         p.ResetHp();
                         p.SendDFToBots(5, 0, 0, p.id, 0);
@@ -268,99 +237,248 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 },
             };
         }
-        public int this[int index]
+
+        private static bool TryBuildPack(
+            Player player,
+            Func<int, int, Pack> factory,
+            int minX, int maxX, int minY, int maxY)
         {
-            get
+            var (x, y) = player.GetDirCord(true);
+            if (!World.CanBuildPack(minX, maxX, minY, maxY, x, y, player))
+                return false;
+
+            factory(x, y).Build();
+            return true;
+        }
+
+        private static bool DetonatePlasmaBomb(Player player)
+        {
+            var (x, y) = player.GetDirCord();
+            if (!World.AccessGun(x, y, player.cid).access) return false;
+
+            var bomb = new Bomb(player.id, x, y, BombType.PlasmaBomb);
+            bomb.Build();
+
+            World.ScheduleAction(TimeSpan.FromSeconds(1), () =>
             {
-                if (!items.ContainsKey(index))
-                    items[index] = 0;
-                return items[index];
+                ForEachCellInRadius(x, y, 3.5f, (tx, ty) =>
+                {
+                    foreach (var target in World.W.GetPlayersFromPos(tx, ty))
+                        target.Hurt(40);
+
+                    if (!World.GetProp(World.GetCell(tx, ty)).is_destructible || World.PackPart(tx, ty))
+                        return;
+
+                    ApplyPlasmaDestruction(tx, ty);
+                });
+
+                bomb.Destroy(player);
+                World.W.SendDirectedFx(1, x, y, 3, 0);
+            });
+
+            return true;
+        }
+
+        private static void ApplyPlasmaDestruction(int x, int y)
+        {
+            var cell = World.GetCell(x, y);
+            switch (cell)
+            {
+                case 117:
+                    if (Physics.r.Next(1, 101) > 98)
+                        World.SetCell(x, y, 118);
+                    break;
+                case 118:
+                    World.SetCell(x, y, 103);
+                    break;
+                default:
+                    World.Destroy(x, y, DestroyCellType.CellAndRoad);
+                    break;
             }
-            set
+        }
+
+        private static bool DetonateProtonBomb(Player player)
+        {
+            var (x, y) = player.GetDirCord();
+            if (!World.AccessGun(x, y, player.cid).access) return false;
+
+            var bomb = new Bomb(player.id, x, y, BombType.ProtonBomb);
+            bomb.Build();
+
+            World.ScheduleAction(TimeSpan.FromSeconds(2), () =>
+            {
+                ForEachCellInRadius(x, y, 3.5f, (tx, ty) =>
+                {
+                    foreach (var target in World.W.GetPlayersFromPos(tx, ty))
+                    {
+                        target.Hurt(50);
+                        if (World.ContainsPack(tx, ty, out var pack) && pack is Gate gate)
+                            gate.Destroy(target);
+                    }
+
+                    if (World.GetProp(World.GetCell(tx, ty)).is_destructible && !World.PackPart(tx, ty))
+                        World.Destroy(tx, ty, DestroyCellType.CellAndRoad);
+                });
+
+                bomb.Destroy(player);
+                World.W.SendDirectedFx(1, x, y, 1, 1);
+            });
+
+            return true;
+        }
+
+        private static bool DetonateDischargeBomb(Player player)
+        {
+            var (x, y) = player.GetDirCord();
+
+            var bomb = new Bomb(player.id, x, y, BombType.DischargeBomb);
+            bomb.Build();
+
+            World.ScheduleAction(TimeSpan.FromSeconds(5), () =>
             {
                 using var db = new DataBase();
-                db.inventories.Attach(this);
-                items[index] = value;
-                itemstobd = JsonConvert.SerializeObject(items);
-                DataBase.GetPlayer(id)?.SendInventory();
-                db.SaveChanges();
-            }
-        }
-        public InventoryPacket InvToSend()
-        {
-            if (miniq.Count < 4 && Lenght > 0) foreach (var i in items) AddChoose(i.Key);
-            var invgrid = minv ? miniq.Select(i => new KeyValuePair<int, int>(i, this[i])).ToDictionary() : items;
-            return new InventoryPacket(new InventoryShowPacket(invgrid, selected, Lenght));
-        }
 
-        public void Use(Player p)
-        {
-            if (!p.HandleUseInventory())
-                return;
-
-            var (x, y) = p.GetDirCord();
-
-            var selectedItem = ItemTypeExt.GetItemById(selected);
-
-            if (typeditems.ContainsKey(selected) && !World.ContainsPack(x, y, out var pack)
-                    && (World.GetProp(x, y).can_place_over || selectedItem.CanBePlacedAnywhere())
-                    && this[selected] > 0)
-            {
-                if (typeditems[selected](p))
+                ForEachCellInRadius(x, y, DischargeBombRadius - 0.5f, (tx, ty) =>
                 {
-                    this[selected]--;
-                    if (this[selected] == 0)
-                        miniq.Remove(selected);
-                    p.SendInventory();
+                    foreach (var target in World.W.GetPlayersFromPos(tx, ty))
+                        target.Hurt(500);
+
+                    if (!World.ContainsPack(tx, ty, out var pack) || pack is not PackCharge charge)
+                        return;
+
+                    db.Attach(pack);
+                    if (charge.CanDestroy())
+                        charge.Destroy(player);
+                    else
+                        charge.Damage(10, DamageTypePacks.Raz);
+                });
+
+                db.SaveChanges();
+                bomb.Destroy(player);
+                World.W.SendDirectedFx(1, x, y, 9, 2);
+            });
+
+            return true;
+        }
+
+        private static void ForEachCellInRadius(int cx, int cy, float radius, Action<int, int> action)
+        {
+            int intRadius = (int)MathF.Ceiling(radius);
+            var center = new Vector2(cx, cy);
+
+            for (int dx = -intRadius; dx <= intRadius; dx++)
+                for (int dy = -intRadius; dy <= intRadius; dy++)
+                {
+                    int tx = cx + dx, ty = cy + dy;
+                    if (!World.ValidCoord(tx, ty)) continue;
+                    if (Vector2.Distance(center, new Vector2(tx, ty)) > radius) continue;
+                    action(tx, ty);
                 }
-            }
         }
-        private void AddChoose(int item)
+
+        private enum GeopackMode { Collect, Place }
+
+        private static bool HandleGeopack(Player player, GeopackMode mode, CellType placeCell = default)
         {
-            if (miniq.Contains(item) || item == -1)
-                return;
-            if (miniq.Count >= 4) miniq.Remove(miniq.First());
-            miniq.Add(item);
-        }
-        public bool minv = true;
-        private List<int> miniq = new();
-        public Dictionary<int, ItemUsage> typeditems;
-        public delegate bool ItemUsage(Player p);
-        public void Choose(int id, Player p)
-        {
-            AddChoose(id);
-            selected = id;
-            ITopLevelPacket packet;
-            if (id == -1)
-                packet = InventoryPacket.Close();
-            else
-                packet = InventoryPacket.Choose("Выбран предмет - " + ItemTypeExt.PackName(id), new bool[0, 0], 123, 123, 12);
-            p.connection?.SendU(InvToSend());
-            p.connection?.SendU(packet);
-        }
-        public int selected = -1;
-        [NotMapped]
-        public int Lenght
-        {
-            get
+            var (x, y) = player.GetDirCord();
+
+            return mode switch
             {
-                var l = 0;
-                List<int> remove = new();
-                foreach (var i in items)
-                    if (i.Value > 0) l++;
-                    else remove.Add(i.Key);
-                foreach (var key in remove)
-                    items.Remove(key);
-                return l;
+                GeopackMode.Collect => CollectGeopack(player, x, y),
+                GeopackMode.Place => PlaceGeopack(player, x, y, placeCell),
+                _ => false,
+            };
+        }
+
+        private static bool CollectGeopack(Player player, int x, int y)
+        {
+            if (World.TrueEmpty(x, y)) return false;
+
+            var cell = (CellType)World.GetCell(x, y);
+            var itemId = MapCellToGeopackItem(cell);
+            if (itemId == -1) return false;
+
+            World.Destroy(x, y);
+            player.inventory[itemId]++;
+            return true;
+        }
+
+        private static bool PlaceGeopack(Player player, int x, int y, CellType cell)
+        {
+            if (!World.TrueEmpty(x, y)) return false;
+            World.SetCell(x, y, cell);
+            return true;
+        }
+
+        private static int MapCellToGeopackItem(CellType cell) => cell switch
+        {
+            CellType.AliveCyan => (int)Item.GeopackCyan,
+            CellType.AliveRed => (int)Item.GeopackRed,
+            CellType.AliveViol => (int)Item.GeopackPurple,
+            CellType.AliveBlack => (int)Item.GeopackBlack,
+            CellType.AliveWhite => (int)Item.GeopackWhite,
+            CellType.AliveBlue => (int)Item.GeopackBlue,
+            CellType.HypnoRock => (int)Item.GeopackHypnoskal,
+            CellType.BlackRock => (int)Item.GeopackBlackSkal,
+            CellType.RedRock => (int)Item.GeopackRedSkal,
+            CellType.AliveRainbow => (int)Item.GeopackRainbow,
+            _ => -1,
+        };
+
+        private static bool PlacePolymer(Player player)
+        {
+            var (x, y) = player.GetDirCord();
+            if (!World.AccessGun(x, y, player.cid).access) return false;
+            if (!World.TrueEmpty(x, y)) return false;
+
+            World.SetCell(x, y, CellType.PolymerRoad);
+            return false;
+        }
+
+        private static bool FireC190(Player player)
+        {
+            var (startX, startY) = player.GetDirCord();
+            var (targetX, targetY) = GetShotTargetByDirection(startX, startY, player.dir, 9);
+
+            if (!World.ValidCoord(targetX, targetY)) return false;
+
+            player.SendDFToBots(7, targetX, targetY, player.id, 1);
+            ProcessShotLine(startX, startY, targetX, targetY);
+            return true;
+        }
+
+        private static void ProcessShotLine(int startX, int startY, int targetX, int targetY)
+        {
+            int stepX = Math.Sign(targetX - startX);
+            int stepY = Math.Sign(targetY - startY);
+
+            int x = startX, y = startY;
+            while (true)
+            {
+                ProcessShotCell(x, y);
+                if (x == targetX && y == targetY) break;
+                x += stepX;
+                y += stepY;
             }
         }
-        public string? itemstobd { get; set; }
-        private Dictionary<int, int> _items;
-        [NotMapped]
-        private Dictionary<int, int> items
+
+        private static void ProcessShotCell(int x, int y)
         {
-            get => _items ??= JsonConvert.DeserializeObject<Dictionary<int, int>>(itemstobd);
-            set => itemstobd = JsonConvert.SerializeObject(_items = value);
+            foreach (var target in World.W.GetPlayersFromPos(x, y))
+                target.HurtC190Stacks();
+
+            if (World.CanDamageCell(x, y))
+                World.DamageCell(x, y, 50);
         }
+
+        private static (int x, int y) GetShotTargetByDirection(int startX, int startY, int direction, int radius)
+            => direction switch
+            {
+                0 => (startX, startY + radius),
+                1 => (startX - radius, startY),
+                2 => (startX, startY - radius),
+                3 => (startX + radius, startY),
+                _ => throw new ArgumentException($"Invalid direction: {direction}", nameof(direction)),
+            };
     }
 }
