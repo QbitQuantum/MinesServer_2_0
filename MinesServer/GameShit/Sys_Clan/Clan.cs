@@ -8,7 +8,6 @@ using MinesServer.GameShit.GUI.Inputs;
 using MinesServer.GameShit.GUI.Inventory;
 using MinesServer.GameShit.GUI.List;
 using MinesServer.GameShit.GUI.Rich;
-using MinesServer.GameShit.GUI.Styles;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.Network.GUI;
 using MinesServer.Server;
@@ -181,20 +180,6 @@ namespace MinesServer.GameShit.ClanSystem
                 C(208, "<color=white>Faceless</color> [FCK]",         "<color=#00FF00>Приём открыт</color> (2|2) ур.2"),
             };
 
-            static RichListEntry B(string rightText, string buton_name, string action) =>
-                RichListEntry.Button(rightText, new MButton(buton_name, action));
-
-            var type_upgrade = new[]
-            {
-                B("Топ по <color=white>Добыче</color>", "Посмотреть", "top_clan_dig"),
-                B("Топ по <color=white>Валюте</color>", "Посмотреть", "top_clan_money"),
-                B("Топ по <color=white>Кредитам</color>", "Посмотреть", "top_clan_creds"),
-                B("Топ по <color=white>Уровню</color>", "Посмотреть", "top_clan_lvl"),
-                B("Топ по <color=white>Живым Кристаллам</color>", "Посмотреть", "top_clan_alive_crystall"),
-                B("Топ по <color=white>ОПП</color>", "Посмотреть", "top_clan_opp"),
-                B("Топ по <color=white>Очкам Федерации</color>", "Посмотреть", "top_clan_point_federation"),
-            };
-
             p.win = new Window
             {
                 Title = "Кланы",
@@ -204,37 +189,26 @@ namespace MinesServer.GameShit.ClanSystem
                     new Tab
                     {
                         Label = "ОБЗОР",
-                        Action = "clanstab",
+                        Action = "clans",
                         InitialPage = new Page
                         {
                             Text = "@@Кланы шахт. Кликните на клан для подробной информации",
                             ClanList = entries,
                             Input = new InputConfig("Поиск", 50, IsConsole: true),
-                            Buttons = []
+                            Buttons = Array.Empty<MButton>()
                         }
                     },
                     new Tab
                     {
                         Label = "ДОСТИЖЕНИЕ КЛАНОВ",
-                        Action = "achievementsclanstab",
-                        InitialPage = new Page 
-                        {
-                            Style = new Style()
-                            {
-                                Space = 1,
-                            },
-                            RichList = new(type_upgrade, false),
-                            Buttons = []
-                        }
+                        Action = "clanlistt",
+                        InitialPage = new Page { Buttons = Array.Empty<MButton>() }
                     },
                     new Tab
                     {
                         Label = "ДИПЛОМАТИЯ",
                         Action = "diplomacytab",
-                        InitialPage = new Page 
-                        { 
-                            Buttons = []
-                        }
+                        InitialPage = new Page { Buttons = Array.Empty<MButton>() }
                     }
                 ]
             };
