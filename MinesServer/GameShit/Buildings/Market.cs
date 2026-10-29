@@ -84,43 +84,42 @@ namespace MinesServer.GameShit.Buildings
             base.Build();
         }
         #endregion
-        public Action<Player, Market> onadmn => (p, m) =>
+
+        private static Action<Player, Market> AdminPanel => (p, m) =>
         {
-            if (p.id == m.ownerid)
+            if (p.id != m.ownerid || p.win == null) return;
+
+            p.win.ShowTabs = false;
+            p.win.CurrentTab.Open(new Page()
             {
-                p.win.ShowTabs = false;
-                p.win?.CurrentTab.Open(new Page()
+                Text = " ",
+                RichList = new RichListConfig()
                 {
-                    Text = " ",
-                    RichList = new RichListConfig()
-                    {
-                        Entries = [
-                            RichListEntry.Text("hp", $"hp {m.hp}"),
-                            RichListEntry.Button($"прибыль {m.moneyinside}$", 
-                            m.moneyinside == 0 ? 
-                                new MButton() : 
-                                new MButton("Получить", "getprofit", (args) => 
-                                { 
-                                    using var db = new DataBase(); 
-                                    p.money += m.moneyinside; 
-                                    m.moneyinside = 0; 
-                                    p.SendMoney(); 
-                                    db.SaveChanges(); 
-                                    m.onadmn(p, m); 
-                                    p.SendWindow(); 
+                    Entries = [
+                        RichListEntry.Text("hp", $"hp {m.hp}"),
+                            RichListEntry.Button($"прибыль {m.moneyinside}$",
+                            m.moneyinside == 0 ?
+                                new MButton() :
+                                new MButton("Получить", "getprofit", (args) =>
+                                {
+                                    using var db = new DataBase();
+                                    p.money += m.moneyinside;
+                                    m.moneyinside = 0;
+                                    p.SendMoney();
+                                    db.SaveChanges();
+                                    AdminPanel(p, m);
+                                    p.SendWindow();
                                 })),
                         ]
-                    },
-                    Buttons = []
-
-                });
-                p.SendWindow();
-            }
+                },
+                Buttons = []
+            });
+            p.SendWindow();
         };
 
         private Page SellPage(Player p, long money = -1)
         {
-            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
+            Action? adminaction = p.id != ownerid ? null : () => AdminPanel(p, this);
 
             var InitialPage = new Page()
             {
@@ -140,7 +139,6 @@ namespace MinesServer.GameShit.Buildings
             return InitialPage;
         }
 
-        // Новый метод для продажи всех кристаллов
         private void SellAllCrys(Player p)
         {
             long[] allCrys = new long[6];
@@ -151,16 +149,16 @@ namespace MinesServer.GameShit.Buildings
             Sell(allCrys, p);
         }
 
-        public void Sell(long[] sliders, Player p)
+        private void Sell(long[]? Sliders, Player p)
         {
-            if (sliders == null) return;
+            if (Sliders == null) return;
 
             long money = 0;
 
             // 1. Изменяем данные в памяти
             for (int i = 0; i < 6; i++)
             {
-                var value = sliders[i];
+                var value = Sliders[i];
                 if (value > 0)
                 {
                     if (p.crys.RemoveCrys(CrystalTypeExt.CrysType[i], value))
@@ -187,7 +185,7 @@ namespace MinesServer.GameShit.Buildings
 
         private Page BuyPage(Player p, long money = -1)
         {
-            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
+            Action? adminaction = p.id != ownerid ? null : () => AdminPanel(p, this);
 
             var InitialPage = new Page()
             {
@@ -206,21 +204,19 @@ namespace MinesServer.GameShit.Buildings
             return InitialPage;
         }
 
-        public void Buy(long[] sliders, Player p)
+        private void Buy(long[]? Sliders, Player p)
         {
-            if (sliders == null)
-            {
-                return;
-            }
+            if (Sliders == null) return;
+
             long money = 0;
             using var db = new DataBase();
             db.players.Attach(p);
             for (int i = 0; i < 6; i++)
             {
-                if (sliders[i] <= 0 || p.money - (sliders[i] * World.GetCrysCost(i) * 10) < 0)
+                if (Sliders[i] <= 0 || p.money - (Sliders[i] * World.GetCrysCost(i) * 10) < 0)
                     continue;
-                money -= sliders[i] * (World.GetCrysCost(i) * 10);
-                p.crys.AddCrys(CrystalTypeExt.CrysType[i], sliders[i]);
+                money -= Sliders[i] * (World.GetCrysCost(i) * 10);
+                p.crys.AddCrys(CrystalTypeExt.CrysType[i], Sliders[i]);
             }
             p.money += money;
             p.crys.SaveToDatabase();
@@ -243,7 +239,7 @@ namespace MinesServer.GameShit.Buildings
 
         private Tab TabBuyCry(Player p)
         {
-            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
+            Action? adminaction = p.id != ownerid ? null : () => AdminPanel(p, this);
             return new Tab()
             {
                 Label = "Покупка",
@@ -251,9 +247,10 @@ namespace MinesServer.GameShit.Buildings
                 InitialPage = BuyPage(p)
             };
         }
+
         private Tab TabProducts(Player p)
         {
-            Action? adminaction = p.id != ownerid ? null : () => onadmn(p, this);
+            Action? adminaction = p.id != ownerid ? null : () => AdminPanel(p, this);
             return new Tab()
             {
                 Label = "Товары",
@@ -286,6 +283,7 @@ namespace MinesServer.GameShit.Buildings
                 }
             };
         }
+
         public override Window? GUIWin(Player p)
         {
             return new Window()
