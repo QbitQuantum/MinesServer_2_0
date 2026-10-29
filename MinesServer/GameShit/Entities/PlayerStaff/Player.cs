@@ -22,27 +22,31 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Player : PEntity
     {
-        public Player() 
+        public Player()
         {
-        
+
         }
 
         private const int BaseMoveDelay = 10000;
         private const int AfkTimeoutMinutes = 5;
         private const int BotUpdateIntervalSeconds = 4;
         private const int C190StackResetMinutes = 1;
+        private const int InventoryUseCooldownMs = 400;
+        private const int MinimumServerPause = 20;
+        private const int PauseBotDivisor = 1000;
+        private const int PauseBotMultiplier = 7;
 
         private (int X, int Y)? lastchunk;
 
-        private DateTime lBotsUpdate = ServerTime.Now;
-        private DateTime lastc190hit = ServerTime.Now;
-        private DateTime lastDelay = ServerTime.Now;
-        private DateTime laststarttime = ServerTime.Now;
-        private DateTime lastuseinventory = ServerTime.Now;
+        private DateTime _lastBotsUpdate = ServerTime.Now;
+        private DateTime _lastc190hit = ServerTime.Now;
+        private DateTime _lastDelay = ServerTime.Now;
+        private DateTime _laststarttime = ServerTime.Now;
+        private DateTime _lastuseinventory = ServerTime.Now;
 
-        private readonly HashSet<(int X, int Y)> alreadyvisible = [];
+        private readonly HashSet<(int X, int Y)> _alreadyVisible = [];
 
-        private int c190stacks = 1;
+        private int _c190stacks = 1;
 
         [NotMapped] public Session? connection { get; set; }
         [NotMapped] public Chat? currentchat { get; set; }
@@ -73,9 +77,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             get
             {
                 var moveSkill = skillslist.GetSkill(SkillType.Movement);
-                long pauseBot = (moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay);
-                long pauseServer = pauseBot * 7 / 1000;
-                return Math.Max(pauseServer, 20);
+                long pauseBot = moveSkill != null ? (long)(moveSkill.Effect * PauseBotMultiplier) / PauseBotDivisor : BaseMoveDelay;
+                return Math.Max(pauseBot, MinimumServerPause);
             }
         }
 
@@ -86,12 +89,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 if (geo == null || geo.Count == 0)
                     return "[]";
 
-                // Сериализуем стек в JSON массив
                 return Newtonsoft.Json.JsonConvert.SerializeObject(geo.ToList());
             }
             set
             {
-                if (value == null || string.IsNullOrEmpty(value) || value == "[]")
+                if (string.IsNullOrEmpty(value) || value == "[]")
                 {
                     geo = new Stack<byte>();
                     return;
@@ -99,7 +101,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
                 try
                 {
-                    // Десериализуем JSON обратно в список и создаем стек
                     var list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<byte>>(value);
                     geo = new Stack<byte>(list ?? new List<byte>());
                 }
@@ -119,16 +120,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             skillslist.LoadSkills();
             MaxHealth = CalculateMaxHealth();
-            Health = Health <= 0 ? MaxHealth : Health;
+            Health = MaxHealth;
             win = null;
 
             MoveToChunk();
-
             SendInitialData();
             SubscribeToEvents();
-
-            
         }
+
         public void CreatePlayer()
         {
             name = "";
@@ -140,8 +139,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             inventory = new Inventory();
             settings = new Settings(true);
             crys = new Basket(true);
-            skillslist = new PlayerSkills(true); // Инициализация без передачи this
-            x = 0; y = 0;
+            skillslist = new PlayerSkills(true);
+            x = 0;
+            y = 0;
             dir = 0;
             clan = null;
             skin = 0;
@@ -149,7 +149,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private int CalculateMaxHealth()
         {
-            var healthSkill = skillslist.GetSkill(SkillType.Health); 
+            var healthSkill = skillslist.GetSkill(SkillType.Health);
             return 100 + (healthSkill != null ? (int)healthSkill.Effect : 0);
         }
 
@@ -188,7 +188,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 UpdateBots(now);
                 return;
             }
-            
+
             UpdateC190Stacks(now);
 
             if (!online)
@@ -203,64 +203,64 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdateC190Stacks(DateTime now)
         {
-            if (now - lastc190hit <= TimeSpan.FromMinutes(C190StackResetMinutes))
+            if (now - _lastc190hit < TimeSpan.FromMinutes(C190StackResetMinutes))
                 return;
 
-            c190stacks = 1;
-            lastc190hit = now;
+            _c190stacks = 1;
+            _lastc190hit = now;
         }
 
         public void HurtC190Stacks()
         {
-            Hurt(20 + 60 * c190stacks);
-            c190stacks++;
-            lastc190hit = ServerTime.Now;
+            Hurt(20 + 60 * _c190stacks);
+            _c190stacks++;
+            _lastc190hit = ServerTime.Now;
         }
 
         public bool HandleUseInventory()
         {
-            DateTime now = ServerTime.Now;
-            bool canUse = (now - lastuseinventory) >= TimeSpan.FromMilliseconds(400) ||
-                           programsData.ProgRunning;
+            var now = ServerTime.Now;
+            bool canUse = (now - _lastuseinventory) >= TimeSpan.FromMilliseconds(InventoryUseCooldownMs)
+                          || programsData.ProgRunning;
             if (canUse)
-                lastuseinventory = now;
+                _lastuseinventory = now;
             return canUse;
         }
 
         private void HandleOffline(DateTime now)
         {
-            if (now - laststarttime <= TimeSpan.FromMinutes(AfkTimeoutMinutes))
-                return;
-
-            DataBase.activeplayers.Remove(this);
-            Death();
+            if (now - _laststarttime >= TimeSpan.FromMinutes(AfkTimeoutMinutes))
+            {
+                Death();
+                DataBase.activeplayers.Remove(this);
+            }
         }
 
         private void UpdateBots(DateTime now)
         {
-            if (now - lBotsUpdate <= TimeSpan.FromSeconds(BotUpdateIntervalSeconds))
+            if (now - _lastBotsUpdate < TimeSpan.FromSeconds(BotUpdateIntervalSeconds))
                 return;
 
             BotsRender();
-            lBotsUpdate = now;
+            _lastBotsUpdate = now;
         }
 
         private void HandleCurrentCell()
         {
             var cell = World.GetCell(x, y);
-            var cellprop = World.GetProp(cell);
+            var cellProp = World.GetProp(cell);
 
-            if (cellprop.isEmpty)
+            if (cellProp.isEmpty)
                 return;
 
-            Hurt(cellprop.fall_damage);
+            Hurt(cellProp.fall_damage);
 
             if (cell == 90)
             {
                 GetBox(x, y);
-                World.DamageCell(x, y, 1);
+                World.DamageCell(x, y, 1, Operator.Unknown);
             }
-            else if (cellprop.is_destructible)
+            else if (cellProp.is_destructible)
             {
                 World.Destroy(x, y);
             }
@@ -268,24 +268,33 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void dOnDisconnect()
         {
+            DateTime disconnectTime = ServerTime.Now;
+
             using var db = new DataBase();
-            var player = db.players.FirstOrDefault(x => x.id == this.id);
+            var player = db.players.FirstOrDefault(p => p.id == this.id);
             if (player is not null)
             {
-                player.laststarttime = ServerTime.Now;
-                db.SaveChanges();
+                player._laststarttime = disconnectTime;
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch
+                {
+                    // Log if needed, but don't block disconnect
+                }
             }
 
-            laststarttime = ServerTime.Now;
+            _laststarttime = disconnectTime;
             connection = null;
-            alreadyvisible.Clear();
+            _alreadyVisible.Clear();
         }
 
         #endregion
 
         #region Movement
 
-        public override bool Move(int x, int y, DirectionType Direction = DirectionType.Unknown)
+        public override bool Move(int x, int y, DirectionType direction = DirectionType.Unknown)
         {
             if (!World.ValidCoord(x, y) || win != null)
             {
@@ -293,7 +302,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return false;
             }
 
-            UpdateDirection(x, y, Direction);
+            UpdateDirection(x, y, direction);
 
             if (IsGateBlocking(x, y))
             {
@@ -312,8 +321,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var factory = World.GetGuiFactory(x, y);
             if (factory != null)
             {
-                var w = factory(this);
-                if (w != null) { win = w; this.SendWindow(); }
+                var window = factory(this);
+                if (window != null)
+                {
+                    win = window;
+                    this.SendWindow();
+                }
             }
 
             return false;
@@ -321,9 +334,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private bool IsGateBlocking(int x, int y)
         {
-            return World.ContainsPack(x, y, out var pack) &&
-                   pack is Gate &&
-                   pack.cid != cid;
+            return World.ContainsPack(x, y, out var pack)
+                   && pack is Gate gate
+                   && gate.cid != cid;
         }
 
         private bool HandleObstacle()
@@ -368,33 +381,29 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (!World.CanBuildAt(x, y, cid))
                 return;
 
-            // Убираем buildskills IEnumerable, работаем напрямую
-            bool success = false;
-            switch (type)
+            bool success = type switch
             {
-                case "G": success = BuildBlock(x, y); break;
-                case "V": success = BuildMilitary(x, y); break;
-                case "R": success = BuildRoad(x, y); break;
-                case "O": success = BuildSupport(x, y); break;
-            }
+                "G" => BuildBlock(x, y),
+                "V" => BuildMilitary(x, y),
+                "R" => BuildRoad(x, y),
+                "O" => BuildSupport(x, y),
+                _ => false
+            };
 
             if (success)
-            {
                 skillslist.HandleBuildingExperience(this, type, 1);
-            }
         }
 
         private bool BuildBlock(int x, int y)
         {
             var cell = World.GetCell(x, y);
-            var cellprop = World.GetProp(cell);
+            var cellProp = World.GetProp(cell);
 
-            // Проверяем наличие навыков
             var greenSkill = skillslist.GetSkill(SkillType.BuildGreen);
             var yellowSkill = skillslist.GetSkill(SkillType.BuildYellow);
             var redSkill = skillslist.GetSkill(SkillType.BuildRed);
 
-            if (greenSkill != null && (World.TrueEmpty(x, y) || cellprop.isSand))
+            if (greenSkill != null && (World.TrueEmpty(x, y) || cellProp.isSand))
             {
                 if (crys.RemoveCrys(CrystalType.Green, (long)greenSkill.Cost))
                 {
@@ -428,12 +437,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private bool BuildMilitary(int x, int y)
         {
             var warSkill = skillslist.GetSkill(SkillType.BuildWar);
-
             if (warSkill == null)
                 return false;
 
             long cost = (long)warSkill.Cost;
-
             if (!crys.RemoveCrys(CrystalType.Cyan, cost) || !World.TrueEmpty(x, y))
                 return false;
 
@@ -446,19 +453,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
                 World.SetCell(x, y, CellType.MilitaryBlock);
                 World.DamageCell(x, y, (int)warSkill.DurabilityEffect, Operator.Unknown);
-            });
+            }, TaskScheduler.Default);
+
             return true;
         }
 
         private bool BuildRoad(int x, int y)
         {
             var roadSkill = skillslist.GetSkill(SkillType.BuildRoad);
-
             if (roadSkill == null)
                 return false;
 
             long cost = (long)roadSkill.Cost;
-
             if (crys.RemoveCrys(0, cost) && World.TrueEmpty(x, y))
             {
                 World.SetCell(x, y, CellType.Road);
@@ -470,20 +476,19 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private bool BuildSupport(int x, int y)
         {
             var structureSkill = skillslist.GetSkill(SkillType.BuildStructure);
-
             if (structureSkill == null)
                 return false;
 
-            var cellprop = World.GetProp(World.GetCell(x, y));
+            var cellProp = World.GetProp(World.GetCell(x, y));
+            bool isBuildable = World.TrueEmpty(x, y) || cellProp.isSand;
 
-            if (!crys.RemoveCrys(CrystalType.Green, (long)structureSkill.Cost) || 
-                !World.TrueEmpty(x, y) && !cellprop.isSand)
+            if (!isBuildable || !crys.RemoveCrys(CrystalType.Green, (long)structureSkill.Cost))
                 return false;
 
             World.SetCell(x, y, CellType.Support);
-
             return true;
         }
+
         #endregion
 
         #region Actions
@@ -493,11 +498,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (HasActiveProgram)
                 return;
 
-            if (ServerTime.Now < lastDelay)
+            if (ServerTime.Now < _lastDelay)
                 return;
 
             a();
-            lastDelay = ServerTime.Now + TimeSpan.FromMilliseconds(delay);
+            _lastDelay = ServerTime.Now + TimeSpan.FromMilliseconds(delay);
         }
 
         public override void Bz()
@@ -505,7 +510,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             ResourceExtractionService.PerformDig(this, this, crys);
         }
 
-        public override void Beep() 
+        public override void Beep()
         {
             this.SendBeep();
         }
@@ -558,20 +563,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Hurt(int damage, DamageTypePlayer type = DamageTypePlayer.Pure)
         {
-            // Обработка опыта
             skillslist.HandleDamageExperience(this, type, 1);
-
-            // Получение модифицированного урона
             int modifiedDamage = skillslist.HandleDamageReceived(damage);
 
-            if (Health - modifiedDamage > 0)
+            if (Health - modifiedDamage <= 0)
             {
-                Health -= modifiedDamage;
-                SendDFToBots(6, 0, 0, id, 0);
+                Health = 0;
+                Death();
             }
             else
             {
-                Death();
+                Health -= modifiedDamage;
+                SendDFToBots(6, 0, 0, id, 0);
             }
 
             this.SendHealth();
@@ -659,9 +662,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             StaticGUI.OpenGui(this);
         }
 
-        public void Rename(int Id)
+        public void Rename(int id)
         {
-            StaticGUI.Rename(this, Id);
+            StaticGUI.Rename(this, id);
         }
 
         #endregion
@@ -676,15 +679,11 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public void CheckChunkChanged(bool force = false)
         {
-            // TODO: 
-            // Выпилить ссылку на GetChunkPosByCoords, чтобы в итоге сделать ее приватной
-            // Так как внешне она больше нигде не вызывается
-            // А может и не надо делать приватной
-            var ChunkPos = Chunk.GetChunkPosByCoords(x, y);
-            if (!World.ValidChunk(ChunkPos.x, ChunkPos.y))
+            var chunkPos = Chunk.GetChunkPosByCoords(x, y);
+            if (!World.ValidChunk(chunkPos.x, chunkPos.y))
                 return;
 
-            if (lastchunk != (ChunkPos.x, ChunkPos.y) || force)
+            if (lastchunk != (chunkPos.x, chunkPos.y) || force)
                 MoveToChunk();
         }
 
@@ -696,18 +695,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void UpdateChunkRegistration()
         {
-            // Удаляем игрока из старого чанка
             if (lastchunk != null)
             {
                 var oldChunk = World.W.GetPosChunk(lastchunk.Value.X, lastchunk.Value.Y);
-                oldChunk.bots.Remove(id, out var p);
+                oldChunk.bots.Remove(id, out _);
             }
 
-            // Добавляем игрока в новый чанк
             var newChunk = World.W.GetChunk(x, y);
             lastchunk = newChunk.pos;
-
-            // AddBot уже проверяет на ContainsKey
             newChunk.AddBot(this);
         }
 
@@ -728,7 +723,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var result = new List<(int x, int y)>();
             foreach (var chunk in currentChunks)
             {
-                if (!alreadyvisible.Contains(chunk))
+                if (!_alreadyVisible.Contains(chunk))
                     result.Add(chunk);
             }
             return result;
@@ -738,7 +733,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var currentSet = new HashSet<(int x, int y)>(currentChunks);
             var result = new List<(int x, int y)>();
-            foreach (var seen in alreadyvisible)
+            foreach (var seen in _alreadyVisible)
             {
                 if (!currentSet.Contains(seen))
                     result.Add(seen);
@@ -748,8 +743,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         private void SendPackets(IEnumerable<IHubPacket> packets)
         {
-            if (connection == null) return;
-            if (packets == null) return;
+            if (connection == null || packets == null) return;
 
             if (packets is ICollection<IHubPacket> collection)
             {
@@ -768,10 +762,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             List<(int x, int y)> chunksToRemove)
         {
             foreach (var chunk in chunksToAdd)
-                alreadyvisible.Add(chunk);
+                _alreadyVisible.Add(chunk);
 
             foreach (var chunk in chunksToRemove)
-                alreadyvisible.Remove(chunk);
+                _alreadyVisible.Remove(chunk);
         }
 
         #endregion
@@ -826,31 +820,39 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private ListEntry[] MyBuildingsList()
         {
             using var db = new DataBase();
-            var entries = new List<ListEntry>();
 
-            entries.AddRange(db.teleports
+            var entries = db.teleports
                 .Where(t => t.ownerid == id)
-                .Select(t => new ListEntry($"tp {t.x}:{t.y}", null)));
+                .Select(t => new ListEntry($"tp {t.x}:{t.y}", null))
+                .ToList();
 
-            entries.AddRange(db.resps
+            var respawns = db.resps
                 .Where(r => r.ownerid == id)
-                .Select(r => new ListEntry($"resp {r.x}:{r.y}", null)));
+                .Select(r => new ListEntry($"resp {r.x}:{r.y}", null))
+                .ToList();
 
-            entries.AddRange(db.ups
+            var ups = db.ups
                 .Where(u => u.ownerid == id)
-                .Select(u => new ListEntry($"up {u.x}:{u.y}", null)));
+                .Select(u => new ListEntry($"up {u.x}:{u.y}", null))
+                .ToList();
 
-            entries.AddRange(db.guns
+            var guns = db.guns
                 .Where(g => g.ownerid == id)
-                .Select(g => new ListEntry($"gun {g.x}:{g.y}", null)));
+                .Select(g => new ListEntry($"gun {g.x}:{g.y}", null))
+                .ToList();
+
+            entries.AddRange(respawns);
+            entries.AddRange(ups);
+            entries.AddRange(guns);
 
             return entries.ToArray();
         }
+
         #endregion
 
-        public override void SpecialAction(ActionType Action)
+        public override void SpecialAction(ActionType action)
         {
-            switch (Action)
+            switch (action)
             {
                 case ActionType.BOOM:
                     inventory.selected = (int)Item.PlasmaBomb;
@@ -883,7 +885,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     // TODO: Прокачка всех скилов
                     break;
                 case ActionType.Craft:
-                // TODO: Создание крафтов
+                    // TODO: Создание крафтов
+                    break;
                 case ActionType.Nano:
                     inventory.selected = (int)Item.NanoBot;
                     inventory.Use(this);
@@ -892,7 +895,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     inventory.selected = (int)Item.RepairBot;
                     inventory.Use(this);
                     break;
-                default: break;
+                default:
+                    break;
             }
         }
     }
