@@ -77,8 +77,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             get
             {
                 var moveSkill = skillslist.GetSkill(SkillType.Movement);
-                long pauseBot = moveSkill != null ? (long)(moveSkill.Effect * PauseBotMultiplier) / PauseBotDivisor : BaseMoveDelay;
-                return Math.Max(pauseBot, MinimumServerPause);
+                long pauseBot = (moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay);
+                long pauseServer = pauseBot * PauseBotMultiplier / PauseBotDivisor;
+                return Math.Max(pauseServer, MinimumServerPause);
             }
         }
 
