@@ -273,13 +273,30 @@ namespace MinesServer.GameShit.Buildings
         }
         private Tab TabAuction(Player p)
         {
+            RichCard[] Card = [
+                new RichCard(
+                    new MButton("<color=green>Да</color>", $"yes_remont"), 
+                    "1111111111111111111111111111111111111",
+                    "inner:SKIN:0",
+                    1, 1
+                )
+            ];
+
             return new Tab()
             {
-                Label = "Аукцион",
-                Action = "buyauction",
+                Action = "gun",
+                Label = "хуй",
+                Title = "Пушка",
                 InitialPage = new Page()
                 {
-                    Buttons = [],
+                    RichList = new RichListConfig()
+                    {
+                        Entries =
+                            [
+                                RichListEntry.CardLine(Card)
+                            ]
+                    },
+                    Buttons = []
                 }
             };
         }
