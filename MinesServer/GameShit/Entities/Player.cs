@@ -18,7 +18,7 @@ using MinesServer.Network.Movement;
 using MinesServer.Network.World;
 using MinesServer.Server;
 
-namespace MinesServer.GameShit.Entities.PlayerStaff
+namespace MinesServer.GameShit.Entities
 {
     public class Player : PEntity
     {
@@ -77,7 +77,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             get
             {
                 var moveSkill = skillslist.GetSkill(SkillType.Movement);
-                long pauseBot = (moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay);
+                long pauseBot = moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay;
                 long pauseServer = pauseBot * PauseBotMultiplier / PauseBotDivisor;
                 return Math.Max(pauseServer, MinimumServerPause);
             }
@@ -221,7 +221,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public bool HandleUseInventory()
         {
             var now = ServerTime.Now;
-            bool canUse = (now - _lastuseinventory) >= TimeSpan.FromMilliseconds(InventoryUseCooldownMs)
+            bool canUse = now - _lastuseinventory >= TimeSpan.FromMilliseconds(InventoryUseCooldownMs)
                           || programsData.ProgRunning;
             if (canUse)
                 _lastuseinventory = now;
@@ -272,7 +272,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             DateTime disconnectTime = ServerTime.Now;
 
             using var db = new DataBase();
-            var player = db.players.FirstOrDefault(p => p.id == this.id);
+            var player = db.players.FirstOrDefault(p => p.id == id);
             if (player is not null)
             {
                 player._laststarttime = disconnectTime;
@@ -348,7 +348,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return true;
             }
 
-            tp(this.x, this.y);
+            tp(x, y);
             return false;
         }
 
@@ -508,7 +508,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Bz()
         {
-            ResourceExtractionService.PerformDig(this, this, crys);
+            ResourceExtraction.PerformDig(this, this, crys);
         }
 
         public override void Beep()
@@ -550,7 +550,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override void Geo()
         {
-            ResourceExtractionService.PerformGeo(this, this);
+            ResourceExtraction.PerformGeo(this, this);
         }
 
         #endregion
@@ -559,7 +559,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public override bool Heal()
         {
-            return ResourceExtractionService.PerformRepair(this, this);
+            return ResourceExtraction.PerformRepair(this, this);
         }
 
         public override void Hurt(int damage, DamageTypePlayer type = DamageTypePlayer.Pure)

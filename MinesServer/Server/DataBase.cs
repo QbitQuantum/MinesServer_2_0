@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.ClanSystem;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GChat;
 using MinesServer.GameShit.Programmator;

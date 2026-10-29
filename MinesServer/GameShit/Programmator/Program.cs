@@ -1,4 +1,4 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using MinesServer.GameShit.Entities;
 
 namespace MinesServer.GameShit.Programmator
 {

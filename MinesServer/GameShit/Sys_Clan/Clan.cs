@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Cards;

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using MinesServer.GameShit.Buildings;
-using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
 using MinesServer.Network.Constraints;

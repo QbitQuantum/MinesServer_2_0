@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Security.Cryptography;
 using MinesServer.GameShit;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;

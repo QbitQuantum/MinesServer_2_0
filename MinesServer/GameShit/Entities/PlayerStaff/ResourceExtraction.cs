@@ -4,7 +4,7 @@ using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
 
-public static class ResourceExtractionService
+public static class ResourceExtraction
 {
     public static CrystalType ParseCryType(CellType cell)
     {

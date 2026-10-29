@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using MinesServer.Enums;
 using MinesServer.GameShit.Buildings;
-using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.GUI;

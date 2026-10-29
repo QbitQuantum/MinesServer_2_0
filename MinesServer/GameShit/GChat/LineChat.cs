@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Entities;
 using MinesServer.Server;
 
 namespace MinesServer.GameShit.GChat

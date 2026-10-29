@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
 using MinesServer.Enums;
+using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Server;
 
-namespace MinesServer.GameShit.Entities.PlayerStaff
+namespace MinesServer.GameShit.Entities
 {
     public class BotSpot : PEntity
     {
@@ -42,7 +43,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 return;
 
             // Просто вызываем сервис, опыт начисляется внутри через owner.skillslist
-            ResourceExtractionService.PerformDig(this, owner, crys);
+            ResourceExtraction.PerformDig(this, owner, crys);
         }
 
         public override void Death()
@@ -72,7 +73,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (owner == null)
                 return;
 
-            ResourceExtractionService.PerformGeo(this, owner);
+            ResourceExtraction.PerformGeo(this, owner);
         }
 
         public override bool Heal()
@@ -80,7 +81,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (owner == null)
                 return false;
 
-            return ResourceExtractionService.PerformRepair(this, owner);
+            return ResourceExtraction.PerformRepair(this, owner);
         }
 
         public override void Hurt(int damage, DamageTypePlayer type = DamageTypePlayer.Pure)

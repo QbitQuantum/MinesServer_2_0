@@ -1,4 +1,4 @@
-﻿using MinesServer.GameShit.Entities.PlayerStaff;
+﻿using MinesServer.GameShit.Entities;
 using MinesServer.Network.Tutorial;
 
 namespace MinesServer.GameShit.Sys_Miss

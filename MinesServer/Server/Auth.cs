@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Inputs;
 using MinesServer.GameShit.WorldSystem;

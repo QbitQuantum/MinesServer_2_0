@@ -1,6 +1,6 @@
 
 using MinesServer.Enums;
-using MinesServer.GameShit.Entities.PlayerStaff;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.WorldSystem;
