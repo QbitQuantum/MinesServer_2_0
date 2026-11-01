@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace MinesServer
+namespace MinesServer.Utils
 {
     public class ImgSpace
     {
@@ -47,19 +47,19 @@ namespace MinesServer
             int sourceX = 0, sourceY = 0, destX = 0, destY = 0;
             float nPercent = 0, nPercentW = 0, nPercentH = 0;
 
-            nPercentW = ((float)newWidth / (float)sourceWidth);
-            nPercentH = ((float)newHeight / (float)sourceHeight);
+            nPercentW = newWidth / (float)sourceWidth;
+            nPercentH = newHeight / (float)sourceHeight;
             if (nPercentH < nPercentW)
             {
                 nPercent = nPercentH;
-                destX = System.Convert.ToInt16((newWidth -
-                          (sourceWidth * nPercent)) / 2);
+                destX = Convert.ToInt16((newWidth -
+                          sourceWidth * nPercent) / 2);
             }
             else
             {
                 nPercent = nPercentW;
-                destY = System.Convert.ToInt16((newHeight -
-                          (sourceHeight * nPercent)) / 2);
+                destY = Convert.ToInt16((newHeight -
+                          sourceHeight * nPercent) / 2);
             }
 
             int destWidth = (int)(sourceWidth * nPercent);
