@@ -1,15 +1,16 @@
-﻿using MinesServer.Enums;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using MinesServer.Enums;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Cards;
 using MinesServer.GameShit.GUI.Rich;
+using MinesServer.GameShit.GUI.Styles;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
 using MinesServer.Server;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinesServer.GameShit.Buildings
 {
@@ -279,110 +280,82 @@ namespace MinesServer.GameShit.Buildings
         }
         private Card MainTitle(Player p, SkillType skilltype = SkillType.Unknown)
         {
-            string InfoPlayerOpp = "Баллов перепрошивки: <color=yellow>" + p.opp + "</color>";
             if (skilltype == SkillType.Unknown)
+            {
+                string InfoPlayerOpp = "Баллов перепрошивки: <color=yellow>" + p.opp + "</color>";
                 return new Card(CardImageType.Skill, SkillType.Architecture.GetCode(),
                     "Удаляя умения вы получаете баллы перепрошивки которые открывают доступ в экспертным умениям.\n" +
                     "Эти умения не доступны в стандратной прошивке робота.\n" +
-                    "(Рис.1 - Пример экспертного умения: Архитектура)\n\n" +
-                    InfoPlayerOpp);
+                    "(Рис.1 - Пример экспертного умения: Архитектура)\n" + InfoPlayerOpp);
+            }
             else
             {
+                string InfoPlayerOpp = "Стоимость перепрошивки: <color=yellow>" + skilltype.GetBasePriceOPP() + "</color>";
                 return new Card(CardImageType.Skill, skilltype.GetCode(),
                     skilltype.GetDescription() + "\n" +
                     InfoPlayerOpp);
             }
         }
-        private void UpdateSkillPage(Player p, SkillType currentDisplaySkill, SkillType? skillToShowPrice = null)
+
+        // Открывает отдельную страницу с подробной информацией о выбранном экспертном умении
+        // и кнопкой покупки (или "Куплено"/"Назад").
+        private void UpdateSkillPage(Player p, SkillType currentDisplaySkill)
         {
-            var allSkills = SkillTypeExtensions.GetAllInfos();
-            var rich = new List<RichListEntry> { };
+            bool isPurchased = p.skillslist.IsExpertSkillPurchased(currentDisplaySkill);
+            int price = currentDisplaySkill.GetBasePriceOPP();
+            long creds_player = p.creds;
 
-            foreach (var kvp in allSkills)
+            MButton actionButton;
+
+            if (isPurchased)
             {
-                var skillType = kvp.Key;
-                var info = kvp.Value;
-
-                if (!info.IsExpertSkill)
-                    continue;
-
-                // Проверяем, куплено ли это умение игроком
-                bool isPurchased = p.skillslist.IsExpertSkillPurchased(skillType);
-
-                // Получаем цену для этого умения
-                int price = skillType.GetBasePriceOPP();
-
-                // Определяем текст и действие кнопки
-                string buttonText;
-                Action<ActionArgs> buttonAction;
-
-                if (isPurchased)
+                // Уже куплено — зелёная надпись, кнопка неактивна
+                actionButton = new MButton("<color=lime>Вам уже доступно это умение</color>", "purchased", _ =>
                 {
-                    // Если умение уже куплено - показываем зеленую надпись "Куплено"
-                    buttonText = "<color=lime>Куплено</color>";
-                    buttonAction = _ =>
+                    // Ничего не делаем — умение уже куплено
+                });
+            }
+            else if (p.opp < price)
+            {
+                // Не хватает OPP — красная кнопка с указанием недостающего количества
+                long missing = price - p.opp;
+                actionButton = new MButton(
+                    $"<color=red>Не хватает {missing:N0} OPP</color>",
+                    "notenough",
+                    _ =>
                     {
-                        // Просто показываем информацию без возможности покупки
-                        UpdateSkillPage(p, skillType, null);
-                    };
-                }
-                else if (skillToShowPrice.HasValue && skillToShowPrice.Value == skillType)
+                        // Ничего не делаем — недостаточно OPP.
+                        // Можно перерисовать, чтобы обновить значение (на случай изменения)
+                        UpdateSkillPage(p, currentDisplaySkill);
+                    });
+            }
+            else
+            {
+                // Достаточно OPP — обычная кнопка покупки
+                actionButton = new MButton($"Купить за <color=yellow>{price}</color> OPP", "buy", _ =>
                 {
-                    // Если это выбранный скилл для покупки - показываем цену и кнопку покупки
-                    buttonText = $"Стоимость исследования: <color=yellow>{price}</color>";
-                    buttonAction = _ =>
-                    {
-                        if (p.opp >= price)
-                        {
-                            using var db = new DataBase();
-                            db.players.Attach(p);
-                            p.opp -= price;
-                            // Добавляем умение в список купленных у игрока
-                            p.skillslist.AddExpertSkillPurchased(skillType);
-                            // Сохраняем изменения
-                            db.SaveChanges();
+                    using var db = new DataBase();
+                    db.players.Attach(p);
+                    p.opp -= price;
+                    p.skillslist.AddExpertSkillPurchased(currentDisplaySkill);
+                    db.SaveChanges();
 
-                            // Обновляем страницу
-                            UpdateSkillPage(p, currentDisplaySkill, null);
-                        }
-                        else
-                        {
-                            // Можно добавить сообщение о нехватке OPP
-                            UpdateSkillPage(p, currentDisplaySkill, null);
-                        }
-                    };
-                }
-                else
-                {
-                    // Обычный режим - показываем "Подробнее" и переключаем отображение
-                    buttonText = "Подробнее";
-                    buttonAction = _ =>
-                    {
-                        UpdateSkillPage(p, skillType, skillType);
-                    };
-                }
-
-                // Добавляем информацию о том, куплен ли скилл в название
-                string skillName = info.Name;
-                if (isPurchased)
-                {
-                    skillName = $"✓ {skillName}";
-                }
-
-                rich.Add(RichListEntry.Button(skillName, new MButton(buttonText, info.Name, buttonAction)));
+                    // Перерисовываем страницу, чтобы отобразить "Куплено"
+                    UpdateSkillPage(p, currentDisplaySkill);
+                });
             }
 
-            var updatedPage = new Page
+            var detailPage = new Page
             {
                 OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null,
                 Card = MainTitle(p, currentDisplaySkill),
-                RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
-                Buttons = []
+                Buttons = new[] { actionButton }
             };
 
-            p.win?.CurrentTab.Open(updatedPage);
+            p.win?.CurrentTab.Open(detailPage);
             p.SendWindow();
         }
+
         private Tab TabFlashing(Player p)
         {
             var allSkills = SkillTypeExtensions.GetAllInfos();
@@ -396,19 +369,21 @@ namespace MinesServer.GameShit.Buildings
                 if (!info.IsExpertSkill)
                     continue;
 
-                // Получаем строковый код умения и проверяем, куплено ли оно
                 bool isPurchased = p.skillslist.IsExpertSkillPurchased(skillType);
 
-                // Добавляем визуальное отличие для купленных умений
-                string skillName = info.Name;
+                // Название умения — зелёное, если уже куплено
+                string color = isPurchased ? "lime" : "white";
+
+                string skillName = $"Умение <color={color}>{info.Name}</color>";
                 if (isPurchased)
                 {
-                    skillName = $"✓ {skillName}"; // Добавляем галочку
+                    skillName = $"✓ {skillName}";
                 }
 
                 rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", info.Name, _ =>
                 {
-                    UpdateSkillPage(p, skillType, skillType);
+                    // Открываем отдельную страницу с подробностями и кнопкой покупки
+                    UpdateSkillPage(p, skillType);
                 })));
             }
 
@@ -417,16 +392,21 @@ namespace MinesServer.GameShit.Buildings
                 OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null,
                 Card = MainTitle(p),
                 RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
-                Buttons = []
+                Buttons = [],
+                Style = new Style()
+                {
+                    ScrollHeight = 350
+                }
             };
 
             return new Tab()
             {
                 Action = "Flashing",
                 Label = "Эксперт. умения",
-                InitialPage = basePage
+                InitialPage = basePage,
             };
         }
+
         public override Window? GUIWin(Player p)
         {
             return new Window()
