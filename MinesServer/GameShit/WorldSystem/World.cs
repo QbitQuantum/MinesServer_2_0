@@ -5,6 +5,7 @@ using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.GUI;
+using MinesServer.GameShit.SysCraft;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
@@ -16,74 +17,32 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class World
     {
-        public World(string name)
+        public World(string config_name)
         {
-
             W = this;
-            this.name = name;
-            var parameters = GenerationParameters.Default(seed: 1337);
-            generator = new WorldGenerator(
-                width: World.CellsWidth,
-                height: World.CellsHeight,
-                parameters);
-            chunks = new Chunk[Chunk.ChunksW * Chunk.ChunksH];
-            for (int i = 0; i < chunks.Length; i++)
-            {
-                int x = i % Chunk.ChunksW;
-                int y = i / Chunk.ChunksW;
-                chunks[i] = new Chunk((x, y));
-            }
 
-            InitializeChunkNeighbors();
+            name = config_name;
 
-            // TODO: проблема в том, что cells/road/durability создают файл, и если вынести то сломается проверка на File.Exists($"{name}.mapb")
-            if (!File.Exists($"{name}.mapb"))
-            {
-                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
-                Console.WriteLine("EmptyMapGeneration");
-                GenerationResult result = generator.GenerateAndWrite(Chunk.ChunkWidth, Chunk.ChunksH);
-                foreach (GeneratedSector sector in result.Sectors)
-                {
-                    Console.WriteLine(
-                        $"Пещера #{sector.Id}: {sector.Size} клеток, " +
-                        $"центр ({sector.CenterX}, {sector.CenterY})");
-                }
-                Console.WriteLine("Generation End");
-            }
-            else
-            {
-                cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-                durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
-            }
+            InitializeChunks();
+            CreateLayersWorld();
             CreateSpawns();
-            CommitWorld();
-            using var db = new DataBase();
-            if (db.chats.FirstOrDefault(i => i.tag == "FED") == default)
-            {
-                db.chats.Add(new GChat.Chat("FED", "Федеральный чат"));
-                db.chats.Add(new GChat.Chat("DNO", "Дно"));
-                db.SaveChanges();
-            }
+            CreateChat();
             DataBase.Load();
-            Console.WriteLine("Creating chunkmesh");
-            Console.WriteLine("LoadConfirmed");
-            Console.WriteLine("Started");
             CommitWorld();
-            SysCraft.RDes.Init();
+            RDes.Init();
+
+            Console.WriteLine("World created");
         }
 
         public static World W;
 
-        public string name { get; private set; }
+        public readonly string name;
+
         public WorldLayer<byte> road;
         public WorldLayer<byte> cells;
         public WorldLayer<float> durability;
 
-        private readonly Chunk[] chunks;
+        private readonly Chunk[] chunks = new Chunk[Chunk.ChunksW * Chunk.ChunksH];
 
         // ширина мира в клетках
         public const int CellsWidth = Chunk.ChunksW * Chunk.ChunkWidth;
@@ -92,9 +51,7 @@ namespace MinesServer.GameShit.WorldSystem
         // всего клеток в мире
         public const int TotalVolume = CellsWidth * CellsHeight;
 
-        public WorldGenerator generator;
-
-        private Dictionary<(int, int), CancellationTokenSource?> shit = [];
+        private readonly Dictionary<(int, int), CancellationTokenSource?> shit = [];
         private static readonly PriorityQueue<Action, DateTime> _delayedActions = new();
 
         public int[] cryscostmod = { 10, 10, 15, 10, 15, 15 };
@@ -108,10 +65,17 @@ namespace MinesServer.GameShit.WorldSystem
         private static DateTime lastcryupdate = DateTime.MinValue;
 
         /// <summary>
-        /// Инициализация соседей для всех чанков
+        /// Инициализация чанков и соседей для всех
         /// </summary>
-        private void InitializeChunkNeighbors()
+        private void InitializeChunks()
         {
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                int x = i % Chunk.ChunksW;
+                int y = i / Chunk.ChunksW;
+                chunks[i] = new Chunk((x, y));
+            }
+
             for (int i = 0; i < chunks.Length; i++)
             {
                 chunks[i].InitializeNeighbors(this);
@@ -124,6 +88,7 @@ namespace MinesServer.GameShit.WorldSystem
             W.road.Commit();
             W.durability.Commit();
         }
+
         public void DeleteWorld()
         {
             cells.Delete();
@@ -159,30 +124,104 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
-        public void CreateSpawns()
+        /// <summary>
+        /// Создание слоев карты
+        /// </summary>
+        private void CreateLayersWorld()
         {
-            using (var db = new DataBase())
-            {
-                var y = 10;
-                var x = 10;
+            Console.WriteLine($"Creating World Preset {CellsWidth} x {CellsHeight}({Chunk.ChunksW} x {Chunk.ChunksH} chunks)");
 
-                // Проверяем только наличие респауна (как ключевой структуры)
-                if (!db.resps.Any(r => r.x == x - 8 && r.y == y + 7))
+            // Создает автоматически файл
+            bool IsExistingMap = !File.Exists($"{name}.mapb");
+
+            cells = new($"{name}.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+            road = new($"{name}_road.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+            durability = new($"{name}_durability.mapb", (Chunk.ChunksW, Chunk.ChunksH));
+
+            if (IsExistingMap)
+            {
+                Console.WriteLine("Generation of a new world");
+                GenerateWorld();
+                Console.WriteLine("Generation End");
+            }
+        }
+
+        /// <summary>
+        /// Инииализация клеток мира
+        /// </summary>
+        private static void Write(GenerationResult result)
+        {
+            for (int baseX = 0; baseX < World.CellsWidth; baseX += Chunk.ChunkWidth)
+            {
+                for (int baseY = 0; baseY < World.CellsHeight; baseY += Chunk.ChunksH)
                 {
-                    for (int rx = -10; rx <= 10; rx++)
+                    int endX = Math.Min(baseX + Chunk.ChunkWidth, World.CellsWidth);
+                    int endY = Math.Min(baseY + Chunk.ChunksH, World.CellsHeight);
+
+                    for (int x = baseX; x < endX; x++)
                     {
-                        for (int ry = -10; ry <= 10; ry++)
+                        for (int y = baseY; y < endY; y++)
                         {
-                            SetCell(x + rx, y + ry, 36);
+                            World.SetCell(x, y, result.Cells[(y * result.Width) + x]);
                         }
                     }
-                    new Market(x - 7, y - 4, 0).Build();
-                    new Up(x, y - 4, 0).Build();
-                    new Teleport(x + 7, y - 4, 0).Build();
-                    new Resp(x - 8, y + 7, 0).Build();
                 }
             }
         }
+
+        private static void GenerateWorld()
+        {
+            var parameters = GenerationParameters.Default(seed: 1337);
+            WorldGenerator generator = new(
+                width: World.CellsWidth,
+                height: World.CellsHeight,
+                parameters);
+            GenerationResult result = generator.Generate();
+
+            Write(result);
+
+            foreach (GeneratedSector sector in result.Sectors)
+            {
+                Console.WriteLine(
+                    $"Пещера #{sector.Id}: {sector.Size} клеток, " +
+                    $"центр ({sector.CenterX}, {sector.CenterY})");
+            }
+        }
+
+        private static void CreateSpawns()
+        {
+            using var db = new DataBase();
+            var y = 10;
+            var x = 10;
+
+            // Проверяем только наличие респауна (как ключевой структуры)
+            if (!db.resps.Any(r => r.x == x - 8 && r.y == y + 7))
+            {
+                for (int rx = -10; rx <= 10; rx++)
+                {
+                    for (int ry = -10; ry <= 10; ry++)
+                    {
+                        SetCell(x + rx, y + ry, 36);
+                    }
+                }
+                new Market(x - 7, y - 4, 0).Build();
+                new Up(x, y - 4, 0).Build();
+                new Teleport(x + 7, y - 4, 0).Build();
+                new Resp(x - 8, y + 7, 0).Build();
+            }
+        }
+
+        private static void CreateChat()
+        {
+            using var db = new DataBase();
+            if (db.chats.FirstOrDefault(i => i.tag == "FED") == default)
+            {
+                db.chats.Add(new GChat.Chat("FED", "Федеральный чат"));
+                db.chats.Add(new GChat.Chat("DNO", "Дно"));
+                db.SaveChanges();
+            }
+        }
+
         public static bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
         {
             if (player == null) return false;
