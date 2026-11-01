@@ -14,7 +14,7 @@ using MinesServer.GameShit.GUI.UP;
 using MinesServer.Network.GUI;
 using MinesServer.Server;
 
-namespace MinesServer.GameShit.ClanSystem
+namespace MinesServer.GameShit.Sys_Clan
 {
     internal static class ClanQueryExtensions
     {

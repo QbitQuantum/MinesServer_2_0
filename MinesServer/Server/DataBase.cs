@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Buildings;
-using MinesServer.GameShit.ClanSystem;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GChat;
 using MinesServer.GameShit.Programmator;
+using MinesServer.GameShit.Sys_Clan;
 using MinesServer.GameShit.Sys_Craft;
 using MinesServer.GameShit.SysMarket;
 using MinesServer.GameShit.VulkSystem;

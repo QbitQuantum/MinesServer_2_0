@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using MinesServer.GameShit.Entities;
 
-namespace MinesServer.GameShit.ClanSystem
+namespace MinesServer.GameShit.Sys_Clan
 {
     public class Request
     {

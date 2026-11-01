@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MinesServer.GameShit.ClanSystem
+namespace MinesServer.GameShit.Sys_Clan
 {
     public class Rank
     {
