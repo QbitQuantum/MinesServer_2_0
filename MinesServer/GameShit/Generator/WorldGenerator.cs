@@ -36,16 +36,4 @@ public sealed class WorldGenerator
 
         return new GenerationResult(cells, sectors, _width, _height);
     }
-
-    public GenerationResult GenerateAndWrite(int chunkWidth, int chunkHeight)
-    {
-        GenerationResult result = Generate();
-
-        var writer = new WorldWriter(
-            _width, _height,
-            chunkWidth, chunkHeight);
-        writer.Write(result);
-
-        return result;
-    }
 }
