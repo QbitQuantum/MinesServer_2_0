@@ -16,54 +16,214 @@ using MoreLinq;
 
 namespace MinesServer.GameShit.SysMarket
 {
+    public static class L
+    {
+        public const string CreateOrderTitle = "Создание ордера";
+        public const string Step1Title = "Шаг 1 из 2 — цена";
+        public const string Step2Title = "Шаг 2 из 2 — количество";
+        public const string EnterCost = "Введите цену за 1 шт. (целое число, $):";
+        public const string EnterNum = "Сколько выставить на продажу?";
+        public const string InInventory = "В инвентаре";
+        public const string InvalidCost = "<color=#ff6666>Цена должна быть целым числом больше 0.</color>";
+        public const string InvalidNum = "<color=#ff6666>Количество должно быть целым числом от 1 до {0}.</color>";
+        public const string NotTradable = "<color=#ff6666>Этот предмет нельзя выставить на аукцион.</color>";
+        public const string CreatedOk = "Ордер создан.\nЕго можно отменить в течение 5 минут после первой ставки.";
+    }
+
     public static class MarketSystem
     {
+        private static readonly HashSet<int> NonTradable = new() { 31, 32, 33, 49, 50 };
+
+        public static void OpenOrderCreation(Player p, int itemtype)
+        {
+            if (NonTradable.Contains(itemtype))
+            {
+                p.win?.CurrentTab.Replace(new Page
+                {
+                    Title = L.CreateOrderTitle,
+                    Text = L.NotTradable,
+                    Buttons = []
+                });
+                p.SendWindow();
+                return;
+            }
+
+            var amount = p.inventory[itemtype];
+            if (amount <= 0)
+            {
+                p.win?.CurrentTab.Replace(new Page
+                {
+                    Title = L.CreateOrderTitle,
+                    Text = $"<color=#ff6666>У вас нет {ItemTypeExt.PackName(itemtype)} в инвентаре.</color>",
+                    Buttons = []
+                });
+                p.SendWindow();
+                return;
+            }
+
+            p.win?.CurrentTab.Open(CostPage(p, itemtype, amount, error: null));
+            p.SendWindow();
+        }
+
+        private static Page CostPage(Player p, int itemtype, int amount, string? error)
+        {
+            var name = ItemTypeExt.PackName(itemtype);
+            return new Page
+            {
+                Title = $"{L.CreateOrderTitle}: {name}",
+                Text = $"{L.Step1Title}\n\n{L.EnterCost}\n" +
+                       $"{L.InInventory}: <color=white>{amount:N0}</color>" +
+                       (error is null ? "" : $"\n{error}"),
+                Input = new InputConfig("цена за 1 шт.", MaxLength: 12),
+                Card = new Card(CardImageType.Item, itemtype.ToString(), name),
+                Buttons = new[]
+                {
+                    new MButton("<color=yellow>Далее</color>", $"setcost:{ActionMacros.Input}",
+                        args => OnCostEntered(p, itemtype, amount, args.Input))
+                }
+            };
+        }
+
+        private static void OnCostEntered(Player p, int itemtype, int amount, string? raw)
+        {
+            if (!int.TryParse(raw, out var cost) || cost <= 0)
+            {
+                p.win?.CurrentTab.Replace(CostPage(p, itemtype, amount, L.InvalidCost));
+                p.SendWindow();
+                return;
+            }
+            p.win?.CurrentTab.Open(NumPage(p, itemtype, cost, amount, error: null));
+            p.SendWindow();
+        }
+
+        private static Page NumPage(Player p, int itemtype, int cost, int amount, string? error)
+        {
+            var name = ItemTypeExt.PackName(itemtype);
+            return new Page
+            {
+                Title = $"{L.CreateOrderTitle}: {name}",
+                Text = $"{L.Step2Title}\n\n{L.EnterNum}\n" +
+                       $"Цена: <color=#aaeeaa>{cost:N0}$</color> за 1 шт.\n" +
+                       $"{L.InInventory}: <color=white>{amount:N0}</color>" +
+                       (error is null ? "" : $"\n{error}"),
+                Input = new InputConfig("количество", MaxLength: 10),
+                Card = new Card(CardImageType.Item, itemtype.ToString(), name),
+                Buttons = new[]
+                {
+                    new MButton("<color=yellow>Создать</color>", $"setnum:{ActionMacros.Input}",
+                        args => OnNumEntered(p, itemtype, cost, amount, args.Input))
+                }
+            };
+        }
+
+        private static void OnNumEntered(Player p, int itemtype, int cost, int amount, string? raw)
+        {
+            if (!int.TryParse(raw, out var num) || num <= 0 || num > amount)
+            {
+                p.win?.CurrentTab.Replace(NumPage(p, itemtype, cost, amount,
+                    string.Format(L.InvalidNum, amount)));
+                p.SendWindow();
+                return;
+            }
+            CreateOrder(p, itemtype, num, cost);
+        }
+
         public static void CreateOrder(Player p, int type, int num, int cost)
         {
-            if (p.inventory[type] < num || num <= 0)
+            if (NonTradable.Contains(type) ||
+                num <= 0 || cost <= 0 ||
+                p.inventory[type] < num)
             {
                 p.win = null;
                 return;
             }
+
             p.inventory[type] -= num;
+
             using var db = new DataBase();
-            var order = new Order()
+            db.orders.Add(new Order
             {
                 initiatorid = p.id,
                 cost = cost,
                 num = num,
                 itemid = type
-            };
-            db.orders.Add(order);
-            db.SaveChanges();
-            p.win?.CurrentTab.Open(new Page()
-            {
-                Title = "ok",
-                Text = "u just created order u can cancel it within five mins after first bet",
-                Buttons = []
             });
+            db.SaveChanges();
+
+            p.win?.CurrentTab.Replace(new Page
+            {
+                Title = $"{L.CreateOrderTitle}: {ItemTypeExt.PackName(type)}",
+                Text = $"{L.CreatedOk}\n\n" +
+                       $"Выставлено: <color=white>{num:N0}</color> x " +
+                       $"<color=#aaeeaa>{cost:N0}$</color>",
+                Buttons = new[]
+                {
+                    new MButton("К аукциону", "backtoauc",
+                        _ => { OpenItemAuc(p, type); p.SendWindow(); })
+                }
+            });
+            p.SendWindow();
         }
+
         public static void OpenOrder(Player p, int orderid)
         {
             using var db = new DataBase();
-            var o = db.orders.First(i => i.id == orderid);
+            var order = db.orders.First(i => i.id == orderid);
             Player? buyer = null;
-            if (o.buyerid > 0)
+            if (order.buyerid > 0)
             {
-                buyer = db.players.First(p => p.id == o.buyerid);
+                buyer = db.players.First(p => p.id == order.buyerid);
             }
-            var cost = buyer == null ? o.cost : o.cost + (o.cost * 0.01f);
-            var timer = o.buyerid > 0 ? $"(time till ends {TimeSpan.FromMinutes(5) - (DateTime.Now - o.bettime):mm\\:ss})" : "";
+            var cost = buyer == null ? order.cost : order.cost + (order.cost * 0.01f);
+            var timer = order.buyerid > 0
+                ? $" (до конца {TimeSpan.FromMinutes(5) - (DateTime.Now - order.bettime):mm\\:ss})"
+                : "";
+            var sellerName = db.players.FirstOrDefault(x => x.id == order.initiatorid)?.name;
+
             p.win?.CurrentTab.Open(new Page()
             {
-                Title = $"Order of player {p.name} {timer}",
-                Text = buyer == null ? null : $"last bet by: {buyer.name}",
-                Input = new InputConfig($"minimal bet is <color=#aaeeaa>{(int)Math.Ceiling(cost)}$</color>", null, false),
-                Buttons = [new MButton("minimalbet","minimalbet", (args) => { var db = new DataBase(); db.Attach(o); o.Bet(p, (long)cost); db.SaveChanges(); OpenOrder(p, orderid); p.SendWindow(); }),new MButton("bet", $"bet:{ActionMacros.Input}", (args) => { if (int.TryParse(args.Input, out var bet)) { var db = new DataBase(); db.Attach(o); o.Bet(p, bet); db.SaveChanges(); } OpenOrder(p, orderid); p.SendWindow(); })],
-                Card = new Card(CardImageType.Item, o.itemid.ToString(), $"{ItemTypeExt.PackName(o.itemid)} x{o.num} costs <color=#aaeeaa>{o.cost}$</color>"),
-            });
+                Title = $"Ордер: {ItemTypeExt.PackName(order.itemid)} x{order.num}{timer}",
+                Text = (buyer == null
+                            ? "Ставок пока нет."
+                            : $"Последняя ставка: <color=white>{buyer.name}</color>")
+                       + (sellerName == null
+                            ? ""
+                            : $"\nПродавец: <color=white>{sellerName}</color>"),
+                Input = new InputConfig(
+                    $"минимальная ставка — <color=#aaeeaa>{(int)Math.Ceiling(cost)}$</color>",
+                    null, false),
+                Buttons = [
+                    new MButton($"<color=yellow>Поставить {(int)Math.Ceiling(cost)}$</color>", "minimalbet",
+                (args) =>
+                {
+                    var db = new DataBase();
+                    db.Attach(order);
+                    order.Bet(p, (long)cost);
+                    db.SaveChanges();
+                    OpenOrder(p, orderid);
+                    p.SendWindow();
+                }),
 
+            new MButton("Ставка", $"bet:{ActionMacros.Input}",
+                (args) =>
+                {
+                    if (int.TryParse(args.Input, out var bet))
+                    {
+                        var db = new DataBase();
+                        db.Attach(order);
+                        order.Bet(p, bet);
+                        db.SaveChanges();
+                    }
+                    OpenOrder(p, orderid);
+                    p.SendWindow();
+                })
+                ],
+                Card = new Card(CardImageType.Item, order.itemid.ToString(),
+                    $"{ItemTypeExt.PackName(order.itemid)} x{order.num}\n" +
+                    $"Цена: <color=#aaeeaa>{order.cost:N0}$</color>"),
+            });
         }
+
         public static ListEntry[] GetItems(Player p, int type)
         {
             ListEntry[] re = [];
@@ -86,28 +246,7 @@ namespace MinesServer.GameShit.SysMarket
                 List = GetItems(p, itemtype)
             });
         }
-        public static void OpenOrderCreation(Player p, int itemtype)
-        {
-            p.win?.CurrentTab.Open(new Page()
-            {
-                Title = $"Order creation {ItemTypeExt.PackName(itemtype)}",
-                Text = "Enter cost",
-                Input = new InputConfig("cost", null, false),
-                Buttons = [new MButton("createorder", $"createorder:{ActionMacros.Input}", (args) => { if (int.TryParse(args.Input, out var res)) OrderCreationNum(p, itemtype, res); else p.win = null; p.SendWindow(); })],
-                Card = new Card(CardImageType.Item, itemtype.ToString(), ItemTypeExt.PackName(itemtype)),
-            });
-        }
-        public static void OrderCreationNum(Player p, int itemtype, int cost)
-        {
-            p.win?.CurrentTab.Open(new Page()
-            {
-                Title = $"Order creation {ItemTypeExt.PackName(itemtype)}",
-                Text = $"{ItemTypeExt.PackName(itemtype)} to sell count",
-                Input = new InputConfig("num", null, false),
-                Buttons = [new MButton("createorder", $"createorder:{ActionMacros.Input}", (args) => { if (int.TryParse(args.Input, out var res)) CreateOrder(p, itemtype, res, cost); else p.win = null; p.SendWindow(); })],
-                Card = new Card(CardImageType.Item, itemtype.ToString(), ItemTypeExt.PackName(itemtype)),
-            });
-        }
+
         public static InventoryItem[] Items()
         {
             using var db = new DataBase();
@@ -196,7 +335,7 @@ namespace MinesServer.GameShit.SysMarket
                 Buttons = [new MButton("<color=yellow>Создать ордер</color>", "neworder",
                 (args) =>
                 {
-                    OpenOrderCreation(p, item); 
+                    OpenOrderCreation(p, item);
                     p.SendWindow();
                 })],
                 //List = GetItems(p, item)
