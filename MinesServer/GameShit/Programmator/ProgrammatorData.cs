@@ -3,7 +3,7 @@ using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.Server;
-using SevenZip.Compression.LZMA;
+using MinesServer.Utils.SevenZip;
 
 namespace MinesServer.GameShit.Programmator
 {

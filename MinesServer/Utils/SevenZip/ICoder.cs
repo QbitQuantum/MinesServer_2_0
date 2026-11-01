@@ -2,7 +2,7 @@
 
 using System;
 
-namespace SevenZip
+namespace MinesServer.Utils.SevenZip
 {
 	/// <summary>
 	/// The exception that is thrown when an error in input stream occurs during decoding.
@@ -31,7 +31,7 @@ namespace SevenZip
 		/// <param name="outSize">
 		/// output size. -1 if unknown.
 		/// </param>
-		void SetProgress(Int64 inSize, Int64 outSize);
+		void SetProgress(long inSize, long outSize);
 	};
 
 	public interface ICoder
@@ -54,11 +54,11 @@ namespace SevenZip
 		/// <param name="progress">
 		/// callback progress reference.
 		/// </param>
-		/// <exception cref="SevenZip.DataErrorException">
+		/// <exception cref="DataErrorException">
 		/// if input stream is not valid
 		/// </exception>
-		void Code(System.IO.Stream inStream, System.IO.Stream outStream,
-			Int64 inSize, Int64 outSize, ICodeProgress progress);
+		void Code(Stream inStream, Stream outStream,
+			long inSize, long outSize, ICodeProgress progress);
 	};
 
 	/*
@@ -147,7 +147,7 @@ namespace SevenZip
 
 	public interface IWriteCoderProperties
 	{
-		void WriteCoderProperties(System.IO.Stream outStream);
+		void WriteCoderProperties(Stream outStream);
 	}
 
 	public interface ISetDecoderProperties

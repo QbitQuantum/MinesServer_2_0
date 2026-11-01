@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using MinesServer.Utils.SevenZip.Compress.LZMA;
 
-namespace SevenZip.Compression.LZMA
+namespace MinesServer.Utils.SevenZip
 {
     public static class SevenZipHelper
     {
@@ -41,7 +42,7 @@ namespace SevenZip.Compression.LZMA
             encoder.WriteCoderProperties(outStream);
             long fileSize = inStream.Length;
             for (int i = 0; i < 8; i++)
-                outStream.WriteByte((byte)(fileSize >> (8 * i)));
+                outStream.WriteByte((byte)(fileSize >> 8 * i));
             encoder.Code(inStream, outStream, -1, -1, null);
             return outStream.ToArray();
         }
@@ -63,7 +64,7 @@ namespace SevenZip.Compression.LZMA
                 int b = inStream.ReadByte();
                 if (b < 0)
                     throw new Exception("Can't Read 1");
-                outSize |= ((long)(byte)b) << (8 * i);
+                outSize |= (long)(byte)b << 8 * i;
             }
 
             long compressedSize = inStream.Length - inStream.Position;

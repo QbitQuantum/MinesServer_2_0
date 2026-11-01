@@ -25,6 +25,6 @@
     <PackageReference Include="System.Memory.Data" Version="8.0.0" />
   </ItemGroup>
  <ItemGroup>
-   <Folder Include="GameShit\Programmator\SevenZip\" />
+   <Folder Include="Utils\SevenZip\" />
  </ItemGroup>
 </Project>

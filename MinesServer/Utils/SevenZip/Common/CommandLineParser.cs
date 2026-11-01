@@ -3,7 +3,7 @@
 using System;
 using System.Collections;
 
-namespace SevenZip.CommandLineParser
+namespace MinesServer.Utils.SevenZip.Common
 {
 	public enum SwitchType
 	{
@@ -87,7 +87,7 @@ namespace SevenZip.CommandLineParser
 					int switchLen = switchForms[switchIndex].IDString.Length;
 					if (switchLen <= maxLen || pos + switchLen > len)
 						continue;
-					if (String.Compare(switchForms[switchIndex].IDString, 0,
+					if (string.Compare(switchForms[switchIndex].IDString, 0,
 							srcString, pos, switchLen, true) == 0)
 					{
 						matchedSwitchIndex = switchIndex;
@@ -98,7 +98,7 @@ namespace SevenZip.CommandLineParser
 					throw new Exception("maxLen == kNoLen");
 				SwitchResult matchedSwitch = _switches[matchedSwitchIndex];
 				SwitchForm switchForm = switchForms[matchedSwitchIndex];
-				if ((!switchForm.Multi) && matchedSwitch.ThereIs)
+				if (!switchForm.Multi && matchedSwitch.ThereIs)
 					throw new Exception("switch must be single");
 				matchedSwitch.ThereIs = true;
 				pos += maxLen;
@@ -112,7 +112,7 @@ namespace SevenZip.CommandLineParser
 								matchedSwitch.WithMinus = false;
 							else
 							{
-								matchedSwitch.WithMinus = (srcString[pos] == kSwitchMinus);
+								matchedSwitch.WithMinus = srcString[pos] == kSwitchMinus;
 								if (matchedSwitch.WithMinus)
 									pos++;
 							}
@@ -150,7 +150,7 @@ namespace SevenZip.CommandLineParser
 								matchedSwitch.PostStrings.Add(srcString.Substring(pos));
 								return true;
 							}
-							String stringSwitch = srcString.Substring(pos, minLen);
+							string stringSwitch = srcString.Substring(pos, minLen);
 							pos += minLen;
 							for (int i = minLen; i < switchForm.MaxLen && pos < len; i++, pos++)
 							{
@@ -241,7 +241,7 @@ namespace SevenZip.CommandLineParser
 					return false;
 				indices.Add(currentIndex);
 			}
-			return (numUsedChars == commandString.Length);
+			return numUsedChars == commandString.Length;
 		}
 		const char kSwitchID1 = '-';
 		const char kSwitchID2 = '/';
@@ -251,7 +251,7 @@ namespace SevenZip.CommandLineParser
 
 		static bool IsItSwitchChar(char c)
 		{
-			return (c == kSwitchID1 || c == kSwitchID2);
+			return c == kSwitchID1 || c == kSwitchID2;
 		}
 	}
 
