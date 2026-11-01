@@ -11,8 +11,7 @@ namespace MinesServer.GameShit.WorldSystem
 
             // Поднимаемся из bin/Debug/net8.0-windows7.0/ в корень проекта
             var projectDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
-            var sourcePath = Path.Combine(projectDir, "cells.json");
-
+            var sourcePath = Path.Combine(projectDir + "\\Resources", "cells.json");
             // Если исходный файл существует, копируем его
             if (File.Exists(sourcePath))
             {
