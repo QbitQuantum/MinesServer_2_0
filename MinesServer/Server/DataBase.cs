@@ -12,6 +12,11 @@ using MinesServer.GameShit.WorldSystem;
 
 namespace MinesServer.Server
 {
+    public static class DataBaseExt
+    {
+        public static void RemoveAll<T>(this DbSet<T> s) where T : class => s.RemoveRange(s);
+    }
+
     public sealed class DataBase : DbContext
     {
         #region player
@@ -320,7 +325,7 @@ namespace MinesServer.Server
             }
             catch (Exception ex)
             {
-                Default.WriteError(ex.ToString());
+                Console.WriteLine("WriteError caused error " + $"{ex}");
             }
         }
 

@@ -5,6 +5,7 @@ using MinesServer.GameShit.GUI.Inputs;
 using MinesServer.GameShit.GUI.List;
 using MinesServer.GameShit.GUI.Styles;
 using MinesServer.Server;
+using MinesServer.Utils;
 
 namespace MinesServer.GameShit.Programmator
 {
@@ -39,7 +40,7 @@ namespace MinesServer.GameShit.Programmator
         {
             var rename =  (ActionArgs args) =>
             {
-                if (Default.def.IsMatch(args.Input))
+                if (InputValidation.AllowedCharsOnly.IsMatch(args.Input))
                 {
                     using var db = new DataBase();
                     var prog = db.progs.FirstOrDefault(p => p.id == id);

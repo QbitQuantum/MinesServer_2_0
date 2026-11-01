@@ -1,5 +1,6 @@
 ﻿using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.WorldSystem;
+using MinesServer.Utils;
 
 namespace MinesServer.Server
 {
@@ -35,11 +36,14 @@ namespace MinesServer.Server
         }
 
         public void Start() {
-            if (!_started)
-            {
-                _updateThread.Start();
-                _started = true;
-            }
+            if (_started) 
+                return;
+
+            CellsSerializer.Load();
+            new ImgSpace();
+            new World(Config.Load("config.json").WorldName);
+            _updateThread.Start();
+            _started = true;
         }
 
         private void RunUpdateLoop()

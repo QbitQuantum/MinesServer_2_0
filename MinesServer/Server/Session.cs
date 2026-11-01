@@ -15,6 +15,7 @@ using MinesServer.Network.GUI;
 using MinesServer.Network.TypicalEvents;
 using MinesServer.Network.World;
 using MinesServer.Server.Network.TypicalEvents;
+using MinesServer.Utils;
 using NetCoreServer;
 
 namespace MinesServer.Server
@@ -272,7 +273,7 @@ namespace MinesServer.Server
 
         private void Chat(TYPacket f, ChatPacket chat)
         {
-            if (!Default.def.IsMatch(chat.message.Replace("\n", ""))) return;
+            if (!InputValidation.AllowedCharsOnly.IsMatch(chat.message.Replace("\n", ""))) return;
             _player?.currentchat?.AddMessage(_player, chat.message.Replace("\n", ""));
         }
 

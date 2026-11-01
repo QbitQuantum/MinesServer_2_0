@@ -18,7 +18,6 @@ namespace MinesServer.Server
 
         public override bool Start()
         {
-            new World(Default.cfg.WorldName);
             time.Start();
             return base.Start();
         }
@@ -35,7 +34,7 @@ namespace MinesServer.Server
         }
         protected override void OnError(SocketError error)
         {
-            Default.WriteError(error.ToString());
+            Console.WriteLine("WriteError caused error " + $"{error}");
         }
     }
 }
