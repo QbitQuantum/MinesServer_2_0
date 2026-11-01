@@ -86,20 +86,7 @@ namespace MinesServer
         }
         
         public static void RemoveAll<T>(this Microsoft.EntityFrameworkCore.DbSet<T> s) where T : class => s.RemoveRange(s);
-        
-        public static Bitmap ConvertMapPart(int fromx,int fromy,int tox,int toy)
-        {
-            var bitmap = new Bitmap(tox - fromx, toy - fromy);
-            for (int x = 0; fromx + x < tox; x++)
-            {
-                for (int y = 0; fromy + y < toy; y++)
-                {
-                    bitmap.SetPixel(x, y, World.GetProp(fromx + x, fromy + y).isEmpty ? Color.Green : Color.CornflowerBlue);
-                }
-            }
-            return bitmap;
-        }
-        
+
         public static void WriteError(string ex)
         {
             Console.WriteLine("WriteError caused error " + $"{ex}");
