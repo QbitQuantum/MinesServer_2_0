@@ -34,18 +34,23 @@ namespace MinesServer.GameShit.Buildings
         public Program? selected { get; set; }
         public BotSpot? entity;
 
-        #endregion
+        private const string TabPrograms = "SpotProgs";
+        private const string TabCrystals = "SpotCrys";
+        private static readonly string[] DropValues = ["— нет —"];
 
+        #endregion
 
         protected override void ClearBuilding()
         {
             World.SetCell(x, y, 32, true);
         }
+
         public override void Build()
         {
             World.SetCell(x, y, 32, true);
             base.Build();
         }
+
         public override void Destroy(Player p)
         {
             ClearBuilding();
@@ -116,6 +121,7 @@ namespace MinesServer.GameShit.Buildings
             entity.programsData.Run(selected);
             ReopenWindow(p, TabPrograms);
         }
+
         private void StopProgram(Player p)
         {
             if (entity == null)
@@ -123,10 +129,6 @@ namespace MinesServer.GameShit.Buildings
             entity.Death();
             ReopenWindow(p, TabPrograms);
         }
-
-        private const string TabPrograms = "SpotProgs";
-        private const string TabCrystals = "SpotCrys";
-        private static readonly string[] DropValues = ["— нет —"];
 
         private void ReopenWindow(Player p, string tabAction)
         {
@@ -139,6 +141,7 @@ namespace MinesServer.GameShit.Buildings
             // RichListEntry.DropDown запрещает ':' внутри значений.
             return text.Replace(":", "·");
         }
+
         private Page ProgramsPage(Player p)
         {
             using var db = new DataBase();
@@ -216,7 +219,7 @@ namespace MinesServer.GameShit.Buildings
             };
         }
 
-        private IPage CrystalsPage(Player p)
+        private Page CrystalsPage(Player p)
         {
             var botCrys = entity?.crys?.cry ?? new long[6];
             var totalCrys = Enumerable.Range(0, 6).Select(i => p.crys.cry[i] + (i < botCrys.Length ? botCrys[i] : 0)).ToArray();
