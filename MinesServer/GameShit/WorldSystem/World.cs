@@ -177,8 +177,9 @@ namespace MinesServer.GameShit.WorldSystem
                         }
                     }
                     new Market(x - 7, y - 4, 0).Build();
-                    new Resp(x - 8, y + 7, 0).Build();
                     new Up(x, y - 4, 0).Build();
+                    new Teleport(x + 7, y - 4, 0).Build();
+                    new Resp(x - 8, y + 7, 0).Build();
                 }
             }
         }
