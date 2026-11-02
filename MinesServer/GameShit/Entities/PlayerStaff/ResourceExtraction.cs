@@ -803,7 +803,12 @@ public static class ResourceExtraction
         {
             var placeable = actor.geo.Pop();
             World.SetCell(x, y, placeable);
-            World.DamageCell(x, y, 99, Operator.Percentage);
+
+            var (x1, y1) = actor.GetDirCord();
+            // Лучше будет если унести сразу в конфиг
+            int CountDamage = placeable == 119 ? 1000 : World.GetProp(placeable).damage;
+            foreach (var target in World.W.GetPlayersFromPos(x1, y1))
+                target.Hurt(CountDamage);
         }
         skillOwner.skillslist.HandleExperience(skillOwner, SkillType.Geology, 1f);
         skillOwner.SendGeo();
