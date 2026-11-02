@@ -1,6 +1,6 @@
 ﻿using MinesServer.GameShit.Skills;
 
-namespace MinesServer.Enums
+namespace MinesServer.GameShit.Enums
 {
     public enum SkillType
     {
@@ -164,8 +164,8 @@ namespace MinesServer.Enums
         public static bool HasConflict(SkillType skill1, SkillType skill2)
         {
             return _conflicts.Any(c =>
-                (c.Skill == skill1 && c.ConflictsWith == skill2) ||
-                (c.Skill == skill2 && c.ConflictsWith == skill1));
+                c.Skill == skill1 && c.ConflictsWith == skill2 ||
+                c.Skill == skill2 && c.ConflictsWith == skill1);
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using MinesServer.Enums;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Crystal;
 using MinesServer.Network.GUI;

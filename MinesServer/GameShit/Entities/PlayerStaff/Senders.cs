@@ -1,4 +1,4 @@
-﻿using MinesServer.Enums;
+﻿using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.Programmator;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.BotInfo;

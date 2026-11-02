@@ -1,4 +1,4 @@
-﻿using MinesServer.Enums;
+﻿using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI.Canvas;
 using MinesServer.GameShit.GUI.Cards;
 using MinesServer.GameShit.GUI.Crystal;

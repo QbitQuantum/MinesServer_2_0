@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using MinesServer.Enums;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.GameShit.Skills;

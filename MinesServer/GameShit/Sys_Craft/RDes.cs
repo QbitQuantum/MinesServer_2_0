@@ -1,4 +1,4 @@
-﻿using MinesServer.Enums;
+﻿using MinesServer.GameShit.Enums;
 using Newtonsoft.Json;
 
 namespace MinesServer.GameShit.SysCraft

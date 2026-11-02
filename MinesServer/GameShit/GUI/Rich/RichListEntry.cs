@@ -1,4 +1,4 @@
-﻿using MinesServer.Enums;
+﻿using MinesServer.GameShit.Enums;
 
 namespace MinesServer.GameShit.GUI.Rich
 {

@@ -1,4 +1,4 @@
-﻿using MinesServer.Enums;
+﻿using MinesServer.GameShit.Enums;
 using MinesServer.Network;
 using System.Text.RegularExpressions;
 

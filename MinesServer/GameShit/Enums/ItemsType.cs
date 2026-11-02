@@ -1,5 +1,4 @@
-
-namespace MinesServer.Enums
+namespace MinesServer.GameShit.Enums
 {
     public enum Item
     {
@@ -135,7 +134,7 @@ namespace MinesServer.Enums
         {
             return
                 // Базовые цветные геопаки (ID: 10-16)
-                (item >= Item.Geopack && item <= Item.GeopackCyan) ||
+                item >= Item.Geopack && item <= Item.GeopackCyan ||
                 // Специальные геопаки
                 item == Item.GeopackBlackSkal ||
                 item == Item.GeopackRedSkal ||
@@ -148,7 +147,7 @@ namespace MinesServer.Enums
         /// </summary>
         public static bool CanBePlacedAnywhere(this Item item)
         {
-            return IsGeopack(item) || item == Item.C190;
+            return item.IsGeopack() || item == Item.C190;
         }
     }
 }

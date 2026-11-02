@@ -3,7 +3,7 @@
 
 
 // Структура для хранения CB разных типов кристаллов
-using MinesServer.Enums;
+using MinesServer.GameShit.Enums;
 
 namespace MinesServer.GameShit.Entities.PlayerStaff
 {

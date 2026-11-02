@@ -90,45 +90,45 @@ namespace MinesServer.GameShit.Programmator
                 case "red":
                     return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Red] == Num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Red] < Num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Red] > Num,
+                        ActionType.WritableState => p.crys?[CrystalType.Red] == Num,
+                        ActionType.WritableStateLower => p.crys?[CrystalType.Red] < Num,
+                        ActionType.WritableStateMore => p.crys?[CrystalType.Red] > Num,
                         _ => null
                     };
 
                 case "green":
                     return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Green] == Num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Green] < Num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Green] > Num,
+                        ActionType.WritableState => p.crys?[CrystalType.Green] == Num,
+                        ActionType.WritableStateLower => p.crys?[CrystalType.Green] < Num,
+                        ActionType.WritableStateMore => p.crys?[CrystalType.Green] > Num,
                         _ => null
                     };
 
                 case "blue":
                     return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Blue] == Num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Blue] < Num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Blue] > Num,
+                        ActionType.WritableState => p.crys?[CrystalType.Blue] == Num,
+                        ActionType.WritableStateLower => p.crys?[CrystalType.Blue] < Num,
+                        ActionType.WritableStateMore => p.crys?[CrystalType.Blue] > Num,
                         _ => null
                     };
 
                 case "white":
                     return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.White] == Num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.White] < Num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.White] > Num,
+                        ActionType.WritableState => p.crys?[CrystalType.White] == Num,
+                        ActionType.WritableStateLower => p.crys?[CrystalType.White] < Num,
+                        ActionType.WritableStateMore => p.crys?[CrystalType.White] > Num,
                         _ => null
                     };
 
                 case "violet":
                     return Type switch
                     {
-                        ActionType.WritableState => p.crys?[MinesServer.Enums.CrystalType.Violet] == Num,
-                        ActionType.WritableStateLower => p.crys?[MinesServer.Enums.CrystalType.Violet] < Num,
-                        ActionType.WritableStateMore => p.crys?[MinesServer.Enums.CrystalType.Violet] > Num,
+                        ActionType.WritableState => p.crys?[CrystalType.Violet] == Num,
+                        ActionType.WritableStateLower => p.crys?[CrystalType.Violet] < Num,
+                        ActionType.WritableStateMore => p.crys?[CrystalType.Violet] > Num,
                         _ => null
                     };
 
@@ -280,7 +280,7 @@ namespace MinesServer.GameShit.Programmator
                     break;  // кристаллов нет
 
                 case ActionType.MacrosHeal:
-                    if (p.crys?[MinesServer.Enums.CrystalType.Red] > 0 && p.Health < p.MaxHealth)
+                    if (p.crys?[CrystalType.Red] > 0 && p.Health < p.MaxHealth)
                     {
                         if (p.Heal())
                         {

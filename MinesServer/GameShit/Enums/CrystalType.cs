@@ -1,4 +1,4 @@
-﻿namespace MinesServer.Enums
+﻿namespace MinesServer.GameShit.Enums
 {
     public enum CrystalType
     {
