@@ -174,28 +174,18 @@ namespace MinesServer.GameShit.Buildings
             if (isRunning)
                 rich.Add(RichListEntry.Button("Остановка", new MButton("STOP", "spotstop", _ => StopProgram(p))));
 
-            var programList = progs.Select(pr => new ListEntry(
-                pr.name + (selected?.id == pr.id ? " ✓" : ""),
-                new MButton(selected?.id == pr.id ? "Выбрано" : "Установить",
-                           selected?.id == pr.id ? "uninstallprog" : $"installprog:{pr.id}",
-                           _ =>
-                           {
-                               if (selected?.id == pr.id) UninstallProgram(p);
-                               else InstallProgram(pr.id, p);
-                           })
-            )).ToArray();
-
             return new Page
             {
                 Title = "Программы",
                 Card = new Card(CardImageType.Item, ((int)Item.SpotBot).ToString(),
                     $"<color=white>Программы Spot</color>\n<color=#7c88a6>Выбрано:</color> <color=#d5ffe8>{(selected?.name ?? "—")}</color>"),
                 RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
-                List = programList,
                 Buttons =
                 [
                     new MButton("SAVE", $"spotprogsave:{ActionMacros.RichList}", args =>
                     {
+                        if (args.RichList == null) return;
+
                         if (!args.RichList.TryGetValue("prog", out var raw) || !int.TryParse(raw, out var index))
                         {
                             ReopenWindow(p, TabPrograms);
