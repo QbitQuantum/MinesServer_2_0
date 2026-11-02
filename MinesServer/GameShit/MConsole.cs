@@ -219,6 +219,13 @@ namespace MinesServer.GameShit
                         value(p, msg);
                     }
                 }
+                else
+                {
+                    if (commands.TryGetValue(msg, out Command? value))
+                    {
+                        value(p, msg);
+                    }
+                }
                 ShowOldConsole(p);
             }
 
