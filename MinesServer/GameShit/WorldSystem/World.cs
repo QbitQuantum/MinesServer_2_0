@@ -695,13 +695,16 @@ namespace MinesServer.GameShit.WorldSystem
 
         public static void SendWorldInfo(Player player)
         {
-            var mapPackets = new List<IHubPacket>();
-
             for (int x = 0; x < Chunk.ChunksW; x++)
+            {
                 for (int y = 0; y < Chunk.ChunksH; y++)
+                {
+                    var mapPackets = new List<IHubPacket>();
                     mapPackets.Add(W.GetPosChunk(x, y).MapPacket());
-
-            player.connection?.SendB(new HBPacket(mapPackets.ToArray()));
+                    player.connection?.SendB(new HBPacket(mapPackets.ToArray()));
+                }
+            }
+            
         }
 
         public IEnumerable<IHubPacket> GetChunksPacketsAdded(List<(int x, int y)> chunksToAdd)
