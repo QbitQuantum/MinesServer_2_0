@@ -796,7 +796,7 @@ namespace MinesServer.GameShit.Sys_Clan
                 ]
             };
 
-            var created = await DataBase.SaveCreateClanAsync(clan);
+            var created = await DataBase.SaveCreateClanAsync(clan, p);
             if (!created)
             {
                 p.ShowInfo("Не удалось создать клан (значок или имя заняты).");

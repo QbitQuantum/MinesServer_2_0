@@ -467,16 +467,25 @@ namespace MinesServer.Server
         /// <summary>
         /// Создание клана.
         /// </summary>
-        public static async Task<bool> SaveCreateClanAsync(Clan clan)
+        public static async Task<bool> SaveCreateClanAsync(Clan clan, Player owner)
         {
             await using var db = new DataBase();
 
             if (await db.clans.AnyAsync(c => c.id == clan.id)) return false;
             if (await db.clans.AnyAsync(c => c.name.ToLower() == clan.name.ToLower())) return false;
 
+            var trackedOwner = await db.players
+                .FirstOrDefaultAsync(p => p.id == owner.id);
+
+            if (trackedOwner is null) return false;
+
             foreach (var r in clan.ranks) r.owner = clan;
 
             var ownerRank = clan.ranks.First(r => r.priority == Clan.OwnerPriority);
+
+            trackedOwner.clan = clan;
+            trackedOwner.clanrank = ownerRank;
+            clan.members.Add(trackedOwner);
 
             db.clans.Add(clan);
             await db.SaveChangesAsync();
