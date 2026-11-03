@@ -639,41 +639,37 @@ namespace MinesServer.GameShit.Sys_Clan
         {
             await using var db = new DataBase();
             var taken = (await db.clans.AsNoTracking().Select(c => c.id).ToListAsync()).ToHashSet();
-            if (taken.Count >= 218)
+
+            const int MaxClanIcons = 218;
+            var free = Enumerable.Range(1, MaxClanIcons)
+                .Where(id => !taken.Contains(id))
+                .ToArray();
+
+            if (free.Length == 0)
             {
                 p.ShowInfo("Свободных значков клана не осталось.");
                 return;
             }
 
-            var icons = new List<byte>(8);
-            var rng = Random.Shared;
-            while (icons.Count < 8)
-            {
-                var id = (byte)rng.Next(1, 219);
-                if (!taken.Contains(id) && !icons.Contains(id))
-                    icons.Add(id);
-            }
+            var entries = free
+                .Select(id => new ClanListEntry(
+                    new MButton($"Значок #{id}", $"pickicon:{id}",
+                        async _ => await NameStepAsync(p, id)),
+                    (byte)id,
+                    "<color=#00FF00>свободен</color>"))
+                .ToArray();
 
             p.win?.CurrentTab.Open(new Page
             {
                 Title = "Выбор значка клана",
-                Text = "@@\nВыберите значок клана...\n",
-                Buttons = [new MButton("Другие", "nexticons",
-                async _ => await ChooseIconStepAsync(p))],
-                Inventory = icons.Select(i => InventoryItem.Clan(i, 0)).ToArray(),
-                OnInventory = async i =>
-                {
-                    var iconId = i - 200;
-                    if (iconId is < 1 or > 218)
-                    {
-                        p.ShowInfo("Некорректный значок клана.");
-                        return;
-                    }
-                    await NameStepAsync(p, iconId);
-                }
+                Text = $"@@\nВыберите свободный значок клана.\n" +
+                       $"Свободно: <color=white>{free.Length}</color> из {MaxClanIcons}.\n",
+                ClanList = entries,
+                Buttons = []
             });
             p.SendWindow();
         }
+
 
         private static Task NameStepAsync(Player p, int iconId)
         {
