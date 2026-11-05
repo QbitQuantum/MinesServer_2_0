@@ -85,32 +85,6 @@ namespace MinesServer.Server
             modelBuilder.Entity<BotSpot>()
                 .Property(b => b.id)
                 .ValueGeneratedNever();
-
-            modelBuilder.Entity<Clan>()
-                .Navigation(c => c.members)
-                .AutoInclude();
-            modelBuilder.Entity<Clan>()
-               .Navigation(c => c.reqs)
-               .AutoInclude();
-            modelBuilder.Entity<Clan>()
-               .Navigation(c => c.ranks)
-               .AutoInclude();
-            modelBuilder.Entity<Program>()
-               .Navigation(c => c.owner)
-               .AutoInclude();
-            var b = modelBuilder.Entity<Player>();
-            b.HasOne(i => i.resp).WithMany().OnDelete(DeleteBehavior.SetNull);
-            b.Navigation(c => c.programs)
-            .AutoInclude();
-            modelBuilder.Entity<Request>()
-                .Navigation(c => c.player)
-                .AutoInclude();
-            modelBuilder.Entity<Crafter>()
-                .Navigation(c => c.currentcraft)
-                .AutoInclude();
-            modelBuilder.Entity<Chat>()
-                .Navigation(c => c.messages)
-                .AutoInclude();
         }
         public static void Save()
         {
