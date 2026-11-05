@@ -188,11 +188,11 @@ namespace MinesServer.Server
                 string lastMessageText = "";
                 string lastMessageAuthor = "";
 
-                if (chat.messages != null && chat.messages.Any())
+                if (chat.messages != null && chat.messages.Count != 0)
                 {
                     var last = chat.messages.Last();
-                    lastMessageText = last.message ?? "";
-                    lastMessageAuthor = last.player?.name ?? "";
+                    lastMessageText = last.message;
+                    lastMessageAuthor = last.playername;
                 }
 
                 chats.Add(new GCChatEntry(chat.tag, chat.Name, lastMessageAuthor, lastMessageText, false));

@@ -185,6 +185,15 @@ namespace MinesServer.Server
                 .FirstOrDefault(i => i.tag == tag);
         }
 
+        public static Chat? GetChatWithMessages(string tag, int limit = 30)
+        {
+            using var db = new DataBase();
+            return db.chats.Include(c => c.messages
+                    .OrderByDescending(m => m.id)
+                    .Take(limit))
+                .FirstOrDefault(i => i.tag == tag);
+        }
+
         public static LineChat? GetLineChat(int id)
         {
             using var db = new DataBase();

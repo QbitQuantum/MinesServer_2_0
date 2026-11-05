@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using MinesServer.GameShit.Entities;
-using MinesServer.Server;
 
 namespace MinesServer.GameShit.GChat
 {
@@ -8,15 +6,9 @@ namespace MinesServer.GameShit.GChat
     {
         public int id { get; set; }
         public int playerid { get; set; }
-        public string message { get; set; }
-        public Chat owner { get; set; }
-
-        [NotMapped] public int time = (int)(DateTime.Now.Ticks / 10000L / 60000L);
-        
-        [NotMapped] public Player? player 
-        {
-            get => DataBase.GetPlayer(playerid);
-            set => playerid = value!.id;
-        }
+        public string playername { get; set; } = "";
+        public int playercid { get; set; }
+        public string message { get; set; } = "";
+        public int time { get; set; } = (int)(DateTime.Now.Ticks / 10000L / 60000L);
     }
 }

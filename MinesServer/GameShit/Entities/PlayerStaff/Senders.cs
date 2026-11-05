@@ -89,18 +89,17 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             if (p.connection == null) return;
 
-            using var db = new DataBase();
-            p.currentchat ??= db.chats.FirstOrDefault(i => i.tag == "FED");
+            p.currentchat ??= DataBase.GetChatWithMessages("FED");
 
             if (p.currentchat == null) return;
 
             p.connection.SendU(new CurrentChatPacket(p.currentchat.tag, p.currentchat.Name));
 
-            var msg = p.currentchat.GetMessages();
+            var message = p.currentchat.GetMessages();
 
-            if (msg.Length > 0)
+            if (message.Length > 0)
             {
-                p.connection.SendU(new ChatMessagesPacket(p.currentchat.tag, p.currentchat.GetMessages()));
+                p.connection.SendU(new ChatMessagesPacket(p.currentchat.tag, message));
             }
         }
     }

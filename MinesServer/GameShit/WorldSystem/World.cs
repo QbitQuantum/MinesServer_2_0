@@ -2,6 +2,7 @@
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
+using MinesServer.GameShit.GChat;
 using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.SysCraft;
@@ -212,12 +213,10 @@ namespace MinesServer.GameShit.WorldSystem
 
         private static void CreateChat()
         {
-            using var db = new DataBase();
-            if (db.chats.FirstOrDefault(i => i.tag == "FED") == default)
+            if (DataBase.GetChat("FED") is var fedChat && fedChat == null)
             {
-                db.chats.Add(new GChat.Chat("FED", "Федеральный чат"));
-                db.chats.Add(new GChat.Chat("DNO", "Дно"));
-                db.SaveChanges();
+                Chat.CreateChat("FED", "Федеральный чат");
+                Chat.CreateChat("DNO", "Дно");
             }
         }
 
