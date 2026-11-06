@@ -54,6 +54,7 @@ namespace MinesServer.GameShit.Entities
         [NotMapped] public override int cid => clan?.id ?? 0;
         [NotMapped] public override int tail => HasActiveProgram ? 1 : 0;
         [NotMapped] public bool HasActiveProgram => programsData.ProgRunning;
+        [NotMapped] public bool dailyRewardClaimed { get; set; }
 
         public string name { get; set; } = string.Empty;
         public string hash { get; set; } = string.Empty;
@@ -64,6 +65,9 @@ namespace MinesServer.GameShit.Entities
         public Clan? clan { get; set; }
         public Rank? clanrank { get; set; }
         public Resp? resp { get; set; }
+
+        public bool autoRem { get; set; }
+        public bool isAdmin { get; set; }
         public List<Program> programs { get; set; } = new();
         public override Basket crys { get; set; } = null!;
         public Inventory inventory { get; set; } = null!;
@@ -171,6 +175,13 @@ namespace MinesServer.GameShit.Entities
             this.ProgStatus();
             this.SendCrys();
             this.SendWindow();
+            this.SendNickList();
+            this.SendOnlineCount();
+            this.SendAgrStatus();
+            this.SendAutoRemStatus();
+            this.SendAdminStatus();
+            this.SendDailyReward();
+            this.SendMissionStatus();
         }
 
         private void SubscribeToEvents()

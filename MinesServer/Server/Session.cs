@@ -165,6 +165,7 @@ namespace MinesServer.Server
                 case ChooPacket choo: Choo(packet, choo); break;
                 case CpriPacket cpri: Cpri(packet, cpri); break;
                 case TAURPacket taur: Taur(packet, taur); break;
+                case RndmPacket rndm: RndmHandler(packet, rndm); break;
                 default:
                     // Invalid event type
                     break;
@@ -240,7 +241,22 @@ namespace MinesServer.Server
             _player.SendWindow();
         }
 
-        private void Taur(TYPacket f, TAURPacket t) { /* TODO */ }
+        private void Taur(TYPacket f, TAURPacket t)
+        {
+            // TODO
+            if (_player == null) return;
+            _player.autoRem = !_player.autoRem;
+            SendU(new AutoRemPacket(_player.autoRem));
+        }
+
+        private void RndmHandler(TYPacket f, RndmPacket r)
+        {
+            // TODO
+            if (_player == null) return;
+            // Клиент отправляет device hash в ответ на ON (version check)
+            // Содержимое игнорируем — flow продолжается к AU
+            Console.WriteLine($"Rndm received from {_player?.name ?? "anon"}");
+        }
 
         private void Chin(TYPacket f, ChinPacket chin) => Console.WriteLine(chin.message);
 

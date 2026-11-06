@@ -7,6 +7,7 @@ using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.Movement;
 using MinesServer.Network.Programmator;
+using MinesServer.Network.Tutorial;
 using MinesServer.Network.World;
 using MinesServer.Server;
 using MinesServer.Server.Network;
@@ -106,6 +107,59 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             {
                 p.connection.SendU(new ChatMessagesPacket(p.currentchat.tag, message));
             }
+        }
+
+        public static void SendNickList(this Player p)
+        {
+            if (p.connection == null) return;
+            var nicks = DataBase.activeplayers
+                .ToDictionary(pl => pl.id, pl => pl.name);
+            p.connection.SendU(new NickListPacket(nicks));
+        }
+
+        public static void SendOnlineCount(this Player p)
+        {
+            if (p.connection == null) return;
+            int playerCount = DataBase.activeplayers.Count;
+            int progCount = DataBase.activeplayers.Count(pl => pl.HasActiveProgram);
+            p.connection.SendU(new OnlinePacket(playerCount, progCount));
+        }
+
+        public static void SendAgrStatus(this Player p)
+        {
+            if (p.connection == null) return;
+            p.connection.SendU(new AgressionPacket(p.agression));
+        }
+
+        public static void SendAutoRemStatus(this Player p)
+        {
+            if (p.connection == null) return;
+            p.connection.SendU(new AutoRemPacket(p.autoRem));
+        }
+
+        public static void SendHandModeStatus(this Player p)
+        {
+            // Режим зелёной руки в во время программатора
+            if (p.connection == null) return;
+            p.connection.SendU(new HandModePacket(p.handMode));
+        }
+
+        public static void SendAdminStatus(this Player p)
+        {
+            if (p.connection == null) return;
+            p.connection.SendU(new AdminStatusPacket(p.isAdmin));
+        }
+
+        public static void SendDailyReward(this Player p)
+        {
+            if (p.connection == null) return;
+            p.connection.SendU(new DailyRewardPacket(p.dailyRewardClaimed));
+        }
+
+        public static void SendMissionStatus(this Player p)
+        {
+            if (p.connection == null) return;
+            // p.connection.SendU(new NaviArrowPacket(0, 0));
         }
     }
 }
