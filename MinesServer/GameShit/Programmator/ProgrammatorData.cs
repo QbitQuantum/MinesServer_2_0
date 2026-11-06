@@ -39,10 +39,12 @@ namespace MinesServer.GameShit.Programmator
 
         private PFunction Function => CurrentProg[CurrentFunction];
 
-        private void Drop()
+        /// <summary>
+        /// Сброс только runtime-состояния (без StartPoint / GotoDeath).
+        /// Используется при Stop() — чтобы можно было продолжить с той же точки входа.
+        /// </summary>
+        private void ResetRuntimeState()
         {
-            StartPoint = ("", 0);
-            GotoDeath = null;
             CurrentFunction = "";
             CheckX = 0;
             CheckY = 0;
@@ -51,6 +53,16 @@ namespace MinesServer.GameShit.Programmator
             FlipState = false;
             foreach (var function in CurrentProg)
                 function.Value.Reset();
+        }
+
+        /// <summary>
+        /// Полный сброс перед запуском новой программы: очищает точку входа и GotoDeath.
+        /// </summary>
+        private void Drop()
+        {
+            StartPoint = ("", 0);
+            GotoDeath = null;
+            ResetRuntimeState();
         }
 
         private static (byte[] DecompressedData, int NumBit, string[] ArrayStrings) Decode(string DataProgramm)
@@ -271,7 +283,10 @@ namespace MinesServer.GameShit.Programmator
             return (ParseCurrentProg, ParseFunctionOrder);
         }
 
-        public void Run(Program p)
+        /// <summary>
+        /// Запуск конкретной программы: парсинг, инициализация, старт.
+        /// </summary>
+        public void Start(Program p)
         {
             Selected = p;
             var (ParseCurrentProg, ParseFunctionOrder) = ParseProgramm(p.data);
@@ -289,21 +304,45 @@ namespace MinesServer.GameShit.Programmator
             ProgRunning = true;
         }
 
+        /// <summary>
+        /// Запуск уже выбранной программы. Если программа уже идёт или не выбрана — ничего не делает.
+        /// </summary>
+        public void Start()
+        {
+            if (ProgRunning)
+                return;
+            if (Selected == null)
+                return;
+
+            Start(Selected);
+        }
+
+        /// <summary>
+        /// Остановка выполнения программы. Сохраняет StartPoint и GotoDeath.
+        /// </summary>
+        public void Stop()
+        {
+            if (!ProgRunning)
+                return;
+
+            ProgRunning = false;
+            ResetRuntimeState();
+            (Entity as Player)?.ProgStatus();
+        }
+
+        /// <summary>
+        /// Перезапуск программы: Stop() + Start().
+        /// </summary>
+        public void Restart()
+        {
+            Stop();
+            Start();
+        }
+
         public void OnDeath()
         {
             Function.Reset();
             CurrentFunction = GotoDeath;
-        }
-
-        // TODO: Разделить методы на Run()/Stop()
-        public void Run()
-        {
-            if (ProgRunning || Selected == null)
-            {
-                ProgRunning = false;
-                return;
-            }
-            Run(Selected);
         }
 
         private void Next()
@@ -485,10 +524,10 @@ namespace MinesServer.GameShit.Programmator
         {
             switch (actionType)
             {
-                case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or 
-                ActionType.CheckLeft or ActionType.CheckDownLeft or ActionType.CheckDownRight or 
-                ActionType.CheckUpLeft or ActionType.CheckUpRight or ActionType.ShiftUp or 
-                ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or 
+                case ActionType.CheckDown or ActionType.CheckUp or ActionType.CheckRight or
+                ActionType.CheckLeft or ActionType.CheckDownLeft or ActionType.CheckDownRight or
+                ActionType.CheckUpLeft or ActionType.CheckUpRight or ActionType.ShiftUp or
+                ActionType.ShiftLeft or ActionType.ShiftDown or ActionType.ShiftRight or
                 ActionType.ShiftForward:
                     if (Function.StartOffset != default)
                     {
@@ -518,18 +557,17 @@ namespace MinesServer.GameShit.Programmator
 
                 case ActionType.Last:
                     break;
+
                 case ActionType.Stop:
-                    Run();
-                    ((Player)Entity)?.ProgStatus();
+                    Stop();
                     break;
 
                 case ActionType.Start:
-                    //startpoint = (cFunction, current.current);
+                    StartPoint = (CurrentFunction, Function.Position);
                     break;
+
                 case ActionType.Restart:
-                    Run(); // Завершаем программу
-                    Run(); // Запускаем программу
-                    ((Player)Entity)?.ProgStatus();
+                    Restart();
                     break;
 
                 case ActionType.Flip:

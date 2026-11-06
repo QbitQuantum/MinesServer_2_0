@@ -244,15 +244,15 @@ namespace MinesServer.Server
 
         private void Chin(TYPacket f, ChinPacket chin) => Console.WriteLine(chin.message);
 
-        private void Pren(TYPacket f, PRENPacket pren) => _player?.Rename(pren.Id);
+        private void Pren(TYPacket f, PRENPacket pren) => _player?.RenameProgram(pren.Id);
 
         private void Prst(TYPacket f, pRSTPacket prst) => _player?.UpdateUIProgramm();
 
         private void PROG(TYPacket f, PROGPacket p) => _player?.StartedProg(p.prog);
 
-        private void Pope(TYPacket f, PopePacket p) => _player?.OpenGuiProgramm();
+        private void Pope(TYPacket f, PopePacket p) => _player?.OpenGuiProgram();
 
-        private void Pdel(TYPacket f, PDELPacket pdel) => DataBase.DeleteProg(pdel.Id);
+        private void Pdel(TYPacket f, PDELPacket pdel) => _player?.DeleteProgram(pdel.Id);
 
         private void Xhea(TYPacket f, XheaPacket heal) => _player?.Heal();
 

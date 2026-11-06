@@ -619,21 +619,11 @@ namespace MinesServer.GameShit.Entities
 
         #region Program Management
 
-        public void RunProgramm(Program? p = null)
+        private void RunProgramm(Program programm)
         {
             win = null;
             this.SendWindow();
-
-            if (p == null)
-                programsData.Run();
-            else
-                programsData.Run(p);
-        }
-
-        public void ProgrammatorUpdate()
-        {
-            if (programsData.ProgRunning)
-                programsData.Step();
+            programsData.Start(programm);
         }
 
         public void UpdateUIProgramm()
@@ -642,29 +632,32 @@ namespace MinesServer.GameShit.Entities
             if (p != null && !programsData.ProgRunning)
                 this.OpenProg(p);
             if (programsData.ProgRunning)
-                RunProgramm();
+                programsData.Stop();
             this.ProgStatus();
         }
 
         public void StartedProg((int id, string source) data)
         {
             Program? programm = DataBase.SaveAndGetProg(data);
-            if (programm != default)
-            {
-                RunProgramm(programm);
-                this.UpdateProg(programm);
-            }
+            if (programm == default) return;
+            RunProgramm(programm);
+            this.UpdateProg(programm);
             this.ProgStatus();
         }
 
-        public void OpenGuiProgramm()
+        public void OpenGuiProgram()
         {
-            StaticGUI.OpenGui(this);
+            ProgrammatorUI.OpenGui(this);
         }
 
-        public void Rename(int id)
+        public void RenameProgram(int id)
         {
-            StaticGUI.Rename(this, id);
+            ProgrammatorUI.Rename(this, id);
+        }
+
+        public void DeleteProgram(int id)
+        {
+            ProgrammatorUI.DeleteProgram(this, id);
         }
 
         #endregion

@@ -118,7 +118,7 @@ namespace MinesServer.GameShit.Buildings
             if (entity == null || selected == null)
                 return; // Нет выбранной программы
             DataBase.botspotplayer.Add(entity);
-            entity.programsData.Run(selected);
+            entity.programsData.Start(selected);
             ReopenWindow(p, TabPrograms);
         }
 

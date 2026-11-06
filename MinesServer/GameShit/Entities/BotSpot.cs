@@ -47,8 +47,7 @@ namespace MinesServer.GameShit.Entities
 
         public override void Death()
         {
-            if (programsData.ProgRunning)
-                programsData.Run();
+            programsData.Stop();
 
             if (crys.AllCry > 0 && owner is not null)
             {

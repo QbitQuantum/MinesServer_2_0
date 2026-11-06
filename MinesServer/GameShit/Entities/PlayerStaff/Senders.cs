@@ -82,8 +82,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public static void OpenProg(this Player p, Program? prog)
         {
-            if (prog == null) return;
-            p.connection?.SendU(new OpenProgrammatorPacket(prog.id, prog.name, prog.data));
+            if (p.connection == null) return;
+
+            var packet = prog == null ?
+                new OpenProgrammatorPacket(-1, "Программатор", "_") :
+                new OpenProgrammatorPacket(prog.id, prog.name, prog.data);
+
+            p.connection.SendU(packet);
         }
         public static void SendChat(this Player p)
         {
