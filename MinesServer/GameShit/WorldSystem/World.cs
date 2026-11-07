@@ -6,6 +6,7 @@ using MinesServer.GameShit.GChat;
 using MinesServer.GameShit.Generator;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.SysCraft;
+using MinesServer.GameShit.VulkSystem;
 using MinesServer.Network.Constraints;
 using MinesServer.Network.GUI;
 using MinesServer.Network.HubEvents;
@@ -208,6 +209,16 @@ namespace MinesServer.GameShit.WorldSystem
                 new Up(x, y - 4, 0).Build();
                 new Teleport(x + 7, y - 4, 0).Build();
                 new Resp(x - 8, y + 7, 0).Build();
+
+                var vulkanCreated = db.vulkans.FirstOrDefault(v => v.x == x && v.y == y + 7);
+                if (vulkanCreated == default)
+                {
+                    var random = new Random(1337);
+                    int vx = x;
+                    int vy = y + 7;
+                    int intensity = random.Next(1, 6);
+                    new Vulkan(vx, vy, intensity).Build();
+                }
             }
         }
 

@@ -260,7 +260,7 @@ namespace MinesServer.GameShit.Generator
             return (hash & 0xFFFFFF) / 16777216f;
         }
 
-        private static DepthSet[] BuildSets() => new[]
+        public static DepthSet[] BuildSets() => new[]
         {
             new DepthSet(
                 crystalsGig: new[] { CellType.Green, CellType.Blue },

@@ -1,6 +1,9 @@
 ﻿using System.Numerics;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Enums;
+using MinesServer.GameShit.GUI;
+using MinesServer.GameShit.GUI.Rich;
+using MinesServer.GameShit.VulkSystem;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.GUI;
 using MinesServer.Server;
@@ -234,6 +237,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         return true;
                     }
                 },
+
+                { (int)Item.VolcanoRadar, p => ShowVolcanoInfo(p) },
             };
         }
 
@@ -443,6 +448,76 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             player.SendDFToBots(7, targetX, targetY, player.id, 1);
             ProcessShotLine(startX, startY, targetX, targetY);
+            return true;
+        }
+
+        private static bool ShowVolcanoInfo(Player player)
+        {
+            using var db = new DataBase();
+            var vulkans = db.vulkans.ToList();
+
+            if (vulkans.Count == 0)
+            {
+                player.win = new Window()
+                {
+                    Title = "Радар вулканов",
+                    Tabs = [new Tab()
+                    {
+                        Action = "volcano_radar",
+                        Label = "Вулканы",
+                        InitialPage = new Page()
+                        {
+                            Buttons = [new MButton()],
+                            Text = "Вулканов не обнаружено"
+                        }
+                    }]
+                };
+                player.SendWindow();
+                return true;
+            }
+
+            var entries = new List<RichListEntry>();
+
+            foreach (var v in vulkans)
+            {
+                string state = v.state switch
+                {
+                    VulkanState.Sleeping => "<color=gray>СПИТ</color>",
+                    VulkanState.Warning => "<color=yellow>ПРЕДУПРЕЖДЕНИЕ</color>",
+                    _ => "?"
+                };
+
+                int dist = Math.Abs(player.x - v.x) + Math.Abs(player.y - v.y);
+                string timeInfo = v.state switch
+                {
+                    VulkanState.Sleeping => $"До пробуждения: {Math.Max(0, (int)((v.wakeTime - ServerTime.Now).TotalMinutes))} мин.",
+                    VulkanState.Warning => $"До взрыва: {Math.Max(0, (int)((v.explodeTime - ServerTime.Now).TotalMinutes))} мин.",
+                    _ => "?"
+                };
+
+                entries.Add(RichListEntry.Text(
+                    $"Вулкан [{v.x},{v.y}]",
+                    $"Дистанция: {dist} кл.<br/>Статус: {state}<br/>Интенсивность: {v.intensity}/5<br/>{timeInfo}"));
+            }
+
+            player.win = new Window()
+            {
+                Title = "Радар вулканов",
+                Tabs = [new Tab()
+                {
+                    Action = "volcano_radar",
+                    Label = "Вулканы",
+                    InitialPage = new Page()
+                    {
+                        Buttons = [new MButton()],
+                        RichList = new RichListConfig()
+                        {
+                            Entries = entries.ToArray()
+                        }
+                    }
+                }]
+            };
+            player.SendWindow();
             return true;
         }
 
