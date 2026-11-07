@@ -40,6 +40,15 @@ namespace MinesServer.GameShit.GUI
 
         public void Open(IPage page)
         {
+            // if (page.OnOpen is { } onOpen)
+            // {
+            //     var rebuilt = onOpen();
+            // if (rebuilt is not null)
+            // {
+            // History.Push(rebuilt);
+            // return;
+            //     }
+            // }
             History.Push(page);
         }
 
@@ -51,11 +60,14 @@ namespace MinesServer.GameShit.GUI
 
         public void Refresh()
         {
+            if (History.Count == 0) return;
+
             var current = History.Peek();
             if (current.Rebuild is { } rebuild)
-                SetInitialPage(rebuild());
-            else
-                ClearHistory();
+            {
+                History.Pop();
+                Open(rebuild());
+            }
         }
 
         public bool ProcessButton(string action)

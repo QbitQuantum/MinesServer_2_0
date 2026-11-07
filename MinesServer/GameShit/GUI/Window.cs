@@ -36,8 +36,6 @@ namespace MinesServer.GameShit.GUI
 
         public bool ProcessButton(string action)
         {
-
-
             if (string.IsNullOrEmpty(action)) return false;
 
             if (action is "exit" or "exit:0")
@@ -50,7 +48,8 @@ namespace MinesServer.GameShit.GUI
                 if (targetTab.IsHidden)
                     throw new InvalidPayloadException("Tried to open a hidden tab");
                 CurrentTab = targetTab;
-                CurrentTab.Refresh();
+                var fresh = CurrentTab.InitialPage.Rebuild?.Invoke() ?? CurrentTab.InitialPage;
+                CurrentTab.SetInitialPage(fresh);
                 return true;
             }
 

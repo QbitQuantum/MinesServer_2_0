@@ -59,31 +59,30 @@ namespace MinesServer.GameShit.Buildings
         };
 
         #endregion
-        
-        private IPage AdminPage => new Page()
+
+        private IPage AdminPage(Player p) => new Page()
         {
-            Title ="UP",
-            RichList = new RichListConfig() {
+            Title = "UP",
+            RichList = new RichListConfig()
+            {
                 Entries = [
-                    RichListEntry.Text("hp", $"Прочность здания {hp}/{maxhp}"), 
+                    RichListEntry.Text("hp", $"Прочность здания {hp}/{maxhp}"),
                     RichListEntry.Button("Доход со здания составляет " + moneyinside, new MButton("Собрать", "collect", _ =>
                     {
                         using var db = new DataBase();
-                        var player = DataBase.GetPlayer(ownerid);
-                        if (player == null) return;
-
-                        db.Attach(player);
                         db.Attach(this);
-                        player.money += moneyinside;
+                        p.money += moneyinside;
                         moneyinside = 0;
                         db.SaveChanges();
-                        player.SendMoney();
-                        player.win = GUIWin(player);
-                        player.SendWindow();
+                        p.SendMoney();
 
-                    }))]
+                        p.win?.CurrentTab.Refresh();
+                        p.SendWindow();
+                    }))
+                ]
             },
-            Buttons = []
+            Buttons = [],
+            Rebuild = () => AdminPage(p),
         };
         private static bool TryPurchaseSlot(Player p, int nextSlot)
         {
@@ -129,21 +128,26 @@ namespace MinesServer.GameShit.Buildings
                 {
                     if (TryPurchaseSlot(p, nextSlot))
                     {
-                        p.win = GUIWin(p);
+                        p.win?.CurrentTab.Refresh();
                         p.SendWindow();
                     }
                 }
             });
         }
-        private Tab TabSkillPage(Player p)
+
+        private UpPage BuildSkillPage(Player p)
         {
-            Action? admn = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null;
-            void onskill(int arg) { p.skillslist.InstallSlot(arg); p.win = GUIWin(p); p.SendWindow(); }
+            void onskill(int arg)
+            {
+                p.skillslist.InstallSlot(arg);
+                p.win?.CurrentTab.Refresh();
+                p.SendWindow();
+            }
 
             // Создаем базовый объект с общими свойствами
             var basePage = new UpPage
             {
-                OnAdmin = admn,
+                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage(p)); p.SendWindow(); } : null,
                 Skills = p.skillslist.GetSkills(),
                 SlotAmount = p.skillslist.slots,
                 OnSkill = onskill,
@@ -164,8 +168,8 @@ namespace MinesServer.GameShit.Buildings
                 if (conflictWith.HasValue)
                 {
                     description = $"НЕЛЬЗЯ УСТАНОВИТЬ ⚠️\n\n" +
-                                 $"Навык \"{skilltype.GetName()}\" конфликтует с навыком \"{conflictWith?.GetName()}\".\n" +
-                                 $"Для установки этого навыка необходимо сначала удалить конфликтующий навык.\n\n";
+                                  $"Навык \"{skilltype.GetName()}\" конфликтует с навыком \"{conflictWith?.GetName()}\".\n" +
+                                  $"Для установки этого навыка необходимо сначала удалить конфликтующий навык.\n\n";
                 }
                 else
                 {
@@ -183,7 +187,8 @@ namespace MinesServer.GameShit.Buildings
                         if (p.skillslist.InstallSkill(skilltype, p.skillslist.GetCurrentSlot()))
                         {
                             p.SendLvl();
-                            p.win = GUIWin(p);
+                            // Установили навык — данные изменились, возвращаемся к корню вкладки.
+                            p.win?.CurrentTab.Refresh();
                             p.SendWindow();
                         }
                     }) : null
@@ -251,8 +256,7 @@ namespace MinesServer.GameShit.Buildings
                                 p.MaxHealth = (int)skillfromslot.Effect;
                                 p.SendHealth();
                             }
-
-                            p.win = GUIWin(p);
+                            p.win?.CurrentTab.Refresh();
                             p.SendWindow();
                         }) :
                         null,
@@ -262,20 +266,25 @@ namespace MinesServer.GameShit.Buildings
                             if (p.skillslist.DeleteSkill())
                             {
                                 p.SendLvl();
-                                p.win = GUIWin(p);
+                                p.win?.CurrentTab.Refresh();
                                 p.SendWindow();
                             }
-                        } 
-                    : 
+                        }
+                    :
                     null,
                     SkillIcon = skillfromslot?.type
                 };
             }
+            return uppage with { Rebuild = () => BuildSkillPage(p) };
+        }
+
+        private Tab TabSkillPage(Player p)
+        {
             return new Tab()
             {
                 Action = "Upgrade",
                 Label = "Просмотр умений",
-                InitialPage = uppage
+                InitialPage = BuildSkillPage(p)
             };
         }
         private Card MainTitle(Player p, SkillType skilltype = SkillType.Unknown)
@@ -299,11 +308,10 @@ namespace MinesServer.GameShit.Buildings
 
         // Открывает отдельную страницу с подробной информацией о выбранном экспертном умении
         // и кнопкой покупки (или "Куплено"/"Назад").
-        private void UpdateSkillPage(Player p, SkillType currentDisplaySkill)
+        private Page BuildSkillDetailPage(Player p, SkillType currentDisplaySkill)
         {
             bool isPurchased = p.skillslist.IsExpertSkillPurchased(currentDisplaySkill);
             int price = currentDisplaySkill.GetBasePriceOPP();
-            long creds_player = p.creds;
 
             MButton actionButton;
 
@@ -326,7 +334,6 @@ namespace MinesServer.GameShit.Buildings
                     {
                         // Ничего не делаем — недостаточно OPP.
                         // Можно перерисовать, чтобы обновить значение (на случай изменения)
-                        UpdateSkillPage(p, currentDisplaySkill);
                     });
             }
             else
@@ -341,22 +348,32 @@ namespace MinesServer.GameShit.Buildings
                     db.SaveChanges();
 
                     // Перерисовываем страницу, чтобы отобразить "Куплено"
-                    UpdateSkillPage(p, currentDisplaySkill);
+                    var refreshed = BuildSkillDetailPage(p, currentDisplaySkill);
+                    p.win?.CurrentTab.Replace(refreshed);
+                    p.SendWindow();
                 });
             }
 
-            var detailPage = new Page
+            return new Page
             {
-                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null,
+                OnAdmin = p.id == ownerid
+                    ? () => { p.win?.CurrentTab.Open(AdminPage(p)); p.SendWindow(); }
+                : null,
                 Card = MainTitle(p, currentDisplaySkill),
-                Buttons = new[] { actionButton }
+                Buttons = new[] { actionButton },
             };
+        }
 
+        private void OpenSkillPage(Player p, SkillType currentDisplaySkill)
+        {
+            var detailPage = BuildSkillDetailPage(p, currentDisplaySkill);
             p.win?.CurrentTab.Open(detailPage);
             p.SendWindow();
         }
 
-        private Tab TabFlashing(Player p)
+        // Корневая страница вкладки экспертных умений. Rebuild — да, чтобы Refresh
+        // пересобирал её с актуальными ✓/цветами при внешних изменениях.
+        private Page TabFlashingPage(Player p)
         {
             var allSkills = SkillTypeExtensions.GetAllInfos();
             var rich = new List<RichListEntry> { };
@@ -383,27 +400,32 @@ namespace MinesServer.GameShit.Buildings
                 rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", skillType.ToString(), _ =>
                 {
                     // Открываем отдельную страницу с подробностями и кнопкой покупки
-                    UpdateSkillPage(p, skillType);
+                    OpenSkillPage(p, skillType);
                 })));
             }
 
-            var basePage = new Page
+            return new Page
             {
-                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage); p.SendWindow(); } : null,
+                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage(p)); p.SendWindow(); } : null,
                 Card = MainTitle(p),
                 RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
                 Buttons = [],
+                // Корневая страница вкладки — при Refresh пересобирается с актуальными данными
+                Rebuild = () => TabFlashingPage(p),
                 Style = new Style()
                 {
                     ScrollHeight = 350
                 }
             };
+        }
 
+        private Tab TabFlashing(Player p)
+        {
             return new Tab()
             {
                 Action = "Flashing",
                 Label = "Эксперт. умения",
-                InitialPage = basePage,
+                InitialPage = TabFlashingPage(p),
             };
         }
 
