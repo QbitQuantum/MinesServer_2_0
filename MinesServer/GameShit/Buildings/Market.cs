@@ -96,22 +96,23 @@ namespace MinesServer.GameShit.Buildings
                 Text = " ",
                 RichList = new RichListConfig()
                 {
-                    Entries = [
+                    Entries = 
+                    [
                         RichListEntry.Text("hp", $"hp {m.hp}"),
-                            RichListEntry.Button($"прибыль {m.moneyinside}$",
+                        RichListEntry.Button($"прибыль {m.moneyinside}$",
                             m.moneyinside == 0 ?
-                                new MButton() :
-                                new MButton("Получить", "getprofit", (args) =>
-                                {
-                                    using var db = new DataBase();
-                                    p.money += m.moneyinside;
-                                    m.moneyinside = 0;
-                                    p.SendMoney();
-                                    db.SaveChanges();
-                                    AdminPanel(p, m);
-                                    p.SendWindow();
-                                })),
-                        ]
+                            new MButton() :
+                            new MButton("Получить", "getprofit", (args) =>
+                            {
+                                using var db = new DataBase();
+                                p.money += m.moneyinside;
+                                m.moneyinside = 0;
+                                p.SendMoney();
+                                db.SaveChanges();
+                                AdminPanel(p, m);
+                                p.SendWindow();
+                            })),
+                    ]
                 },
                 Buttons = []
             });
@@ -125,7 +126,9 @@ namespace MinesServer.GameShit.Buildings
             var InitialPage = new Page()
             {
                 OnAdmin = adminaction,
-                CrystalConfig = new CrystalConfig(" ", "цена", [
+                Rebuild = () => SellPage(p, money),
+                CrystalConfig = new CrystalConfig(" ", "цена", 
+                [
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0)}$</color>", 0, 0, p.crys[CrystalType.Green], 0),
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1)}$</color>", 0, 0, p.crys[CrystalType.Blue], 0),
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2)}$</color>", 0, 0, p.crys[CrystalType.Red], 0),
@@ -134,8 +137,11 @@ namespace MinesServer.GameShit.Buildings
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
                 ]),
                 Text = "Продажа кристаллов" + (money == -1 ? "" : $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
-                Buttons = [new MButton("Продать всё", $"sellallcrys", (args) => SellAllCrys(p)),
-                        new MButton("Продать", $"sellcrys:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))]
+                Buttons = 
+                [
+                    new MButton("Продать всё", $"sellallcrys", (args) => SellAllCrys(p)),
+                    new MButton("Продать", $"sellcrys:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))
+                ]
             };
             return InitialPage;
         }
@@ -156,27 +162,23 @@ namespace MinesServer.GameShit.Buildings
 
             long money = 0;
 
-            // 1. Изменяем данные в памяти
             for (int i = 0; i < 6; i++)
             {
                 var value = Sliders[i];
-                if (value > 0)
-                {
-                    if (p.crys.RemoveCrys(CrystalTypeExt.CrysType[i], value))
-                        money += value * World.GetCrysCost(i);
-                }
+                if (value <= 0) continue;
+
+                if (p.crys.RemoveCrys(CrystalTypeExt.CrysType[i], value))
+                    money += value * World.GetCrysCost(i);
             }
 
             moneyinside += (long)(money * 0.1);
             p.money += money;
 
             using var db = new DataBase();
-
-            var playerEntry = db.players.Find(p.id);
-            if (playerEntry != null)
-                playerEntry.money = p.money;
-            p.crys.SaveToDatabase();
+            db.players.Attach(p);
             db.SaveChanges();
+
+            p.crys.SaveToDatabase();
 
             p.SendMoney();
             var page = SellPage(p, money);
@@ -191,7 +193,9 @@ namespace MinesServer.GameShit.Buildings
             var InitialPage = new Page()
             {
                 OnAdmin = adminaction,
-                CrystalConfig = new CrystalConfig(" ", "цена", [
+                Rebuild = () => BuyPage(p),
+                CrystalConfig = new CrystalConfig(" ", "цена", 
+                [
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(0) * 10)), 0),
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(1) * 10)), 0),
                     new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(2) * 10)), 0),
@@ -210,8 +214,6 @@ namespace MinesServer.GameShit.Buildings
             if (Sliders == null) return;
 
             long money = 0;
-            using var db = new DataBase();
-            db.players.Attach(p);
             for (int i = 0; i < 6; i++)
             {
                 if (Sliders[i] <= 0 || p.money - (Sliders[i] * World.GetCrysCost(i) * 10) < 0)
@@ -221,8 +223,13 @@ namespace MinesServer.GameShit.Buildings
             }
             p.money += money;
             p.crys.SaveToDatabase();
+
+            using var db = new DataBase();
+            db.players.Attach(p);
             db.SaveChanges();
+
             p.SendMoney();
+
             var page = BuyPage(p, -money);
             p.win?.CurrentTab.SetInitialPage(page);
             p.SendWindow();
@@ -240,7 +247,6 @@ namespace MinesServer.GameShit.Buildings
 
         private Tab TabBuyCry(Player p)
         {
-            Action? adminaction = p.id != ownerid ? null : () => AdminPanel(p, this);
             return new Tab()
             {
                 Label = "Покупка",
@@ -258,6 +264,7 @@ namespace MinesServer.GameShit.Buildings
                 Action = "buyproducts",
                 InitialPage = new Page()
                 {
+                    OnAdmin = adminaction,
                     OnInventory = (int type) => { MarketSystem.OpenItemAuc(p, type); },
                     Inventory = MarketSystem.Items(),
                     Buttons = [],
@@ -291,7 +298,13 @@ namespace MinesServer.GameShit.Buildings
             {
                 ShowTabs = true,
                 Title = "МАРКЕТ",
-                Tabs = [TabCellCry(p), TabBuyCry(p), TabProducts(p), TabAuction(p)]
+                Tabs = 
+                [
+                    TabCellCry(p), 
+                    TabBuyCry(p), 
+                    TabProducts(p), 
+                    TabAuction(p)
+                ]
             };
         }
     }

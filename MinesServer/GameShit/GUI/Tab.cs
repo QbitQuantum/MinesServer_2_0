@@ -49,6 +49,15 @@ namespace MinesServer.GameShit.GUI
             Open(page);
         }
 
+        public void Refresh()
+        {
+            var current = History.Peek();
+            if (current.Rebuild is { } rebuild)
+                SetInitialPage(rebuild());
+            else
+                ClearHistory();
+        }
+
         public bool ProcessButton(string action)
         {
             if (action[0] == '<')

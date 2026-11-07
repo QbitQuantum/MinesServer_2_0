@@ -19,6 +19,8 @@ namespace MinesServer.GameShit.GUI.UP
         SkillType? SkillIcon
         ) : IPage
     {
+        public Func<IPage>? Rebuild { get; init; }
+
         public bool ProcessButton(string action)
         {
             if (Button?.ProcessButton(action) == true)

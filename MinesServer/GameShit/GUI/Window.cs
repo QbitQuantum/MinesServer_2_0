@@ -50,7 +50,7 @@ namespace MinesServer.GameShit.GUI
                 if (targetTab.IsHidden)
                     throw new InvalidPayloadException("Tried to open a hidden tab");
                 CurrentTab = targetTab;
-                CurrentTab.ClearHistory();
+                CurrentTab.Refresh();
                 return true;
             }
 

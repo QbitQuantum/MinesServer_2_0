@@ -27,7 +27,7 @@ namespace MinesServer.GameShit.GUI
         public Style? Style { get; init; }
         public Card? Card { get; init; }
         public Action<int>? OnInventory { get; init; }
-
+        public Func<IPage>? Rebuild { get; init; }
         public bool ProcessButton(string action)
         {
             foreach (var btn in Buttons)
