@@ -380,7 +380,7 @@ namespace MinesServer.GameShit.Buildings
                     skillName = $"✓ {skillName}";
                 }
 
-                rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", info.Name, _ =>
+                rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", "moredetails", _ =>
                 {
                     // Открываем отдельную страницу с подробностями и кнопкой покупки
                     UpdateSkillPage(p, skillType);
