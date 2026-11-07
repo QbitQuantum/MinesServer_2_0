@@ -76,11 +76,11 @@ namespace MinesServer.GameShit.Buildings
                 return;
             for (int i = 0; i < 6; i++)
             {
-                var count = p.crys.cry[i] + entity.crys.cry[i];
+                var count = p.crys[i] + entity.crys[i];
                 if (count - sliders[i] >= 0 && sliders[i] >= 0)
                 {
-                    p.crys.cry[i] = count - sliders[i];
-                    entity.crys.cry[i] = sliders[i];
+                    p.crys[i] = count - sliders[i];
+                    entity.crys[i] = sliders[i];
                 }
             }
             entity.crys.NotifyChanged();
@@ -211,8 +211,8 @@ namespace MinesServer.GameShit.Buildings
 
         private Page CrystalsPage(Player p)
         {
-            var botCrys = entity?.crys?.cry ?? new long[6];
-            var totalCrys = Enumerable.Range(0, 6).Select(i => p.crys.cry[i] + (i < botCrys.Length ? botCrys[i] : 0)).ToArray();
+            var botCrys = entity?.crys?.crystall ?? new long[6];
+            var totalCrys = Enumerable.Range(0, 6).Select(i => p.crys[i] + (i < botCrys.Length ? botCrys[i] : 0)).ToArray();
             var crysLines = totalCrys.Select((_, id) => new CrysLine("", 0, 0, totalCrys[id], id < botCrys.Length ? botCrys[id] : 0)).ToArray();
 
             return new Page
@@ -224,7 +224,7 @@ namespace MinesServer.GameShit.Buildings
                 RichList = new RichListConfig(
                     [
                         RichListEntry.Text("total_title", "<size=18><color=#b7c6ff>Итого</color></size>"),
-                        RichListEntry.Text("player_crys", $"У игрока: <color=#d5ffe8>{p.crys.cry.Sum()}</color>"),
+                        RichListEntry.Text("player_crys", $"У игрока: <color=#d5ffe8>{p.crys.Sum()}</color>"),
                         RichListEntry.Text("spot_crys", $"В споте: <color=#ffe6a6>{botCrys.Sum()}</color>"),
                         RichListEntry.Text("sum_crys", $"Сумма: <color=white>{totalCrys.Sum()}</color>"),
                         RichListEntry.Text("spacer", " "),

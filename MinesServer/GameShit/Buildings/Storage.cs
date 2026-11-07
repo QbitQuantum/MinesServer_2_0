@@ -27,47 +27,6 @@ namespace MinesServer.GameShit.Buildings
         [NotMapped] public override int off { get; set; }
 
         private readonly long[] _crysinside = new long[6];
-        public long this[int index]
-        {
-            get => _crysinside[index];
-            set => _crysinside[index] = value;
-        }
-
-        public long ze
-        {
-            get { return this[0]; }
-            set { this[0] = value; }
-        }
-
-        public long cr
-        {
-            get { return this[1]; }
-            set { this[1] = value; }
-        }
-
-        public long si
-        {
-            get { return this[2]; }
-            set { this[2] = value; }
-        }
-
-        public long be
-        {
-            get { return this[3]; }
-            set { this[3] = value; }
-        }
-
-        public long fi
-        {
-            get { return this[4]; }
-            set { this[4] = value; }
-        }
-
-        public long go
-        {
-            get { return this[5]; }
-            set { this[5] = value; }
-        }
 
         #endregion
 
@@ -99,7 +58,7 @@ namespace MinesServer.GameShit.Buildings
             World.RemovePack(this);
             if (_crysinside.Sum() > 0)
             {
-                Box.BuildBox(x, y, _crysinside, null);
+                Box.BuildBox(x, y, _crysinside);
             }
             using var db = new DataBase();
             db.storages.Remove(this);
@@ -110,39 +69,42 @@ namespace MinesServer.GameShit.Buildings
         #endregion
         private void StockTransfer(long[]? sliders, Player p)
         {
-            if (sliders == null)
-                return;
+            if (sliders == null) return;
+
             for (int i = 0; i < 6; i++)
             {
-                var count = p.crys.cry[i] + this[i];
-                if (count - sliders[i] >= 0 && sliders[i] >= 0)
-                {
-                    p.crys.cry[i] = count - sliders[i];
-                    this[i] = sliders[i];
-                }
+                var count = p.crys.crystall[i] + _crysinside[i];
+
+                if (count - sliders[i] < 0 || sliders[i] < 0)
+                    continue;
+
+                p.crys.crystall[i] = count - sliders[i];
+
+                _crysinside[i] = sliders[i];
             }
             p.win = GUIWin(p);
         }
-        private Page MainPage(Player p) => new Page(){
-                Title = "Склад",
-                CrystalConfig = new CrystalConfig(
-                    " ",
-                    " ",
-                    _crysinside.Select((cry, id) => new CrysLine("", 0, 0, p.crys.cry[id] + cry, (int)(cry))).ToArray()
-                    ),
-                Buttons = [
-                    new MButton("transfer", $"transfer:{ActionMacros.CrystalSliders}", 
-                    (args) =>
-                    StockTransfer(args.CrystalSliders, p))]
-            };
+
+        private Page MainPage(Player p) => new Page()
+        {
+            Title = "Склад",
+            CrystalConfig = new CrystalConfig
+            (
+                " ", " ", _crysinside.Select((cry, id) =>
+                new CrysLine("", 0, 0, p.crys.crystall[id] + cry, cry)).ToArray()
+            ),
+            Buttons = [
+                new MButton("transfer", $"transfer:{ActionMacros.CrystalSliders}", (args) => StockTransfer(args.CrystalSliders, p))
+                ]
+        };
         
         public override Window? GUIWin(Player p) => new Window(){
             Tabs = [new Tab()
-                {
-                    Action = "хй",
-                    Label = "хуху",
-                    InitialPage = MainPage(p)
-                }]
+            {
+                Action = "OpenStorage",
+                Label = "Склад",
+                InitialPage = MainPage(p)
+            }]
         };
     }
 }

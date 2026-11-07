@@ -51,8 +51,7 @@ namespace MinesServer.GameShit.Entities
 
             if (crys.AllCry > 0 && owner is not null)
             {
-                var (bx, by) = World.FindEmptyForBox(x, y);
-                Box.BuildBox(bx, by, crys.cry, owner, true);
+                Box.BuildBox(x, y, crys.crystall, owner, true);
             }
             ResetHp();
 

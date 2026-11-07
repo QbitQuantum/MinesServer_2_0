@@ -128,7 +128,7 @@ namespace MinesServer.GameShit.Buildings
             if (charge > 0)
             {
                 var temp = new long[] { 0, 0, 0, (long)charge, 0, 0 };
-                Box.BuildBox(x, y, temp,null);
+                Box.BuildBox(x, y, temp);
             }
             using var db = new DataBase();
             db.teleports.Remove(this);

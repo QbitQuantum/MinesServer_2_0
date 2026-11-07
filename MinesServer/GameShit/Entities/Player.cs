@@ -186,7 +186,7 @@ namespace MinesServer.GameShit.Entities
 
         private void SubscribeToEvents()
         {
-            if (crys.shouldsubscribe)
+            if (crys.ShouldSubscribe)
                 crys.Changed += this.SendCrys;
         }
 
@@ -526,14 +526,14 @@ namespace MinesServer.GameShit.Entities
             this.SendBeep();
         }
 
-        public void BBox(long[]? c)
+        public void BBox(long[]? crystalls)
         {
             var (x, y) = GetDirCord();
 
-            if (!World.ValidCoord(x, y) || c == null)
+            if (!World.ValidCoord(x, y) || crystalls == null)
                 return;
 
-            Box.BuildBox(x, y, c, this);
+            Box.BuildBox(x, y, crystalls, this);
             connection?.CloseWindow();
         }
 
@@ -595,8 +595,7 @@ namespace MinesServer.GameShit.Entities
         {
             if (crys.AllCry > 0)
             {
-                var (boxX, boxY) = World.FindEmptyForBox(x, y);
-                Box.BuildBox(boxX, boxY, crys.cry, this, true);
+                Box.BuildBox(x, y, crys.crystall, this, true);
             }
 
             ResetHp();

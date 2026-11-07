@@ -10,50 +10,55 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Basket
     {
-        public int id { get; set; }
-        public string? serialazed { get; set; }
-
-        // TODO: Сделать частью БД
-        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
+        private Basket() { }
 
         public Basket(bool n)
         {
-            _cry = new long[6];
-            serialazed = JsonConvert.SerializeObject(_cry);
+            Serialazed = JsonConvert.SerializeObject(_cry);
         }
 
-        public event Action Changed;
-        public bool shouldsubscribe => Changed is null;
+        // TODO: Сделать частью БД
+        [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
+        public int id { get; set; }
+        public string Serialazed { get; set; } = "[]";
+        public long AllCry => CrystalTypeExt.CrysType.Sum(t => this[t]);
+        public bool ShouldSubscribe => Changed is null;
 
-        private Basket() { }
+        public event Action? Changed;
+        public int capacity = 1;
 
-        public long this[CrystalType type]
-        {
-            get => cry[(int)type];
-            set => cry[(int)type] = value;
-        }
+        private long[] _cry = new long[6];
 
-        private long[]? _cry = null;
-
-        [NotMapped]
-        public long[] cry
+        [NotMapped] public long[] crystall
         {
             get
             {
-                _cry ??= JsonConvert.DeserializeObject<long[]>(serialazed ?? "[]") ?? new long[6];
+                _cry ??= JsonConvert.DeserializeObject<long[]>(Serialazed) ?? new long[6];
                 return _cry;
             }
         }
 
+        public long this[CrystalType type]
+        {
+            get => this[(int)type];
+            set => this[(int)type] = value;
+        }
+
+        public long this[int type]
+        {
+            get => crystall[type];
+            set => crystall[type] = value;
+        }
+
+        public long Sum() => crystall.Sum();
+        public void NotifyChanged() => Changed?.Invoke();
+
         public void SaveToDatabase()
         {
-            if (_cry != null)
-            {
-                serialazed = JsonConvert.SerializeObject(_cry);
-                using var db = new DataBase();
-                db.baskets.Update(this);
-                db.SaveChanges();
-            }
+            Serialazed = JsonConvert.SerializeObject(_cry);
+            using var db = new DataBase();
+            db.baskets.Update(this);
+            db.SaveChanges();
         }
 
         public void AddCrys(CrystalType type, long val)
@@ -61,15 +66,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this[type] += val;
             if (this[type] < 0)
                 this[type] = long.MaxValue;
-            Changed?.Invoke();
-        }
-
-        public void BoxCrys(IReadOnlyDictionary<CrystalType, long> crys)
-        {
-            foreach (var kvp in crys)
-            {
-                this[kvp.Key] += kvp.Value;
-            }
             Changed?.Invoke();
         }
 
@@ -87,32 +83,24 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             Changed?.Invoke();
         }
 
-        public bool RemoveCrys(CrystalType type, long val)
+        public bool RemoveCrys(int indexCrystallType, long value)
         {
-            if (val < 0) return false;
+            if (indexCrystallType >= 6 || indexCrystallType < 0 || value < 0) return false;
+            CrystalType type = CrystalTypeExt.CrysType[indexCrystallType];
+            return RemoveCrys(type, value);
+        }
 
-            if (this[type] >= val)
+        public bool RemoveCrys(CrystalType type, long value)
+        {
+            if (type == CrystalType.Unknown || value < 0) return false;
+
+            if (this[type] >= value)
             {
-                this[type] -= val;
-                Changed?.Invoke();
+                this[type] -= value;
+                NotifyChanged();
                 return true;
             }
             return false;
-        }
-
-        public long GetCrys(CrystalType type) => this[type];
-
-        public void SetCrys(CrystalType type, long value)
-        {
-            this[type] = value;
-            Changed?.Invoke();
-        }
-
-        public void NotifyChanged() => Changed?.Invoke();
-
-        private int Buildcap()
-        {
-            return 1;
         }
 
         public Window OpenBoxGui(Player p)
@@ -151,13 +139,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             this[CrystalType.Violet],
             this[CrystalType.White],
             this[CrystalType.Cyan],
-            Buildcap()
+            capacity
         );
-
-        public int cap = 0;
-
-        public long AllCry => CrystalTypeExt.CrysType.Sum(t => this[t]);
-
-        public string GetCry => string.Join(":", CrystalTypeExt.CrysType.Select(t => this[t])) + ":" + cap;
     }
 }

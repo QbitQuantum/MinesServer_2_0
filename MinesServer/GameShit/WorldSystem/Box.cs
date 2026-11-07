@@ -7,9 +7,13 @@ namespace MinesServer.GameShit.WorldSystem
 {
     public class Box : Entity
     {
-        [NotMapped] private readonly long[] bxcrys = new long[6];
-
         private Box() { }
+
+        public long AllCrys => _crysinside.Sum();
+
+        public long[] BoxCrystall => _crysinside;
+
+        [NotMapped] private readonly long[] _crysinside = new long[6];
 
         public static Box? GetBox(int x, int y)
         {
@@ -18,82 +22,57 @@ namespace MinesServer.GameShit.WorldSystem
             return DataBase.GetBox(x, y);
         }
 
-        public static void BuildBox(int x, int y, long[] cry, Player? p, bool force = false)
+        /// <summary>
+        /// Установка бокса на месте разрушения пака
+        /// </summary>
+        public static void BuildBox(int x, int y, long[] crystalls)
         {
-            var cell = World.GetCell(x, y);
-            if (!(World.GetProp(cell).can_place_over && World.IsEmpty(x, y)) && !force)
+            BuildBox(x, y, crystalls, null, false);
+        }
+
+        public static void BuildBox(int x, int y, long[] crystalls, Player? p, bool force = false)
+        {
+            var (boxX, boxY) = force ? World.FindEmptyForBox(x, y) : (x, y);
+
+            var cell = World.GetCell(boxX, boxY);
+
+            if (!(World.GetProp(cell).can_place_over && 
+                World.IsEmpty(boxX, boxY)) && !force)
             {
                 return;
             }
+
             var box = new Box();
+
             for (int i = 0; i < 6; i++)
             {
-                long remcry = cry[i];
+                long count_cry = crystalls[i];
+
                 if (p == null)
                 {
-                    box.bxcrys[i] = remcry;
+                    box.BoxCrystall[i] = count_cry;
                 }
-                else if (p.crys.RemoveCrys(CrystalTypeExt.CrysType[i], remcry))
+                else
                 {
-                    box.bxcrys[i] = remcry;
+                    if (p.crys.RemoveCrys(i, count_cry))
+                    {
+                        box.BoxCrystall[i] = count_cry;
+                    }
                 }
             }
-            if (box.bxcrys.Sum() <= 0)
-            {
-                return;
-            }
-            box.y = y; box.x = x;
+
+            if (box.BoxCrystall.Sum() <= 0) return;
+
+            box.x = boxX;
+            box.y = boxY; 
+
             using (var db = new DataBase())
             {
                 db.boxes.Add(box);
                 db.SaveChanges();
             }
-            World.SetCell(x, y, 90);
-        }
 
-        public long AllCrys => bxcrys.Sum();
-
-        public long[] BoxCrys => bxcrys;
-
-        public long this[CrystalType crystal]
-        {
-            get => bxcrys[(int)crystal];
-            set => bxcrys[(int)crystal] = value;
-        }
-        public long ze
-        {
-            get { return bxcrys[0]; }
-            set { bxcrys[0] = value; }
-        }
-
-        public long cr
-        {
-            get { return bxcrys[1]; }
-            set { bxcrys[1] = value; }
-        }
-
-        public long si
-        {
-            get { return bxcrys[2]; }
-            set { bxcrys[2] = value; }
-        }
-
-        public long be
-        {
-            get { return bxcrys[3]; }
-            set { bxcrys[3] = value; }
-        }
-
-        public long fi
-        {
-            get { return bxcrys[4]; }
-            set { bxcrys[4] = value; }
-        }
-
-        public long go
-        {
-            get { return bxcrys[5]; }
-            set { bxcrys[5] = value; }
+            World.SetCell(boxX, boxY, 90);
         }
     }
 }

@@ -83,32 +83,38 @@ namespace MinesServer.GameShit.Buildings
             TryToReturnInventory(p);
         }
         #endregion
+
         public void Fill(Player p, long val)
         {
-            if (charge == maxcharge)
-            {
-                return;
-            }
-            using var db = new DataBase();
-            db.Attach(this);
+            if (charge == maxcharge) return;
+
             if (p.crys[CrystalType.Cyan] < val)
             {
                 val = p.crys[CrystalType.Cyan];
             }
+
             if (p.crys.RemoveCrys(CrystalType.Cyan, val))
             {
                 charge += (int)val;
             }
+
+            using var db = new DataBase();
+            db.Attach(this);
             db.SaveChanges();
+
             p.win = GUIWin(p);
             p.SendWindow();
         }
+
         public override Window? GUIWin(Player p)
         {
-            MButton[] fillbuttons = [p.crys[CrystalType.Cyan] >= 100 ? new MButton("+100", "fill:100", (args) => Fill(p, 100)) : new MButton("+100", "fill:100"),
+            MButton[] fillbuttons = 
+            [
+                p.crys[CrystalType.Cyan] >= 100 ? new MButton("+100", "fill:100", (args) => Fill(p, 100)) : new MButton("+100", "fill:100"),
                 p.crys[CrystalType.Cyan] >= 1000 ? new MButton("+1000", "fill:1000", (args) => Fill(p, 1000)) : new MButton("+1000", "fill:1000"),
                 p.crys[CrystalType.Cyan] >= 0 ? new MButton("max", "fill:max", (args) => Fill(p, (long)(maxcharge - charge))) : new MButton("max", "fill:max")
-               ];
+            ];
+
             return new Window()
             {
                 Tabs = [new Tab()

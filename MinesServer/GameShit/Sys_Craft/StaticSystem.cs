@@ -186,7 +186,7 @@ namespace MinesServer.GameShit.Sys_Craft
         }
 
         private static bool MeetReqs(Player p, Recipie r, int num) =>
-            (r.costcrys is null || !r.costcrys.Select(i => p.crys.cry[i.id] >= (i.num * num)).Contains(false)) &&
+            (r.costcrys is null || !r.costcrys.Select(i => p.crys.crystall[i.id] >= (i.num * num)).Contains(false)) &&
             (r.costres is null || !r.costres.Select(i => p.inventory[i.id] >= (i.num * num)).Contains(false));
 
         private static void DeleteReqs(Player p, Recipie r, int num)
@@ -195,7 +195,7 @@ namespace MinesServer.GameShit.Sys_Craft
             {
                 foreach (var i in r.costcrys)
                 {
-                    p.crys.RemoveCrys(CrystalTypeExt.CrysType[i.id], i.num * num);
+                    p.crys.RemoveCrys(i.id, i.num * num);
                 }
             }
 
