@@ -2,11 +2,13 @@
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.WorldSystem;
+
 namespace MinesServer.GameShit.Buildings
 {
     public abstract class Pack : Entity
     {
-        public Pack() {
+        public Pack()
+        {
         }
         public Pack(int x, int y, int ownerid)
         {
@@ -42,14 +44,56 @@ namespace MinesServer.GameShit.Buildings
         public abstract Window? GUIWin(Player p);
         protected abstract void ClearBuilding();
         public abstract void Destroy(Player p);
-        
-        public virtual void Update()
+
+        // ---- Кэш последнего отправленного состояния ----
+        private char _lastSentType;
+        private int _lastSentX = int.MinValue;
+        private int _lastSentY = int.MinValue;
+        private int _lastSentCid = -1;
+        private int _lastSentOff = -1;
+        private bool _hasSent;
+
+        /// <summary>
+        /// Отправляет пакет клиенту только если состояние пака изменилось
+        /// (type / x / y / cid / off). Защищает от пересоздания объекта на клиенте каждый тик.
+        /// </summary>
+        protected void SendPackIfChanged()
         {
+            if (_hasSent
+                && _lastSentType == (char)type
+                && _lastSentX == x
+                && _lastSentY == y
+                && _lastSentCid == cid
+                && _lastSentOff == off)
+                return;
+
+            RememberSentState();
             World.UpdatePack(this);
         }
+
+        /// <summary>
+        /// Запоминает текущее состояние как «уже отправленное».
+        /// Вызывается из SendPackIfChanged и Build (после AddPack, который сам шлёт пакет).
+        /// </summary>
+        private void RememberSentState()
+        {
+            _hasSent = true;
+            _lastSentType = (char)type;
+            _lastSentX = x;
+            _lastSentY = y;
+            _lastSentCid = cid;
+            _lastSentOff = off;
+        }
+
+        public virtual void Update()
+        {
+            SendPackIfChanged();
+        }
+
         public virtual void Build()
         {
             World.AddPack(this);
+            RememberSentState();
         }
     }
 }

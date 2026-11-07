@@ -439,7 +439,11 @@ namespace MinesServer.GameShit.WorldSystem
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetChunkId(int x, int y) => x + y * ChunksW;
+        private static int GetChunkId(int x, int y)
+        {
+            var (cx, cy) = GetChunkPosByCoords(x, y);
+            return cx + cy * ChunksW;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetPackKey(int x, int y) => x + y * ChunkWidth;
