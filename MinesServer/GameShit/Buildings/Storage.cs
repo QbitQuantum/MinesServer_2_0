@@ -26,7 +26,7 @@ namespace MinesServer.GameShit.Buildings
         [NotMapped] public override int cid { get; set; }
         [NotMapped] public override int off { get; set; }
 
-        private long[] _crysinside = new long[6];
+        private readonly long[] _crysinside = new long[6];
         public long this[int index]
         {
             get => _crysinside[index];
@@ -100,7 +100,6 @@ namespace MinesServer.GameShit.Buildings
             if (_crysinside.Sum() > 0)
             {
                 Box.BuildBox(x, y, _crysinside, null);
-                _crysinside = new long[6];
             }
             using var db = new DataBase();
             db.storages.Remove(this);
