@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
@@ -310,6 +311,24 @@ namespace MinesServer.Server
             {
                 Console.WriteLine("WriteError caused error " + $"{ex}");
             }
+        }
+
+        /// <summary>
+        /// Помечает только указанные поля как изменённые и сохраняет.
+        /// </summary>
+        public void Save<T>(
+            T entity,
+            params Expression<Func<T, object?>>[] fields)
+            where T : class
+        {
+            var entry = Entry(entity);
+            if (entry.State == EntityState.Detached)
+                Attach(entity);
+
+            foreach (var field in fields)
+                entry.Property(field).IsModified = true;
+
+            SaveChanges();
         }
 
         #region Clan saves

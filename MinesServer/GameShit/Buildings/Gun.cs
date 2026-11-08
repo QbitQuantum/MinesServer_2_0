@@ -99,8 +99,8 @@ namespace MinesServer.GameShit.Buildings
             }
 
             using var db = new DataBase();
-            db.Attach(this);
-            db.SaveChanges();
+            db.Save(this, t => t.charge);
+            p.crys.SaveToDatabase();
 
             p.win = GUIWin(p);
             p.SendWindow();
@@ -177,6 +177,9 @@ namespace MinesServer.GameShit.Buildings
 
                     charge = (int)MathF.Max(0, charge - basecrys);
                 }
+
+                using var db = new DataBase();
+                db.Save(this, t => t.charge);
 
                 lastAttackTime = ServerTime.Now;
             }

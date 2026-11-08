@@ -107,12 +107,16 @@ namespace MinesServer.GameShit.Buildings
                             new MButton() :
                             new MButton("Получить", "getprofit", (args) =>
                             {
-                                using var db = new DataBase();
                                 p.money += m.moneyinside;
                                 m.moneyinside = 0;
-                                p.SendMoney();
-                                db.SaveChanges();
+
+                                using var db = new DataBase();
+                                db.Save(p, p => p.money);
+                                db.Save(m, t => t.moneyinside);
+
                                 AdminPanel(p, m);
+
+                                p.SendMoney();
                                 p.SendWindow();
                             })),
                     ]
@@ -178,9 +182,8 @@ namespace MinesServer.GameShit.Buildings
             p.money += money;
 
             using var db = new DataBase();
-            db.players.Attach(p);
-            db.SaveChanges();
-
+            db.Save(p, p => p.money);
+            db.Save(this, t => t.moneyinside);
             p.crys.SaveToDatabase();
 
             p.SendMoney();
@@ -226,9 +229,12 @@ namespace MinesServer.GameShit.Buildings
                 p.crys.AddCrys(CrystalTypeExt.CrysType[i], Sliders[i]);
             }
             p.money += money;
-            p.crys.SaveToDatabase();
 
             using var db = new DataBase();
+            db.Save(p, p => p.money);
+            db.Save(this, t => t.moneyinside);
+            p.crys.SaveToDatabase();
+
             db.players.Attach(p);
             db.SaveChanges();
 

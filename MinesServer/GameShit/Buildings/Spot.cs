@@ -83,7 +83,10 @@ namespace MinesServer.GameShit.Buildings
                     entity.crys[i] = sliders[i];
                 }
             }
-            entity.crys.NotifyChanged();
+
+            entity.crys.SaveToDatabase();
+            p.crys.SaveToDatabase();
+
             p.SendCrys();
             ReopenWindow(p, TabCrystals);
         }

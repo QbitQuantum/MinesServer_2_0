@@ -125,13 +125,10 @@ namespace MinesServer.GameShit.Buildings
             if (ExistMoney && ExistCharge)
             {
                 using var db = new DataBase();
-                db.Attach(this);
-                p.money -= cost;
-                moneyinside += cost;
-                charge--;
-                p.SendMoney();
+                db.Save(p, p => p.money);
+                db.Save(this, t => t.moneyinside, t => t.charge);
+                p.crys.SaveToDatabase();
                 base.Update();
-                db.SaveChanges();
             }
         }
 
@@ -148,35 +145,34 @@ namespace MinesServer.GameShit.Buildings
             {
                 num = p.crys[CrystalType.Blue];
             }
-            db.Attach(this);
             if (p.crys.RemoveCrys(CrystalType.Blue, num))
             {
                 charge += (int)num;
             }
+
+            p.crys.SaveToDatabase();
+            db.Save(this, t => t.charge);
+
             p.win?.CurrentTab.Replace(AdmnPage(p));
             p.SendWindow();
-            db.SaveChanges();
         }
 
         public void AdminSaveChanges(Player p, Dictionary<string, string> d)
         {
             cid = 0;
-            if (bool.TryParse(d["clan"], out var clan))
+            if (bool.TryParse(d["clan"], out var clan) && clan)
             {
-                if (clan)
-                {
-                    var Player = DataBase.GetPlayer(ownerid);
-                    if (Player != null) cid = Player.cid;
-                }                
+                var owner = DataBase.GetPlayer(ownerid);
+                if (owner != null) cid = owner.cid;
             }
             if (int.TryParse(d["cost"], out var costs) && costs >= 0 && costs <= 5000)
-            {
                 cost = costs;
-            }
             if (int.TryParse(d["clanzone"], out var clanz))
-            {
                 clanzone = clanz;
-            }
+
+            using var db = new DataBase();
+            db.Save(this, t => t.cid, t => t.cost, t => t.clanzone);
+
             p.win?.CurrentTab.Replace(AdmnPage(p));
         }
 
@@ -199,11 +195,16 @@ namespace MinesServer.GameShit.Buildings
                         RichListEntry.Fill("заряд", (int)charge, (int)maxcharge, CrystalType.Blue, fillbuttons[0], fillbuttons[1], fillbuttons[2]),
                         RichListEntry.Text("hp", "hp"),
                         RichListEntry.UInt32("cost", "cost", (uint)cost),
-                        RichListEntry.Button($"прибыль {moneyinside}$", moneyinside == 0 ? default : new MButton("Получить", "getprofit", (args) => { 
+                        RichListEntry.Button($"прибыль {moneyinside}$", moneyinside == 0 ? default : new MButton("Получить", "getprofit", (args) => {
+
+                            p.money += moneyinside;
+                            moneyinside = 0;
+
                             using var db = new DataBase(); 
-                            p.money += moneyinside; moneyinside = 0; 
-                            p.SendMoney(); 
-                            db.SaveChanges(); 
+                            db.Save(p, p => p.money);
+                            db.Save(this, t => t.moneyinside);
+
+                            p.SendMoney();
                             p.win?.CurrentTab.Replace(AdmnPage(p)); 
                             p.SendWindow(); 
                         })),

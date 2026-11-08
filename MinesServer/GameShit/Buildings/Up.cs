@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
@@ -7,6 +7,7 @@ using MinesServer.GameShit.GUI.Cards;
 using MinesServer.GameShit.GUI.Rich;
 using MinesServer.GameShit.GUI.Styles;
 using MinesServer.GameShit.GUI.UP;
+using MinesServer.GameShit.Skills;
 using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.HubEvents;
 using MinesServer.Network.World;
@@ -70,12 +71,12 @@ namespace MinesServer.GameShit.Buildings
                     RichListEntry.Button("Доход со здания составляет " + moneyinside, new MButton("Собрать", "collect", _ =>
                     {
                         using var db = new DataBase();
-                        db.Attach(this);
                         p.money += moneyinside;
                         moneyinside = 0;
-                        db.SaveChanges();
-                        p.SendMoney();
 
+                        db.Save(this, t => t.moneyinside);
+
+                        p.SendMoney();
                         p.win?.CurrentTab.Refresh();
                         p.SendWindow();
                     }))
@@ -84,19 +85,15 @@ namespace MinesServer.GameShit.Buildings
             Buttons = [],
             Rebuild = () => AdminPage(p),
         };
+
         private static bool TryPurchaseSlot(Player p, int nextSlot)
         {
-            using var db = new DataBase();
-            db.Attach(p.skillslist);
-            db.Attach(p);
-
             if (nextSlot <= 10)
             {
                 if (PriceSlots.TryGetValue(nextSlot, out long requiredMoney) && p.money >= requiredMoney)
                 {
                     p.money -= requiredMoney;
                     p.skillslist.slots++;
-                    db.SaveChanges();
                     return true;
                 }
             }
@@ -106,12 +103,12 @@ namespace MinesServer.GameShit.Buildings
                 {
                     p.creds -= requiredCreds;
                     p.skillslist.slots++;
-                    db.SaveChanges();
                     return true;
                 }
             }
             return false;
         }
+
         private MButton? CreateBuySlotButton(Player p)
         {
             int nextSlot = p.skillslist.slots + 1;
@@ -128,6 +125,10 @@ namespace MinesServer.GameShit.Buildings
                 {
                     if (TryPurchaseSlot(p, nextSlot))
                     {
+                        using var db = new DataBase();
+                        db.Save(p.skillslist, sk => sk.slots);
+                        db.Save(p, p => p.money, p => p.creds);
+
                         p.win?.CurrentTab.Refresh();
                         p.SendWindow();
                     }
@@ -224,26 +225,16 @@ namespace MinesServer.GameShit.Buildings
                     Button = skillfromslot != null && skillfromslot.isUpReady() && p.money > skillfromslot.Cost ?
                         new MButton("Прокачать", "upgrade", (args) =>
                         {
-                            using (var db = new DataBase())
-                            {
-                                long money = (long)(skillfromslot.Cost);
+                            long money = (long)(skillfromslot.Cost);
+                            p.money -= money;
+                            moneyinside += (long)(money * 0.1);
 
-                                db.ups.Attach(this);
-                                db.players.Attach(p);
-                                p.money -= money;
+                            using var db = new DataBase();
+                            db.Save(this, t => t.moneyinside);
+                            db.Save(p.skillslist, skill => skill.ser, skill => skill.expertSkill);
 
-                                // Добавляем 10% от стоимости в moneyinside
-                                moneyinside += (long)(money * 0.1);
-                                db.SaveChanges();
-
-                                p.SendMoney();
-                            }
-
-                            var SkillProgress = skillfromslot.Up();
-                            // Сперва сохраняем данные
-                            p.skillslist.Save();
-
-                            p.SendSkills(SkillProgress);
+                            p.SendMoney();
+                            p.SendSkills(skillfromslot.Up());
                             p.SendLvl();
 
                             if (skillfromslot.type == SkillType.Movement || skillfromslot.type == SkillType.RoadMovement)
@@ -256,6 +247,7 @@ namespace MinesServer.GameShit.Buildings
                                 p.MaxHealth = (int)skillfromslot.Effect;
                                 p.SendHealth();
                             }
+
                             p.win?.CurrentTab.Refresh();
                             p.SendWindow();
                         }) :
@@ -341,11 +333,11 @@ namespace MinesServer.GameShit.Buildings
                 // Достаточно OPP — обычная кнопка покупки
                 actionButton = new MButton($"Купить за <color=yellow>{price}</color> OPP", "buy", _ =>
                 {
-                    using var db = new DataBase();
-                    db.players.Attach(p);
                     p.opp -= price;
                     p.skillslist.AddExpertSkillPurchased(currentDisplaySkill);
-                    db.SaveChanges();
+
+                    using var db = new DataBase();
+                    db.Save(p, t => t.opp);
 
                     // Перерисовываем страницу, чтобы отобразить "Куплено"
                     var refreshed = BuildSkillDetailPage(p, currentDisplaySkill);
