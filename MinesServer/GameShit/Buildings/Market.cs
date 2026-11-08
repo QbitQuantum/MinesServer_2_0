@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
@@ -179,8 +178,9 @@ namespace MinesServer.GameShit.Buildings
             p.money += money;
 
             using var db = new DataBase();
-            db.Save(p, x => x.money);
-            db.Save(this, x => x.moneyinside);
+            db.players.Attach(p);
+            db.SaveChanges();
+
             p.crys.SaveToDatabase();
 
             p.SendMoney();
@@ -226,11 +226,13 @@ namespace MinesServer.GameShit.Buildings
                 p.crys.AddCrys(CrystalTypeExt.CrysType[i], Sliders[i]);
             }
             p.money += money;
-            
-            using var db = new DataBase();
-            db.Save(p, x => x.money);
-            db.Save(this, x => x.moneyinside);
             p.crys.SaveToDatabase();
+
+            using var db = new DataBase();
+            db.players.Attach(p);
+            db.SaveChanges();
+
+            p.SendMoney();
 
             var page = BuyPage(p, -money);
             p.win?.CurrentTab.SetInitialPage(page);

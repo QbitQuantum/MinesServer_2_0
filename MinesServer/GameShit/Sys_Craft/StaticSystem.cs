@@ -152,10 +152,11 @@ namespace MinesServer.GameShit.Sys_Craft
                 return;
             }
 
+            using var db = new DataBase();
+            db.crafts.Attach(c);
+
             c.currentcraft = new CraftEntry(r.id, num, DateTime.Now + (TimeSpan.FromSeconds(r.time) * num));
 
-            using var db = new DataBase();
-            db.crafts.Update(c);
             db.SaveChanges();
             p.win?.CurrentTab.Open(FilledPage(p, c));
             p.SendInventory();
@@ -170,14 +171,14 @@ namespace MinesServer.GameShit.Sys_Craft
 
             var recipe = c.currentcraft.GetRecipie();
 
-            p.inventory[recipe.result.id] += c.currentcraft.num * recipe.result.num;
             using var db = new DataBase();
-            
+            db.crafts.Attach(c);
+            db.players.Attach(p);
+
+            p.inventory[recipe.result.id] += c.currentcraft.num * recipe.result.num;
             db.craftentries.Remove(c.currentcraft);
             c.currentcraft = null;
 
-            db.crafts.Update(c);
-            db.players.Update(p);
             db.SaveChanges();
 
             p.SendInventory();
@@ -237,12 +238,13 @@ namespace MinesServer.GameShit.Sys_Craft
             if (c.currentcraft.num > 0)
             {
                 // Проверяем, есть ли уже готовые предметы
+                var readyItems = 0;
                 var recipe = c.currentcraft.GetRecipie();
                 // Рассчитываем количество готовых предметов на основе прошедшего времени
                 var elapsed = DateTime.Now - (c.currentcraft.endtime - TimeSpan.FromSeconds(recipe.time * c.currentcraft.num));
                 var totalSeconds = recipe.time * c.currentcraft.num;
                 var progressSeconds = Math.Min(elapsed.TotalSeconds, totalSeconds);
-                var readyItems = (int)(progressSeconds / recipe.time);
+                readyItems = (int)(progressSeconds / recipe.time);
 
                 if (readyItems > 0)
                 {
@@ -277,6 +279,8 @@ namespace MinesServer.GameShit.Sys_Craft
             var recipe = c.currentcraft.GetRecipie();
 
             using var db = new DataBase();
+            db.crafts.Attach(c);
+            db.players.Attach(p);
 
             // Добавляем готовые предметы в инвентарь
             p.inventory[recipe.result.id] += readyCount * recipe.result.num;
@@ -296,9 +300,6 @@ namespace MinesServer.GameShit.Sys_Craft
                 var remainingTime = TimeSpan.FromSeconds(recipe.time * c.currentcraft.num);
                 c.currentcraft.endtime = DateTime.Now + remainingTime;
             }
-
-            db.crafts.Update(c);
-            db.players.Update(p);
 
             db.SaveChanges();
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MinesServer.GameShit.Entities;
+﻿using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Inputs;
@@ -15,9 +14,10 @@ namespace MinesServer.GameShit.Programmator
         public static void NewProg(Player p, string name)
         {
             using var db = new DataBase();
+            db.players.Attach(p);
             var prog = new Program(p, name, "");
             p.programs.Add(prog);
-            db.Save(p, x => x.programs);
+            db.SaveChanges();
             p.OpenProg(prog);
             p.win = null;
         }

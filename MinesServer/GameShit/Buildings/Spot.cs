@@ -90,9 +90,10 @@ namespace MinesServer.GameShit.Buildings
 
         private void UninstallProgram(Player p)
         {
-            selected = null;
             using var db = new DataBase();
-            db.Save(this, x => x.selected);
+            db.spots.Attach(this);
+            selected = null;
+            db.SaveChanges();
             ReopenWindow(p, TabPrograms);
         }
 
@@ -104,8 +105,9 @@ namespace MinesServer.GameShit.Buildings
             if (prog == null || prog.owner?.id != p.id)
                 return;
 
+            db.spots.Attach(this);
             selected = prog;
-            db.Save(this, x => x.selected);
+            db.SaveChanges();
 
             ReopenWindow(p, TabPrograms);
         }
