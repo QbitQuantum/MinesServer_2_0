@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
@@ -69,11 +70,13 @@ namespace MinesServer.GameShit.Buildings
                     RichListEntry.Text("hp", $"Прочность здания {hp}/{maxhp}"),
                     RichListEntry.Button("Доход со здания составляет " + moneyinside, new MButton("Собрать", "collect", _ =>
                     {
-                        using var db = new DataBase();
-                        db.Attach(this);
+                        
                         p.money += moneyinside;
                         moneyinside = 0;
-                        db.SaveChanges();
+                        using var db = new DataBase();
+                        db.Save(this, x => x.moneyinside);
+                        db.Save(p, x => x.money);
+
                         p.SendMoney();
 
                         p.win?.CurrentTab.Refresh();
@@ -87,8 +90,6 @@ namespace MinesServer.GameShit.Buildings
         private static bool TryPurchaseSlot(Player p, int nextSlot)
         {
             using var db = new DataBase();
-            db.Attach(p.skillslist);
-            db.Attach(p);
 
             if (nextSlot <= 10)
             {
@@ -96,7 +97,7 @@ namespace MinesServer.GameShit.Buildings
                 {
                     p.money -= requiredMoney;
                     p.skillslist.slots++;
-                    db.SaveChanges();
+                    db.Save(p, x => x.money, x => x.skillslist.slots);
                     return true;
                 }
             }
@@ -106,7 +107,7 @@ namespace MinesServer.GameShit.Buildings
                 {
                     p.creds -= requiredCreds;
                     p.skillslist.slots++;
-                    db.SaveChanges();
+                    db.Save(p, x => x.creds, x => x.skillslist.slots);
                     return true;
                 }
             }
@@ -228,13 +229,12 @@ namespace MinesServer.GameShit.Buildings
                             {
                                 long money = (long)(skillfromslot.Cost);
 
-                                db.ups.Attach(this);
-                                db.players.Attach(p);
                                 p.money -= money;
 
                                 // Добавляем 10% от стоимости в moneyinside
                                 moneyinside += (long)(money * 0.1);
-                                db.SaveChanges();
+                                db.Save(this, x => x.moneyinside);
+                                db.Save(p, x => x.money);
 
                                 p.SendMoney();
                             }

@@ -125,13 +125,12 @@ namespace MinesServer.GameShit.Buildings
             if (ExistMoney && ExistCharge)
             {
                 using var db = new DataBase();
-                db.Attach(this);
                 p.money -= cost;
                 moneyinside += cost;
                 charge--;
                 p.SendMoney();
+                db.Save(this, x => x.moneyinside, x => x.charge);
                 base.Update();
-                db.SaveChanges();
             }
         }
 
@@ -148,14 +147,14 @@ namespace MinesServer.GameShit.Buildings
             {
                 num = p.crys[CrystalType.Blue];
             }
-            db.Attach(this);
             if (p.crys.RemoveCrys(CrystalType.Blue, num))
             {
                 charge += (int)num;
             }
+            db.Save(this, x => x.charge);
+            p.crys.SaveToDatabase();
             p.win?.CurrentTab.Replace(AdmnPage(p));
             p.SendWindow();
-            db.SaveChanges();
         }
 
         public void AdminSaveChanges(Player p, Dictionary<string, string> d)

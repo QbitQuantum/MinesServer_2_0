@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
@@ -311,6 +312,62 @@ namespace MinesServer.Server
                 Console.WriteLine("WriteError caused error " + $"{ex}");
             }
         }
+
+        /// <summary>
+        /// Помечает только указанные поля как изменённые и сохраняет.
+        /// </summary>
+        public void Save<T>(
+            T entity,
+            params Expression<Func<T, object?>>[] fields)
+            where T : class
+        {
+            var entry = Entry(entity);
+            if (entry.State == EntityState.Detached)
+                Attach(entity);
+
+            foreach (var field in fields)
+                entry.Property(field).IsModified = true;
+
+            SaveChanges();
+        }
+
+        /*
+        public static void Save<T>(
+            this DataBase db,
+            T entity,
+            params Expression<Func<T, object?>>[] fields)
+            where T : class
+        {
+            var entry = db.Entry(entity);
+            if (entry.State == EntityState.Detached)
+                db.Attach(entity);
+
+            foreach (var field in fields)
+            {
+                var member = field.Body is UnaryExpression u ? u.Operand : field.Body;
+                var name = ((MemberExpression)member).Member.Name;
+
+                if (entry.Metadata.FindProperty(name) is not null)
+                {
+                    entry.Property(name).IsModified = true;
+                }
+                else if (entry.Metadata.FindNavigation(name) is { } nav)
+                {
+                    if (nav.IsCollection)
+                        throw new InvalidOperationException(
+                            $"'{typeof(T).Name}.{name}' — коллекция, сохраняйте её элементы отдельно.");
+                    entry.Reference(name).IsModified = true;
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"'{typeof(T).Name}.{name}' не является ни свойством, ни навигацией.");
+                }
+            }
+
+            db.SaveChanges();
+        } 
+        */
 
         #region Clan saves
 

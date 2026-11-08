@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Inputs;
@@ -163,8 +164,7 @@ namespace MinesServer.Server
             _tempPlayer.hash = GenerateHash();
 
             db.players.Add(_tempPlayer);
-            db.skills.Attach(_tempPlayer.skillslist);
-            db.SaveChanges();
+            db.Save(_tempPlayer.skillslist, x => x.ser, x => x.expertSkill);
 
             _tempPlayer = null;
 

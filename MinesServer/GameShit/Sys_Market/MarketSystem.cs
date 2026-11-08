@@ -1,4 +1,5 @@
-﻿using MinesServer.GameShit.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
@@ -197,9 +198,8 @@ namespace MinesServer.GameShit.SysMarket
                 (args) =>
                 {
                     var db = new DataBase();
-                    db.Attach(order);
                     order.Bet(p, (long)cost);
-                    db.SaveChanges();
+                    db.Save(order, x => x.buyerid, x => x.bettime, x => x.cost);
                     OpenOrder(p, orderid);
                     p.SendWindow();
                 }),
@@ -210,9 +210,8 @@ namespace MinesServer.GameShit.SysMarket
                     if (int.TryParse(args.Input, out var bet))
                     {
                         var db = new DataBase();
-                        db.Attach(order);
                         order.Bet(p, bet);
-                        db.SaveChanges();
+                        db.Save(order, x => x.buyerid, x => x.bettime, x => x.cost);
                     }
                     OpenOrder(p, orderid);
                     p.SendWindow();

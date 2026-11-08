@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
@@ -99,9 +100,8 @@ namespace MinesServer.GameShit.Buildings
             }
 
             using var db = new DataBase();
-            db.Attach(this);
-            db.SaveChanges();
-
+            db.Save(this, x => x.charge);
+            p.crys.SaveToDatabase();
             p.win = GUIWin(p);
             p.SendWindow();
         }

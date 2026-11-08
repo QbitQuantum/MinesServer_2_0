@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI.UP;
 using MinesServer.GameShit.Skills;
@@ -234,7 +235,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public void Save()
         {
             using var db = new DataBase();
-            db.skills.Attach(this);
+            db.Entry(this).State = EntityState.Modified;
 
             var raw = new Dictionary<int, PlayerSkillData>(skills.Count);
 
@@ -253,7 +254,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
             expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
 
-            db.SaveChanges();
+            db.Save(this, x => x.ser, x => x.expertSkill);
         }
 
         public Dictionary<SkillType, bool> SkillToInstall()

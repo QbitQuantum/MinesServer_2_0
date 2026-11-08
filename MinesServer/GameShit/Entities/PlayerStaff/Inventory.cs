@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
@@ -46,9 +47,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 Items[itemId] = value;
 
                 using var db = new DataBase();
-                db.inventories.Attach(this);
                 DataBase.GetPlayer(id)?.SendInventory();
-                db.SaveChanges();
+                db.Save(this, x => x.itemstobd);
             }
         }
 
@@ -350,7 +350,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     if (!World.ContainsPack(tx, ty, out var pack) || pack is not PackCharge charge)
                         return;
 
-                    db.Attach(pack);
                     if (charge.CanDestroy())
                         charge.Destroy(player);
                     else
