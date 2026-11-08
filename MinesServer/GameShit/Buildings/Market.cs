@@ -32,7 +32,7 @@ namespace MinesServer.GameShit.Buildings
         [NotMapped] public override int cid { get; set; }
         [NotMapped] public override int off { get; set; }
         public long moneyinside { get; set; }
-
+        
         #endregion;
         
         #region affectworld
@@ -86,6 +86,9 @@ namespace MinesServer.GameShit.Buildings
         }
         #endregion
 
+        private static int GetPriceCellCrystall(int type_crydstall) => World.GetCrysCost(type_crydstall);
+        private static int GetPriceBuyCrystall(int type_crydstall) => GetPriceCellCrystall(type_crydstall) * 10;
+
         private static Action<Player, Market> AdminPanel => (p, m) =>
         {
             if (p.id != m.ownerid || p.win == null) return;
@@ -129,15 +132,15 @@ namespace MinesServer.GameShit.Buildings
                 Rebuild = () => SellPage(p, money),
                 CrystalConfig = new CrystalConfig(" ", "цена", 
                 [
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0)}$</color>", 0, 0, p.crys[CrystalType.Green], 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1)}$</color>", 0, 0, p.crys[CrystalType.Blue], 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2)}$</color>", 0, 0, p.crys[CrystalType.Red], 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3)}$</color>", 0, 0, p.crys[CrystalType.Violet], 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4)}$</color>", 0, 0, p.crys[CrystalType.White], 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(0)}$</color>", 0, 0, p.crys[CrystalType.Green], 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(1)}$</color>", 0, 0, p.crys[CrystalType.Blue], 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(2)}$</color>", 0, 0, p.crys[CrystalType.Red], 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(3)}$</color>", 0, 0, p.crys[CrystalType.Violet], 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(4)}$</color>", 0, 0, p.crys[CrystalType.White], 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(5)}$</color>", 0, 0, p.crys[CrystalType.Cyan], 0)
                 ]),
                 Text = "Продажа кристаллов" + (money == -1 ? "" : $"\nПродано кристалов на <color=#aaeeaa>{money}$</color>"),
-                Buttons = 
+                Buttons =
                 [
                     new MButton("Продать всё", $"sellallcrys", (args) => SellAllCrys(p)),
                     new MButton("Продать", $"sellcrys:{ActionMacros.CrystalSliders}", (args) => Sell(args.CrystalSliders, p))
@@ -196,12 +199,12 @@ namespace MinesServer.GameShit.Buildings
                 Rebuild = () => BuyPage(p),
                 CrystalConfig = new CrystalConfig(" ", "цена", 
                 [
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(0) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(0) * 10)), 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(1) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(1) * 10)), 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(2) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(2) * 10)), 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(3) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(3) * 10)), 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(4) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(4) * 10)), 0),
-                    new CrysLine($"<color=#aaeeaa>{World.GetCrysCost(5) * 10}$</color>", 0, 0, (int)(p.money / (World.GetCrysCost(5) * 10)), 0)
+                    new CrysLine($"<color=#aaeeaa>{GetPriceBuyCrystall(0)}$</color>", 0, 0, (int)(p.money / GetPriceCellCrystall(0)), 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceBuyCrystall(1)}$</color>", 0, 0, (int)(p.money / GetPriceCellCrystall(1)), 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(2)}$</color>", 0, 0, (int)(p.money / GetPriceCellCrystall(2)), 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceBuyCrystall(3)}$</color>", 0, 0, (int)(p.money / GetPriceCellCrystall(3)), 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(4)}$</color>", 0, 0, (int)(p.money / GetPriceCellCrystall(4)), 0),
+                    new CrysLine($"<color=#aaeeaa>{GetPriceCellCrystall(5)}$</color>", 0, 0, (int)(p.money / GetPriceCellCrystall(5)), 0)
                 ]),
                 Text = "Покупка кристаллов" + (money == -1 ?  "": $"\nКуплено кристалов на <color=#aaeeaa>{money}$</color>"),
                 Buttons = [new MButton("Покупка", $"buycrys:{ActionMacros.CrystalSliders}", (args) => Buy(args.CrystalSliders, p))]
@@ -216,9 +219,10 @@ namespace MinesServer.GameShit.Buildings
             long money = 0;
             for (int i = 0; i < 6; i++)
             {
-                if (Sliders[i] <= 0 || p.money - (Sliders[i] * World.GetCrysCost(i) * 10) < 0)
+                int PriceBuyCrystall = GetPriceBuyCrystall(i);
+                if (Sliders[i] <= 0 || p.money - (Sliders[i] * PriceBuyCrystall) < 0)
                     continue;
-                money -= Sliders[i] * (World.GetCrysCost(i) * 10);
+                money -= Sliders[i] * (PriceBuyCrystall);
                 p.crys.AddCrys(CrystalTypeExt.CrysType[i], Sliders[i]);
             }
             p.money += money;
