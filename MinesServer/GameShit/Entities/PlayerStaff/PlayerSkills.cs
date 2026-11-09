@@ -22,9 +22,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
     {
         public PlayerSkills() { }
 
-        [NotMapped] private HashSet<string> _purchasedExpertSkills = [];
+        [NotMapped] private readonly HashSet<string> _purchasedExpertSkills = [];
 
-        [NotMapped] private readonly Dictionary<int, Skill> skills = [];
+        [NotMapped] private readonly Dictionary<int, Skill> _purchasedStandartSkills = [];
 
         [NotMapped] private int selectedslot = -1;
 
@@ -35,7 +35,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// <summary>
         /// Сериализованное представление словаря слот -> (код навыка, уровень, опыт).
         /// </summary>
-        public string ser { get; set; } = "";
+        public string standartSkills { get; set; } = "";
 
         /// <summary>
         /// JSON поле для хранения купленных экспертных скиллов (храним строковые коды)
@@ -43,20 +43,26 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public string expertSkill { get; set; } = "[]";
 
         /// <summary>
-        /// Устанавливает текущий слот
+        /// Установка умений по умолчанию
         /// </summary>
-        
         public void Init()
         {
-            slots = 4;
-            // Установка базовых навыков без Player
-            ForceInstallSkill(SkillType.MineGeneral, 0, 1, 0);
-            ForceInstallSkill(SkillType.Digging, 1, 1, 0);
-            ForceInstallSkill(SkillType.Movement, 2, 1, 0);
-            ForceInstallSkill(SkillType.Health, 3, 1, 0);
-            Save();
+            var DefaultSkills = new List<Skill>
+            {
+                new(lvl: 1, exp: 0, type: SkillType.MineGeneral),
+                new(lvl: 1, exp: 0, type: SkillType.Digging),
+                new(lvl: 1, exp: 0, type: SkillType.Movement),
+                new(lvl: 1, exp: 0, type: SkillType.Health)
+            };
+
+            for (int i = 0; i < DefaultSkills.Count; i++)
+                _purchasedStandartSkills[i] = DefaultSkills[i];
+            slots = _purchasedStandartSkills.Count;
         }
-        
+
+        /// <summary>
+        /// Устанавливает текущий слот
+        /// </summary>
         public void InstallSlot(int SelectedSlot)
         {
             selectedslot = SelectedSlot;
@@ -75,7 +81,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public Skill? GetSkill(SkillType Type)
         {
-            return skills.Values.FirstOrDefault(s => s?.type == Type);
+            return _purchasedStandartSkills.Values.FirstOrDefault(s => s?.type == Type);
         }
 
         /// <summary>
@@ -83,7 +89,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         private Skill? GetSkillAtSlot(int slot)
         {
-            if (slot > -1 && skills.TryGetValue(slot, out Skill? value))
+            if (slot > -1 && _purchasedStandartSkills.TryGetValue(slot, out Skill? value))
                 return value;
             return null;
         }
@@ -108,22 +114,21 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public List<SkillType> GetSkillTypes()
         {
-            return skills.Values
+            return _purchasedStandartSkills.Values
                     .Where(s => s != null)
                     .Select(s => s.type)
                     .ToList();
         }
 
-        public void LoadSkills()
+        private void LoadStandartSkills()
         {
-            if (skills.Count > 0 || string.IsNullOrEmpty(ser))
+            if (_purchasedStandartSkills.Count > 0 || string.IsNullOrEmpty(standartSkills))
                 return;
 
-            var raw = Newtonsoft.Json.JsonConvert
-                .DeserializeObject<Dictionary<int, PlayerSkillData>>(ser) // Убрали ?
-                ?? [];
+            var loadStandartSkills = Newtonsoft.Json.JsonConvert
+                .DeserializeObject<Dictionary<int, PlayerSkillData>>(standartSkills) ?? [];
 
-            foreach (var kvp in raw)
+            foreach (var kvp in loadStandartSkills)
             {
                 var data = kvp.Value;
                 if (data == null || string.IsNullOrEmpty(data.Code))
@@ -139,10 +144,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public bool DeleteSkill()
         {
-            if (!skills.ContainsKey(selectedslot))
+            if (!_purchasedStandartSkills.ContainsKey(selectedslot))
                 return false;
 
-            skills.Remove(selectedslot);
+            _purchasedStandartSkills.Remove(selectedslot);
             Save();
             return true;
         }
@@ -153,14 +158,13 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         private bool MeetsRequirements(SkillType skillType)
         {
             var info = skillType.GetInfo();
-            if (info?.Requirements == null || !info.Requirements.Any())
+            if (info?.Requirements == null || info.Requirements.Count == 0)
                 return true; // Нет требований - можно устанавливать
 
             foreach (var req in info.Requirements)
             {
-                var hasReq = skills.Values.Any(s => s?.IsRequiered(req.RequiredSkill, req.RequiredLevel) ?? false);
-                if (!hasReq)
-                    return false; // Не выполнено хотя бы одно требование
+                var hasReq = _purchasedStandartSkills.Values.Any(s => s?.IsRequiered(req.RequiredSkill, req.RequiredLevel) ?? false);
+                if (!hasReq) return false; // Не выполнено хотя бы одно требование
             }
 
             return true; // Все требования выполнены
@@ -197,7 +201,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             if (slot > slots || slot < 0)
                 return false;
 
-            if (skills.ContainsKey(slot) && skills[slot] != null)
+            if (_purchasedStandartSkills.ContainsKey(slot))
                 return false;
 
             if (skillType == SkillType.Unknown)
@@ -223,19 +227,16 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return true;
         }
 
-        public void ForceInstallSkill(SkillType skillType, int slot, int lvl, float exp)
+        private void ForceInstallSkill(SkillType skillType, int slot, int lvl, float exp)
         {
-            skills[slot] = new Skill(lvl, exp, skillType);
+            _purchasedStandartSkills[slot] = new Skill(lvl, exp, skillType);
         }
 
-        public void Save()
+        private void Save()
         {
-            using var db = new DataBase();
-            db.skills.Attach(this);
+            var raw = new Dictionary<int, PlayerSkillData>(_purchasedStandartSkills.Count);
 
-            var raw = new Dictionary<int, PlayerSkillData>(skills.Count);
-
-            foreach (var kvp in skills)
+            foreach (var kvp in _purchasedStandartSkills)
             {
                 var skill = kvp.Value;
                 raw[kvp.Key] = new PlayerSkillData
@@ -246,11 +247,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 };
             }
 
-            ser = Newtonsoft.Json.JsonConvert.SerializeObject(raw, Newtonsoft.Json.Formatting.None);
+            standartSkills = Newtonsoft.Json.JsonConvert.SerializeObject(raw, Newtonsoft.Json.Formatting.None);
 
             expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
 
-            db.SaveChanges();
+            using var db = new DataBase();
+            db.Save(this, t => t.standartSkills, t => t.expertSkill);
         }
 
         public Dictionary<SkillType, bool> SkillToInstall()
@@ -264,7 +266,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 var info = kvp.Value;
 
                 // Пропускаем если навык уже есть
-                if (skills.Values.Any(s => s?.type == skillType))
+                if (_purchasedStandartSkills.Values.Any(s => s?.type == skillType))
                     continue;
 
                 // Для экспертных навыков проверяем, куплен ли он
@@ -272,7 +274,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     continue;
 
                 // Если нет требований - сразу доступен
-                if (info?.Requirements == null || !info.Requirements.Any())
+                if (info?.Requirements == null || info.Requirements.Count == 0)
                 {
                     result.Add(skillType, true);
                     continue;
@@ -316,17 +318,17 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return result;
         }
 
-        public int lvlsummary() => skills.Sum(i => i.Value?.lvl ?? 0);
+        public int lvlsummary() => _purchasedStandartSkills.Sum(i => i.Value?.lvl ?? 0);
 
         public UpSkill[] GetSkills()
         {
-            LoadSkills();
+            LoadStandartSkills();
 
             List<UpSkill> ski = [];
             
             for (int i = 0; i < slots; i++)
             {
-                if (skills.TryGetValue(i, out Skill? value) && value is not null)
+                if (_purchasedStandartSkills.TryGetValue(i, out Skill? value) && value is not null)
                 {
                     var saled = value.saledSkill;
                     ski.Add(new UpSkill(i, saled.Lvl, saled.IsUp, saled.Type));
@@ -348,7 +350,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public void HandleExperience(Player player, SkillType skillType, float baseExp = 1f)
         {
-            LoadSkills();
+            LoadStandartSkills();
             var skill = GetSkill(skillType);
             if (skill == null) return;
             var skillProgress = skill.AddExp(baseExp, UpgradeEffect());
@@ -381,7 +383,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public void HandleBuildingExperience(Player player, string buildType, float baseExp = 1f)
         {
-            LoadSkills();
+            LoadStandartSkills();
 
             // Определяем, какой навык строительства использовать
             SkillType skillType = buildType switch
@@ -415,7 +417,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public void HandleDamageExperience(Player player, DamageTypePlayer damageType, float baseExp = 1f)
         {
-            LoadSkills();
+            LoadStandartSkills();
 
             // Навык здоровья получает опыт при любом уроне
             HandleExperience(player, SkillType.Health, baseExp);
@@ -434,7 +436,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public int HandleDamageReceived(int damage)
         {
-            LoadSkills();
+            LoadStandartSkills();
             int modifiedDamage = damage;
 
             var AntiGunSkill = GetSkill(SkillType.AntiGun);
@@ -454,7 +456,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public float GetMiningMultiplier()
         {
-            LoadSkills();
+            LoadStandartSkills();
             var miningSkill = GetSkill(SkillType.MineGeneral);
             miningSkill ??= GetSkill(SkillType.ExpertMining);
             return miningSkill?.Effect ?? 0f;
@@ -462,14 +464,14 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public bool HasSkill(SkillType skillType)
         {
-            LoadSkills();
+            LoadStandartSkills();
             var skill = GetSkill(skillType);
             return skill != null;
         }
 
         public float GetSkillEffect(SkillType skillType)
         {
-            LoadSkills();
+            LoadStandartSkills();
             var skill = GetSkill(skillType);
             return skill?.Effect ?? 0f;
         }
@@ -479,7 +481,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public float HandleInductionReceived()
         {
-            LoadSkills();
+            LoadStandartSkills();
             float modifiedinductionMultiplier = 1f;
 
             var InductionSkill = GetSkill(SkillType.Induction);

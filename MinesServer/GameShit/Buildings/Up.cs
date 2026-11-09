@@ -231,7 +231,7 @@ namespace MinesServer.GameShit.Buildings
 
                             using var db = new DataBase();
                             db.Save(this, t => t.moneyinside);
-                            db.Save(p.skillslist, skill => skill.ser, skill => skill.expertSkill);
+                            db.Save(p.skillslist, skill => skill.standartSkills, skill => skill.expertSkill);
 
                             p.SendMoney();
                             p.SendSkills(skillfromslot.Up());
