@@ -58,6 +58,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             for (int i = 0; i < DefaultSkills.Count; i++)
                 _purchasedStandartSkills[i] = DefaultSkills[i];
             slots = _purchasedStandartSkills.Count;
+            Save();
         }
 
         /// <summary>
@@ -252,7 +253,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             expertSkill = Newtonsoft.Json.JsonConvert.SerializeObject(_purchasedExpertSkills);
 
             using var db = new DataBase();
-            db.Save(this, t => t.standartSkills, t => t.expertSkill);
+            db.Save(this, t => t.standartSkills, t => t.expertSkill, t => t.slots);
         }
 
         public Dictionary<SkillType, bool> SkillToInstall()
