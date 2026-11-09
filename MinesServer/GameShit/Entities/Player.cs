@@ -121,6 +121,8 @@ namespace MinesServer.GameShit.Entities
         {
             skillslist.Init();
             settings.Init();
+            MaxHealth = CalculateMaxHealth();
+            Health = MaxHealth;
         }
 
         public void UpdateState()
@@ -128,9 +130,6 @@ namespace MinesServer.GameShit.Entities
             if (!DataBase.activeplayers.Contains(this))
                 DataBase.activeplayers.Add(this);
             win = null;
-            skillslist.LoadStandartSkills();
-            MaxHealth = CalculateMaxHealth();
-            Health = MaxHealth;
             MoveToChunk();
             SendInitialData();
             SubscribeToEvents();
