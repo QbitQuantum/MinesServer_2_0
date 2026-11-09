@@ -181,8 +181,9 @@ namespace MinesServer.Server
                 return;
             }
 
-            // Создаем соединение
-            _initiator.CreateSession(player);
+            player.Init();
+
+            HandleSpecialPlayer(player);
             Console.WriteLine($"Account created and logged in: {player.name}");
         }
 
@@ -262,8 +263,7 @@ namespace MinesServer.Server
                 return;
             }
 
-            // Создаем соединение
-            _initiator.CreateSession(player);
+            HandleSpecialPlayer(player);
             Console.WriteLine($"Player logged in: {player.name}");
         }
 

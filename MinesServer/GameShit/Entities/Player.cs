@@ -119,15 +119,16 @@ namespace MinesServer.GameShit.Entities
 
         public void Init()
         {
-            if (!DataBase.activeplayers.Contains(this))
-                DataBase.activeplayers.Add(this);
-
             skillslist.Init();
             settings.Init();
             MaxHealth = CalculateMaxHealth();
             Health = MaxHealth;
-            win = null;
+        }
 
+        public void UpdateState()
+        {
+            if (!DataBase.activeplayers.Contains(this))
+                DataBase.activeplayers.Add(this);
             MoveToChunk();
             SendInitialData();
             SubscribeToEvents();

@@ -460,7 +460,7 @@ namespace MinesServer.Server
             _auth = null;
             _player = authPlayer;
             _player.connection = this;
-            _player.Init();
+            _player.UpdateState();
             SendU(new AHPacket(_player.id, _player.hash));
         }
 
