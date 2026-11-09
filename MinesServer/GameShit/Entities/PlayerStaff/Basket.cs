@@ -97,35 +97,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return false;
         }
 
-        public Window OpenBoxGui(Player p)
-        {
-            return new Window()
-            {
-                ShowTabs = false,
-                Title = "Создание бокса",
-                Tabs = [new Tab()
-                {
-                    Label = "Box",
-                    Action = "dropbox",
-                    InitialPage = new Page()
-                    {
-                        CrystalConfig = new CrystalConfig("  останется", "будет в боксе",
-                            [
-                                new CrysLine("", 0, 0, this[CrystalType.Green], 0),
-                                new CrysLine("", 0, 0, this[CrystalType.Blue], 0),
-                                new CrysLine("", 0, 0, this[CrystalType.Red], 0),
-                                new CrysLine("", 0, 0, this[CrystalType.Violet], 0),
-                                new CrysLine("", 0, 0, this[CrystalType.White], 0),
-                                new CrysLine("", 0, 0, this[CrystalType.Cyan], 0)
-                            ]),
-                        Text = "\nИспользуйте полосы прокрутки, чтобы выбрать сколько положить в бокс\",\r\n" +
-                        "                    \"ВНИМАНИЕ! При создании бокса, количество кристаллов не уменьшается\n",
-                        Buttons = [new MButton("<color=green>Добавить в бокс</color>", $"dropbox:{ActionMacros.CrystalSliders}", (args) => { p.BBox(args.CrystalSliders); })]
-                    }
-                }]
-            };
-        }
-
         public BasketPacket BPacket => new BasketPacket(
             this[CrystalType.Green],
             this[CrystalType.Blue],

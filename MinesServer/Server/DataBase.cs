@@ -278,6 +278,7 @@ namespace MinesServer.Server
             yield return observatory.Cast<Pack>();
             yield return mayak.Cast<Pack>();
             yield return jobs.Cast<Pack>();
+            yield return boxes.Cast<Pack>();
         }
 
         private static void LoadPacksBuild(DataBase db)
@@ -291,20 +292,11 @@ namespace MinesServer.Server
             }
         }
 
-        private static void LoadBoxBuild(DataBase db)
-        {
-            foreach (var box in db.boxes)
-            {
-                World.SetCell(box.x, box.y, 90);
-            }
-        }
-
         public static void Load()
         {
             using var db = new DataBase();
             try
             {
-                LoadBoxBuild(db);
                 LoadPacksBuild(db);
             }
             catch (Exception ex)

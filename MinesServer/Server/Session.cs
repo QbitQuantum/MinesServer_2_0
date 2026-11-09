@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Security.Cryptography;
 using MinesServer.GameShit;
+using MinesServer.GameShit.Buildings;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
@@ -304,7 +305,8 @@ namespace MinesServer.Server
 
         private void Dpbx(TYPacket f, DPBXPacket p)
         {
-            _player!.win = _player.crys.OpenBoxGui(_player);
+            if (_player == null) return;
+            _player.win = Box.GUIWinBox(_player);
             _player.SendWindow();
         }
 

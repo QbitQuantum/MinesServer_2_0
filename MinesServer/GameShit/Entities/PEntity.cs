@@ -120,7 +120,7 @@ namespace MinesServer.GameShit.Entities
         public abstract void Update();
         public virtual long GetBox(int x, int y)
         {
-            var b = Box.GetBox(x, y);
+            var b = DataBase.GetBox(x, y);
             if (b == null) return 0;
             crys?.BoxCrys(b.BoxCrystall);
             using var db = new DataBase();

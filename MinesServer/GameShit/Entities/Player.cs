@@ -523,17 +523,6 @@ namespace MinesServer.GameShit.Entities
             this.SendBeep();
         }
 
-        public void BBox(long[]? crystalls)
-        {
-            var (x, y) = GetDirCord();
-
-            if (!World.ValidCoord(x, y) || crystalls == null)
-                return;
-
-            Box.BuildBox(x, y, crystalls, this);
-            connection?.CloseWindow();
-        }
-
         public override long GetBox(int x, int y)
         {
             var result = base.GetBox(x, y);
