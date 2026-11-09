@@ -16,7 +16,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         [Key]
         public int id { get; set; }
-        public string settings { get; set; } = "[]";
+        public string settings { get; set; } = "";
 
         public string this[string key]
         {
@@ -34,7 +34,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             }
         }
 
-        [NotMapped] private Dictionary<string, string> _purchasedSettings = new()
+        [NotMapped] private Dictionary<string, string> _purchasedSettings = DefaultSettings();
+
+        private static Dictionary<string, string> DefaultSettings() => new()
         {
             ["cc"] = "10",
             ["snd"] = "0",
@@ -48,19 +50,34 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             ["mof"] = "1"
         };
 
-        public void Init()
+        public void LoadSettings()
         {
-            using var db = new DataBase();
-            settings = JsonConvert.SerializeObject(_purchasedSettings);
-            db.SaveChanges();
-        }        
+            try
+            {
+                _purchasedSettings = JsonConvert.DeserializeObject<Dictionary<string, string>>(settings)
+                                     ?? DefaultSettings();
+            }
+            catch (JsonException)
+            {
+                _purchasedSettings = DefaultSettings();
+            }
+        }
 
-        public void Save(Player p, Dictionary<string, string> _settings)
+        public void SaveSettings(Dictionary<string, string> _settings)
         {
             settings = JsonConvert.SerializeObject(_settings);
             var db = new DataBase();
             db.Save(this, t => t.settings);
+        }
 
+        public void Init()
+        {
+            SaveSettings(_purchasedSettings);
+        }
+
+        public void Save(Player p, Dictionary<string, string> _settings)
+        {
+            SaveSettings(_settings);
             p.SendSettings();
             SendSettingsGUI(p);
         }
@@ -68,18 +85,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public SettingsPacket BuildSettingPacket()
         {
             _purchasedSettings = JsonConvert.
-                DeserializeObject<Dictionary<string, string>>(settings) ?? [];
+                DeserializeObject<Dictionary<string, string>>(settings) ?? DefaultSettings();
             return new SettingsPacket(_purchasedSettings);
         }
 
         public void SendSettingsGUI(Player p)
         {
-            MButton[] btns = 
+            MButton[] btns =
             [
-                new MButton("Сохранить", $"save:{ActionMacros.RichList}", (args) => 
+                new MButton("Сохранить", $"save:{ActionMacros.RichList}", (args) =>
                 {
                     if (args.RichList == null) return;
-                    Save(p, args.RichList); 
+                    Save(p, args.RichList);
                 })
             ];
 
@@ -100,7 +117,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     {
                         RichList = new RichListConfig()
                         {
-                            Entries = 
+                            Entries =
                             [
                                 RichListEntry.DropDown("Масштаб интерфейса", "isca", ["мелко", "КРУПНО"], int.Parse(this["isca"])),
                                 RichListEntry.DropDown("Масштаб территории", "tsca", ["мелко", "КРУПНО"], int.Parse(this["tsca"])),

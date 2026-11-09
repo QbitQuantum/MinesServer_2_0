@@ -129,6 +129,7 @@ namespace MinesServer.GameShit.Entities
                 DataBase.activeplayers.Add(this);
             win = null;
             skillslist.LoadStandartSkills();
+            settings.LoadSettings();
             MaxHealth = CalculateMaxHealth();
             Health = MaxHealth;
             MoveToChunk();
