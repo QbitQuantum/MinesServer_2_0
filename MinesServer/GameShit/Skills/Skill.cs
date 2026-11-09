@@ -1,4 +1,5 @@
-﻿using MinesServer.GameShit.Entities;
+﻿using System.Text;
+using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Enums;
 
 namespace MinesServer.GameShit.Skills
@@ -17,20 +18,32 @@ namespace MinesServer.GameShit.Skills
             float upgradeEffect = 0)
         {
             var info = skillType.GetInfo();
-            return
-                $"<color=white>{info?.Name ?? skillType.ToString()}</color>. Уровень:<color=white>{level}</color>\n" +
-                $"Опыт {currentExp}/{maxExp} " +
-                (upgradeEffect > 0
-                    ? $"<color=yellow>[Экспертное обучение x{1 + (upgradeEffect / 100f):F1}]</color>\n"
-                    : $"<color=red>[Экспертное обучение отсутствует]</color>\n") +
-                $"Как качать: {info?.LevelingHint ?? "Неизвестно"}\n" +
-                skillType.GetDisplayInfo(skillType.GetInfo().EffectFunc(level)) + "\n" +
-                $"Стоимость: {skillType.GetPrice(level)} " +
-                (discountEffect > 0
-                    ? $"<color=yellow>[Оптимизация стоимости {discountEffect:F1}%]</color>\n"
-                    : $"<color=red>[Оптимизация отсутствует]</color>\n") +
-                $"ОПП: {skillType.GetOpp(level)}\n";
+            if (info == null) return "Информация об умении отсутствует.";
+            var name = info.Name ?? skillType.ToString();
+            var hint = info.LevelingHint ?? "Неизвестно";
+            var effect = info.EffectFunc(level);
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"<color=white>{name}</color>. Уровень: <color=white>{level}</color>");
+            sb.AppendLine($"Опыт <color=white>{currentExp}/{maxExp}</color> " + FormatUpgrade(upgradeEffect));
+            sb.AppendLine($"Как качать: <color=white>{hint}</color>");
+            sb.AppendLine(skillType.GetDisplayInfo(effect));
+            sb.AppendLine(FormatCost(skillType.GetPrice(level), discountEffect));
+            sb.AppendLine($"<color=white>Баллы перепрошивки</color>: {skillType.GetOpp(level)}");
+
+            return sb.ToString();
         }
+
+        private static string FormatUpgrade(float upgradeEffect) =>
+            upgradeEffect > 0
+                ? $"<color=yellow>[Экспертное обучение x{1 + upgradeEffect / 100f:F1}]</color>"
+                : "<color=red>[Экспертное обучение отсутствует]</color>";
+
+        private static string FormatCost(float price, float discountEffect) =>
+            $"Стоимость: {price} " + (discountEffect > 0
+                ? $"<color=yellow>[Оптимизация стоимости {discountEffect:F1}%]</color>"
+                : "<color=red>[Оптимизация отсутствует]</color>");
     }
     public class Skill
     {
