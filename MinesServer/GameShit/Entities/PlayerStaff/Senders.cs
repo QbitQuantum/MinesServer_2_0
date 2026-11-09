@@ -60,7 +60,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public static void SendOnline(this Player p) => p.connection?.SendU(new OnlinePacket(DataBase.activeplayers.Count, 0));
         public static void SendInventory(this Player p) => p.connection?.SendU(p.inventory.BuildInventoryPacket());
         public static void SendConfig(this Player p) => p.connection?.SendU(new ConfigPacket("oldprogramformat+"));
-        public static void SendSettings(this Player p) => p.settings.SendSettings(p);
+        public static void SendSettings(this Player p) => p.connection?.SendU(p.settings.BuildSettingPacket());
         public static void ShowInfo(this Player p, string message, string title = "Ошибка") => p.connection?.SendU(new OKPacket(title, message));
         public static void SendLocalPrivateMessage(this Player p, int id, int x, int y, string message) => p.connection?.SendB(new HBPacket([new HBChatPacket(id, x, y, message)]));
 
