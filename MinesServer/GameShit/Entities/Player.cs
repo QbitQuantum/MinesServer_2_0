@@ -129,6 +129,7 @@ namespace MinesServer.GameShit.Entities
         {
             if (!DataBase.activeplayers.Contains(this))
                 DataBase.activeplayers.Add(this);
+            win = null;
             MoveToChunk();
             SendInitialData();
             SubscribeToEvents();
