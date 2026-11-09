@@ -69,10 +69,10 @@ namespace MinesServer.GameShit.Entities
         public bool autoRem { get; set; }
         public bool isAdmin { get; set; }
         public List<Program> programs { get; set; } = new();
-        public override Basket crys { get; set; } = null!;
-        public Inventory inventory { get; set; } = null!;
-        public Settings settings { get; set; } = null!;
-        public PlayerSkills skillslist { get; set; } = null!;
+        public override Basket crys { get; set; } = new();
+        public Inventory inventory { get; set; } = new();
+        public Settings settings { get; set; } = new();
+        public PlayerSkills skillslist { get; set; } = new();
         public Queue<Line> console = new Queue<Line>();
 
         public override double ServerPause
@@ -122,7 +122,8 @@ namespace MinesServer.GameShit.Entities
             if (!DataBase.activeplayers.Contains(this))
                 DataBase.activeplayers.Add(this);
 
-            skillslist.LoadSkills();
+            skillslist.Init();
+            settings.Init();
             MaxHealth = CalculateMaxHealth();
             Health = MaxHealth;
             win = null;
@@ -134,20 +135,13 @@ namespace MinesServer.GameShit.Entities
 
         public void CreatePlayer()
         {
-            name = "";
             money = 1000;
             creds = 0;
-            passwd = "";
             Health = 100;
             MaxHealth = 100;
-            inventory = new Inventory();
-            settings = new Settings(true);
-            crys = new Basket(true);
-            skillslist = new PlayerSkills(true);
             x = 0;
             y = 0;
             dir = 0;
-            clan = null;
             skin = 0;
         }
 

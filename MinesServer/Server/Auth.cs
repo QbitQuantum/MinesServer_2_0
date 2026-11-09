@@ -152,18 +152,16 @@ namespace MinesServer.Server
 
         private void CreatePlayerAccount(string nickname, string password)
         {
-            using var db = new DataBase();
-
             var _tempPlayer = new Player();
 
-            _tempPlayer.CreatePlayer();
             _tempPlayer.id = DataBase.GetNextId();
             _tempPlayer.name = nickname;
             _tempPlayer.passwd = password;
             _tempPlayer.hash = GenerateHash();
+            _tempPlayer.CreatePlayer();
 
+            using var db = new DataBase();
             db.players.Add(_tempPlayer);
-            db.skills.Attach(_tempPlayer.skillslist);
             db.SaveChanges();
 
             _tempPlayer = null;

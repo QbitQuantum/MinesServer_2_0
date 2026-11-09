@@ -17,7 +17,6 @@ namespace MinesServer.GameShit.Entities
             this.x = x;
             this.y = y;
             this.owner = owner;
-            crys = new Basket(true);
             MaxHealth = 100;
             Health = 100;
 
@@ -32,7 +31,7 @@ namespace MinesServer.GameShit.Entities
         public int owner_id { get; set; } = 0;
         public override int cid => owner?.cid ?? 0;
         [NotMapped] public Player? owner { get; set; }
-        public override Basket crys { get; set; }
+        public override Basket crys { get; set; } = new();
 
         public override void Build(string type) { } // Боты не строят
 

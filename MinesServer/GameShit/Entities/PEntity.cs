@@ -26,7 +26,7 @@ namespace MinesServer.GameShit.Entities
         [NotMapped]
         public virtual Stack<byte> geo { get; set; } = new();
         protected ProgrammatorData? _pdata { get; set; }
-        public abstract Basket? crys { get; set; }
+        public virtual Basket crys { get; set; } = new();
         public virtual int Health { get; set; }
         public virtual int MaxHealth { get; set; }
         public virtual double ServerPause { get; }

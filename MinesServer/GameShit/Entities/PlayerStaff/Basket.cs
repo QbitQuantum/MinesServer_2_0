@@ -10,14 +10,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Basket
     {
-        private Basket() { }
+        public Basket() { }
 
-        public Basket(bool n)
-        {
-            Serialazed = JsonConvert.SerializeObject(_cry);
-        }
-
-        // TODO: Сделать частью БД
         [NotMapped] public CrystalCBStorage CrystalCB { get; set; } = new();
         public int id { get; set; }
         public string Serialazed { get; set; } = "[]";

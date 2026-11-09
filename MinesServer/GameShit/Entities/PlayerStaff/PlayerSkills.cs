@@ -20,22 +20,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
     public class PlayerSkills
     {
-        private PlayerSkills() { }
-
-        public PlayerSkills(bool initializeDefaultSkills)
-        {
-            if (initializeDefaultSkills)
-            {
-                slots = 4;
-                // Установка базовых навыков без Player
-                ForceInstallSkill(SkillType.MineGeneral, 0, 1, 0);
-                ForceInstallSkill(SkillType.Digging, 1, 1, 0);
-                ForceInstallSkill(SkillType.Movement, 2, 1, 0);
-                ForceInstallSkill(SkillType.Health, 3, 1, 0);
-            }
-
-            Save(); // Сохраняем после инициализации
-        }
+        public PlayerSkills() { }
 
         [NotMapped] private HashSet<string> _purchasedExpertSkills = [];
 
@@ -60,6 +45,18 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// <summary>
         /// Устанавливает текущий слот
         /// </summary>
+        
+        public void Init()
+        {
+            slots = 4;
+            // Установка базовых навыков без Player
+            ForceInstallSkill(SkillType.MineGeneral, 0, 1, 0);
+            ForceInstallSkill(SkillType.Digging, 1, 1, 0);
+            ForceInstallSkill(SkillType.Movement, 2, 1, 0);
+            ForceInstallSkill(SkillType.Health, 3, 1, 0);
+            Save();
+        }
+        
         public void InstallSlot(int SelectedSlot)
         {
             selectedslot = SelectedSlot;

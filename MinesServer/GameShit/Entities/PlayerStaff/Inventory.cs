@@ -13,11 +13,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 {
     public class Inventory
     {
-        public Inventory()
-        {
-            itemstobd ??= JsonConvert.SerializeObject(new Dictionary<int, int>());
-            _itemUsages = CreateItemUsages();
-        }
+        public Inventory() { }
 
         private const int MiniQueueCapacity = 4;
         private const int DischargeBombRadius = 10;
@@ -25,10 +21,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         public int id { get; set; }
         public bool minv = true;
         public int selected = -1;
-        public string? itemstobd { get; set; }
+        public string itemstobd { get; set; } = "{}";
         private readonly List<int> _miniQueue = [];
-        private readonly Dictionary<int, ItemUsage> _itemUsages;
-
+        private readonly Dictionary<int, ItemUsage> _itemUsages = CreateItemUsages();
+         
         private delegate bool ItemUsage(Player player);
 
         private Dictionary<int, int>? _itemsCache;
