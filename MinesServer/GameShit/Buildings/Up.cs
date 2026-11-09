@@ -182,6 +182,7 @@ namespace MinesServer.GameShit.Buildings
                 {
                     SkillIcon = skilltype,
                     Text = description,
+                    Rebuild = () => BuildSkillPage(p),
                     // Показываем кнопку установки только если нет конфликта
                     Button = !conflictWith.HasValue ? new MButton("Установить", "confirm", (args) =>
                     {
