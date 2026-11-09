@@ -121,7 +121,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                     .ToList();
         }
 
-        private void LoadStandartSkills()
+        public void LoadStandartSkills()
         {
             if (_purchasedStandartSkills.Count > 0 || string.IsNullOrEmpty(standartSkills))
                 return;
