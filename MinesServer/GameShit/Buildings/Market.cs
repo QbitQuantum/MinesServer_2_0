@@ -17,7 +17,7 @@ namespace MinesServer.GameShit.Buildings
     public class Market : PackDamage
     {
         private Market() { }
-        public Market(int ownerid, int x, int y) : base(ownerid, x, y, 1000)
+        public Market(int x, int y, int ownerid) : base(x, y, ownerid, 1000)
         {
             using var db = new DataBase();
             hp = 100;

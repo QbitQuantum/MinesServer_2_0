@@ -256,7 +256,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var (x, y) = player.GetDirCord();
             if (!World.AccessGun(x, y, player.cid).access) return false;
 
-            var bomb = new Bomb(player.id, x, y, BombType.PlasmaBomb);
+            var bomb = new Bomb(x, y, player.id, BombType.PlasmaBomb);
             bomb.Build();
 
             World.ScheduleAction(TimeSpan.FromSeconds(1), () =>
@@ -302,7 +302,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var (x, y) = player.GetDirCord();
             if (!World.AccessGun(x, y, player.cid).access) return false;
 
-            var bomb = new Bomb(player.id, x, y, BombType.ProtonBomb);
+            var bomb = new Bomb(x, y, player.id, BombType.ProtonBomb);
             bomb.Build();
 
             World.ScheduleAction(TimeSpan.FromSeconds(2), () =>
@@ -331,7 +331,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var (x, y) = player.GetDirCord();
 
-            var bomb = new Bomb(player.id, x, y, BombType.DischargeBomb);
+            var bomb = new Bomb(x, y, player.id, BombType.DischargeBomb);
             bomb.Build();
 
             World.ScheduleAction(TimeSpan.FromSeconds(5), () =>

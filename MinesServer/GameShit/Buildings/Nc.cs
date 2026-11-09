@@ -15,7 +15,7 @@ namespace MinesServer.GameShit.Buildings
     public sealed class NC : Pack
     {
         private NC() { }
-        public NC(int ownerid, int x, int y) : base(ownerid, x, y)
+        public NC(int x, int y, int ownerid) : base(x, y, ownerid)
         {
             using var db = new DataBase();
             db.ncs.Add(this);

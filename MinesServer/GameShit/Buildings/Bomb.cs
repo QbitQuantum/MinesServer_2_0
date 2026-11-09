@@ -10,7 +10,7 @@ namespace MinesServer.GameShit.Buildings
     public sealed class Bomb : Pack
     {
         private Bomb() { }
-        public Bomb(int ownerid, int x, int y, BombType type) : base(x, y, ownerid)
+        public Bomb(int x, int y, int ownerid, BombType type) : base(x, y, ownerid)
         {
             Bombtype = type;
         }
