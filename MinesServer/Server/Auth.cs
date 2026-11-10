@@ -3,10 +3,7 @@ using System.Text;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Inputs;
-using MinesServer.GameShit.WorldSystem;
 using MinesServer.Network.Auth;
-using MinesServer.Network.BotInfo;
-using MinesServer.Network.World;
 
 
 namespace MinesServer.Server
@@ -51,8 +48,6 @@ namespace MinesServer.Server
                 existingPlayer = DataBase.GetPlayer(packet.user_id.Value);
             }
 
-            SendWorldInfo();
-
             if (existingPlayer == null)
             {
                 HandleNewPlayer();
@@ -68,8 +63,6 @@ namespace MinesServer.Server
 
         private void HandleNewPlayer()
         {
-            _initiator.SendU(new BotInfoPacket("Default", 0, 0, -1));
-            _initiator.SendU(new HBPacket([World.W.MapPacket(0, 0)]));
             AuthWindow = CreateDefaultWindow();
             SendCurrentWindow();
         }
@@ -327,11 +320,6 @@ namespace MinesServer.Server
         private void SendCurrentWindow()
         {
             _initiator.SendWin(AuthWindow.ToString());
-        }
-
-        private void SendWorldInfo()
-        {
-            _initiator.SendWorldInfo();
         }
 
         private void ResetAuthState()
