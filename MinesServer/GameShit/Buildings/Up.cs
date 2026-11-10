@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.Entities.PlayerStaff;
 using MinesServer.GameShit.Enums;
@@ -61,100 +62,220 @@ namespace MinesServer.GameShit.Buildings
 
         #endregion
 
+        #region helpers
+
+        /// <summary>
+        /// Пересобирает текущую страницу вкладки (через IPage.Rebuild) и отправляет окно клиенту.
+        /// </summary>
+        private static void RefreshAndSend(Player p)
+        {
+            p.win?.CurrentTab.Refresh();
+            p.SendWindow();
+        }
+
+        /// <summary>
+        /// Открывает админ-страницу текущего здания во вкладке игрока.
+        /// </summary>
+        private void OpenAdmin(Player p)
+        {
+            p.win?.CurrentTab.Open(AdminPage(p));
+            p.SendWindow();
+        }
+
+        #endregion
+
+        #region admin page
+
+        private void CollectIncome(Player p)
+        {
+            using var db = new DataBase();
+            p.money += moneyinside;
+            moneyinside = 0;
+
+            db.Save(this, t => t.moneyinside);
+
+            p.SendMoney();
+            RefreshAndSend(p);
+        }
+
         private IPage AdminPage(Player p) => new Page()
         {
             Title = "UP",
             RichList = new RichListConfig()
             {
-                Entries = [
+                Entries =
+                [
                     RichListEntry.Text("hp", $"Прочность здания {hp}/{maxhp}"),
-                    RichListEntry.Button("Доход со здания составляет " + moneyinside, new MButton("Собрать", "collect", _ =>
-                    {
-                        using var db = new DataBase();
-                        p.money += moneyinside;
-                        moneyinside = 0;
-
-                        db.Save(this, t => t.moneyinside);
-
-                        p.SendMoney();
-                        p.win?.CurrentTab.Refresh();
-                        p.SendWindow();
-                    }))
+                    RichListEntry.Button(
+                        $"Доход со здания составляет {moneyinside}",
+                        new MButton("Собрать", "collect", _ => CollectIncome(p)))
                 ]
             },
             Buttons = [],
             Rebuild = () => AdminPage(p),
         };
 
+        #endregion
+
+        #region slot purchase
+
         private static bool TryPurchaseSlot(Player p, int nextSlot)
         {
             if (nextSlot <= 10)
             {
-                if (PriceSlots.TryGetValue(nextSlot, out long requiredMoney) && p.money >= requiredMoney)
-                {
-                    p.money -= requiredMoney;
-                    p.skillslist.slots++;
-                    return true;
-                }
+                if (!PriceSlots.TryGetValue(nextSlot, out long requiredMoney))
+                    return false;
+
+                if (p.money < requiredMoney)
+                    return false;
+
+                p.money -= requiredMoney;
+                p.skillslist.slots++;
+                return true;
             }
-            else if (nextSlot <= 34)
-            {
-                if (PriceSlots.TryGetValue(nextSlot, out long requiredCreds) && p.creds >= requiredCreds)
-                {
-                    p.creds -= requiredCreds;
-                    p.skillslist.slots++;
-                    return true;
-                }
-            }
-            return false;
+
+            if (nextSlot > 34)
+                return false;
+
+            if (!PriceSlots.TryGetValue(nextSlot, out long requiredCreds))
+                return false;
+
+            if (p.creds < requiredCreds)
+                return false;
+
+            p.creds -= requiredCreds;
+            p.skillslist.slots++;
+            return true;
         }
 
-        private MButton? CreateBuySlotButton(Player p)
+        private static void BuySlot(Player p, int nextSlot)
+        {
+            if (p.skillslist.slots >= 34)
+                return;
+
+            if (!TryPurchaseSlot(p, nextSlot))
+                return;
+
+            using var db = new DataBase();
+            db.Save(p.skillslist, sk => sk.slots);
+            db.Save(p, pl => pl.money, pl => pl.creds);
+
+            RefreshAndSend(p);
+        }
+
+        private static MButton? CreateBuySlotButton(Player p)
         {
             int nextSlot = p.skillslist.slots + 1;
-            string buttonText = "Купить слот за ";
+
+            if (nextSlot > 34) return null;
+
+            var sb = new StringBuilder("Купить слот за ");
 
             if (nextSlot <= 10)
-                buttonText += $"<color=green>{PriceSlots[nextSlot]:N0} $</color>";
+                sb.Append($"<color=green>{PriceSlots[nextSlot]:N0} $</color>");
             else
-                buttonText += $"<color=yellow>{PriceSlots[nextSlot]:N0} C</color>";
+                sb.Append($"<color=yellow>{PriceSlots[nextSlot]:N0} C</color>");
 
-            return new MButton(buttonText, "buyslot", (args) =>
+            string buttonText = sb.ToString();
+
+            return new MButton(buttonText, "buyslot", _ => BuySlot(p, nextSlot));
+        }
+
+        #endregion
+
+        #region skill page
+
+        private static void InstallSlot(Player p, int arg)
+        {
+            p.skillslist.InstallSlot(arg);
+            RefreshAndSend(p);
+        }
+
+        private static void ConfirmSkillInstall(Player p, SkillType skilltype)
+        {
+            if (!p.skillslist.InstallSkill(skilltype, p.skillslist.GetCurrentSlot()))
+                return;
+
+            p.SendLvl();
+            RefreshAndSend(p);
+        }
+
+        private void UpgradeSkill(Player p, Skill skillfromslot)
+        {
+            long money = (long)skillfromslot.Cost;
+            p.money -= money;
+            moneyinside += (long)(money * 0.1);
+
+            using var db = new DataBase();
+            db.Save(this, t => t.moneyinside);
+            db.Save(p.skillslist, skill => skill.standartSkills, skill => skill.expertSkill);
+
+            p.SendMoney();
+            p.SendSkills(skillfromslot.Up());
+            p.SendLvl();
+
+            if (skillfromslot.type == SkillType.Movement || skillfromslot.type == SkillType.RoadMovement)
+                p.SendSpeed();
+
+            if (skillfromslot.type == SkillType.Health)
             {
-                if (p.skillslist.slots < 34)
-                {
-                    if (TryPurchaseSlot(p, nextSlot))
-                    {
-                        using var db = new DataBase();
-                        db.Save(p.skillslist, sk => sk.slots);
-                        db.Save(p, p => p.money, p => p.creds);
+                p.MaxHealth = (int)skillfromslot.Effect;
+                p.SendHealth();
+            }
 
-                        p.win?.CurrentTab.Refresh();
-                        p.SendWindow();
-                    }
-                }
-            });
+            RefreshAndSend(p);
+        }
+
+        private static void DeleteSkill(Player p)
+        {
+            if (!p.skillslist.DeleteSkill())
+                return;
+
+            p.SendLvl();
+            RefreshAndSend(p);
+        }
+
+        private static string BuildInstallDescription(Player p, SkillType skilltype, SkillType? conflictWith)
+        {
+            if (!conflictWith.HasValue)
+            {
+                var playerSkill = p.skillslist.GetSkill(skilltype);
+                return playerSkill != null
+                    ? playerSkill.GetDescription(p)
+                    : SkillTypeExtensions.GetDescription(skilltype);
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("НЕЛЬЗЯ УСТАНОВИТЬ ⚠️");
+            sb.AppendLine();
+            sb.AppendLine($"Навык \"{skilltype.GetName()}\" конфликтует с навыком \"{conflictWith?.GetName()}\".");
+            sb.AppendLine("Для установки этого навыка необходимо сначала удалить конфликтующий навык.");
+            sb.AppendLine();
+            return sb.ToString();
+        }
+
+        private void ShowInstallPage(Player p, SkillType skilltype, SkillType? conflictWith, UpPage basePage)
+        {
+            string description = BuildInstallDescription(p, skilltype, conflictWith);
+
+            var installPage = basePage with
+            {
+                SkillIcon = skilltype,
+                Text = description,
+                Rebuild = () => BuildSkillPage(p),
+                Button = !conflictWith.HasValue
+                    ? new MButton("Установить", "confirm", _ => ConfirmSkillInstall(p, skilltype)) : null
+            };
+
+            p.win?.CurrentTab.Replace(installPage);
+            p.SendWindow();
         }
 
         private UpPage BuildSkillPage(Player p)
         {
-            void onskill(int arg)
-            {
-                p.skillslist.InstallSlot(arg);
-                p.win?.CurrentTab.Refresh();
-                p.SendWindow();
-            }
+            void onskill(int arg) => InstallSlot(p, arg);
 
-            // Создаем базовый объект с общими свойствами
-            var basePage = new UpPage
-            {
-                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage(p)); p.SendWindow(); } : null,
-                Skills = p.skillslist.GetSkills(),
-                SlotAmount = p.skillslist.slots,
-                OnSkill = onskill,
-            };
-
-            var oninstall = (int slot, SkillType skilltype) =>
+            Action<int, SkillType> oninstall = (slot, skilltype) =>
             {
                 // Получаем текущие навыки игрока для проверки конфликтов
                 var currentSkills = p.skillslist.GetSkillTypes();
@@ -162,113 +283,56 @@ namespace MinesServer.GameShit.Buildings
                 // Проверяем конфликты
                 var conflictWith = SkillConflicts.CanLearn(skilltype, currentSkills);
 
-                // Создаем описание навыка
-                string description = "";
-
-                // Если есть конфликт - добавляем сообщение о конфликте в описание и не показываем кнопку установки
-                if (conflictWith.HasValue)
+                // Создаем базовый объект с общими свойствами
+                var basePage = new UpPage
                 {
-                    description = $"НЕЛЬЗЯ УСТАНОВИТЬ ⚠️\n\n" +
-                                  $"Навык \"{skilltype.GetName()}\" конфликтует с навыком \"{conflictWith?.GetName()}\".\n" +
-                                  $"Для установки этого навыка необходимо сначала удалить конфликтующий навык.\n\n";
-                }
-                else
-                {
-                    var playerSkill = p.skillslist.GetSkill(skilltype);
-                    description = playerSkill != null ? playerSkill.GetDescription(p) : SkillTypeExtensions.GetDescription(skilltype);
-                }
-
-                var installPage = basePage with
-                {
-                    SkillIcon = skilltype,
-                    Text = description,
-                    Rebuild = () => BuildSkillPage(p),
-                    // Показываем кнопку установки только если нет конфликта
-                    Button = !conflictWith.HasValue ? new MButton("Установить", "confirm", (args) =>
-                    {
-                        if (p.skillslist.InstallSkill(skilltype, p.skillslist.GetCurrentSlot()))
-                        {
-                            p.SendLvl();
-                            // Установили навык — данные изменились, возвращаемся к корню вкладки.
-                            p.win?.CurrentTab.Refresh();
-                            p.SendWindow();
-                        }
-                    }) : null
+                    OnAdmin = p.id == ownerid ? () => OpenAdmin(p) : null,
+                    Skills = p.skillslist.GetSkills(),
+                    SlotAmount = p.skillslist.slots,
+                    OnSkill = onskill,
                 };
 
-                p.win?.CurrentTab.Replace(installPage);
-                p.SendWindow();
+                ShowInstallPage(p, skilltype, conflictWith, basePage);
             };
 
             var skillfromslot = p.skillslist.GetSelectedSkill();
 
-            UpPage uppage;
-
+            // Случай: слот не выбран
             if (p.skillslist.GetCurrentSlot() == -1)
             {
-                uppage = basePage with
+                var emptyPage = new UpPage
                 {
+                    OnAdmin = p.id == ownerid ? () => OpenAdmin(p) : null,
+                    Skills = p.skillslist.GetSkills(),
+                    SlotAmount = p.skillslist.slots,
+                    OnSkill = onskill,
                     SkillsToInstall = null,
                     Text = "Выберите скилл или пустой слот",
                     Button = p.skillslist.slots < 34 ? CreateBuySlotButton(p) : null,
-                    SkillIcon = SkillType.Unknown
+                    SkillIcon = SkillType.Unknown,
                 };
+                return emptyPage with { Rebuild = () => BuildSkillPage(p) };
             }
-            else
+
+            // Случай: слот выбран
+            var selectedPage = new UpPage
             {
-                // Случай: слот выбран
-                uppage = basePage with
-                {
-                    SelectedSlot = p.skillslist.GetCurrentSlot(),
-                    SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
-                    OnInstall = skillfromslot == null ? oninstall : null,
-                    Text = skillfromslot?.GetDescription(p),
-                    Button = skillfromslot != null && skillfromslot.isUpReady() && p.money > skillfromslot.Cost ?
-                        new MButton("Прокачать", "upgrade", (args) =>
-                        {
-                            long money = (long)(skillfromslot.Cost);
-                            p.money -= money;
-                            moneyinside += (long)(money * 0.1);
+                OnAdmin = p.id == ownerid ? () => OpenAdmin(p) : null,
+                Skills = p.skillslist.GetSkills(),
+                SlotAmount = p.skillslist.slots,
+                OnSkill = onskill,
+                SelectedSlot = p.skillslist.GetCurrentSlot(),
+                SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
+                OnInstall = skillfromslot == null ? oninstall : null,
+                Text = skillfromslot?.GetDescription(p),
+                Button = skillfromslot != null && skillfromslot.isUpReady() && p.money > skillfromslot.Cost
+                    ? new MButton("Прокачать", "upgrade", _ => UpgradeSkill(p, skillfromslot))
+                    : null,
+                OnDelete = skillfromslot != null ? _ => DeleteSkill(p) : null,
+                SkillIcon = skillfromslot?.type,
+            };
 
-                            using var db = new DataBase();
-                            db.Save(this, t => t.moneyinside);
-                            db.Save(p.skillslist, skill => skill.standartSkills, skill => skill.expertSkill);
-
-                            p.SendMoney();
-                            p.SendSkills(skillfromslot.Up());
-                            p.SendLvl();
-
-                            if (skillfromslot.type == SkillType.Movement || skillfromslot.type == SkillType.RoadMovement)
-                            {
-                                p.SendSpeed();
-                            }
-
-                            if (skillfromslot.type == SkillType.Health)
-                            {
-                                p.MaxHealth = (int)skillfromslot.Effect;
-                                p.SendHealth();
-                            }
-
-                            p.win?.CurrentTab.Refresh();
-                            p.SendWindow();
-                        }) :
-                        null,
-                    OnDelete = skillfromslot != null ?
-                        (slot) =>
-                        {
-                            if (p.skillslist.DeleteSkill())
-                            {
-                                p.SendLvl();
-                                p.win?.CurrentTab.Refresh();
-                                p.SendWindow();
-                            }
-                        }
-                    :
-                    null,
-                    SkillIcon = skillfromslot?.type
-                };
-            }
-            return uppage with { Rebuild = () => BuildSkillPage(p) };
+            return selectedPage with { Rebuild = () => BuildSkillPage(p) };
         }
 
         private Tab TabSkillPage(Player p)
@@ -280,80 +344,97 @@ namespace MinesServer.GameShit.Buildings
                 InitialPage = BuildSkillPage(p)
             };
         }
-        private Card MainTitle(Player p, SkillType skilltype = SkillType.Unknown)
+
+        #endregion
+
+        #region cards / titles
+
+        private static Card MainTitle(Player p, SkillType skilltype = SkillType.Unknown)
         {
-            if (skilltype == SkillType.Unknown)
+            if (skilltype != SkillType.Unknown)
             {
-                string InfoPlayerOpp = "Баллов перепрошивки: <color=yellow>" + p.opp + "</color>";
-                return new Card(CardImageType.Skill, SkillType.Architecture.GetCode(),
-                    "Удаляя умения вы получаете баллы перепрошивки которые открывают доступ в экспертным умениям.\n" +
-                    "Эти умения не доступны в стандратной прошивке робота.\n" +
-                    "(Рис.1 - Пример экспертного умения: Архитектура)\n" + InfoPlayerOpp);
+                var descriptionSb = new StringBuilder()
+                    .AppendLine(skilltype.GetDescription())
+                    .Append("Стоимость перепрошивки: <color=yellow>")
+                    .Append(skilltype.GetBasePriceOPP())
+                    .Append("</color>")
+                    .ToString();
+
+                return new Card(
+                    CardImageType.Skill,
+                    skilltype.GetCode(),
+                    descriptionSb);
             }
-            else
+
+            var description = new StringBuilder()
+                .AppendLine("Удаляя умения вы получаете баллы перепрошивки которые открывают доступ в экспертным умениям.")
+                .AppendLine("Эти умения не доступны в стандратной прошивке робота.")
+                .AppendLine("(Рис.1 - Пример экспертного умения: Архитектура)")
+                .Append("Баллов перепрошивки: <color=yellow>")
+                .Append(p.opp)
+                .Append("</color>")
+                .ToString();
+
+            return new Card(
+                CardImageType.Skill,
+                SkillType.Architecture.GetCode(),
+                description);
+        }
+
+        #endregion
+
+        #region expert skills
+
+        private void BuyExpertSkill(Player p, SkillType skill, int price)
+        {
+            p.opp -= price;
+            p.skillslist.AddExpertSkillPurchased(skill);
+
+            using var db = new DataBase();
+            db.Save(p, t => t.opp);
+
+            // Перерисовываем страницу, чтобы отобразить "Куплено"
+            var refreshed = BuildSkillDetailPage(p, skill);
+            p.win?.CurrentTab.Replace(refreshed);
+            p.SendWindow();
+        }
+
+        private MButton BuildExpertSkillButton(Player p, SkillType skill, int price)
+        {
+            if (p.skillslist.IsExpertSkillPurchased(skill))
+                return new MButton("<color=lime>Вам уже доступно это умение</color>", "purchased", _ => { });
+
+            if (p.opp < price)
             {
-                string InfoPlayerOpp = "Стоимость перепрошивки: <color=yellow>" + skilltype.GetBasePriceOPP() + "</color>";
-                return new Card(CardImageType.Skill, skilltype.GetCode(),
-                    skilltype.GetDescription() + "\n" +
-                    InfoPlayerOpp);
+                long missing = price - p.opp;
+                var sb = new StringBuilder()
+                    .Append("<color=red>Не хватает ")
+                    .Append(missing.ToString("N0"))
+                    .Append(" OPP</color>");
+
+                return new MButton(sb.ToString(), "notenough", _ => { });
             }
+
+            var buySb = new StringBuilder()
+                .Append("Купить за <color=yellow>")
+                .Append(price)
+                .Append("</color> OPP");
+
+            return new MButton(buySb.ToString(), "buy", _ => BuyExpertSkill(p, skill, price));
         }
 
         // Открывает отдельную страницу с подробной информацией о выбранном экспертном умении
-        // и кнопкой покупки (или "Куплено"/"Назад").
         private Page BuildSkillDetailPage(Player p, SkillType currentDisplaySkill)
         {
-            bool isPurchased = p.skillslist.IsExpertSkillPurchased(currentDisplaySkill);
             int price = currentDisplaySkill.GetBasePriceOPP();
-
-            MButton actionButton;
-
-            if (isPurchased)
-            {
-                // Уже куплено — зелёная надпись, кнопка неактивна
-                actionButton = new MButton("<color=lime>Вам уже доступно это умение</color>", "purchased", _ =>
-                {
-                    // Ничего не делаем — умение уже куплено
-                });
-            }
-            else if (p.opp < price)
-            {
-                // Не хватает OPP — красная кнопка с указанием недостающего количества
-                long missing = price - p.opp;
-                actionButton = new MButton(
-                    $"<color=red>Не хватает {missing:N0} OPP</color>",
-                    "notenough",
-                    _ =>
-                    {
-                        // Ничего не делаем — недостаточно OPP.
-                        // Можно перерисовать, чтобы обновить значение (на случай изменения)
-                    });
-            }
-            else
-            {
-                // Достаточно OPP — обычная кнопка покупки
-                actionButton = new MButton($"Купить за <color=yellow>{price}</color> OPP", "buy", _ =>
-                {
-                    p.opp -= price;
-                    p.skillslist.AddExpertSkillPurchased(currentDisplaySkill);
-
-                    using var db = new DataBase();
-                    db.Save(p, t => t.opp);
-
-                    // Перерисовываем страницу, чтобы отобразить "Куплено"
-                    var refreshed = BuildSkillDetailPage(p, currentDisplaySkill);
-                    p.win?.CurrentTab.Replace(refreshed);
-                    p.SendWindow();
-                });
-            }
+            MButton actionButton = BuildExpertSkillButton(p, currentDisplaySkill, price);
 
             return new Page
             {
-                OnAdmin = p.id == ownerid
-                    ? () => { p.win?.CurrentTab.Open(AdminPage(p)); p.SendWindow(); }
-                : null,
+                OnAdmin = p.id == ownerid ? () => OpenAdmin(p) : null,
                 Card = MainTitle(p, currentDisplaySkill),
                 Buttons = new[] { actionButton },
+                Rebuild = () => BuildSkillDetailPage(p, currentDisplaySkill),
             };
         }
 
@@ -364,12 +445,11 @@ namespace MinesServer.GameShit.Buildings
             p.SendWindow();
         }
 
-        // Корневая страница вкладки экспертных умений. Rebuild — да, чтобы Refresh
-        // пересобирал её с актуальными ✓/цветами при внешних изменениях.
+        // Корневая страница вкладки экспертных умений
         private Page TabFlashingPage(Player p)
         {
             var allSkills = SkillTypeExtensions.GetAllInfos();
-            var rich = new List<RichListEntry> { };
+            var rich = new List<RichListEntry>();
 
             foreach (var kvp in allSkills)
             {
@@ -384,22 +464,24 @@ namespace MinesServer.GameShit.Buildings
                 // Название умения — зелёное, если уже куплено
                 string color = isPurchased ? "lime" : "white";
 
-                string skillName = $"Умение <color={color}>{info.Name}</color>";
+                var sb = new StringBuilder();
                 if (isPurchased)
-                {
-                    skillName = $"✓ {skillName}";
-                }
+                    sb.Append("✓ ");
 
-                rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", skillType.ToString(), _ =>
-                {
-                    // Открываем отдельную страницу с подробностями и кнопкой покупки
-                    OpenSkillPage(p, skillType);
-                })));
+                sb.Append("Умение <color=")
+                  .Append(color)
+                  .Append('>')
+                  .Append(info.Name)
+                  .Append("</color>");
+
+                string skillName = sb.ToString();
+
+                rich.Add(RichListEntry.Button(skillName, new MButton("Подробнее", skillType.ToString(), _ => OpenSkillPage(p, skillType))));
             }
 
             return new Page
             {
-                OnAdmin = p.id == ownerid ? () => { p.win?.CurrentTab.Open(AdminPage(p)); p.SendWindow(); } : null,
+                OnAdmin = p.id == ownerid ? () => OpenAdmin(p) : null,
                 Card = MainTitle(p),
                 RichList = new RichListConfig(rich.ToArray(), NoScroll: false),
                 Buttons = [],
@@ -422,6 +504,7 @@ namespace MinesServer.GameShit.Buildings
             };
         }
 
+        #endregion
         public override Window? GUIWin(Player p)
         {
             return new Window()
