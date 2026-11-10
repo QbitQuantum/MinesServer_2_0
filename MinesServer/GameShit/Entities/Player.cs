@@ -26,14 +26,12 @@ namespace MinesServer.GameShit.Entities
 
         }
 
-        private const int BaseMoveDelay = 10000;
+        private const int BaseMoveDelay = 200;
         private const int AfkTimeoutMinutes = 5;
         private const int BotUpdateIntervalSeconds = 4;
         private const int C190StackResetMinutes = 1;
         private const int InventoryUseCooldownMs = 400;
-        private const int MinimumServerPause = 20;
-        private const int PauseBotDivisor = 1000;
-        private const int PauseBotMultiplier = 7;
+        private const double ServerPauseScale = 0.007;
 
         private (int X, int Y)? lastchunk;
 
@@ -80,9 +78,8 @@ namespace MinesServer.GameShit.Entities
             get
             {
                 var moveSkill = skillslist.GetSkill(SkillType.Movement);
-                long pauseBot = moveSkill != null ? (int)(moveSkill.Effect * 100) : BaseMoveDelay;
-                long pauseServer = pauseBot * PauseBotMultiplier / PauseBotDivisor;
-                return Math.Max(pauseServer, MinimumServerPause);
+                long basePause = moveSkill != null ? (int)(moveSkill.Effect) : BaseMoveDelay;
+                return basePause * ServerPauseScale;
             }
         }
 
@@ -130,7 +127,7 @@ namespace MinesServer.GameShit.Entities
             win = null;
             skillslist.LoadStandartSkills();
             settings.LoadSettings();
-            MaxHealth = CalculateMaxHealth();
+            UpdateMaxHp();
             Health = MaxHealth;
             MoveToChunk();
             SendInitialData();
@@ -147,6 +144,11 @@ namespace MinesServer.GameShit.Entities
             y = 0;
             dir = 0;
             skin = 0;
+        }
+
+        public void UpdateMaxHp()
+        {
+            MaxHealth = CalculateMaxHealth();
         }
 
         private int CalculateMaxHealth()
