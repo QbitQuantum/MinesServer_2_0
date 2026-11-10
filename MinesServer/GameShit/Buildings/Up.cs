@@ -191,13 +191,25 @@ namespace MinesServer.GameShit.Buildings
             RefreshAndSend(p);
         }
 
+        private static void UpdateStatePlayer(Player p, SkillType skilltype)
+        {
+            if (skilltype == SkillType.Movement || skilltype == SkillType.RoadMovement)
+                p.SendSpeed();
+
+            if (skilltype == SkillType.Health)
+            {
+                p.UpdateMaxHp();
+                p.SendHealth();
+            }
+            p.SendLvl();
+            RefreshAndSend(p);
+        }
+
         private static void ConfirmSkillInstall(Player p, SkillType skilltype)
         {
             if (!p.skillslist.InstallSkill(skilltype, p.skillslist.GetCurrentSlot()))
                 return;
-
-            p.SendLvl();
-            RefreshAndSend(p);
+            UpdateStatePlayer(p, skilltype);
         }
 
         private void UpgradeSkill(Player p, Skill skillfromslot)
@@ -212,27 +224,20 @@ namespace MinesServer.GameShit.Buildings
 
             p.SendMoney();
             p.SendSkills(skillfromslot.Up());
-            p.SendLvl();
-
-            if (skillfromslot.Type == SkillType.Movement || skillfromslot.Type == SkillType.RoadMovement)
-                p.SendSpeed();
-
-            if (skillfromslot.Type == SkillType.Health)
-            {
-                p.MaxHealth = (int)skillfromslot.Effect;
-                p.SendHealth();
-            }
-
-            RefreshAndSend(p);
+            UpdateStatePlayer(p, skillfromslot.Type);
         }
 
         private static void DeleteSkill(Player p)
         {
+            var currentSkill = p.skillslist.GetSelectedSkill();
+            if (currentSkill == null) return;
+
+            var skilltype = currentSkill.Type;
+
             if (!p.skillslist.DeleteSkill())
                 return;
 
-            p.SendLvl();
-            RefreshAndSend(p);
+            UpdateStatePlayer(p, skilltype);
         }
 
         private static string BuildInstallDescription(Player p, SkillType skilltype, SkillType? conflictWith)
