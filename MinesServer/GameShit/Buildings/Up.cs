@@ -214,10 +214,10 @@ namespace MinesServer.GameShit.Buildings
             p.SendSkills(skillfromslot.Up());
             p.SendLvl();
 
-            if (skillfromslot.type == SkillType.Movement || skillfromslot.type == SkillType.RoadMovement)
+            if (skillfromslot.Type == SkillType.Movement || skillfromslot.Type == SkillType.RoadMovement)
                 p.SendSpeed();
 
-            if (skillfromslot.type == SkillType.Health)
+            if (skillfromslot.Type == SkillType.Health)
             {
                 p.MaxHealth = (int)skillfromslot.Effect;
                 p.SendHealth();
@@ -325,11 +325,11 @@ namespace MinesServer.GameShit.Buildings
                 SkillsToInstall = skillfromslot == null ? p.skillslist.SkillToInstall() : null,
                 OnInstall = skillfromslot == null ? oninstall : null,
                 Text = skillfromslot?.GetDescription(p),
-                Button = skillfromslot != null && skillfromslot.isUpReady() && p.money > skillfromslot.Cost
+                Button = skillfromslot != null && skillfromslot.IsUp && p.money > skillfromslot.Cost
                     ? new MButton("Прокачать", "upgrade", _ => UpgradeSkill(p, skillfromslot))
                     : null,
                 OnDelete = skillfromslot != null ? _ => DeleteSkill(p) : null,
-                SkillIcon = skillfromslot?.type,
+                SkillIcon = skillfromslot?.Type,
             };
 
             return selectedPage with { Rebuild = () => BuildSkillPage(p) };

@@ -49,10 +49,10 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             var DefaultSkills = new List<Skill>
             {
-                new(lvl: 1, exp: 0, type: SkillType.MineGeneral),
-                new(lvl: 1, exp: 0, type: SkillType.Digging),
-                new(lvl: 1, exp: 0, type: SkillType.Movement),
-                new(lvl: 1, exp: 0, type: SkillType.Health)
+                new(level: 1, expiriense: 0, type: SkillType.MineGeneral),
+                new(level: 1, expiriense: 0, type: SkillType.Digging),
+                new(level: 1, expiriense: 0, type: SkillType.Movement),
+                new(level: 1, expiriense: 0, type: SkillType.Health)
             };
 
             for (int i = 0; i < DefaultSkills.Count; i++)
@@ -82,7 +82,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         /// </summary>
         public Skill? GetSkill(SkillType Type)
         {
-            return _purchasedStandartSkills.Values.FirstOrDefault(s => s?.type == Type);
+            return _purchasedStandartSkills.Values.FirstOrDefault(s => s?.Type == Type);
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             return _purchasedStandartSkills.Values
                     .Where(s => s != null)
-                    .Select(s => s.type)
+                    .Select(s => s.Type)
                     .ToList();
         }
 
@@ -242,9 +242,9 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 var skill = kvp.Value;
                 raw[kvp.Key] = new PlayerSkillData
                 {
-                    Code = skill.type.GetCode(),
-                    Level = skill.lvl,
-                    Exp = skill.exp
+                    Code = skill.Type.GetCode(),
+                    Level = skill.Level,
+                    Exp = skill.Expiriense
                 };
             }
 
@@ -267,7 +267,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                 var info = kvp.Value;
 
                 // Пропускаем если навык уже есть
-                if (_purchasedStandartSkills.Values.Any(s => s?.type == skillType))
+                if (_purchasedStandartSkills.Values.Any(s => s?.Type == skillType))
                     continue;
 
                 // Для экспертных навыков проверяем, куплен ли он
@@ -319,7 +319,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             return result;
         }
 
-        public int lvlsummary() => _purchasedStandartSkills.Sum(i => i.Value?.lvl ?? 0);
+        public int lvlsummary() => _purchasedStandartSkills.Sum(i => i.Value?.Level ?? 0);
 
         public UpSkill[] GetSkills()
         {
@@ -331,8 +331,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             {
                 if (_purchasedStandartSkills.TryGetValue(i, out Skill? value) && value is not null)
                 {
-                    var saled = value.saledSkill;
-                    ski.Add(new UpSkill(i, saled.Lvl, saled.IsUp, saled.Type));
+                    ski.Add(new UpSkill(i, value.Level, value.IsUp, value.Type));
                 }
             }
             return ski.ToArray();

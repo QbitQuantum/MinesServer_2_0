@@ -4,73 +4,36 @@ using MinesServer.GameShit.Enums;
 
 namespace MinesServer.GameShit.Skills
 {
-    class TemplateDescription
-    {
-        /// <summary>
-        /// Унифицированный шаблон описания навыка, основанный на его идентификаторе.
-        /// </summary>
-        public static string Description(
-            SkillType skillType,
-            int level,
-            float currentExp,
-            float maxExp,
-            float discountEffect = 0,
-            float upgradeEffect = 0)
-        {
-            var info = skillType.GetInfo();
-            if (info == null) return "Информация об умении отсутствует.";
-            var name = info.Name ?? skillType.ToString();
-            var hint = info.LevelingHint ?? "Неизвестно";
-            var effect = info.EffectFunc(level);
-
-            var sb = new StringBuilder();
-
-            sb.AppendLine($"<color=white>{name}</color>. Уровень: <color=white>{level}</color>");
-            sb.AppendLine($"Опыт <color=white>{currentExp}/{maxExp}</color> " + FormatUpgrade(upgradeEffect));
-            sb.AppendLine($"Как качать: <color=white>{hint}</color>");
-            sb.AppendLine(skillType.GetDisplayInfo(effect));
-            sb.AppendLine(FormatCost(skillType.GetPrice(level), discountEffect));
-            sb.AppendLine($"<color=white>Баллы перепрошивки</color>: {skillType.GetOpp(level)}");
-
-            return sb.ToString();
-        }
-
-        private static string FormatUpgrade(float upgradeEffect) =>
-            upgradeEffect > 0
-                ? $"<color=yellow>[Экспертное обучение x{1 + upgradeEffect / 100f:F1}]</color>"
-                : "<color=red>[Экспертное обучение отсутствует]</color>";
-
-        private static string FormatCost(float price, float discountEffect) =>
-            $"Стоимость: {price} " + (discountEffect > 0
-                ? $"<color=yellow>[Оптимизация стоимости {discountEffect:F1}%]</color>"
-                : "<color=red>[Оптимизация отсутствует]</color>");
-    }
     public class Skill
     {
         public Skill()
         {
         }
 
-        public Skill(int lvl, float exp, SkillType type)
+        public Skill(int level, float expiriense, SkillType type)
         {
-            this.lvl = lvl;
-            this.exp = exp;
-            this.type = type;
+            _level = level;
+            _expiriense = expiriense;
+            _type = type;
         }
 
-        public int lvl = 1;
-        public float exp = 0;
-        public SkillType type;
+        private int _level = 1;
+        private float _expiriense = 0;
+        private readonly SkillType _type = SkillType.Unknown;
 
-        public SaledSkill saledSkill => new(lvl, isUpReady(), type);
+        public int Level => _level;
+        public float Expiriense => _expiriense;
+        public SkillType Type => _type;
+
+        public bool IsUp => IsUpReady();
 
         public Dictionary<string, int> Up()
         {
             Dictionary<string, int> skillProgress = [];
-            if (!isUpReady()) return skillProgress;
-            exp -= Expiriense;
-            lvl += 1;
-            skillProgress.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
+            if (!IsUp) return skillProgress;
+            _expiriense -= MaxExpiriense;
+            _level += 1;
+            skillProgress.Add(Type.GetCode(), (int)((Expiriense * 100f) / MaxExpiriense));
             return skillProgress;
         }
 
@@ -79,31 +42,31 @@ namespace MinesServer.GameShit.Skills
             Dictionary<string, int> skillProgress = [];
             if (UpgradeEffect != 0)
                 expv *= 1f + (UpgradeEffect / 100f);
-            exp += expv;
-            skillProgress.Add(type.GetCode(), (int)((exp * 100f) / Expiriense));
+            _expiriense += expv;
+            skillProgress.Add(Type.GetCode(), (int)((Expiriense * 100f) / MaxExpiriense));
             return skillProgress;
         }
 
         //  Mетод проверки уровня
         public bool IsLevelSatisfied(int requiredLevel)
         {
-            return lvl >= requiredLevel;
+            return Level >= requiredLevel;
         }
 
         // Метод для получения отставания по уровню
         public int GetLevelDeficit(int requiredLevel)
         {
-            return requiredLevel - lvl;
+            return requiredLevel - Level;
         }
 
         public bool IsRequiered(SkillType RequiredSkill, int RequiredLevel)
         {
-            return type == RequiredSkill && lvl >= RequiredLevel;
+            return Type == RequiredSkill && Level >= RequiredLevel;
         }
 
-        public bool isUpReady()
+        private bool IsUpReady()
         {
-            return exp >= Expiriense;
+            return Expiriense >= MaxExpiriense;
         }
 
         public string GetDescription(Player p)
@@ -117,33 +80,33 @@ namespace MinesServer.GameShit.Skills
                 var SkillUpgrade = SkillType.Upgrade;
                 var upgradeSkill = p.skillslist.GetSkill(SkillUpgrade);
                 
-                if (upgradeSkill != null && upgradeSkill.type != SkillUpgrade)
+                if (upgradeSkill != null && upgradeSkill.Type != SkillUpgrade)
                     upgradeEffect = upgradeSkill.Effect;
 
                 // Находим навык Discount
                 var SkillDiscount = SkillType.Discount;
                 var discountSkill = p.skillslist.GetSkill(SkillDiscount);
 
-                if (discountSkill != null && discountSkill.type != SkillDiscount)
+                if (discountSkill != null && discountSkill.Type != SkillDiscount)
                     discountEffect = discountSkill.Effect;
             }
 
-            return TemplateDescription.Description(
-                type,
-                lvl,
-                exp,
+            return TemplateDescription(
+                Type,
+                Level,
                 Expiriense,
+                MaxExpiriense,
                 discountEffect,
                 upgradeEffect
             );
         }
 
-        public float Expiriense
+        public float MaxExpiriense
         {
             get
             {
-                var info = type.GetInfo();
-                return info?.ExpFunc?.Invoke(lvl) ?? 100f;
+                var info = Type.GetInfo();
+                return info?.ExpFunc?.Invoke(Level) ?? 100f;
             }
         }
 
@@ -151,8 +114,8 @@ namespace MinesServer.GameShit.Skills
         {
             get
             {
-                var info = type.GetInfo();
-                return info.Description;
+                var info = Type.GetInfo();
+                return info?.Description ?? "";
             }
         }
 
@@ -160,16 +123,16 @@ namespace MinesServer.GameShit.Skills
         {
             get
             {
-                var info = type.GetInfo();
-                return info?.EffectFunc?.Invoke(lvl) ?? 0f;
+                var info = Type.GetInfo();
+                return info?.EffectFunc?.Invoke(Level) ?? 0f;
             }
         }
         public float DurabilityEffect
         {
             get
             {
-                var info = type.GetInfo();
-                return info?.DurabilityFunc?.Invoke(lvl) ?? 0f;
+                var info = Type.GetInfo();
+                return info?.DurabilityFunc?.Invoke(Level) ?? 0f;
             }
         }
 
@@ -177,35 +140,50 @@ namespace MinesServer.GameShit.Skills
         {
             get
             {
-                var info = type.GetInfo();
-                return info?.PriceFunc?.Invoke(lvl) ?? 0f;
+                var info = Type.GetInfo();
+                return info?.PriceFunc?.Invoke(Level) ?? 0f;
             }
         }
 
-        public Dictionary<SkillType, int>? requirements
+        /// <summary>
+        /// Унифицированный шаблон описания навыка, основанный на его идентификаторе.
+        /// </summary>
+        private static string TemplateDescription(
+            SkillType Type,
+            int Level,
+            float Expiriense,
+            float MaxExpiriense,
+            float discountEffect = 0,
+            float upgradeEffect = 0)
         {
-            get;
-            set;
+            var info = Type.GetInfo();
+
+            if (info == null) return "Информация об умении отсутствует.";
+
+            var name = info.Name ?? Type.ToString();
+            var hint = info.LevelingHint ?? "Неизвестно";
+            var effect = info.EffectFunc(Level);
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"<color=white>{name}</color>. Уровень: <color=white>{Level}</color>");
+            sb.AppendLine($"Опыт <color=white>{Expiriense}/{MaxExpiriense}</color> " + FormatUpgrade(upgradeEffect));
+            sb.AppendLine($"Как качать: <color=white>{hint}</color>");
+            sb.AppendLine(Type.GetDisplayInfo(effect));
+            sb.AppendLine(FormatCost(Type.GetPrice(Level), discountEffect));
+            sb.AppendLine($"<color=white>Баллы перепрошивки</color>: {Type.GetOpp(Level)}");
+
+            return sb.ToString();
         }
 
-        public Dictionary<SkillType, int>? GetReqs
-        {
-            get
-            {
-                // Сначала проверяем, есть ли локальные требования
-                if (requirements != null)
-                    return requirements;
+        private static string FormatUpgrade(float upgradeEffect) =>
+            upgradeEffect > 0
+                ? $"<color=yellow>[Экспертное обучение x{1 + upgradeEffect / 100f:F1}]</color>"
+                : "<color=red>[Экспертное обучение отсутствует]</color>";
 
-                // Иначе берем из централизованного хранилища
-                var info = type.GetInfo();
-                if (info?.Requirements != null)
-                {
-                    // Конвертируем List<SkillRequirement> в Dictionary<SkillType, int>
-                    return info.Requirements.ToDictionary(r => r.RequiredSkill, r => r.RequiredLevel);
-                }
-
-                return null;
-            }
-        }
+        private static string FormatCost(float price, float discountEffect) =>
+            $"Стоимость: {price} " + (discountEffect > 0
+                ? $"<color=yellow>[Оптимизация стоимости {discountEffect:F1}%]</color>"
+                : "<color=red>[Оптимизация отсутствует]</color>");
     }
 }
