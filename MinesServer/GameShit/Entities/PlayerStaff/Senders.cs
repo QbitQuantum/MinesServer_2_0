@@ -66,8 +66,8 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
         public static void SendSpeed(this Player p)
         {
-            var _serverPause = p.ServerPause * 1.7;
-            p.connection?.SendU(new SpeedPacket((int)(_serverPause), (int)(_serverPause * 0.80), 100000));
+            var serverPause = p.ServerPause;
+            p.connection?.SendU(new SpeedPacket((int)(serverPause), (int)(serverPause * 0.80), 100000));
         }
 
         public static void SendSkills(this Player p, Dictionary<string, int> skillProgress)

@@ -31,7 +31,7 @@ namespace MinesServer.GameShit.Entities
         private const int BotUpdateIntervalSeconds = 4;
         private const int C190StackResetMinutes = 1;
         private const int InventoryUseCooldownMs = 400;
-        private const double ServerPauseScale = 0.7;
+        private const double ServerPauseScale = 1.19;
 
         private (int X, int Y)? lastchunk;
 
