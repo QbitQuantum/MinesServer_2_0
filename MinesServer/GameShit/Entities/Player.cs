@@ -129,9 +129,11 @@ namespace MinesServer.GameShit.Entities
             settings.LoadSettings();
             UpdateMaxHp();
             Health = MaxHealth;
-            MoveToChunk();
             SendInitialData();
             SubscribeToEvents();
+
+            int delayMs = Math.Clamp((int)(Double.Hypot(x, y) / 10.0), 300, 2000);
+            _ = Task.Delay(delayMs).ContinueWith(_ => MoveToChunk(), TaskScheduler.Default);
         }
 
         public void CreatePlayer()
