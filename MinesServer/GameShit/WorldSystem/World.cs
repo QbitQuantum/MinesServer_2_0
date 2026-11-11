@@ -234,32 +234,42 @@ namespace MinesServer.GameShit.WorldSystem
         public static bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
         {
             if (player == null) return false;
+            if (player.connection == null) return false;
 
-            List<IHubPacket> packets = new();
+            List<IHubPacket> packets = [];
+
+            bool accessGun = AccessGun(x, y, player.cid).access;
+
             for (int cx = left; cx <= right; cx++)
             {
                 for (int cy = bottom; cy <= top; cy++)
                 {
                     int targetX = x + cx;
                     int targetY = y + cy;
-                    var p = GetProp(GetCell(targetX, targetY));
-                    if (!ValidCoord(targetX, targetY) ||
-                        PackPart(targetX, targetY) ||
-                        !AccessGun(x, y, player.cid).access ||
-                        ignoreplace && (!IsForDigging(p) || GetCell(targetX, targetY) == 36) ||
-                        !ignoreplace && !IsBlockedForPlacement(p))
+
+                    if (!ValidCoord(targetX, targetY))
                     {
                         packets.Add(new HBFXPacket(targetX, targetY, 0));
+                        continue;
                     }
+
+                    var prop = GetProp(GetCell(targetX, targetY));
+
+                    bool isInvalidCell = ignoreplace ?
+                        (!IsForDigging(prop) || prop.type == (byte)CellType.GoldenRoad)
+                        : !IsBlockedForPlacement(prop);
+
+                    if (accessGun && !PackPart(targetX, targetY) && !isInvalidCell)
+                        continue;
+
+                    packets.Add(new HBFXPacket(targetX, targetY, 0));
                 }
             }
 
-            if (packets.Count > 0)
-            {
-                player.connection?.SendB(new HBPacket(packets.ToArray()));
-                return false;
-            }
-            return true;
+            if (packets.Count == 0) return true;
+
+            player.connection.SendB(new HBPacket(packets.ToArray()));
+            return false;
         }
 
         public static bool DamageCell(int x, int y, float value, Operator TypeOperator = Operator.Minus)
