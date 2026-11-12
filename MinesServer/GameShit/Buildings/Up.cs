@@ -247,7 +247,7 @@ namespace MinesServer.GameShit.Buildings
                 var playerSkill = p.skillslist.GetSkill(skilltype);
                 return playerSkill != null
                     ? playerSkill.GetDescription(p)
-                    : SkillTypeExtensions.GetDescription(skilltype);
+                    : skilltype.GetDescription();
             }
 
             var sb = new StringBuilder();
