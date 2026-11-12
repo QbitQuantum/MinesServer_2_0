@@ -120,13 +120,25 @@ namespace MinesServer.GameShit.Entities
             settings.Init();
         }
 
+        public void Load()
+        {
+            skillslist.LoadStandartSkills();
+            settings.LoadSettings();
+            // TODO: Грузит только для владельцев
+            using var db = new DataBase();
+            clan = db.clans.AsNoTracking()
+                .FirstOrDefault(i => i.ownerid == id);
+            // TODO: Грузит только для владельцев
+            resp = db.resps.AsNoTracking()
+                .FirstOrDefault(i => i.ownerid == id);
+        }
+
         public void UpdateState()
         {
             if (!DataBase.activeplayers.Contains(this))
                 DataBase.activeplayers.Add(this);
             win = null;
-            skillslist.LoadStandartSkills();
-            settings.LoadSettings();
+            Load();
             UpdateMaxHp();
             Health = MaxHealth;
             SendInitialData();
