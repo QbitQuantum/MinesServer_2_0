@@ -231,7 +231,21 @@ namespace MinesServer.GameShit.WorldSystem
             }
         }
 
-        public static bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
+        public static bool TryBuildPack(
+            Player player,
+            Func<int, int, Pack> factory,
+            int minX, int maxX, int minY, int maxY, bool notGate = true)
+        {
+            var (x, y) = player.GetDirCord(notGate);
+
+            if (!CanBuildPack(minX, maxX, minY, maxY, x, y, player))
+                return false;
+
+            factory(x, y).Build();
+            return true;
+        }
+
+        private static bool CanBuildPack(int left, int right, int bottom, int top, int x, int y, Player player, bool ignoreplace = false)
         {
             if (player == null) return false;
             if (player.connection == null) return false;

@@ -148,51 +148,27 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
         {
             return new Dictionary<int, ItemUsage>
             {
-                { (int)Item.Teleport,        p => TryBuildPack(p, (x, y) => new Teleport(x, y, p.id), -2, 2, -2, 1) },
-                { (int)Item.Respawn,         p => TryBuildPack(p, (x, y) => new Resp(x, y, p.id),     -2, 6, -2, 3) },
-                { (int)Item.SpotBot,         p => TryBuildPack(p, (x, y) => new Spot(x, y, p.id),      1, 1,  1, 1) },
-                { (int)Item.Up,              p => TryBuildPack(p, (x, y) => new Up(x, y, p.id),       -2, 2, -3, 4) },
-                { (int)Item.Market,          p => TryBuildPack(p, (x, y) => new Market(x, y, p.id),   -3, 3, -3, 3) },
-                { (int)Item.ScienceCenter,   p => TryBuildPack(p, (x, y) => new NC(x, y, p.id),        1, 1,  1, 1) },
-                { (int)Item.Crafter,         p => TryBuildPack(p, (x, y) => new Crafter(x, y, p.id),  -2, 2, -2, 2) },
-                { (int)Item.Storage,         p => TryBuildPack(p, (x, y) => new Storage(x, y, p.id),  -2, 2, -2, 1) },
-
-                { (int)Item.Gun, p =>
-                    {
-                        if (p.clan == null) return false;
-                        var (x, y) = p.GetDirCord(true);
-                        if (!World.CanBuildPack(-2, 2, -2, 2, x, y, p)) return false;
-                        new Gun(x, y, p.id, p.cid).Build();
-                        return true;
-                    }
-                },
-
-                { (int)Item.ClanGate, p =>
-                    {
-                        if (p.clan == null) return false;
-                        var (x, y) = p.GetDirCord();
-                        var access = World.AccessGun(x, y, p.cid);
-                        if (!access.access || !access.anygun) return false;
-
-                        var gate = new Gate(x, y, p.cid);
-                        gate.Build();
-                        using var db = new DataBase();
-                        db.gates.Add(gate);
-                        db.SaveChanges();
-                        return true;
-                    }
-                },
+                { (int)Item.Teleport,                   p => World.TryBuildPack(p, (x, y) => new Teleport(x, y, p.id),    -2, 2, -2, 1) },
+                { (int)Item.Respawn,                    p => World.TryBuildPack(p, (x, y) => new Resp(x, y, p.id),        -2, 6, -2, 3) },
+                { (int)Item.SpotBot,                    p => World.TryBuildPack(p, (x, y) => new Spot(x, y, p.id),         1, 1,  1, 1) },
+                { (int)Item.Up,                         p => World.TryBuildPack(p, (x, y) => new Up(x, y, p.id),          -2, 2, -3, 4) },
+                { (int)Item.Market,                     p => World.TryBuildPack(p, (x, y) => new Market(x, y, p.id),      -3, 3, -3, 3) },
+                { (int)Item.ScienceCenter,              p => World.TryBuildPack(p, (x, y) => new NC(x, y, p.id),          -4, 4, -1, 4) },
+                { (int)Item.Crafter,                    p => World.TryBuildPack(p, (x, y) => new Crafter(x, y, p.id),     -2, 2, -2, 2) },
+                { (int)Item.Storage,                    p => World.TryBuildPack(p, (x, y) => new Storage(x, y, p.id),     -2, 2, -2, 1) },
+                { (int)Item.Gun,      p => p.clan != null && World.TryBuildPack(p, (x, y) => new Gun(x, y, p.id, p.cid),  -2, 2, -2, 2) },
+                { (int)Item.ClanGate, p => p.clan != null && World.TryBuildPack(p, (x, y) => new Gate(x, y, p.id, p.cid),  0, 0,  0, 0, false) },
 
                 { (int)Item.Disassembler, p =>
                     {
-                        var (x, y) = p.GetDirCord(true);
-                        var pack = World.GetPack(x, y);
+                        Pack? pack = null;
+                        Player? owner = null;
+                        var cell = World.GetCell(p.x, p.y);
+                        var (x, y) = p.GetDirCord(World.GetCell(p.x, p.y) != (byte)CellType.Gate);
+                        pack = World.GetPack(x, y);
                         if (pack == null) return false;
-                        if (p.id != pack.ownerid && p.cid != pack.cid) return false;
-
-                        var owner = p.id == pack.ownerid ? p : DataBase.GetPlayer(pack.ownerid);
+                        owner = p.id == pack.ownerid ? p : DataBase.GetPlayer(pack.ownerid);
                         if (owner == null) return false;
-
                         pack.Destroy(owner);
                         return true;
                     }
@@ -236,19 +212,6 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
 
                 { (int)Item.VolcanoRadar, p => ShowVolcanoInfo(p) },
             };
-        }
-
-        private static bool TryBuildPack(
-            Player player,
-            Func<int, int, Pack> factory,
-            int minX, int maxX, int minY, int maxY)
-        {
-            var (x, y) = player.GetDirCord(true);
-            if (!World.CanBuildPack(minX, maxX, minY, maxY, x, y, player))
-                return false;
-
-            factory(x, y).Build();
-            return true;
         }
 
         private static bool DetonatePlasmaBomb(Player player)

@@ -10,9 +10,15 @@ namespace MinesServer.GameShit.Buildings
     {
         private Gate() { }
 
-        public Gate(int x, int y, int cid) : base(x, y, 0)
+        public Gate(int x, int y, int ownerid, int cid) : base(x, y, ownerid)
         {
-            this.x = x; this.y = y; this.cid = cid;
+            this.x = x; 
+            this.y = y; 
+            this.cid = cid;
+
+            using var db = new DataBase();
+            db.gates.Add(this);
+            db.SaveChanges();
         }
 
         #region fields
@@ -31,15 +37,14 @@ namespace MinesServer.GameShit.Buildings
         }
         public override void Destroy(Player p)
         {
-            World.SetCell(x, y, 32);
+            ClearBuilding();
             using var db = new DataBase();
             db.gates.Remove(this);
             db.SaveChanges();
+            World.RemovePack(this);
         }
-        public override Window? GUIWin(Player p)
-        {
-            return null;
-        }
+
+        public override Window? GUIWin(Player p) => null;
 
         protected override void ClearBuilding()
         {
