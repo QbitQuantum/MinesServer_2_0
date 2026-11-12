@@ -540,6 +540,8 @@ namespace MinesServer.GameShit.Entities
             connection?.SendU(new SmoothTPPacket(x, y));
             BotsRender();
             CheckChunkChanged();
+            using var db = new DataBase();
+            db.Save(this, t => t.x, t => t.y);
         }
 
         public void teleport_tp(int x, int y)
