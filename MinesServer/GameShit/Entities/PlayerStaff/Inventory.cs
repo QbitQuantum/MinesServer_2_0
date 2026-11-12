@@ -84,14 +84,12 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
             var (x, y) = player.GetDirCord();
             var selectedItem = ItemTypeExt.GetItemById(selected);
 
-            var canPlaceHere =
-                !World.ContainsPack(x, y, out _) &&
-                (World.GetProp(x, y).can_place_over || selectedItem.CanBePlacedAnywhere()) &&
-                this[selected] > 0;
+            var canPlaceHere = World.GetCell(x, y) == (byte)CellType.GoldenRoad ? 
+                selectedItem.CanBePlacedAnywhere() : this[selected] > 0;
 
             if (!canPlaceHere || !usage(player))
                 return;
-
+            
             this[selected]--;
             if (this[selected] == 0)
                 _miniQueue.Remove(selected);
@@ -164,7 +162,7 @@ namespace MinesServer.GameShit.Entities.PlayerStaff
                         Pack? pack = null;
                         Player? owner = null;
                         var cell = World.GetCell(p.x, p.y);
-                        var (x, y) = p.GetDirCord(World.GetCell(p.x, p.y) != (byte)CellType.Gate);
+                        var (x, y) = p.GetDirCord(World.GetCell(p.x, p.y) == (byte)CellType.Gate);
                         pack = World.GetPack(x, y);
                         if (pack == null) return false;
                         owner = p.id == pack.ownerid ? p : DataBase.GetPlayer(pack.ownerid);
