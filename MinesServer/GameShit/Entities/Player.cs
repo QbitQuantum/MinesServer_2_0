@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Buildings;
@@ -552,8 +553,25 @@ namespace MinesServer.GameShit.Entities
             connection?.SendU(new SmoothTPPacket(x, y));
             BotsRender();
             CheckChunkChanged();
-            using var db = new DataBase();
-            db.Save(this, t => t.x, t => t.y);
+            // TODO: ВРЕМЕННО ОТКЛЮЧЕНО СОХРАНЕНИЕ ПОЗИЦИИ.
+            // Причина: Attach(player) в DataBase.Save обходит граф навигаций (clan, resp, clanrank,
+            // clan.members и т.д.) и вызывает System.InvalidOperationException:
+            // "The instance of entity type 'Clan' cannot be tracked because another instance
+            // with the same key value for {'id'} is already being tracked."
+            // План исправления: перейти на модель без навигаций (FK + [NotMapped]-объекты)
+            // и заменить Attach на
+            // var entry = Entry(entity);
+            // if (entry.State == EntityState.Detached)
+            //     entry.State = EntityState.Unchanged;   // без обхода навигаций
+            // 
+            // foreach (var field in fields)
+            //     entry.Property(field).IsModified = true;
+            // 
+            // SaveChanges();
+            // либо реализовать EntityDataBase.Save() без обхода графа.
+            // После исправления раскомментировать.
+            // using var db = new DataBase();
+            // db.Save(this, t => t.x, t => t.y);
         }
 
         public void teleport_tp(int x, int y)
