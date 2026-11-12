@@ -1,4 +1,4 @@
-﻿namespace MinesServer.GameShit.Skills
+﻿namespace MinesServer.GameShit.Enums
 {
     public enum SkillEffectType
     {
