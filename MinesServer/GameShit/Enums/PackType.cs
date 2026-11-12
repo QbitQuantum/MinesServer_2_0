@@ -1,4 +1,4 @@
-﻿namespace MinesServer.GameShit.Buildings
+﻿namespace MinesServer.GameShit.Enums
 {
     public enum PackType
     {

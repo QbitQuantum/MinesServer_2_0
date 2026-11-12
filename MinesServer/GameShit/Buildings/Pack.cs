@@ -2,6 +2,7 @@
 using MinesServer.GameShit.Entities;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.WorldSystem;
+using MinesServer.GameShit.Enums;
 
 namespace MinesServer.GameShit.Buildings
 {

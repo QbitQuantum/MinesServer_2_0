@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 using MinesServer.GameShit.Entities;
+using MinesServer.GameShit.Enums;
 using MinesServer.GameShit.GUI;
 using MinesServer.GameShit.GUI.Canvas;
 using MinesServer.GameShit.GUI.Rich;
