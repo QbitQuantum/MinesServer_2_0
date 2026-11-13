@@ -17,11 +17,19 @@ namespace MinesServer.GameShit.Sys_Clan
 {
     internal static class ClanQueryExtensions
     {
+        /// <summary>
+        /// Загружает клан со всеми связанными данными: участниками (и их званиями),
+        /// званиями клана и заявками (и их игроками).
+        /// </summary>
         public static IQueryable<Clan> WithGraph(this IQueryable<Clan> q) => q
             .Include(c => c.members).ThenInclude(m => m.clanrank)
             .Include(c => c.ranks)
             .Include(c => c.reqs).ThenInclude(r => r.player);
 
+        /// <summary>
+        /// Загружает клан только с участниками и заявками (без званий и игроков заявок).
+        /// Используется для облегчённого предпросмотра.
+        /// </summary>
         public static IQueryable<Clan> WithGraphLight(this IQueryable<Clan> q) => q
             .Include(c => c.members)
             .Include(c => c.reqs);
@@ -62,28 +70,51 @@ namespace MinesServer.GameShit.Sys_Clan
             public static Permission Deny(string message) => new(false, message);
         }
 
+        /// <summary>
+        /// Проверяет, состоит ли игрок в данном клане (по его текущему званию).
+        /// </summary>
         private bool IsMember(Player actor) =>
             actor.clanrank is not null && actor.clanrank.ClanId == id;
 
+        /// <summary>
+        /// Проверяет, что игрок состоит в клане и его приоритет не ниже указанного.
+        /// </summary>
         private bool HasAtLeast(Player actor, int priority) =>
             IsMember(actor) && actor.clanrank!.priority >= priority;
 
+        /// <summary>
+        /// Проверяет, может ли игрок управлять заявками (приоритет не ниже офицерского).
+        /// </summary>
         private bool CanManageRequests(Player actor) => HasAtLeast(actor, OfficerPriority);
 
+        /// <summary>
+        /// Проверяет, может ли игрок выдать указанное звание (только ниже своего приоритета).
+        /// </summary>
         private bool CanAssignRank(Player actor, Rank rank) =>
             IsMember(actor) && rank.priority < actor.clanrank!.priority;
 
+        /// <summary>
+        /// Проверяет, может ли игрок воздействовать на другого участника:
+        /// не владелец, не сам себя, и его звание строго выше.
+        /// </summary>
         private bool CanActOn(Player actor, Player target) =>
             IsMember(actor)
             && target.id != ownerid
             && target.id != actor.id
             && actor.clanrank!.Outranks(target.clanrank);
 
+        /// <summary>
+        /// Проверяет право на управление заявками и возвращает Permission с описанием ошибки при отказе.
+        /// </summary>
         private Permission CheckManageRequests(Player actor) =>
             CanManageRequests(actor)
                 ? Permission.Ok
                 : Permission.Deny("Недостаточно прав для управления заявками.");
 
+        /// <summary>
+        /// Проверяет право на воздействие на участника (кик, смена звания)
+        /// и возвращает Permission с конкретной причиной отказа.
+        /// </summary>
         private Permission CheckActOn(Player actor, Player target)
         {
             if (!IsMember(actor))
@@ -101,6 +132,10 @@ namespace MinesServer.GameShit.Sys_Clan
             return Permission.Ok;
         }
 
+        /// <summary>
+        /// Проверяет право выдать участнику указанное звание: сначала общая проверка
+        /// воздействия, затем — что звание ниже собственного.
+        /// </summary>
         private Permission CheckAssignRank(Player actor, Player target, Rank rank)
         {
             var actCheck = CheckActOn(actor, target);
@@ -112,9 +147,15 @@ namespace MinesServer.GameShit.Sys_Clan
             return Permission.Ok;
         }
 
+        /// <summary>
+        /// Проверяет, есть ли у игрока непросроченная заявка в этот клан.
+        /// </summary>
         private bool HasPendingRequest(int playerId) =>
             reqs.Any(r => r.PlayerId == playerId && !r.IsExpired);
 
+        /// <summary>
+        /// Открывает окно с ознакомительным текстом и кнопкой перехода к выбору значка клана.
+        /// </summary>
         public static Task OpenCreateWindowAsync(Player p)
         {
             var text = new StringBuilder()
@@ -155,6 +196,10 @@ namespace MinesServer.GameShit.Sys_Clan
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Открывает общее окно со списком кланов (вкладка "Обзор" с захардкоженным
+        /// списком топ-кланов), вкладкой достижений и вкладкой дипломатии.
+        /// </summary>
         public static async Task OpenListAsync(Player p)
         {
             static ClanListEntry C(int id, string name, string rightText) =>
@@ -248,6 +293,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Открывает главное окно клана игрока: вкладка "Обзор", вкладка "Список"
+        /// и (если есть заявки и есть права) вкладка "Заявки".
+        /// </summary>
         public static async Task OpenWinAsync(Player p)
         {
             if (p.clan is null)
@@ -272,6 +321,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Открывает страницу предпросмотра клана для постороннего игрока:
+        /// показывает карточку клана и (если возможно) кнопку подачи заявки.
+        /// </summary>
         private static async Task OpenPreviewAsync(Player p, int clanId)
         {
             await using var db = new DataBase();
@@ -316,6 +369,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Строит вкладку "Обзор": карточка клана (название, уровень, число участников)
+        /// и текст с текущей клановой миссией и сообщением для сокланов.
+        /// </summary>
         private static Tab BuildOverviewTab(Clan clan)
         {
             var cardText = new StringBuilder()
@@ -352,6 +409,10 @@ namespace MinesServer.GameShit.Sys_Clan
             };
         }
 
+        /// <summary>
+        /// Строит вкладку "Список": перечень участников клана с их званиями
+        /// и статусом онлайн, плюс кнопку "Покинуть клан".
+        /// </summary>
         private static Tab BuildListTab(Player p, Clan clan)
         {
             var memberEntries = clan.members
@@ -380,6 +441,10 @@ namespace MinesServer.GameShit.Sys_Clan
             };
         }
 
+        /// <summary>
+        /// Строит вкладку "Заявки": нумерованный список игроков, подавших заявку,
+        /// с кнопкой открытия деталей каждой заявки.
+        /// </summary>
         private static Tab BuildRequestsTab(Player actor, Clan clan)
         {
             var requestEntries = clan.reqs
@@ -401,6 +466,11 @@ namespace MinesServer.GameShit.Sys_Clan
             };
         }
 
+        /// <summary>
+        /// Открывает профиль соклана. В обычном режиме — кнопки "Прокачка" и (при наличии прав)
+        /// "Изменить звание". В режиме changeRank — выпадающий список званий и кнопки
+        /// "Применить" и "Исключить".
+        /// </summary>
         private static async Task OpenPlayerPreviewAsync(Player p, int targetId, bool changeRank = false)
         {
             if (p.clan is null)
@@ -483,6 +553,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Открывает страницу просмотра скиллов указанного игрока (только чтение)
+        /// с общим уровнем и списком слотов.
+        /// </summary>
         private static async Task OpenSkillsAsync(Player p, int targetId)
         {
             await using var db = new DataBase();
@@ -517,6 +591,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Открывает детали конкретной заявки: имя и ID игрока, оставшееся время,
+        /// а также кнопки "Принять", "Отклонить" и "Прокачка".
+        /// </summary>
         private static async Task OpenRequestAsync(Player actor, int requestId)
         {
             if (actor.clan is null)
@@ -571,6 +649,11 @@ namespace MinesServer.GameShit.Sys_Clan
             actor.SendWindow();
         }
 
+        /// <summary>
+        /// Подаёт заявку на вступление в клан от имени игрока:
+        /// проверяет, что игрок без клана и заявка ещё не подана, сохраняет её
+        /// и обновляет страницу предпросмотра.
+        /// </summary>
         private static async Task SubmitRequestAsync(Player p, Clan clan)
         {
             if (p.clan is not null)
@@ -594,6 +677,10 @@ namespace MinesServer.GameShit.Sys_Clan
             await OpenPreviewAsync(p, clan.id);
         }
 
+        /// <summary>
+        /// Принимает заявку: проверяет права актора, применяет изменение в БД
+        /// и перерисовывает окно клана.
+        /// </summary>
         private static async Task AcceptRequestAsync(Player p, Request request)
         {
             var perm = p.clan!.CheckManageRequests(p);
@@ -613,6 +700,10 @@ namespace MinesServer.GameShit.Sys_Clan
             await OpenWinAsync(p);
         }
 
+        /// <summary>
+        /// Отклоняет заявку: проверяет права актора, удаляет заявку из БД
+        /// и перерисовывает окно клана.
+        /// </summary>
         private static async Task DeclineRequestAsync(Player p, Request request)
         {
             var perm = p.clan!.CheckManageRequests(p);
@@ -632,6 +723,10 @@ namespace MinesServer.GameShit.Sys_Clan
             await OpenWinAsync(p);
         }
 
+        /// <summary>
+        /// Выход игрока из клана: сохраняет изменение в БД, сбрасывает клан/звание
+        /// у игрока, перерисовывает ботов и закрывает окно клана.
+        /// </summary>
         private static async Task LeaveAsync(Player p)
         {
             if (p.clan is null)
@@ -648,6 +743,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Исключает участника из клана: проверяет права актора (не владелец, не себя,
+        /// выше по званию), сохраняет изменение и перерисовывает окно клана.
+        /// </summary>
         private static async Task KickAsync(Player p, Player target)
         {
             var perm = p.clan!.CheckActOn(p, target);
@@ -662,6 +761,10 @@ namespace MinesServer.GameShit.Sys_Clan
             await OpenWinAsync(p);
         }
 
+        /// <summary>
+        /// Меняет звание участника: проверяет права на выдачу указанного звания,
+        /// сохраняет изменение и переоткрывает профиль участника.
+        /// </summary>
         private static async Task ChangeRankAsync(Player p, Player target, Rank newRank)
         {
             var perm = p.clan!.CheckAssignRank(p, target, newRank);
@@ -676,6 +779,10 @@ namespace MinesServer.GameShit.Sys_Clan
             await OpenPlayerPreviewAsync(p, target.id);
         }
 
+        /// <summary>
+        /// Шаг выбора значка клана: вычисляет свободные значки (1..MaxClanIcons, ещё не занятые),
+        /// показывает их списком; при отсутствии свободных — сообщает об этом.
+        /// </summary>
         private static async Task ChooseIconStepAsync(Player p)
         {
             await using var db = new DataBase();
@@ -719,6 +826,10 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
         }
 
+        /// <summary>
+        /// Шаг ввода названия клана: показывает поле ввода с ограничением длины
+        /// и переходит к шагу аббревиатуры после подтверждения.
+        /// </summary>
         private static Task NameStepAsync(Player p, int iconId)
         {
             p.win?.CurrentTab.Open(new Page
@@ -741,6 +852,10 @@ namespace MinesServer.GameShit.Sys_Clan
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Шаг ввода аббревиатуры: проверяет непустое название, показывает карточку
+        /// клана с введённым именем и поле ввода аббревиатуры; затем переход к подтверждению.
+        /// </summary>
         private static Task AbbreviationStepAsync(Player p, int iconId, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -777,6 +892,11 @@ namespace MinesServer.GameShit.Sys_Clan
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Финальный шаг подтверждения: проверяет непустую аббревиатуру, показывает
+        /// итоговую карточку (имя + аббревиатура) и текст с условиями, а также кнопку
+        /// "Принимаю условия", ведущую к созданию.
+        /// </summary>
         private static Task ConfirmStepAsync(Player p, int iconId, string name, string abbr)
         {
             if (string.IsNullOrWhiteSpace(abbr))
@@ -815,6 +935,11 @@ namespace MinesServer.GameShit.Sys_Clan
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Создаёт клан: валидирует имя и аббревиатуру (длина, заглавные латинские буквы),
+        /// сохраняет клан в БД, назначает игрока владельцем, обновляет состояние
+        /// и показывает поздравительное сообщение.
+        /// </summary>
         private static async Task CreateAsync(Player p, int iconId, string name, string abbr)
         {
             name = name.Trim();
