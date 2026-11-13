@@ -45,8 +45,8 @@ namespace MinesServer.GameShit.Sys_Clan
 
         private const int MaxClanIcons = 218;
 
-        public Clan()
-        {
+        public Clan() 
+        { 
         }
 
         #region fields
@@ -61,7 +61,7 @@ namespace MinesServer.GameShit.Sys_Clan
         public List<Player> members { get; set; } = [];
         public List<Rank> ranks { get; set; } = [];
         public string ViewTextClan => $"<color=white>[{abbreviation}] {name}</color>";
-
+        
         #endregion
 
         public readonly record struct Permission(bool Allowed, string? Error)
@@ -71,66 +71,39 @@ namespace MinesServer.GameShit.Sys_Clan
         }
 
         /// <summary>
-        /// Проверяет, состоит ли игрок в данном клане (по его текущему званию).
+        /// Проверяет права актора в клане. При target == null — только членство
+        /// и минимальный приоритет; при target != null — дополнительно запрет
+        /// воздействия на владельца/себя и требование строго старшего звания.
         /// </summary>
-        private bool IsMember(Player actor) =>
-            actor.clanrank is not null && actor.clanrank.ClanId == id;
-
-        /// <summary>
-        /// Проверяет, что игрок состоит в клане и его приоритет не ниже указанного.
-        /// </summary>
-        private bool HasAtLeast(Player actor, int priority) =>
-            IsMember(actor) && actor.clanrank!.priority >= priority;
-
-        /// <summary>
-        /// Проверяет, может ли игрок управлять заявками (приоритет не ниже офицерского).
-        /// </summary>
-        private bool CanManageRequests(Player actor) => HasAtLeast(actor, OfficerPriority);
-
-        /// <summary>
-        /// Проверяет, может ли игрок выдать указанное звание (только ниже своего приоритета).
-        /// </summary>
-        private bool CanAssignRank(Player actor, Rank rank) =>
-            IsMember(actor) && rank.priority < actor.clanrank!.priority;
-
-        /// <summary>
-        /// Проверяет, может ли игрок воздействовать на другого участника:
-        /// не владелец, не сам себя, и его звание строго выше.
-        /// </summary>
-        private bool CanActOn(Player actor, Player target) =>
-            IsMember(actor)
-            && target.id != ownerid
-            && target.id != actor.id
-            && actor.clanrank!.Outranks(target.clanrank);
-
-        /// <summary>
-        /// Проверяет право на управление заявками и возвращает Permission с описанием ошибки при отказе.
-        /// </summary>
-        private Permission CheckManageRequests(Player actor) =>
-            CanManageRequests(actor)
-                ? Permission.Ok
-                : Permission.Deny("Недостаточно прав для управления заявками.");
-
-        /// <summary>
-        /// Проверяет право на воздействие на участника (кик, смена звания)
-        /// и возвращает Permission с конкретной причиной отказа.
-        /// </summary>
-        private Permission CheckActOn(Player actor, Player target)
+        private Permission CheckAction(Player actor, Player? target = null, int requiredPriority = 0)
         {
-            if (!IsMember(actor))
+            if (actor.clanrank is not { } rank || rank.ClanId != id)
                 return Permission.Deny("Вы не состоите в этом клане.");
+
+            if (target is null)
+            {
+                return rank.priority >= requiredPriority
+                    ? Permission.Ok
+                    : Permission.Deny("Недостаточно прав.");
+            }
 
             if (target.id == ownerid)
                 return Permission.Deny("Нельзя воздействовать на владельца клана.");
-
+            
             if (target.id == actor.id)
                 return Permission.Deny("Нельзя воздействовать на себя.");
-
-            if (!actor.clanrank!.Outranks(target.clanrank))
+            
+            if (!rank.Outranks(target.clanrank))
                 return Permission.Deny("Нельзя воздействовать на игрока с равным или более высоким званием.");
 
             return Permission.Ok;
         }
+
+        /// <summary>
+        /// Проверяет право на управление заявками (приоритет не ниже офицерского).
+        /// </summary>
+        private Permission CheckManageRequests(Player actor) =>
+            CheckAction(actor, requiredPriority: OfficerPriority);
 
         /// <summary>
         /// Проверяет право выдать участнику указанное звание: сначала общая проверка
@@ -138,20 +111,48 @@ namespace MinesServer.GameShit.Sys_Clan
         /// </summary>
         private Permission CheckAssignRank(Player actor, Player target, Rank rank)
         {
-            var actCheck = CheckActOn(actor, target);
-            if (!actCheck.Allowed)
-                return actCheck;
+            var act = CheckAction(actor, target);
+            if (!act.Allowed) return act;
 
-            if (!CanAssignRank(actor, rank))
-                return Permission.Deny("Нельзя выдать звание выше или равное своему.");
-            return Permission.Ok;
+            return rank.priority < actor.clanrank!.priority
+                ? Permission.Ok
+                : Permission.Deny("Нельзя выдать звание выше или равное своему.");
         }
+
+        /// <summary>
+        /// Проверяет, может ли игрок управлять заявками (приоритет не ниже офицерского).
+        /// </summary>
+        private bool CanManageRequests(Player actor) => CheckManageRequests(actor).Allowed;
 
         /// <summary>
         /// Проверяет, есть ли у игрока непросроченная заявка в этот клан.
         /// </summary>
         private bool HasPendingRequest(int playerId) =>
             reqs.Any(r => r.PlayerId == playerId && !r.IsExpired);
+
+        /// <summary>
+        /// Проверяет длину названия клана.
+        /// </summary>
+        private static Permission ValidateName(string name)
+        {
+            name = name.Trim();
+            return name.Length >= MinNameLength && name.Length <= MaxNameLength
+                ? Permission.Ok
+                : Permission.Deny($"Название клана должно быть от {MinNameLength} до {MaxNameLength} символов.");
+        }
+
+        /// <summary>
+        /// Проверяет аббревиатуру: длину и допустимые символы (заглавные латинские буквы).
+        /// </summary>
+        private static Permission ValidateAbbreviation(string abbr)
+        {
+            abbr = abbr.Trim().ToUpperInvariant();
+            if (abbr.Length is < 1 or > MaxAbbreviationLength)
+                return Permission.Deny($"Аббревиатура должна быть от 1 до {MaxAbbreviationLength} символов.");
+            if (!abbr.All(char.IsAsciiLetterUpper))
+                return Permission.Deny("Аббревиатура должна состоять только из заглавных латинских букв.");
+            return Permission.Ok;
+        }
 
         /// <summary>
         /// Открывает окно с ознакомительным текстом и кнопкой перехода к выбору значка клана.
@@ -197,8 +198,7 @@ namespace MinesServer.GameShit.Sys_Clan
         }
 
         /// <summary>
-        /// Открывает общее окно со списком кланов (вкладка "Обзор" с захардкоженным
-        /// списком топ-кланов), вкладкой достижений и вкладкой дипломатии.
+        /// Открывает общее окно со списком кланов, вкладкой достижений и вкладкой дипломатии.
         /// </summary>
         public static async Task OpenListAsync(Player p)
         {
@@ -233,10 +233,10 @@ namespace MinesServer.GameShit.Sys_Clan
                 C(208, "<color=white>Faceless</color> [FCK]",         "<color=#00FF00>Приём открыт</color> (2|2) ур.2"),
             };
 
-            static RichListEntry B(string rightText, string buton_name, string action) =>
-                RichListEntry.Button(rightText, new MButton(buton_name, action));
+            static RichListEntry B(string rightText, string buttonName, string action) =>
+                RichListEntry.Button(rightText, new MButton(buttonName, action));
 
-            var type_upgrade = new[]
+            var typeUpgrade = new[]
             {
                 B("Топ по <color=white>Добыче</color>", "Посмотреть", "top_clan_dig"),
                 B("Топ по <color=white>Валюте</color>", "Посмотреть", "top_clan_money"),
@@ -275,7 +275,7 @@ namespace MinesServer.GameShit.Sys_Clan
                             {
                                 Space = 1,
                             },
-                            RichList = new(type_upgrade, false),
+                            RichList = new(typeUpgrade, false),
                             Buttons = []
                         }
                     },
@@ -294,8 +294,7 @@ namespace MinesServer.GameShit.Sys_Clan
         }
 
         /// <summary>
-        /// Открывает главное окно клана игрока: вкладка "Обзор", вкладка "Список"
-        /// и (если есть заявки и есть права) вкладка "Заявки".
+        /// Открывает главное окно клана игрока.
         /// </summary>
         public static async Task OpenWinAsync(Player p)
         {
@@ -338,7 +337,7 @@ namespace MinesServer.GameShit.Sys_Clan
 
             if (clan.HasPendingRequest(p.id))
             {
-                text = "\nЗаявка уже подана.";
+                text = "\nЗаявка подана.";
             }
             else if (p.clan is null)
             {
@@ -487,7 +486,7 @@ namespace MinesServer.GameShit.Sys_Clan
             if (clan is null)
                 return;
 
-            var canAct = clan.CanActOn(p, player);
+            var canAct = clan.CheckAction(p, player).Allowed;
 
             var buttons = new List<MButton>
             {
@@ -650,20 +649,14 @@ namespace MinesServer.GameShit.Sys_Clan
         }
 
         /// <summary>
-        /// Подаёт заявку на вступление в клан от имени игрока:
-        /// проверяет, что игрок без клана и заявка ещё не подана, сохраняет её
-        /// и обновляет страницу предпросмотра.
+        /// Подаёт заявку на вступление в клан от имени игрока: проверяет, что игрок
+        /// без клана и заявка ещё не подана, сохраняет её и обновляет страницу предпросмотра.
         /// </summary>
         private static async Task SubmitRequestAsync(Player p, Clan clan)
         {
             if (p.clan is not null)
             {
                 p.ShowInfo("Вы уже состоите в клане.");
-                return;
-            }
-            if (clan.HasPendingRequest(p.id))
-            {
-                p.ShowInfo("Заявка уже подана.");
                 return;
             }
 
@@ -749,7 +742,7 @@ namespace MinesServer.GameShit.Sys_Clan
         /// </summary>
         private static async Task KickAsync(Player p, Player target)
         {
-            var perm = p.clan!.CheckActOn(p, target);
+            var perm = p.clan!.CheckAction(p, target);
             if (!perm.Allowed)
             {
                 p.ShowInfo(perm.Error!);
@@ -945,19 +938,17 @@ namespace MinesServer.GameShit.Sys_Clan
             name = name.Trim();
             abbr = abbr.Trim().ToUpperInvariant();
 
-            if (name.Length < MinNameLength || name.Length > MaxNameLength)
+            var nameCheck = ValidateName(name);
+            if (!nameCheck.Allowed)
             {
-                p.ShowInfo($"Название клана должно быть от {MinNameLength} до {MaxNameLength} символов.");
+                p.ShowInfo(nameCheck.Error!);
                 return;
             }
-            if (abbr.Length is < 1 or > MaxAbbreviationLength)
+
+            var abbrCheck = ValidateAbbreviation(abbr);
+            if (!abbrCheck.Allowed)
             {
-                p.ShowInfo($"Аббревиатура должна быть от 1 до {MaxAbbreviationLength} символов.");
-                return;
-            }
-            if (!abbr.All(char.IsAsciiLetterUpper))
-            {
-                p.ShowInfo("Аббревиатура должна состоять только из заглавных латинских букв.");
+                p.ShowInfo(abbrCheck.Error!);
                 return;
             }
 
