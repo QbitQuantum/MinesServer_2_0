@@ -29,14 +29,12 @@ namespace MinesServer.GameShit.Entities
 
         private const int BaseMoveDelay = 200;
         private const int AfkTimeoutMinutes = 5;
-        private const int BotUpdateIntervalSeconds = 4;
         private const int C190StackResetMinutes = 1;
         private const int InventoryUseCooldownMs = 400;
         private const double ServerPauseScale = 1.19;
 
         private (int X, int Y)? lastchunk;
 
-        private DateTime _lastBotsUpdate = ServerTime.Now;
         private DateTime _lastc190hit = ServerTime.Now;
         private DateTime _lastDelay = ServerTime.Now;
         private DateTime _laststarttime = ServerTime.Now;
@@ -211,7 +209,7 @@ namespace MinesServer.GameShit.Entities
 
             if (HadleProgramm())
             {
-                UpdateBots(now);
+                BotsRender();
                 return;
             }
 
@@ -223,7 +221,7 @@ namespace MinesServer.GameShit.Entities
                 return;
             }
 
-            UpdateBots(now);
+            BotsRender();
             HandleCurrentCell();
         }
 
@@ -260,15 +258,6 @@ namespace MinesServer.GameShit.Entities
                 Death();
                 DataBase.activeplayers.Remove(this);
             }
-        }
-
-        private void UpdateBots(DateTime now)
-        {
-            if (now - _lastBotsUpdate < TimeSpan.FromSeconds(BotUpdateIntervalSeconds))
-                return;
-
-            BotsRender();
-            _lastBotsUpdate = now;
         }
 
         private void HandleCurrentCell()

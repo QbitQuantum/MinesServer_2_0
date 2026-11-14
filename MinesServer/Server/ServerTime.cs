@@ -21,6 +21,8 @@ namespace MinesServer.Server
         private DateTime _lastActionsUpdate = Now;
         private DateTime _lastCommitWorld = Now;
 
+        private const int TickIntervalMs = 33;
+
         // Очередь действий
         public readonly Queue<(Action action, Player initiator)> gameActions = new();
 
@@ -66,7 +68,7 @@ namespace MinesServer.Server
                     _lastWorldUpdate = now;
                 }
 
-                if ((now - _lastPlayersUpdate).TotalMilliseconds >= 100)
+                if ((now - _lastPlayersUpdate).TotalMilliseconds >= TickIntervalMs)
                 {
                     for (int i = DataBase.activeplayers.Count - 1; i >= 0; i--)
                     {
@@ -75,7 +77,7 @@ namespace MinesServer.Server
                     _lastPlayersUpdate = now;
                 }
 
-                if ((now - _lastProgBotSpotUpdate).TotalMilliseconds >= 100)
+                if ((now - _lastProgBotSpotUpdate).TotalMilliseconds >= TickIntervalMs)
                 {
                     for (int i = DataBase.botspotplayer.Count - 1; i >= 0; i--)
                     {
@@ -97,7 +99,7 @@ namespace MinesServer.Server
                 }
 
                 // === Очередь действий — 10 раз в секунду ===
-                if ((now - _lastActionsUpdate).TotalMilliseconds >= 100)
+                if ((now - _lastActionsUpdate).TotalMilliseconds >= TickIntervalMs)
                 {
                     while (gameActions.Count > 0)
                     {
