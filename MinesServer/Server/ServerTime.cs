@@ -68,18 +68,18 @@ namespace MinesServer.Server
 
                 if ((now - _lastPlayersUpdate).TotalMilliseconds >= 100)
                 {
-                    foreach (var player in DataBase.activeplayers)
+                    for (int i = DataBase.activeplayers.Count - 1; i >= 0; i--)
                     {
-                        player.Update();
+                        DataBase.activeplayers[i].Update();
                     }
                     _lastPlayersUpdate = now;
                 }
 
                 if ((now - _lastProgBotSpotUpdate).TotalMilliseconds >= 100)
                 {
-                    foreach (var botspot in DataBase.botspotplayer)
+                    for (int i = DataBase.botspotplayer.Count - 1; i >= 0; i--)
                     {
-                        botspot.Update();
+                        DataBase.botspotplayer[i].Update();
                     }
                     _lastProgBotSpotUpdate = now;
                 }
