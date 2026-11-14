@@ -345,7 +345,7 @@ namespace MinesServer.Server
                 reqtime = DateTime.UtcNow
             });
 
-            db.Save(clan, c => c.reqs);
+            await db.SaveChangesAsync();
             return true;
         }
 
@@ -387,7 +387,7 @@ namespace MinesServer.Server
             clan.reqs.Remove(request);
 
             db.Save(player, t => t.clan, t => t.clanrank);
-            db.Save(clan, c => c.reqs);
+            await db.SaveChangesAsync();
 
             return true;
         }
@@ -408,7 +408,7 @@ namespace MinesServer.Server
             if (request is null) return false;
 
             clan.reqs.Remove(request);
-            db.Save(clan, c => c.reqs);
+            await db.SaveChangesAsync();
 
             return true;
         }

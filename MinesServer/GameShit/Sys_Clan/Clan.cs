@@ -208,30 +208,31 @@ namespace MinesServer.GameShit.Sys_Clan
                     (byte)id,
                     rightText);
 
-            var entries = new[]
-            {
-                C(48,  "<color=white>The Masons</color> [XXX]",       "<color=#00FF00>Приём открыт</color> (29|21) ур.97"),
-                C(165, "<color=white>Империя Гроксы</color> [IMG]",                "<color=#00FF00>Приём открыт</color> (19|13) ур.92"),
-                C(126, "<color=white>Euphoria</color> [HOR]",         "<color=#00FF00>Приём открыт</color> (7|7) ур.62"),
-                C(62,  "<color=white>ANVIL</color> [ANV]",            "<color=#00FF00>Приём открыт</color> (10|8) ур.60"),
-                C(43,  "<color=white>НЕНАВИСТЬ!</color> [N]",                  "<color=#00FF00>Приём открыт</color> (4|4) ур.53"),
-                C(160, "<color=white>Цитадель</color> [ZTD]",                 "<color=#00FF00>Приём открыт</color> (16|16) ур.45"),
-                C(100, "<color=white>Winx</color> [WNX]",             "<color=#00FF00>Приём открыт</color> (11|5) ур.43"),
-                C(89,  "<color=white>Самый Лучший Клан</color> [TOP]","<color=#00FF00>Приём открыт</color> (16|10) ур.42"),
-                C(7,   "<color=white>Бригада котиков</color> [RPG]",                "<color=#00FF00>Приём открыт</color> (8|68) ур.30"),
-                C(131, "<color=white>КГБ</color> [КГБ]",                    "<color=#00FF00>Приём открыт</color> (7|4) ур.29"),
-                C(18,  "<color=white>РОЙ</color> [ROY]",                "<color=#00FF00>Приём открыт</color> (0|1) ур.25"),
-                C(19,  "<color=white>Nvidia power</color> [NVP]",     "<color=#00FF00>Приём открыт</color> (3|1) ур.19"),
-                C(83,  "<color=white>Steel Brotherhood</color> [SB]", "<color=#00FF00>Приём открыт</color> (13|4) ур.18"),
-                C(184, "<color=white>Wild Cats</color> [WLD]",        "<color=#00FF00>Приём открыт</color> (4|3) ур.14"),
-                C(68,  "<color=white>Клан друзей FAISSa</color> [FIS]",          "<color=#00FF00>Приём открыт</color> (8|1) ур.14"),
-                C(6,   "<color=white>А мы не ангелы парень!</color> [NIG]",            "<color=#00FF00>Приём открыт</color> (11|5) ур.12"),
-                C(94,  "<color=white>ЗЕМЛЯ</color> [ZEM]",                 "<color=#00FF00>Приём открыт</color> (1|2) ур.12"),
-                C(77,  "<color=white>The anarchists</color> [ANX]",   "<color=#00FF00>Приём открыт</color> (1|1) ур.9"),
-                C(157, "<color=white>Инферно</color> [INF]",                 "<color=#00FF00>Приём открыт</color> (2|1) ур.8"),
-                C(36,  "<color=white>sleeping knights</color> [SK]",  "<color=#00FF00>Приём открыт</color> (0|1) ур.4"),
-                C(208, "<color=white>Faceless</color> [FCK]",         "<color=#00FF00>Приём открыт</color> (2|2) ур.2"),
-            };
+            await using var db = new DataBase();
+
+            var clans = await db.clans
+                .AsNoTracking()
+                .OrderByDescending(c => c.lvl)
+                .Select(c => new
+                {
+                    c.id,
+                    c.name,
+                    c.abbreviation,
+                    c.lvl,
+                    Members = c.members.Count,
+                    Requests = c.reqs.Count
+                })
+                .ToListAsync();
+
+            var entries = clans
+            .Select(c => new ClanListEntry(
+                new MButton(
+                    $"<color=white>{c.name}</color> [{c.abbreviation}]",
+                    $"clan{c.id}",
+                    async _ => await OpenPreviewAsync(p, c.id)),
+                (byte)c.id,
+                $"<color=#00FF00>Приём открыт</color> ({c.Requests}|{c.Members}) ур.{c.lvl}"))
+            .ToArray();
 
             static RichListEntry B(string rightText, string buttonName, string action) =>
                 RichListEntry.Button(rightText, new MButton(buttonName, action));
