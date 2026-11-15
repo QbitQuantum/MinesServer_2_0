@@ -386,8 +386,11 @@ namespace MinesServer.Server
 
             clan.reqs.Remove(request);
 
-            db.Save(player, t => t.clan, t => t.clanrank);
             await db.SaveChangesAsync();
+
+            Player? activeplayer = activeplayers.
+                FirstOrDefault(p => p.id == player.id);
+            activeplayer?.SendClan();
 
             return true;
         }
