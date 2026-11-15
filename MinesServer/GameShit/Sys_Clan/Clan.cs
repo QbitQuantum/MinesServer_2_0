@@ -471,60 +471,59 @@ namespace MinesServer.GameShit.Sys_Clan
         /// "Изменить звание". В режиме changeRank — выпадающий список званий и кнопки
         /// "Применить" и "Исключить".
         /// </summary>
-        private static async Task OpenPlayerPreviewAsync(Player p, int targetId, bool changeRank = false)
+        private static async Task OpenPlayerPreviewAsync(Player p, int targetId, bool OpenChangeRankPage = false)
         {
-            if (p.clan is null)
-                return;
+            if (p.clan is null) return;
 
             await using var db = new DataBase();
             var player = await db.players.Include(x => x.clanrank).AsNoTracking()
                 .FirstOrDefaultAsync(x => x.id == targetId);
-            if (player is null)
-                return;
+
+            if (player is null) return;
 
             var clan = await db.clans.Include(c => c.ranks).AsNoTracking()
                 .FirstOrDefaultAsync(c => c.id == p.clan.id);
-            if (clan is null)
-                return;
+
+            if (clan is null) return;
 
             var canAct = clan.CheckAction(p, player).Allowed;
 
-            var buttons = new List<MButton>
+            var buttons = !OpenChangeRankPage ? new List<MButton>
             {
-                new("Прокачка", "skills", async _ => await OpenSkillsAsync(p, targetId))
-            };
+                new("Прокачка", "skills", async _ => await OpenSkillsAsync(p, targetId)),
+                new("Исключить", "kick", async _ => await KickAsync(p, player))
+            } : [];
 
             RichListEntry[] rich = [];
-            if (changeRank && canAct)
+
+            if (canAct)
             {
-                var available = clan.ranks
+                if (OpenChangeRankPage)
+                {
+                    var available = clan.ranks
                     .Where(r => r.priority < p.clanrank!.priority)
                     .ToArray();
 
-                rich =
-                [
-                    RichListEntry.DropDown("изменение звания", "changerankd",
+                    rich =
+                    [
+                        RichListEntry.DropDown("изменение звания", "changerankd",
                         available.Select(r => r.name).ToArray(), 0)
-                ];
+                    ];
 
-                buttons.Add(new MButton("Применить", "saverank",
-                    async args =>
-                    {
-                        if (!int.TryParse(args.Input, out var idx)
-                            || idx < 0 || idx >= available.Length)
+                    buttons.Add(new MButton("Применить", "saverank",
+                        async args =>
                         {
-                            p.ShowInfo("Некорректно выбрано звание.");
-                            return;
-                        }
-                        await ChangeRankAsync(p, player, available[idx]);
-                    }));
-                buttons.Add(new MButton("Исключить", "kick",
-                    async _ => await KickAsync(p, player)));
-            }
-            else if (canAct)
-            {
+                            if (!int.TryParse(args.Input, out var idx)
+                                || idx < 0 || idx >= available.Length)
+                            {
+                                p.ShowInfo("Некорректно выбрано звание.");
+                                return;
+                            }
+                            await ChangeRankAsync(p, player, available[idx]);
+                        }));
+                }
                 buttons.Add(new MButton("Изменить звание", "changerank",
-                    async _ => await OpenPlayerPreviewAsync(p, targetId, true)));
+                                    async _ => await OpenPlayerPreviewAsync(p, targetId, true)));
             }
 
             var text = new StringBuilder()
