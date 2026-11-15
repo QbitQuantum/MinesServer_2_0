@@ -966,7 +966,7 @@ namespace MinesServer.GameShit.Sys_Clan
             p.SendWindow();
 
             var message = new StringBuilder()
-                .Append("Удачи в клановой игре. Помни: клан — это не один игрок, а семья. ")
+                .AppendLine("Удачи в клановой игре. Помни: клан — это не один игрок, а семья.")
                 .Append("Держимся вместе, выручаем друг друга и получаем от игры удовольствие.")
                 .ToString();
 
