@@ -3,13 +3,15 @@ using Newtonsoft.Json;
 
 namespace MinesServer.GameShit.SysCraft
 {
-    public static class RDes
+    public static class RecipiesCatalog
     {
-        public static List<Recipie> recipies;
+        public static List<Recipie> recipies = [];
+
         public static void Init()
         {
             recipies = GetResipies();
         }
+
         public static List<Recipie> GetResipies()
         {
             var rid = 0;
@@ -254,6 +256,7 @@ namespace MinesServer.GameShit.SysCraft
             }
             return list;
         }
+
         public static Recipie ByResultId(int res_id)
         {
             return recipies.FirstOrDefault(i => i.result.id == res_id);

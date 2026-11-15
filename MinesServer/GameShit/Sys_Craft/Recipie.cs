@@ -17,5 +17,6 @@ namespace MinesServer.GameShit.SysCraft
             costcrys = [];
         }
     }
-    public record struct RC(int id,int num);
+
+    public record struct RC(int id, int num);
 }

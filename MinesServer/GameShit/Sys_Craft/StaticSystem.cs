@@ -95,7 +95,7 @@ namespace MinesServer.GameShit.Sys_Craft
 
         private static void OpenRecipie(Player p, int id)
         {
-            var recipe = RDes.recipies.FirstOrDefault(i => i.id == id);
+            var recipe = RecipiesCatalog.recipies.FirstOrDefault(i => i.id == id);
             if (recipe.result.id == 0 && recipe.time == 0)
             {
                 return;
@@ -318,7 +318,7 @@ namespace MinesServer.GameShit.Sys_Craft
         {
             var onInventoryClick = new Action<int>(type =>
             {
-                var recipesForItem = RDes.recipies.Where(r => r.result.id == type).ToArray();
+                var recipesForItem = RecipiesCatalog.recipies.Where(r => r.result.id == type).ToArray();
 
                 if (recipesForItem.Length == 0)
                 {

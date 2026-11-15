@@ -353,7 +353,7 @@ namespace MinesServer.GameShit.SysMarket
                 var order = new Order()
                 {
                     initiatorid = 0,
-                    cost = RDes.ByResultId(i).Cost() * num,
+                    cost = RecipiesCatalog.ByResultId(i).Cost() * num,
                     num = num,
                     itemid = i
                 };
@@ -364,7 +364,7 @@ namespace MinesServer.GameShit.SysMarket
         public static long Cost(this Recipie r)
         {
             long ret = 0;
-            ret += r.costres?.Select(i => RDes.ByResultId(i.id).Cost() * i.num).Sum() ?? 0;
+            ret += r.costres?.Select(i => RecipiesCatalog.ByResultId(i.id).Cost() * i.num).Sum() ?? 0;
             ret += r.costcrys?.Select(i => World.GetCrysCost(i.id) * 2L * i.num).Sum() ?? 0;
             return ret;
         }

@@ -30,7 +30,7 @@ namespace MinesServer.GameShit.WorldSystem
             CreateChat();
             DataBase.Load();
             CommitWorld();
-            RDes.Init();
+            RecipiesCatalog.Init();
 
             Console.WriteLine("World created");
         }

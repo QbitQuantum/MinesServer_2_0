@@ -9,16 +9,19 @@ namespace MinesServer.GameShit.Sys_Craft
         {
 
         }
+
         public CraftEntry(int rec_id, int num, DateTime end)
         {
             starttime = DateTime.Now;
             endtime = end;
             recipie_id = rec_id; this.num = num;
         }
+
         public Recipie GetRecipie()
         {
-            return RDes.recipies.FirstOrDefault(i => i.id == recipie_id);
+            return RecipiesCatalog.recipies.FirstOrDefault(i => i.id == recipie_id);
         }
+
         [NotMapped]
         public double progress { get
             {
@@ -27,6 +30,7 @@ namespace MinesServer.GameShit.Sys_Craft
                 return value;
             }
         }
+
         public int id { get; set; }
         public int recipie_id { get; set; }
         public int num { get; set; }
