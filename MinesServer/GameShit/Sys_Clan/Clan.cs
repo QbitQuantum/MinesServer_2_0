@@ -40,8 +40,6 @@ namespace MinesServer.GameShit.Sys_Clan
         public const int MinNameLength = 3;
         public const int MaxNameLength = 32;
         public const int MaxAbbreviationLength = 3;
-        public const int OwnerPriority = 100;
-        public const int OfficerPriority = 20;
 
         private const int MaxClanIcons = 218;
 
@@ -103,7 +101,7 @@ namespace MinesServer.GameShit.Sys_Clan
         /// Проверяет право на управление заявками (приоритет не ниже офицерского).
         /// </summary>
         private Permission CheckManageRequests(Player actor) =>
-            CheckAction(actor, requiredPriority: OfficerPriority);
+            CheckAction(actor, requiredPriority: Rank.OfficerPriority);
 
         /// <summary>
         /// Проверяет право выдать участнику указанное звание: сначала общая проверка

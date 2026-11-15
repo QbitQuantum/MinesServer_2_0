@@ -465,7 +465,7 @@ namespace MinesServer.Server
                     return true;
                 }
 
-                var ownerRank = clan.ranks.FirstOrDefault(r => r.priority == Clan.OwnerPriority);
+                var ownerRank = clan.ranks.FirstOrDefault(r => r.priority == Rank.OwnerPriority);
                 if (ownerRank is null) return false;
 
                 clan.ownerid = heir.id;
@@ -593,15 +593,10 @@ namespace MinesServer.Server
                 name = name,
                 abbreviation = abbreviation,
                 lvl = 0,
-                ranks =
-                [
-                    new Rank { name = "Новобранец", priority = 0,                   colorhex = "#00FF00" },
-                    new Rank { name = "Ветеран",    priority = Clan.OfficerPriority, colorhex = "#ff0000" },
-                    new Rank { name = "Создатель",  priority = Clan.OwnerPriority,   colorhex = "#006400" }
-                ]
+                ranks = Rank.DefaultRanks
             };
 
-            var ownerRank = clan.ranks.First(r => r.priority == Clan.OwnerPriority);
+            var ownerRank = clan.ranks.First(r => r.priority == Rank.OwnerPriority);
 
             player.clan = clan;
             player.clanrank = ownerRank;
