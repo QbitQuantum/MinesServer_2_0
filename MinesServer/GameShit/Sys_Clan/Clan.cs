@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using MinesServer.GameShit.Entities;
@@ -413,14 +414,16 @@ namespace MinesServer.GameShit.Sys_Clan
         /// </summary>
         private static Tab BuildListTab(Player p, Clan clan)
         {
+            Console.WriteLine(DataBase.activeplayers.Count);
             var memberEntries = clan.members
-                .Select(m => new ClanListEntry(
+                .Select(member => new ClanListEntry(
                     new MButton(
-                        $"<color={m.clanrank?.colorhex}>{m.name}</color> - {m.clanrank?.name}",
-                        $"listrow:{m.id}",
-                        async _ => await OpenPlayerPreviewAsync(p, m.id)),
+                        $"<color={member.clanrank?.colorhex}>{member.name}</color> - {member.clanrank?.name}",
+                        $"listrow:{member.id}",
+                        async _ => await OpenPlayerPreviewAsync(p, member.id)),
                     0,
-                    m.online ? "онлайн" : "оффлайн"))
+                    DataBase.activeplayers.FirstOrDefault(activep => activep.id == member.id) != null 
+                    ? "<color=green>Онлайн</color>" : "<color=red>Оффлайн</color>"))
                 .ToArray();
 
             return new Tab
