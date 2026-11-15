@@ -77,7 +77,7 @@ namespace MinesServer.GameShit.Sys_Clan
         /// </summary>
         private Permission CheckAction(Player actor, Player? target = null, int requiredPriority = 0)
         {
-            if (actor.clanrank is not { } rank || rank.ClanId != id)
+            if (actor.clanrank is not { } rank || rank.owner.id != id)
                 return Permission.Deny("Вы не состоите в этом клане.");
 
             if (target is null)
