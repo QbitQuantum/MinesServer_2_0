@@ -388,9 +388,12 @@ namespace MinesServer.Server
 
             await db.SaveChangesAsync();
 
-            Player? activeplayer = activeplayers.
-                FirstOrDefault(p => p.id == player.id);
-            activeplayer?.SendClan();
+            UpdateActivePlayer(player.id, p =>
+            {
+                p.clan = clan;
+                p.clanrank = rank;
+                p.SendClan();
+            });
 
             return true;
         }
@@ -442,6 +445,7 @@ namespace MinesServer.Server
 
                 if (heir is null)
                 {
+                    // Клан пуст — расформировываем.
                     player.clan = null;
                     player.clanrank = null;
 
@@ -450,6 +454,14 @@ namespace MinesServer.Server
                     db.clans.Remove(clan);
 
                     await db.SaveChangesAsync();
+
+                    UpdateActivePlayer(playerId, p =>
+                    {
+                        p.clan = null;
+                        p.clanrank = null;
+                        p.SendClan();
+                    });
+
                     return true;
                 }
 
@@ -463,6 +475,23 @@ namespace MinesServer.Server
                 player.clanrank = null;
 
                 await db.SaveChangesAsync();
+
+                // Уходящий: обнуляем клан/звание.
+                UpdateActivePlayer(playerId, p =>
+                {
+                    p.clan = null;
+                    p.clanrank = null;
+                    p.SendClan();
+                });
+
+                UpdateActivePlayer(heir.id, p =>
+                {
+                    p.clanrank = ownerRank;
+                    if (p.clan is not null)
+                        p.clan.ownerid = heir.id;
+                    p.SendClan();
+                });
+
                 return true;
             }
 
@@ -470,6 +499,14 @@ namespace MinesServer.Server
             player.clanrank = null;
 
             await db.SaveChangesAsync();
+
+            UpdateActivePlayer(playerId, p =>
+            {
+                p.clan = null;
+                p.clanrank = null;
+                p.SendClan();
+            });
+
             return true;
         }
 
@@ -489,7 +526,15 @@ namespace MinesServer.Server
             player.clan = null;
             player.clanrank = null;
 
-            db.Save(player, t => t.clan, t => t.clanrank);
+            await db.SaveChangesAsync();
+
+            UpdateActivePlayer(playerId, p =>
+            {
+                p.clan = null;
+                p.clanrank = null;
+                p.SendClan();
+            });
+
             return true;
         }
 
@@ -503,13 +548,21 @@ namespace MinesServer.Server
             var player = await db.players
                 .Include(p => p.clanrank)
                 .FirstOrDefaultAsync(p => p.id == playerId);
-            var rank = await db.ranks.FirstOrDefaultAsync(r => r.id == rankId);
+            if (player is null) return false;
 
-            if (player is null || rank is null) return false;
+            var rank = await db.ranks.FirstOrDefaultAsync(r => r.id == rankId);
+            if (rank is null) return false;
 
             player.clanrank = rank;
 
-            db.Save(player, t => t.clanrank);
+            await db.SaveChangesAsync();
+
+            UpdateActivePlayer(playerId, p =>
+            {
+                p.clanrank = rank;
+                p.SendClan();
+            });
+
             return true;
         }
 
@@ -557,9 +610,26 @@ namespace MinesServer.Server
             db.clans.Add(clan);
             await db.SaveChangesAsync();
 
+            UpdateActivePlayer(ownerId, p =>
+            {
+                p.clan = clan;
+                p.clanrank = ownerRank;
+                p.SendClan();
+            });
+
             return clan;
         }
 
         #endregion
+
+        /// <summary>
+        /// Применяет действие к активному игроку, если он онлайн.
+        /// </summary>
+        private static void UpdateActivePlayer(int playerId, Action<Player> action)
+        {
+            var active = activeplayers.FirstOrDefault(p => p.id == playerId);
+            if (active is not null)
+                action(active);
+        }
     }
 }
