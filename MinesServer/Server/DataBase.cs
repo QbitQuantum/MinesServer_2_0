@@ -423,14 +423,12 @@ namespace MinesServer.Server
             var clan = await db.clans
                 .Include(c => c.members).ThenInclude(m => m.clanrank)
                 .Include(c => c.ranks)
+                .Include(c => c.reqs)
                 .FirstOrDefaultAsync(c => c.id == clanId);
             if (clan is null) return false;
 
             var player = clan.members.FirstOrDefault(m => m.id == playerId);
             if (player is null) return false;
-
-            player.clan = null;
-            player.clanrank = null;
 
             if (clan.ownerid == playerId)
             {
@@ -441,26 +439,34 @@ namespace MinesServer.Server
 
                 if (heir is null)
                 {
+                    player.clan = null;
+                    player.clanrank = null;
+
+                    db.ranks.RemoveRange(clan.ranks);
+                    db.reqs.RemoveRange(clan.reqs);
                     db.clans.Remove(clan);
+
                     await db.SaveChangesAsync();
                     return true;
                 }
 
-                var rank = clan.ranks.FirstOrDefault(r => r.priority == Clan.OwnerPriority);
-                if (rank is null) return false;
+                var ownerRank = clan.ranks.FirstOrDefault(r => r.priority == Clan.OwnerPriority);
+                if (ownerRank is null) return false;
 
                 clan.ownerid = heir.id;
-                heir.clanrank = rank;
+                heir.clanrank = ownerRank;
 
-                db.Save(clan, c => c.ownerid);
-                db.Save(heir, t => t.clanrank);
-                db.Save(player, t => t.clan, t => t.clanrank);
-            }
-            else
-            {
-                db.Save(player, t => t.clan, t => t.clanrank);
+                player.clan = null;
+                player.clanrank = null;
+
+                await db.SaveChangesAsync();
+                return true;
             }
 
+            player.clan = null;
+            player.clanrank = null;
+
+            await db.SaveChangesAsync();
             return true;
         }
 
